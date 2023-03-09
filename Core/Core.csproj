@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+	<TargetFramework>net6.0-windows</TargetFramework>
+	<UseWPF>true</UseWPF>
+  </PropertyGroup>
+  <ItemGroup>
+	<PackageReference Include="Prism.Wpf" Version="8.1.97" />
+	  <PackageReference Include="OpenCVSharp4" Version="4.7.0.20230115" />
+	  <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
+  </ItemGroup>
+</Project>
