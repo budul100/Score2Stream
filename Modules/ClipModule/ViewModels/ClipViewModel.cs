@@ -1,8 +1,8 @@
 ﻿using MvvmValidation;
 using Prism.Commands;
+using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Models;
 using ScoreboardOCR.Core.Mvvm;
-using System;
 using System.Windows.Media.Imaging;
 
 namespace ClipModule.ViewModels
@@ -12,6 +12,7 @@ namespace ClipModule.ViewModels
     {
         #region Private Fields
 
+        private readonly IClipService clipService;
         private BitmapSource content;
         private bool isActive;
         private string name;
@@ -20,24 +21,24 @@ namespace ClipModule.ViewModels
 
         #region Public Constructors
 
-        public ClipViewModel(Clip clip)
+        public ClipViewModel(IClipService clipService, Clip clip)
         {
+            this.clipService = clipService;
             this.Clip = clip;
+            this.Name = clip.Name;
 
             OnClickCommand = new DelegateCommand(OnClick);
 
             Validator.AddRule(
                 targetName: nameof(Name),
                 validateDelegate: () => RuleResult.Assert(!string.IsNullOrEmpty(Name), "Name is required"));
+
+            Validator.AddRule(
+                targetName: nameof(Name),
+                validateDelegate: () => RuleResult.Assert(clipService.IsUniqueName(Name), $"Name {Name} is already used. Please choose another one."));
         }
 
         #endregion Public Constructors
-
-        #region Public Events
-
-        public event EventHandler OnClipSelectedEvent;
-
-        #endregion Public Events
 
         #region Public Properties
 
@@ -60,13 +61,14 @@ namespace ClipModule.ViewModels
             get { return name; }
             set
             {
-                if (!string.IsNullOrWhiteSpace(value)
+                SetProperty(ref name, value);
+                var validation = Validator.Validate(nameof(Name));
+
+                if (validation.IsValid
                     && Clip.Name != value)
                 {
                     Clip.Name = value;
                 }
-
-                SetProperty(ref name, value);
             }
         }
 
@@ -103,9 +105,7 @@ namespace ClipModule.ViewModels
 
         private void OnClick()
         {
-            OnClipSelectedEvent?.Invoke(
-                sender: this,
-                e: default);
+            clipService.Activate(Clip);
         }
 
         #endregion Private Methods

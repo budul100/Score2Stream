@@ -4,6 +4,7 @@ using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,7 +40,7 @@ namespace WebcamService
             this.clipService = clipService;
             this.dispatcherService = dispatcherService;
 
-            clipService.OnClipDimensionedEvent += OnClipDimensioned;
+            clipService.OnClipDefinedEvent += OnClipDefined;
         }
 
         #endregion Public Constructors
@@ -210,7 +211,7 @@ namespace WebcamService
             return result;
         }
 
-        private void OnClipDimensioned(object sender, EventArgs e)
+        private void OnClipDefined(object sender, EventArgs e)
         {
             SetClips();
         }
@@ -271,7 +272,10 @@ namespace WebcamService
                     await Task.Delay(Delay);
                 }
             }
-            catch { }
+            catch
+            {
+                Debugger.Break();
+            }
 
             frame = default;
             Content = default;

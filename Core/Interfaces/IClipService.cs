@@ -10,7 +10,7 @@ namespace ScoreboardOCR.Core.Interfaces
 
         event EventHandler OnClipActivatedEvent;
 
-        event EventHandler OnClipDimensionedEvent;
+        event EventHandler OnClipDefinedEvent;
 
         event EventHandler OnClipsChangedEvent;
 
@@ -30,7 +30,11 @@ namespace ScoreboardOCR.Core.Interfaces
 
         void Add();
 
-        void Save();
+        void Define();
+
+        bool IsUniqueName(string name);
+
+        void Remove();
 
         #endregion Public Methods
     }

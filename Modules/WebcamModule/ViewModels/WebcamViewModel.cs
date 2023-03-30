@@ -264,7 +264,7 @@ namespace WebcamModule.ViewModels
                     activeClip.Clip.RelativeY2 = ((activeClip.Top ?? 0) - y1.Value + (activeClip.Height ?? 0)) / actualHeight.Value;
                 }
 
-                clipService.Save();
+                clipService.Define();
             }
 
             isMouseActive = false;

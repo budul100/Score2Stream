@@ -57,16 +57,6 @@ namespace ClipModule.ViewModels
             SetClips();
         }
 
-        private void OnClipSelected(object sender, System.EventArgs e)
-        {
-            var clip = sender as ClipViewModel;
-
-            if (clip != default)
-            {
-                clipService.Activate(clip.Clip);
-            }
-        }
-
         private void OnContentChanged(object sender, System.EventArgs e)
         {
             foreach (var clip in Clips)
@@ -82,9 +72,8 @@ namespace ClipModule.ViewModels
             foreach (var clip in clipService.Clips)
             {
                 var current = new ClipViewModel(
+                    clipService: clipService,
                     clip: clip);
-
-                current.OnClipSelectedEvent += OnClipSelected;
 
                 Clips.Add(current);
             }

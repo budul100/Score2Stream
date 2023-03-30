@@ -2,11 +2,12 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace ScoreboardOCR.Core.Mvvm
 {
     public class ValidatableViewModelBase
-        : ViewModelBase, INotifyDataErrorInfo
+        : ViewModelBase, IValidatable, INotifyDataErrorInfo
     {
         #region Public Constructors
 
@@ -55,6 +56,11 @@ namespace ScoreboardOCR.Core.Mvvm
         public IEnumerable GetErrors(string propertyName)
         {
             return NotifyDataErrorInfoAdapter.GetErrors(propertyName);
+        }
+
+        Task<ValidationResult> IValidatable.Validate()
+        {
+            return Validator.ValidateAllAsync();
         }
 
         #endregion Public Methods

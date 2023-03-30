@@ -2,6 +2,7 @@
 using ScoreboardOCR.Core.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ClipService
 {
@@ -12,7 +13,7 @@ namespace ClipService
 
         public event EventHandler OnClipActivatedEvent;
 
-        public event EventHandler OnClipDimensionedEvent;
+        public event EventHandler OnClipDefinedEvent;
 
         public event EventHandler OnClipsChangedEvent;
 
@@ -39,7 +40,12 @@ namespace ClipService
 
         public void Add()
         {
-            var clip = new Clip();
+            var name = GetName();
+
+            var clip = new Clip()
+            {
+                Name = name
+            };
 
             Clips.Add(clip);
 
@@ -50,16 +56,53 @@ namespace ClipService
             Activate(clip);
         }
 
-        public void Save()
+        public void Define()
         {
             if (Active != default)
             {
-                OnClipDimensionedEvent?.Invoke(
+                OnClipDefinedEvent?.Invoke(
+                    sender: this,
+                    e: default);
+            }
+        }
+
+        public bool IsUniqueName(string name)
+        {
+            var result = !Clips.Any(c => c.Name == name);
+
+            return result;
+        }
+
+        public void Remove()
+        {
+            if (Active != default)
+            {
+                Clips.Remove(Active);
+
+                OnClipsChangedEvent?.Invoke(
                     sender: this,
                     e: default);
             }
         }
 
         #endregion Public Methods
+
+        #region Private Methods
+
+        private string GetName()
+        {
+            var index = 0;
+
+            string result;
+
+            do
+            {
+                result = $"Clip{++index}";
+            } while (!IsUniqueName(result));
+
+            return result;
+        }
+
+        #endregion Private Methods
     }
 }

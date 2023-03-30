@@ -10,37 +10,52 @@ namespace WebcamService.Extensions
 
         public static double DiffTo(this Mat image, Mat template)
         {
-            var compare = image.Resize(
-                dsize: template.Size(),
-                interpolation: InterpolationFlags.Nearest);
+            var result = default(double);
 
-            var match = compare.MatchTemplate(
-                templ: template,
-                method: TemplateMatchModes.CCoeffNormed);
+            if (image?.Step(0) > 0
+                && image.Rows > 0
+                && template?.Step(0) > 0
+                && template.Rows > 0)
+            {
+                var compare = image.Resize(
+                    dsize: template.Size(),
+                    interpolation: InterpolationFlags.Nearest);
 
-            match.MinMaxLoc(
-                minVal: out _,
-                maxVal: out double result);
+                var match = compare.MatchTemplate(
+                    templ: template,
+                    method: TemplateMatchModes.CCoeffNormed);
 
-            return Math.Abs(result);
+                match.MinMaxLoc(
+                    minVal: out _,
+                    maxVal: out double value);
+
+                result = Math.Abs(value);
+            }
+
+            return result;
         }
 
         public static Rect? GetContour(this Mat image)
         {
             var result = default(Rect?);
 
-            image.FindContours(
-                contours: out var contours,
-                hierarchy: out _,
-                mode: RetrievalModes.Tree,
-                method: ContourApproximationModes.ApproxSimple);
+            if (image?.Step(0) > 0
+                && image.Rows > 0)
 
-            if (contours.Length > 0)
             {
-                var relevant = contours
-                    .OrderByDescending(c => c.Length).First();
+                image.FindContours(
+                    contours: out var contours,
+                    hierarchy: out _,
+                    mode: RetrievalModes.Tree,
+                    method: ContourApproximationModes.ApproxSimple);
 
-                result = Cv2.BoundingRect(relevant);
+                if (contours.Length > 0)
+                {
+                    var relevant = contours
+                        .OrderByDescending(c => c.Length).First();
+
+                    result = Cv2.BoundingRect(relevant);
+                }
             }
 
             return result;
@@ -48,16 +63,22 @@ namespace WebcamService.Extensions
 
         public static Mat ToMonochrome(this Mat image, double threshold)
         {
-            var monochromeImage = image.Channels() > 1
-                ? image.CvtColor(ColorConversionCodes.BGR2GRAY)
-                : image;
+            var result = default(Mat);
 
-            var thresh = threshold * 255;
+            if (image?.Step(0) > 0
+                && image.Rows > 0)
+            {
+                var monochromeImage = image.Channels() > 1
+                    ? image.CvtColor(ColorConversionCodes.BGR2GRAY)
+                    : image;
 
-            var result = monochromeImage.Threshold(
-                thresh: thresh,
-                maxval: 255,
-                type: ThresholdTypes.Binary);
+                var thresh = threshold * 255;
+
+                result = monochromeImage.Threshold(
+                    thresh: thresh,
+                    maxval: 255,
+                    type: ThresholdTypes.Binary);
+            }
 
             return result;
         }

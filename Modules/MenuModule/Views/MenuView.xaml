@@ -32,6 +32,7 @@
                 </fl:RibbonGroupBox>
                 <fl:RibbonGroupBox Header="Clips">
                     <fl:Button Command="{Binding ClipAddCommand}" Header="Add" />
+                    <fl:Button Command="{Binding ClipRemoveCommand}" Header="Remove" />
                 </fl:RibbonGroupBox>
             </fl:RibbonTabItem>
         </fl:Ribbon>

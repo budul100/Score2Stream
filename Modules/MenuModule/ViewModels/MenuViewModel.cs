@@ -24,6 +24,7 @@ namespace MenuModule.ViewModels
             this.clipService = clipService;
 
             webcamService.OnContentChangedEvent += OnContentChanged;
+            clipService.OnClipsChangedEvent += OnClipsChanged;
 
             this.WebcamPlayCommand = new DelegateCommand(
                 executeMethod: WebcamStartAsync,
@@ -35,6 +36,9 @@ namespace MenuModule.ViewModels
             this.ClipAddCommand = new DelegateCommand(
                 executeMethod: ClipAdd,
                 canExecuteMethod: () => webcamService.IsActive);
+            this.ClipRemoveCommand = new DelegateCommand(
+                executeMethod: ClipRemove,
+                canExecuteMethod: () => clipService.Active != default);
         }
 
         #endregion Public Constructors
@@ -42,6 +46,8 @@ namespace MenuModule.ViewModels
         #region Public Properties
 
         public DelegateCommand ClipAddCommand { get; }
+
+        public DelegateCommand ClipRemoveCommand { get; }
 
         public DelegateCommand WebcamPauseCommand { get; }
 
@@ -61,6 +67,17 @@ namespace MenuModule.ViewModels
         private void ClipAdd()
         {
             clipService.Add();
+        }
+
+        private void ClipRemove()
+        {
+            clipService.Remove();
+        }
+
+        private void OnClipsChanged(object sender, System.EventArgs e)
+        {
+            ClipAddCommand.RaiseCanExecuteChanged();
+            ClipRemoveCommand.RaiseCanExecuteChanged();
         }
 
         private void OnContentChanged(object sender, System.EventArgs e)
