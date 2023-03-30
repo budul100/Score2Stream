@@ -4,7 +4,8 @@
     {
         #region Public Fields
 
-        public const string ContentRegion = "ContentRegion";
+        public const string MenuRegion = "MenuRegion";
+        public const string WebcamRegion = "WebcamRegion";
 
         #endregion Public Fields
     }

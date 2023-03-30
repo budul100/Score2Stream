@@ -1,9 +1,11 @@
-﻿using Prism.Commands;
+﻿using Core.Events;
+using Prism.Commands;
 using Prism.Events;
 using Prism.Regions;
 using ScoreboardOCR.Core.Events;
 using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Mvvm;
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 
@@ -15,14 +17,15 @@ namespace WebcamModule.ViewModels
         #region Private Fields
 
         private readonly IWebcamService webcamService;
+
+        private ClipViewModel currentClip;
         private BitmapSource currentView;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public WebcamViewModel(IRegionManager regionManager, IEventAggregator eventAggregator,
-            IWebcamService webcamService)
+        public WebcamViewModel(IRegionManager regionManager, IEventAggregator eventAggregator, IWebcamService webcamService)
             : base(regionManager)
         {
             this.webcamService = webcamService;
@@ -31,13 +34,19 @@ namespace WebcamModule.ViewModels
                 .GetEvent<WebcamChangedEvent>()
                 .Subscribe(OnWebcamChanged);
 
-            StartCommand = new DelegateCommand(StartAsync);
-            StopCommand = new DelegateCommand(StopAsync);
+            eventAggregator
+                .GetEvent<ClipAddEvent>()
+                .Subscribe(OnAddClip);
+
+            MouseDownCommand = new DelegateCommand(OnMouseDown);
+            MouseUpCommand = new DelegateCommand(OnMouseUp);
         }
 
         #endregion Public Constructors
 
         #region Public Properties
+
+        public ObservableCollection<ClipViewModel> Clips { get; } = new ObservableCollection<ClipViewModel>();
 
         public BitmapSource CurrentView
         {
@@ -45,36 +54,86 @@ namespace WebcamModule.ViewModels
             set { SetProperty(ref currentView, value); }
         }
 
-        public ICommand StartCommand { get; }
+        public ICommand MouseDownCommand { get; }
 
-        public ICommand StopCommand { get; }
+        public ICommand MouseUpCommand { get; }
+
+        public double MouseX
+        {
+            get { return default; }
+            set
+            {
+                if (currentClip?.IsActive == true)
+                {
+                    if (!currentClip.HasValue)
+                    {
+                        currentClip.Left = value;
+                    }
+                    else
+                    {
+                        currentClip.Width = value - currentClip.Left.Value;
+                    }
+                }
+            }
+        }
+
+        public double MouseY
+        {
+            get { return default; }
+            set
+            {
+                if (currentClip?.IsActive == true)
+                {
+                    if (!currentClip.HasValue)
+                    {
+                        currentClip.Top = value;
+                    }
+                    else
+                    {
+                        currentClip.Height = value - currentClip.Top.Value;
+                    }
+                }
+            }
+        }
 
         #endregion Public Properties
 
         #region Public Methods
 
         public override void OnNavigatedTo(NavigationContext navigationContext)
-        {
-            //do something
-        }
+        { }
 
         #endregion Public Methods
 
         #region Private Methods
 
+        private void OnAddClip()
+        {
+            currentClip = new ClipViewModel();
+
+            Clips.Add(currentClip);
+        }
+
+        private void OnMouseDown()
+        {
+            if (currentClip != default)
+            {
+                currentClip.IsActive = true;
+            }
+        }
+
+        private void OnMouseUp()
+        {
+            if (currentClip?.IsActive == true)
+            {
+                currentClip.IsActive = false;
+                currentClip = default;
+            }
+        }
+
         private void OnWebcamChanged()
         {
             CurrentView = webcamService.Current;
-        }
-
-        private async void StartAsync()
-        {
-            await webcamService.StartAsync();
-        }
-
-        private async void StopAsync()
-        {
-            await webcamService.StopAsync();
         }
 
         #endregion Private Methods

@@ -1,13 +1,13 @@
 ﻿using System.Windows.Controls;
 
-namespace WebcamModule.Views
+namespace MenuModule.Views
 {
-    public partial class WebcamView
+    public partial class MenuView
         : UserControl
     {
         #region Public Constructors
 
-        public WebcamView()
+        public MenuView()
         {
             InitializeComponent();
         }

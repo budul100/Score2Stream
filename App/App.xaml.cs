@@ -15,7 +15,10 @@ namespace ScoreboardOCR
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
         {
-            moduleCatalog.AddModule<WebcamModule.Module>();
+            moduleCatalog.AddModule<MenuModule.Module>(
+                name: nameof(MenuModule));
+            moduleCatalog.AddModule<WebcamModule.Module>(
+                name: nameof(WebcamModule));
         }
 
         protected override Window CreateShell()
