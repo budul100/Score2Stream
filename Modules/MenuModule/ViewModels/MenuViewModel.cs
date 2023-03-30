@@ -1,5 +1,6 @@
 ﻿using Prism.Commands;
 using Prism.Regions;
+using ScoreboardOCR.Core.Constants;
 using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Mvvm;
 
@@ -10,8 +11,14 @@ namespace MenuModule.ViewModels
     {
         #region Private Fields
 
+        private const int IndexClipView = 0;
+        private const int IndexTemplateView = 1;
+
         private readonly IClipService clipService;
+        private readonly IRegionManager regionManager;
         private readonly IWebcamService webcamService;
+
+        private int selectedTabIndex;
 
         #endregion Private Fields
 
@@ -22,6 +29,7 @@ namespace MenuModule.ViewModels
         {
             this.webcamService = webcamService;
             this.clipService = clipService;
+            this.regionManager = regionManager;
 
             webcamService.OnContentChangedEvent += OnContentChanged;
             clipService.OnClipsChangedEvent += OnClipsChanged;
@@ -48,6 +56,30 @@ namespace MenuModule.ViewModels
         public DelegateCommand ClipAddCommand { get; }
 
         public DelegateCommand ClipRemoveCommand { get; }
+
+        public int SelectedTabIndex
+        {
+            get { return selectedTabIndex; }
+            set
+            {
+                SetProperty(ref selectedTabIndex, value);
+
+                switch (SelectedTabIndex)
+                {
+                    case IndexClipView:
+                        regionManager.RequestNavigate(
+                            regionName: RegionNames.EditRegion,
+                            source: ViewNames.ClipView);
+                        break;
+
+                    case IndexTemplateView:
+                        regionManager.RequestNavigate(
+                            regionName: RegionNames.EditRegion,
+                            source: ViewNames.TemplateView);
+                        break;
+                }
+            }
+        }
 
         public DelegateCommand WebcamPauseCommand { get; }
 

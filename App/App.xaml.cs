@@ -6,9 +6,6 @@ using System.Windows;
 
 namespace ScoreboardOCR
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App
     {
         #region Protected Methods
@@ -21,6 +18,8 @@ namespace ScoreboardOCR
                 name: nameof(WebcamModule));
             moduleCatalog.AddModule<ClipModule.Module>(
                 name: nameof(ClipModule));
+            moduleCatalog.AddModule<TemplateModule.Module>(
+                name: nameof(TemplateModule));
         }
 
         protected override Window CreateShell()

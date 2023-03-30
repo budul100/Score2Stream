@@ -1,12 +1,12 @@
 ﻿<UserControl
     x:Class="MenuModule.Views.MenuView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:prism="http://prismlibrary.com/"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:fl="clr-namespace:Fluent;assembly=Fluent"
     xmlns:hl="clr-namespace:MenuModule.Helpers"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:prism="http://prismlibrary.com/"
     d:DataContext="{Binding Source={x:Static hl:DesignTimeViewModelLocator.MenuViewModel}}"
     d:DesignWidth="500"
     prism:ViewModelLocator.AutoWireViewModel="True"
@@ -24,8 +24,19 @@
             IsAutomaticCollapseEnabled="False"
             IsCollapsed="False"
             IsQuickAccessToolBarMenuDropDownVisible="False"
-            IsQuickAccessToolBarVisible="False">
-            <fl:RibbonTabItem Height="0" Header="Main">
+            IsQuickAccessToolBarVisible="False"
+            SelectedTabIndex="{Binding SelectedTabIndex, Mode=TwoWay}">
+            <fl:RibbonTabItem Header="Edit clips">
+                <fl:RibbonGroupBox Header="Webcam">
+                    <fl:Button Command="{Binding WebcamPlayCommand}" Header="Play" />
+                    <fl:Button Command="{Binding WebcamPauseCommand}" Header="Pause" />
+                </fl:RibbonGroupBox>
+                <fl:RibbonGroupBox Header="Clips">
+                    <fl:Button Command="{Binding ClipAddCommand}" Header="Add" />
+                    <fl:Button Command="{Binding ClipRemoveCommand}" Header="Remove" />
+                </fl:RibbonGroupBox>
+            </fl:RibbonTabItem>
+            <fl:RibbonTabItem Header="Edit templates">
                 <fl:RibbonGroupBox Header="Webcam">
                     <fl:Button Command="{Binding WebcamPlayCommand}" Header="Play" />
                     <fl:Button Command="{Binding WebcamPauseCommand}" Header="Pause" />
