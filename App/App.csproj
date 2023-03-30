@@ -9,6 +9,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" />
+    <ProjectReference Include="..\Modules\ClipModule\ClipModule.csproj" />
     <ProjectReference Include="..\Modules\MenuModule\MenuModule.csproj" />
     <ProjectReference Include="..\Modules\WebcamModule\WebcamModule.csproj" />
     <ProjectReference Include="..\Services\DispatcherService\DispatcherService.csproj" />

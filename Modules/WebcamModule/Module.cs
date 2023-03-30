@@ -11,7 +11,7 @@ namespace WebcamModule
     {
         #region Private Fields
 
-        private readonly IRegionManager _regionManager;
+        private readonly IRegionManager regionManager;
 
         #endregion Private Fields
 
@@ -19,7 +19,7 @@ namespace WebcamModule
 
         public Module(IRegionManager regionManager)
         {
-            _regionManager = regionManager;
+            this.regionManager = regionManager;
         }
 
         #endregion Public Constructors
@@ -28,7 +28,7 @@ namespace WebcamModule
 
         public void OnInitialized(IContainerProvider containerProvider)
         {
-            _regionManager.RequestNavigate(RegionNames.WebcamRegion, nameof(WebcamView));
+            regionManager.RequestNavigate(RegionNames.WebcamRegion, nameof(WebcamView));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)

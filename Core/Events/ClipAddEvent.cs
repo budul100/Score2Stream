@@ -1,6 +1,6 @@
 ﻿using Prism.Events;
 
-namespace Core.Events
+namespace ScoreboardOCR.Core.Events
 {
     public class ClipAddEvent
         : PubSubEvent

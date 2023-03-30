@@ -17,8 +17,12 @@ namespace WebcamModule.ViewModels
 
         #region Public Properties
 
-        public bool HasValue => left.HasValue
-            && top.HasValue;
+        public double? Bottom => Top.HasValue
+            ? Top.Value + Height
+            : default;
+
+        public bool HasValue => Left.HasValue
+            && Top.HasValue;
 
         public double Height
         {
@@ -37,6 +41,10 @@ namespace WebcamModule.ViewModels
             get { return left; }
             set { SetProperty(ref left, value); }
         }
+
+        public double? Right => Left.HasValue
+            ? Left.Value + Width
+            : default;
 
         public double? Top
         {

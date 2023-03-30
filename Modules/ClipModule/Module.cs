@@ -1,9 +1,10 @@
-﻿using Prism.Ioc;
+﻿using ClipModule.Views;
+using Prism.Ioc;
 using Prism.Modularity;
 using Prism.Regions;
 using ScoreboardOCR.Core;
 
-namespace MenuModule
+namespace ClipModule
 {
     public class Module
         : IModule
@@ -27,12 +28,12 @@ namespace MenuModule
 
         public void OnInitialized(IContainerProvider containerProvider)
         {
-            regionManager.RequestNavigate(RegionNames.MenuRegion, nameof(MenuView));
+            regionManager.RequestNavigate(RegionNames.ClipRegion, nameof(ListView));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterForNavigation<Views.MenuView>();
+            containerRegistry.RegisterForNavigation<Views.ListView>();
         }
 
         #endregion Public Methods

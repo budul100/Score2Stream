@@ -6,7 +6,9 @@ namespace ScoreboardOCR.ViewModels
     {
         #region Private Fields
 
-        private string _title = "Prism Application";
+        private int height;
+        private string title = "ScoreboardOCR";
+        private int width;
 
         #endregion Private Fields
 
@@ -14,16 +16,30 @@ namespace ScoreboardOCR.ViewModels
 
         public MainViewModel()
         {
+            Height = 800;
+            Width = 1200;
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
+        public int Height
+        {
+            get { return height; }
+            set { SetProperty(ref height, value); }
+        }
+
         public string Title
         {
-            get { return _title; }
-            set { SetProperty(ref _title, value); }
+            get { return title; }
+            set { SetProperty(ref title, value); }
+        }
+
+        public int Width
+        {
+            get { return width; }
+            set { SetProperty(ref width, value); }
         }
 
         #endregion Public Properties

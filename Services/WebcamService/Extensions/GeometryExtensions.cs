@@ -49,7 +49,7 @@ namespace WebcamService.Extensions
                 else if (vizSize.Height > vizSize.Width)
                 {
                     var scale = (double)vizSize.Height / picSize.Height;
-                    var spare = (picSize.Width - vizSize.Width / scale) / 2;
+                    var spare = (picSize.Width - (vizSize.Width / scale)) / 2;
 
                     var x = point.X - spare;
                     x = x < 0 ? 0 : x;
@@ -61,7 +61,7 @@ namespace WebcamService.Extensions
                 else
                 {
                     var scale = (double)vizSize.Width / picSize.Width;
-                    var spare = (picSize.Height - vizSize.Height / scale) / 2;
+                    var spare = (picSize.Height - (vizSize.Height / scale)) / 2;
 
                     var y = point.Y - spare;
                     y = y < 0 ? 0 : y;

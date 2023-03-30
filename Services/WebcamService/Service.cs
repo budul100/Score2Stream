@@ -3,6 +3,7 @@ using OpenCvSharp.WpfExtensions;
 using Prism.Events;
 using ScoreboardOCR.Core.Events;
 using ScoreboardOCR.Core.Interfaces;
+using ScoreboardOCR.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,11 +21,13 @@ namespace WebcamService
 
         private const int Delay = 100;
 
+        private readonly List<(Clip, Rect?)> clips = new();
         private readonly IEventAggregator eventAggregator;
         private readonly IDictionary<string, Mat> templates = new Dictionary<string, Mat>();
         private readonly IDispatcherService wpfContext;
 
         private CancellationTokenSource cancellationTokenSource;
+        private Mat frame;
         private bool isDisposed;
         private Task webcamTask;
 
@@ -42,9 +45,7 @@ namespace WebcamService
 
         #region Public Properties
 
-        public BitmapSource Current { get; private set; }
-
-        public bool IsRunning { get; set; }
+        public BitmapSource Content { get; private set; }
 
         public double ThresholdCompare { get; set; }
 
@@ -53,6 +54,32 @@ namespace WebcamService
         #endregion Public Properties
 
         #region Public Methods
+
+        public void AddClip(Clip clip)
+        {
+            if (frame != default)
+            {
+                RemoveClip(clip);
+
+                var firstX = Convert.ToInt32(clip.RelativeX1 * frame.Size().Width);
+                var secondX = Convert.ToInt32(clip.RelativeX2 * frame.Size().Width);
+
+                var firstY = Convert.ToInt32(clip.RelativeY1 * frame.Size().Height);
+                var secondY = Convert.ToInt32(clip.RelativeY2 * frame.Size().Height);
+
+                var rectangle = frame.Size().GetRectangle(
+                    firstX: firstX,
+                    firstY: firstY,
+                    secondX: secondX,
+                    secondY: secondY);
+
+                if (rectangle.HasValue)
+                {
+                    var value = (clip, rectangle);
+                    clips.Add(value);
+                }
+            }
+        }
 
         void IDisposable.Dispose()
         {
@@ -89,6 +116,17 @@ namespace WebcamService
             }
 
             return result;
+        }
+
+        public void RemoveClip(Clip clip)
+        {
+            var relevant = clips
+                .SingleOrDefault(c => c.Item1 == clip);
+
+            if (relevant != default)
+            {
+                clips.Remove(relevant);
+            }
         }
 
         public void Set(Mat image, int firstX, int firstY, int secondX, int secondY, string value)
@@ -217,21 +255,40 @@ namespace WebcamService
                 //    throw new ApplicationException("Cannot connect to camera");
                 //}
 
-                using var frame = new Mat();
+                using var currentFrame = new Mat();
 
                 while (!cancellationTokenSource.IsCancellationRequested)
                 {
-                    video.Read(frame);
+                    video.Read(currentFrame);
 
-                    if (!frame.Empty())
+                    if (!currentFrame.Empty())
                     {
-                        Current = frame.ToBitmapSource();
+                        frame = currentFrame;
+
+                        Content = currentFrame.ToBitmapSource();
+
+                        foreach (var clip in clips)
+                        {
+                            if (clip.Item2.HasValue)
+                            {
+                                var cropImage = frame
+                                    .Clone(clip.Item2.Value)
+                                    .ToMonochrome(clip.Item1.ThresholdMonochrome);
+
+                                var contourRectangle = cropImage.GetContour();
+
+                                if (contourRectangle.HasValue)
+                                {
+                                    clip.Item1.Content = cropImage
+                                        .Clone(contourRectangle.Value)
+                                        .ToBitmapSource();
+                                }
+                            }
+                        }
 
                         eventAggregator
                             .GetEvent<WebcamChangedEvent>()
                             .Publish();
-
-                        IsRunning = true;
                     }
 
                     await Task.Delay(Delay);
@@ -239,7 +296,8 @@ namespace WebcamService
             }
             catch { }
 
-            IsRunning = false;
+            frame = default;
+            Content = default;
         }
 
         #endregion Private Methods

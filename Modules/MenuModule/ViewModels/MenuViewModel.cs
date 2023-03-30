@@ -1,7 +1,7 @@
-﻿using Core.Events;
-using Prism.Commands;
+﻿using Prism.Commands;
 using Prism.Events;
 using Prism.Regions;
+using ScoreboardOCR.Core.Events;
 using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Mvvm;
 using System.Windows.Input;
@@ -20,7 +20,7 @@ namespace MenuModule.ViewModels
 
         #region Public Constructors
 
-        public MenuViewModel(IRegionManager regionManager, IEventAggregator eventAggregator, IWebcamService webcamService)
+        public MenuViewModel(IWebcamService webcamService, IEventAggregator eventAggregator, IRegionManager regionManager)
             : base(regionManager)
         {
             this.eventAggregator = eventAggregator;

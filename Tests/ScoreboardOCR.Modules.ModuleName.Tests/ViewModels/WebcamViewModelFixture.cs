@@ -41,9 +41,9 @@ namespace WebcamModule.Tests
         public void MessageINotifyPropertyChangedCalled()
         {
             var viewModel = new WebcamViewModel(
-                regionManager: regionManagerMock.Object,
+                webcamServiceMock.Object,
                 eventAggregatorMock.Object,
-                webcamServiceMock.Object);
+                regionManager: regionManagerMock.Object);
 
             //Assert.PropertyChanged(vm, nameof(vm.Message), () => vm.Message = "Changed");
         }

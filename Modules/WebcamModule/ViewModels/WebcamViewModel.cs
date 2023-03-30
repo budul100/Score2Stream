@@ -1,5 +1,4 @@
-﻿using Core.Events;
-using Prism.Commands;
+﻿using Prism.Commands;
 using Prism.Events;
 using Prism.Regions;
 using ScoreboardOCR.Core.Events;
@@ -18,14 +17,16 @@ namespace WebcamModule.ViewModels
 
         private readonly IWebcamService webcamService;
 
+        private BitmapSource content;
         private ClipViewModel currentClip;
-        private BitmapSource currentView;
+        private bool movedToBottom;
+        private bool movedToRight;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public WebcamViewModel(IRegionManager regionManager, IEventAggregator eventAggregator, IWebcamService webcamService)
+        public WebcamViewModel(IWebcamService webcamService, IEventAggregator eventAggregator, IRegionManager regionManager)
             : base(regionManager)
         {
             this.webcamService = webcamService;
@@ -48,10 +49,10 @@ namespace WebcamModule.ViewModels
 
         public ObservableCollection<ClipViewModel> Clips { get; } = new ObservableCollection<ClipViewModel>();
 
-        public BitmapSource CurrentView
+        public BitmapSource Content
         {
-            get { return currentView; }
-            set { SetProperty(ref currentView, value); }
+            get { return content; }
+            set { SetProperty(ref content, value); }
         }
 
         public ICommand MouseDownCommand { get; }
@@ -69,9 +70,18 @@ namespace WebcamModule.ViewModels
                     {
                         currentClip.Left = value;
                     }
-                    else
+                    else if (value > currentClip.Right
+                        || (value >= currentClip.Left && movedToRight))
                     {
                         currentClip.Width = value - currentClip.Left.Value;
+                        movedToRight = true;
+                    }
+                    else if (value < currentClip.Left
+                        || (value <= currentClip.Right && !movedToRight))
+                    {
+                        currentClip.Width += currentClip.Left.Value - value;
+                        currentClip.Left = value;
+                        movedToRight = false;
                     }
                 }
             }
@@ -88,9 +98,18 @@ namespace WebcamModule.ViewModels
                     {
                         currentClip.Top = value;
                     }
-                    else
+                    else if (value > currentClip.Bottom
+                        || (value >= currentClip.Top && movedToBottom))
                     {
                         currentClip.Height = value - currentClip.Top.Value;
+                        movedToBottom = true;
+                    }
+                    else if (value < currentClip.Top
+                        || (value <= currentClip.Bottom && !movedToBottom))
+                    {
+                        currentClip.Height += currentClip.Top.Value - value;
+                        currentClip.Top = value;
+                        movedToBottom = false;
                     }
                 }
             }
@@ -127,13 +146,19 @@ namespace WebcamModule.ViewModels
             if (currentClip?.IsActive == true)
             {
                 currentClip.IsActive = false;
+
+                if (currentClip.Width == 0 || currentClip.Height == 0)
+                {
+                    Clips.Remove(currentClip);
+                }
+
                 currentClip = default;
             }
         }
 
         private void OnWebcamChanged()
         {
-            CurrentView = webcamService.Current;
+            Content = webcamService.Content;
         }
 
         #endregion Private Methods
