@@ -1,6 +1,8 @@
 ﻿using MvvmValidation;
+using Prism.Commands;
 using ScoreboardOCR.Core.Models;
 using ScoreboardOCR.Core.Mvvm;
+using System;
 using System.Windows.Media.Imaging;
 
 namespace ClipModule.ViewModels
@@ -10,8 +12,8 @@ namespace ClipModule.ViewModels
     {
         #region Private Fields
 
-        private readonly Clip clip;
         private BitmapSource content;
+        private bool isActive;
         private string name;
 
         #endregion Private Fields
@@ -20,7 +22,9 @@ namespace ClipModule.ViewModels
 
         public ClipViewModel(Clip clip)
         {
-            this.clip = clip;
+            this.Clip = clip;
+
+            OnClickCommand = new DelegateCommand(OnClick);
 
             Validator.AddRule(
                 targetName: nameof(Name),
@@ -29,12 +33,26 @@ namespace ClipModule.ViewModels
 
         #endregion Public Constructors
 
+        #region Public Events
+
+        public event EventHandler OnClipSelectedEvent;
+
+        #endregion Public Events
+
         #region Public Properties
+
+        public Clip Clip { get; }
 
         public BitmapSource Content
         {
             get { return content; }
             set { SetProperty(ref content, value); }
+        }
+
+        public bool IsActive
+        {
+            get { return isActive; }
+            set { SetProperty(ref isActive, value); }
         }
 
         public string Name
@@ -43,25 +61,27 @@ namespace ClipModule.ViewModels
             set
             {
                 if (!string.IsNullOrWhiteSpace(value)
-                    && clip.Name != value)
+                    && Clip.Name != value)
                 {
-                    clip.Name = value;
+                    Clip.Name = value;
                 }
 
                 SetProperty(ref name, value);
             }
         }
 
+        public DelegateCommand OnClickCommand { get; }
+
         public int ThresholdMonochrome
         {
-            get { return clip.ThresholdMonochrome; }
+            get { return Clip.ThresholdMonochrome; }
             set
             {
                 if (value >= 0
                     && value <= 100
-                    && clip.ThresholdMonochrome != value)
+                    && Clip.ThresholdMonochrome != value)
                 {
-                    clip.ThresholdMonochrome = value;
+                    Clip.ThresholdMonochrome = value;
                 }
 
                 RaisePropertyChanged(nameof(ThresholdMonochrome));
@@ -74,9 +94,20 @@ namespace ClipModule.ViewModels
 
         public void Update()
         {
-            Content = clip.Content;
+            Content = Clip.Content;
         }
 
         #endregion Public Methods
+
+        #region Private Methods
+
+        private void OnClick()
+        {
+            OnClipSelectedEvent?.Invoke(
+                sender: this,
+                e: default);
+        }
+
+        #endregion Private Methods
     }
 }
