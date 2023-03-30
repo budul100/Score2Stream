@@ -1,5 +1,4 @@
 ﻿using Moq;
-using Prism.Events;
 using Prism.Regions;
 using ScoreboardOCR.Core.Interfaces;
 using WebcamModule.ViewModels;
@@ -11,9 +10,9 @@ namespace WebcamModule.Tests
     {
         #region Private Fields
 
-        private Mock<IEventAggregator> eventAggregatorMock;
-        private Mock<IRegionManager> regionManagerMock;
-        private Mock<IWebcamService> webcamServiceMock;
+        private readonly Mock<IClipService> clipServiceMock;
+        private readonly Mock<IRegionManager> regionManagerMock;
+        private readonly Mock<IWebcamService> webcamServiceMock;
 
         #endregion Private Fields
 
@@ -29,8 +28,8 @@ namespace WebcamModule.Tests
             //_messageServiceMock = messageService;
 
             regionManagerMock = new Mock<IRegionManager>();
-            eventAggregatorMock = new Mock<IEventAggregator>();
             webcamServiceMock = new Mock<IWebcamService>();
+            clipServiceMock = new Mock<IClipService>();
         }
 
         #endregion Public Constructors
@@ -42,7 +41,7 @@ namespace WebcamModule.Tests
         {
             var viewModel = new WebcamViewModel(
                 webcamServiceMock.Object,
-                eventAggregatorMock.Object,
+                clipServiceMock.Object,
                 regionManager: regionManagerMock.Object);
 
             //Assert.PropertyChanged(vm, nameof(vm.Message), () => vm.Message = "Changed");

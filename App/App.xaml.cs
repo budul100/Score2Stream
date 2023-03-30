@@ -32,6 +32,7 @@ namespace ScoreboardOCR
             containerRegistry.RegisterInstance<IDispatcherService>(dispatcherService);
 
             containerRegistry.RegisterSingleton<IWebcamService, WebcamService.Service>();
+            containerRegistry.RegisterSingleton<IClipService, ClipService.Service>();
         }
 
         #endregion Protected Methods

@@ -1,7 +1,5 @@
 ﻿using Prism.Commands;
-using Prism.Events;
 using Prism.Regions;
-using ScoreboardOCR.Core.Events;
 using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Mvvm;
 using System.Windows.Input;
@@ -13,18 +11,18 @@ namespace MenuModule.ViewModels
     {
         #region Private Fields
 
-        private readonly IEventAggregator eventAggregator;
+        private readonly IClipService clipService;
         private readonly IWebcamService webcamService;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public MenuViewModel(IWebcamService webcamService, IEventAggregator eventAggregator, IRegionManager regionManager)
+        public MenuViewModel(IWebcamService webcamService, IClipService clipService, IRegionManager regionManager)
             : base(regionManager)
         {
-            this.eventAggregator = eventAggregator;
             this.webcamService = webcamService;
+            this.clipService = clipService;
 
             this.ClipAddCommand = new DelegateCommand(ClipAdd);
             this.WebcamPlayCommand = new DelegateCommand(WebcamStartAsync);
@@ -54,9 +52,7 @@ namespace MenuModule.ViewModels
 
         private void ClipAdd()
         {
-            eventAggregator
-                .GetEvent<ClipAddEvent>()
-                .Publish();
+            clipService.Add();
         }
 
         private async void WebcamStartAsync()

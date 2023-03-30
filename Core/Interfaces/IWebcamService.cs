@@ -1,5 +1,6 @@
 ﻿using OpenCvSharp;
 using ScoreboardOCR.Core.Models;
+using System;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
@@ -7,6 +8,12 @@ namespace ScoreboardOCR.Core.Interfaces
 {
     public interface IWebcamService
     {
+        #region Public Events
+
+        event EventHandler OnContentChangedEvent;
+
+        #endregion Public Events
+
         #region Public Properties
 
         BitmapSource Content { get; }

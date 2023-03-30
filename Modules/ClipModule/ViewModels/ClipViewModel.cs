@@ -1,6 +1,5 @@
 ﻿using MvvmValidation;
-using Prism.Events;
-using ScoreboardOCR.Core.Events;
+using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Models;
 using ScoreboardOCR.Core.Mvvm;
 using System.Windows.Media.Imaging;
@@ -19,7 +18,7 @@ namespace ClipModule.ViewModels
 
         #region Public Constructors
 
-        public ClipViewModel(Clip clip, IEventAggregator eventAggregator)
+        public ClipViewModel(Clip clip, IWebcamService webcamService)
         {
             this.clip = clip;
 
@@ -27,9 +26,7 @@ namespace ClipModule.ViewModels
                 targetName: nameof(Name),
                 validateDelegate: () => RuleResult.Assert(!string.IsNullOrEmpty(Name), "Name is required"));
 
-            eventAggregator
-                .GetEvent<WebcamChangedEvent>()
-                .Subscribe(OnWebcamChanged);
+            webcamService.OnContentChangedEvent += OnContentChanged;
         }
 
         #endregion Public Constructors
@@ -59,6 +56,11 @@ namespace ClipModule.ViewModels
         #endregion Public Properties
 
         #region Private Methods
+
+        private void OnContentChanged(object sender, System.EventArgs e)
+        {
+            Content = clip.Content;
+        }
 
         private void OnWebcamChanged()
         {

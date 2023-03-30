@@ -1,7 +1,5 @@
 ﻿using OpenCvSharp;
 using OpenCvSharp.WpfExtensions;
-using Prism.Events;
-using ScoreboardOCR.Core.Events;
 using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Models;
 using System;
@@ -22,7 +20,6 @@ namespace WebcamService
         private const int Delay = 100;
 
         private readonly List<(Clip, Rect?)> clips = new();
-        private readonly IEventAggregator eventAggregator;
         private readonly IDictionary<string, Mat> templates = new Dictionary<string, Mat>();
         private readonly IDispatcherService wpfContext;
 
@@ -35,13 +32,18 @@ namespace WebcamService
 
         #region Public Constructors
 
-        public Service(IEventAggregator eventAggregator, IDispatcherService dispatcherService)
+        public Service(IDispatcherService dispatcherService)
         {
-            this.eventAggregator = eventAggregator;
             this.wpfContext = dispatcherService;
         }
 
         #endregion Public Constructors
+
+        #region Public Events
+
+        public event EventHandler OnContentChangedEvent;
+
+        #endregion Public Events
 
         #region Public Properties
 
@@ -286,9 +288,9 @@ namespace WebcamService
                             }
                         }
 
-                        eventAggregator
-                            .GetEvent<WebcamChangedEvent>()
-                            .Publish();
+                        OnContentChangedEvent?.Invoke(
+                            sender: this,
+                            e: default);
                     }
 
                     await Task.Delay(Delay);

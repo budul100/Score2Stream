@@ -1,10 +1,10 @@
 ﻿using Prism.Commands;
-using Prism.Events;
 using Prism.Regions;
-using ScoreboardOCR.Core.Events;
 using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Mvvm;
+using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 
@@ -15,10 +15,19 @@ namespace WebcamModule.ViewModels
     {
         #region Private Fields
 
+        private const int BorderThicknessDefault = 2;
+
+        private readonly IClipService clipService;
         private readonly IWebcamService webcamService;
 
+        private ClipViewModel activeClip;
+        private int borderThickness;
         private BitmapSource content;
-        private ClipViewModel currentClip;
+        private int fullHeight;
+        private int fullWidth;
+        private int imageHeight;
+        private int imageWidth;
+        private bool isMouseActive;
         private bool movedToBottom;
         private bool movedToRight;
 
@@ -26,26 +35,31 @@ namespace WebcamModule.ViewModels
 
         #region Public Constructors
 
-        public WebcamViewModel(IWebcamService webcamService, IEventAggregator eventAggregator, IRegionManager regionManager)
+        public WebcamViewModel(IWebcamService webcamService, IClipService clipService, IRegionManager regionManager)
             : base(regionManager)
         {
             this.webcamService = webcamService;
+            this.clipService = clipService;
 
-            eventAggregator
-                .GetEvent<WebcamChangedEvent>()
-                .Subscribe(OnWebcamChanged);
-
-            eventAggregator
-                .GetEvent<ClipAddEvent>()
-                .Subscribe(OnAddClip);
+            webcamService.OnContentChangedEvent += OnContentChanged;
+            clipService.OnClipsChangedEvent += OnClipsChanged;
+            clipService.OnClipActivatedEvent += OnClipActivated;
 
             MouseDownCommand = new DelegateCommand(OnMouseDown);
             MouseUpCommand = new DelegateCommand(OnMouseUp);
+
+            BorderThickness = BorderThicknessDefault;
         }
 
         #endregion Public Constructors
 
         #region Public Properties
+
+        public int BorderThickness
+        {
+            get { return borderThickness; }
+            set { SetProperty(ref borderThickness, value); }
+        }
 
         public ObservableCollection<ClipViewModel> Clips { get; } = new ObservableCollection<ClipViewModel>();
 
@@ -53,6 +67,30 @@ namespace WebcamModule.ViewModels
         {
             get { return content; }
             set { SetProperty(ref content, value); }
+        }
+
+        public int FullHeight
+        {
+            get { return fullHeight; }
+            set { SetProperty(ref fullHeight, value); }
+        }
+
+        public int FullWidth
+        {
+            get { return fullWidth; }
+            set { SetProperty(ref fullWidth, value); }
+        }
+
+        public int ImageHeight
+        {
+            get { return imageHeight; }
+            set { SetProperty(ref imageHeight, value); }
+        }
+
+        public int ImageWidth
+        {
+            get { return imageWidth; }
+            set { SetProperty(ref imageWidth, value); }
         }
 
         public ICommand MouseDownCommand { get; }
@@ -64,25 +102,32 @@ namespace WebcamModule.ViewModels
             get { return default; }
             set
             {
-                if (currentClip?.IsActive == true)
+                if (isMouseActive
+                    && activeClip != default
+                    && Content != default)
                 {
-                    if (!currentClip.HasValue)
+                    if (!activeClip.HasValue)
                     {
-                        currentClip.Left = value;
+                        activeClip.Left = value;
                     }
-                    else if (value > currentClip.Right
-                        || (value >= currentClip.Left && movedToRight))
+                    else if (value > activeClip.Right
+                        || (value >= activeClip.Left && movedToRight))
                     {
-                        currentClip.Width = value - currentClip.Left.Value;
+                        activeClip.Width = value - activeClip.Left.Value;
                         movedToRight = true;
                     }
-                    else if (value < currentClip.Left
-                        || (value <= currentClip.Right && !movedToRight))
+                    else if (value < activeClip.Left
+                        || (value <= activeClip.Right && !movedToRight))
                     {
-                        currentClip.Width += currentClip.Left.Value - value;
-                        currentClip.Left = value;
+                        activeClip.Width += activeClip.Left.Value - value;
+                        activeClip.Left = value;
                         movedToRight = false;
                     }
+
+                    activeClip.Clip.BoxLeft = activeClip.Left;
+                    activeClip.Clip.BoxTop = activeClip.Top;
+                    activeClip.Clip.BoxWidth = activeClip.Width;
+                    activeClip.Clip.BoxHeight = activeClip.Height;
                 }
             }
         }
@@ -92,25 +137,32 @@ namespace WebcamModule.ViewModels
             get { return default; }
             set
             {
-                if (currentClip?.IsActive == true)
+                if (isMouseActive
+                    && activeClip != default
+                    && Content != default)
                 {
-                    if (!currentClip.HasValue)
+                    if (!activeClip.HasValue)
                     {
-                        currentClip.Top = value;
+                        activeClip.Top = value;
                     }
-                    else if (value > currentClip.Bottom
-                        || (value >= currentClip.Top && movedToBottom))
+                    else if (value > activeClip.Bottom
+                        || (value >= activeClip.Top && movedToBottom))
                     {
-                        currentClip.Height = value - currentClip.Top.Value;
+                        activeClip.Height = value - activeClip.Top.Value;
                         movedToBottom = true;
                     }
-                    else if (value < currentClip.Top
-                        || (value <= currentClip.Bottom && !movedToBottom))
+                    else if (value < activeClip.Top
+                        || (value <= activeClip.Bottom && !movedToBottom))
                     {
-                        currentClip.Height += currentClip.Top.Value - value;
-                        currentClip.Top = value;
+                        activeClip.Height += activeClip.Top.Value - value;
+                        activeClip.Top = value;
                         movedToBottom = false;
                     }
+
+                    activeClip.Clip.BoxLeft = activeClip.Left;
+                    activeClip.Clip.BoxTop = activeClip.Top;
+                    activeClip.Clip.BoxWidth = activeClip.Width;
+                    activeClip.Clip.BoxHeight = activeClip.Height;
                 }
             }
         }
@@ -126,39 +178,43 @@ namespace WebcamModule.ViewModels
 
         #region Private Methods
 
-        private void OnAddClip()
+        private void OnClipActivated(object sender, EventArgs e)
         {
-            currentClip = new ClipViewModel();
+            activeClip = Clips
+                .SingleOrDefault(c => c.Clip == clipService.Active);
+        }
 
-            Clips.Add(currentClip);
+        private void OnClipsChanged(object sender, System.EventArgs e)
+        {
+            Clips.Clear();
+
+            foreach (var clip in clipService.Clips)
+            {
+                var current = new ClipViewModel(clip);
+                Clips.Add(current);
+            }
+        }
+
+        private void OnContentChanged(object sender, EventArgs e)
+        {
+            Content = webcamService.Content;
         }
 
         private void OnMouseDown()
         {
-            if (currentClip != default)
+            if (activeClip != default
+                && Content != default)
             {
-                currentClip.IsActive = true;
+                activeClip.Left = default;
+                activeClip.Top = default;
+
+                isMouseActive = true;
             }
         }
 
         private void OnMouseUp()
         {
-            if (currentClip?.IsActive == true)
-            {
-                currentClip.IsActive = false;
-
-                if (currentClip.Width == 0 || currentClip.Height == 0)
-                {
-                    Clips.Remove(currentClip);
-                }
-
-                currentClip = default;
-            }
-        }
-
-        private void OnWebcamChanged()
-        {
-            Content = webcamService.Content;
+            isMouseActive = false;
         }
 
         #endregion Private Methods

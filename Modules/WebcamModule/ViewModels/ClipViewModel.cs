@@ -1,4 +1,5 @@
-﻿using ScoreboardOCR.Core.Mvvm;
+﻿using ScoreboardOCR.Core.Models;
+using ScoreboardOCR.Core.Mvvm;
 
 namespace WebcamModule.ViewModels
 {
@@ -8,18 +9,34 @@ namespace WebcamModule.ViewModels
         #region Private Fields
 
         private double height;
-        private bool isActive;
+
         private double? left;
         private double? top;
         private double width;
 
         #endregion Private Fields
 
+        #region Public Constructors
+
+        public ClipViewModel(Clip clip)
+        {
+            Clip = clip;
+
+            Left = Clip.BoxLeft;
+            Top = Clip.BoxTop;
+            Width = Clip.BoxWidth ?? 0;
+            Height = Clip.BoxHeight ?? 0;
+        }
+
+        #endregion Public Constructors
+
         #region Public Properties
 
-        public double? Bottom => Top.HasValue
+        public double? Bottom => HasValue
             ? Top.Value + Height
             : default;
+
+        public Clip Clip { get; }
 
         public bool HasValue => Left.HasValue
             && Top.HasValue;
@@ -30,19 +47,13 @@ namespace WebcamModule.ViewModels
             set { SetProperty(ref height, value); }
         }
 
-        public bool IsActive
-        {
-            get { return isActive; }
-            set { SetProperty(ref isActive, value); }
-        }
-
         public double? Left
         {
             get { return left; }
             set { SetProperty(ref left, value); }
         }
 
-        public double? Right => Left.HasValue
+        public double? Right => HasValue
             ? Left.Value + Width
             : default;
 
