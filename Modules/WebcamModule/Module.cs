@@ -1,8 +1,7 @@
 ﻿using Prism.Ioc;
 using Prism.Modularity;
 using Prism.Regions;
-using ScoreboardOCR.Core;
-using WebcamModule.Views;
+using ScoreboardOCR.Core.Constants;
 
 namespace WebcamModule
 {
@@ -28,12 +27,15 @@ namespace WebcamModule
 
         public void OnInitialized(IContainerProvider containerProvider)
         {
-            regionManager.RequestNavigate(RegionNames.WebcamRegion, nameof(WebcamView));
+            regionManager.RequestNavigate(
+                regionName: RegionNames.WebcamRegion,
+                source: ViewNames.WebcamView);
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterForNavigation<Views.WebcamView>();
+            containerRegistry.RegisterForNavigation<Views.WebcamView>(
+                name: ViewNames.WebcamView);
         }
 
         #endregion Public Methods

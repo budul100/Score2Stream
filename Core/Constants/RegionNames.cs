@@ -1,12 +1,12 @@
-﻿namespace ScoreboardOCR.Core
+﻿namespace ScoreboardOCR.Core.Constants
 {
     public static class RegionNames
     {
         #region Public Fields
 
+        public const string EditRegion = "EditRegion";
         public const string MenuRegion = "MenuRegion";
         public const string WebcamRegion = "WebcamRegion";
-        public const string ClipRegion = "ClipRegion";
 
         #endregion Public Fields
     }

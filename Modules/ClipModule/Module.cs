@@ -1,8 +1,7 @@
-﻿using ClipModule.Views;
-using Prism.Ioc;
+﻿using Prism.Ioc;
 using Prism.Modularity;
 using Prism.Regions;
-using ScoreboardOCR.Core;
+using ScoreboardOCR.Core.Constants;
 
 namespace ClipModule
 {
@@ -28,12 +27,15 @@ namespace ClipModule
 
         public void OnInitialized(IContainerProvider containerProvider)
         {
-            regionManager.RequestNavigate(RegionNames.ClipRegion, nameof(ListView));
+            regionManager.RequestNavigate(
+                regionName: RegionNames.EditRegion,
+                source: ViewNames.ClipView);
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterForNavigation<Views.ListView>();
+            containerRegistry.RegisterForNavigation<Views.ListView>(
+                name: ViewNames.ClipView);
         }
 
         #endregion Public Methods

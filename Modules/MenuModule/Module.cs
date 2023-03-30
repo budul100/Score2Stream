@@ -1,7 +1,7 @@
 ﻿using Prism.Ioc;
 using Prism.Modularity;
 using Prism.Regions;
-using ScoreboardOCR.Core;
+using ScoreboardOCR.Core.Constants;
 
 namespace MenuModule
 {
@@ -27,12 +27,15 @@ namespace MenuModule
 
         public void OnInitialized(IContainerProvider containerProvider)
         {
-            regionManager.RequestNavigate(RegionNames.MenuRegion, nameof(MenuView));
+            regionManager.RequestNavigate(
+                regionName: RegionNames.MenuRegion,
+                source: ViewNames.MenuView);
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterForNavigation<Views.MenuView>();
+            containerRegistry.RegisterForNavigation<Views.MenuView>(
+                name: ViewNames.MenuView);
         }
 
         #endregion Public Methods
