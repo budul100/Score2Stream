@@ -12,6 +12,8 @@ namespace ClipService
 
         public event EventHandler OnClipActivatedEvent;
 
+        public event EventHandler OnClipDimensionedEvent;
+
         public event EventHandler OnClipsChangedEvent;
 
         #endregion Public Events
@@ -46,6 +48,16 @@ namespace ClipService
                 e: default);
 
             Activate(clip);
+        }
+
+        public void Save()
+        {
+            if (Active != default)
+            {
+                OnClipDimensionedEvent?.Invoke(
+                    sender: this,
+                    e: default);
+            }
         }
 
         #endregion Public Methods

@@ -1,5 +1,7 @@
 ﻿using Prism.Regions;
+using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Mvvm;
+using System.Collections.ObjectModel;
 
 namespace ClipModule.ViewModels
 {
@@ -8,27 +10,26 @@ namespace ClipModule.ViewModels
     {
         #region Private Fields
 
-        private string _message;
+        private readonly IClipService clipService;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public ListViewModel(IRegionManager regionManager)
+        public ListViewModel(IWebcamService webcamService, IClipService clipService, IRegionManager regionManager)
             : base(regionManager)
         {
-            Message = "View A from your Prism Module";
+            this.clipService = clipService;
+
+            webcamService.OnContentChangedEvent += OnContentChanged;
+            clipService.OnClipsChangedEvent += OnClipsChanged;
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public string Message
-        {
-            get { return _message; }
-            set { SetProperty(ref _message, value); }
-        }
+        public ObservableCollection<ClipViewModel> Clips { get; } = new ObservableCollection<ClipViewModel>();
 
         #endregion Public Properties
 
@@ -38,5 +39,35 @@ namespace ClipModule.ViewModels
         { }
 
         #endregion Public Methods
+
+        #region Private Methods
+
+        private void OnClipsChanged(object sender, System.EventArgs e)
+        {
+            SetClips();
+        }
+
+        private void OnContentChanged(object sender, System.EventArgs e)
+        {
+            foreach (var clip in Clips)
+            {
+                clip.Update();
+            }
+        }
+
+        private void SetClips()
+        {
+            Clips.Clear();
+
+            foreach (var clip in clipService.Clips)
+            {
+                var current = new ClipViewModel(
+                    clip: clip);
+
+                Clips.Add(current);
+            }
+        }
+
+        #endregion Private Methods
     }
 }

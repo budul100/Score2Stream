@@ -1,5 +1,4 @@
 ﻿using MvvmValidation;
-using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Models;
 using ScoreboardOCR.Core.Mvvm;
 using System.Windows.Media.Imaging;
@@ -13,20 +12,19 @@ namespace ClipModule.ViewModels
 
         private readonly Clip clip;
         private BitmapSource content;
+        private string name;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public ClipViewModel(Clip clip, IWebcamService webcamService)
+        public ClipViewModel(Clip clip)
         {
             this.clip = clip;
 
             Validator.AddRule(
                 targetName: nameof(Name),
                 validateDelegate: () => RuleResult.Assert(!string.IsNullOrEmpty(Name), "Name is required"));
-
-            webcamService.OnContentChangedEvent += OnContentChanged;
         }
 
         #endregion Public Constructors
@@ -41,32 +39,44 @@ namespace ClipModule.ViewModels
 
         public string Name
         {
-            get { return clip.Name; }
+            get { return name; }
             set
             {
                 if (!string.IsNullOrWhiteSpace(value)
                     && clip.Name != value)
                 {
                     clip.Name = value;
-                    RaisePropertyChanged(nameof(Name));
                 }
+
+                SetProperty(ref name, value);
+            }
+        }
+
+        public int ThresholdMonochrome
+        {
+            get { return clip.ThresholdMonochrome; }
+            set
+            {
+                if (value >= 0
+                    && value <= 100
+                    && clip.ThresholdMonochrome != value)
+                {
+                    clip.ThresholdMonochrome = value;
+                }
+
+                RaisePropertyChanged(nameof(ThresholdMonochrome));
             }
         }
 
         #endregion Public Properties
 
-        #region Private Methods
+        #region Public Methods
 
-        private void OnContentChanged(object sender, System.EventArgs e)
+        public void Update()
         {
             Content = clip.Content;
         }
 
-        private void OnWebcamChanged()
-        {
-            Content = clip.Content;
-        }
-
-        #endregion Private Methods
+        #endregion Public Methods
     }
 }

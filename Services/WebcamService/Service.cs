@@ -18,10 +18,12 @@ namespace WebcamService
         #region Private Fields
 
         private const int Delay = 100;
+        private const double thresholdDivider = 100;
 
         private readonly List<(Clip, Rect?)> clips = new();
+        private readonly IClipService clipService;
+        private readonly IDispatcherService dispatcherService;
         private readonly IDictionary<string, Mat> templates = new Dictionary<string, Mat>();
-        private readonly IDispatcherService wpfContext;
 
         private CancellationTokenSource cancellationTokenSource;
         private Mat frame;
@@ -32,9 +34,12 @@ namespace WebcamService
 
         #region Public Constructors
 
-        public Service(IDispatcherService dispatcherService)
+        public Service(IClipService clipService, IDispatcherService dispatcherService)
         {
-            this.wpfContext = dispatcherService;
+            this.clipService = clipService;
+            this.dispatcherService = dispatcherService;
+
+            clipService.OnClipDimensionedEvent += OnClipDimensioned;
         }
 
         #endregion Public Constructors
@@ -49,39 +54,13 @@ namespace WebcamService
 
         public BitmapSource Content { get; private set; }
 
-        public double ThresholdCompare { get; set; }
+        public bool IsActive => Content != default;
 
-        public double ThresholdMonochrome { get; set; }
+        public double ThresholdCompare { get; set; }
 
         #endregion Public Properties
 
         #region Public Methods
-
-        public void AddClip(Clip clip)
-        {
-            if (frame != default)
-            {
-                RemoveClip(clip);
-
-                var firstX = Convert.ToInt32(clip.RelativeX1 * frame.Size().Width);
-                var secondX = Convert.ToInt32(clip.RelativeX2 * frame.Size().Width);
-
-                var firstY = Convert.ToInt32(clip.RelativeY1 * frame.Size().Height);
-                var secondY = Convert.ToInt32(clip.RelativeY2 * frame.Size().Height);
-
-                var rectangle = frame.Size().GetRectangle(
-                    firstX: firstX,
-                    firstY: firstY,
-                    secondX: secondX,
-                    secondY: secondY);
-
-                if (rectangle.HasValue)
-                {
-                    var value = (clip, rectangle);
-                    clips.Add(value);
-                }
-            }
-        }
 
         void IDisposable.Dispose()
         {
@@ -118,17 +97,6 @@ namespace WebcamService
             }
 
             return result;
-        }
-
-        public void RemoveClip(Clip clip)
-        {
-            var relevant = clips
-                .SingleOrDefault(c => c.Item1 == clip);
-
-            if (relevant != default)
-            {
-                clips.Remove(relevant);
-            }
         }
 
         public void Set(Mat image, int firstX, int firstY, int secondX, int secondY, string value)
@@ -168,7 +136,7 @@ namespace WebcamService
             cancellationTokenSource = new CancellationTokenSource();
 
             webcamTask = Task.Run(
-                function: async () => wpfContext.Invoke(() => RunWebcamAsync()),
+                function: async () => dispatcherService.Invoke(() => RunWebcamAsync()),
                 cancellationToken: cancellationTokenSource.Token);
 
             if (webcamTask.IsFaulted)
@@ -228,7 +196,7 @@ namespace WebcamService
             {
                 var cropImage = image
                     .Clone(cropRectangle.Value)
-                    .ToMonochrome(ThresholdMonochrome);
+                    .ToMonochrome(0.8);
 
                 var contourRectangle = cropImage.GetContour();
 
@@ -240,6 +208,11 @@ namespace WebcamService
             }
 
             return result;
+        }
+
+        private void OnClipDimensioned(object sender, EventArgs e)
+        {
+            SetClips();
         }
 
         private async void RunWebcamAsync()
@@ -273,9 +246,11 @@ namespace WebcamService
                         {
                             if (clip.Item2.HasValue)
                             {
+                                var thresholdMonochrome = clip.Item1.ThresholdMonochrome / thresholdDivider;
+
                                 var cropImage = frame
                                     .Clone(clip.Item2.Value)
-                                    .ToMonochrome(clip.Item1.ThresholdMonochrome);
+                                    .ToMonochrome(thresholdMonochrome);
 
                                 var contourRectangle = cropImage.GetContour();
 
@@ -300,6 +275,35 @@ namespace WebcamService
 
             frame = default;
             Content = default;
+        }
+
+        private void SetClips()
+        {
+            if (frame != default)
+            {
+                clips.Clear();
+
+                foreach (var clip in clipService.Clips)
+                {
+                    var firstX = Convert.ToInt32(clip.RelativeX1 * frame.Size().Width);
+                    var secondX = Convert.ToInt32(clip.RelativeX2 * frame.Size().Width);
+
+                    var firstY = Convert.ToInt32(clip.RelativeY1 * frame.Size().Height);
+                    var secondY = Convert.ToInt32(clip.RelativeY2 * frame.Size().Height);
+
+                    var rectangle = frame.Size().GetRectangle(
+                        firstX: firstX,
+                        firstY: firstY,
+                        secondX: secondX,
+                        secondY: secondY);
+
+                    if (rectangle.HasValue)
+                    {
+                        var value = (clip, rectangle);
+                        clips.Add(value);
+                    }
+                }
+            }
         }
 
         #endregion Private Methods

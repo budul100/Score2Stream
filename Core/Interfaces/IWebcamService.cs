@@ -1,5 +1,4 @@
 ﻿using OpenCvSharp;
-using ScoreboardOCR.Core.Models;
 using System;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
@@ -18,19 +17,15 @@ namespace ScoreboardOCR.Core.Interfaces
 
         BitmapSource Content { get; }
 
-        double ThresholdCompare { get; set; }
+        bool IsActive { get; }
 
-        double ThresholdMonochrome { get; set; }
+        double ThresholdCompare { get; set; }
 
         #endregion Public Properties
 
         #region Public Methods
 
-        void AddClip(Clip clip);
-
         string Get(Mat image, int firstX, int firstY, int secondX, int secondY);
-
-        void RemoveClip(Clip clip);
 
         void Set(Mat image, int firstX, int firstY, int secondX, int secondY, string value);
 

@@ -6,15 +6,63 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:hl="clr-namespace:ClipModule.Helpers"
+    xmlns:vm="clr-namespace:ClipModule.ViewModels"
+    xmlns:ud="clr-namespace:ControlLib;assembly=NumericUpDown"
     d:DataContext="{Binding Source={x:Static hl:DesignTimeViewModelLocator.ListViewModel}}"
     d:DesignHeight="300"
     d:DesignWidth="300"
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
-    <Grid>
-        <TextBlock
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Text="{Binding Message}" />
+    <UserControl.Resources>
+        <BitmapImage x:Key="DesignSource" UriSource="/Images/digit.png" />
+    </UserControl.Resources>
+    <Grid Margin="5">
+        <ItemsControl ItemsSource="{Binding Clips}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.Resources>
+                <DataTemplate DataType="{x:Type vm:ClipViewModel}">
+                    <StackPanel Orientation="Horizontal">
+                        <Border
+                            Margin="5"
+                            VerticalAlignment="Center"
+                            Background="LightGray"
+                            BorderBrush="LightSlateGray"
+                            BorderThickness="2">
+                            <Image
+                                Width="40"
+                                Height="60"
+                                VerticalAlignment="Center"
+                                Source="{Binding Content, FallbackValue={StaticResource DesignSource}}"
+                                Stretch="Uniform" />
+                        </Border>
+                        <TextBlock
+                            Margin="10,0,5,0"
+                            VerticalAlignment="Center"
+                            Text="Name" />
+                        <TextBox
+                            Width="80"
+                            Margin="5,0"
+                            VerticalAlignment="Center"
+                            d:Text="LoremIspum"
+                            Text="{Binding Name, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock
+                            Margin="10,0,5,0"
+                            VerticalAlignment="Center"
+                            Text="Threshold" />
+                        <ud:NumericUpDown
+                            Width="40"
+                            Margin="5,0"
+                            VerticalAlignment="Center"
+                            MaxValue="100"
+                            MinValue="0"
+                            Value="{Binding ThresholdMonochrome, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ItemsControl.Resources>
+        </ItemsControl>
     </Grid>
 </UserControl>

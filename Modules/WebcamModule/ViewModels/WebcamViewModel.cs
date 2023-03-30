@@ -5,7 +5,6 @@ using ScoreboardOCR.Core.Mvvm;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Windows.Input;
 using System.Windows.Media.Imaging;
 
 namespace WebcamModule.ViewModels
@@ -40,12 +39,13 @@ namespace WebcamModule.ViewModels
         #region Public Constructors
 
         public WebcamViewModel(IWebcamService webcamService, IClipService clipService, IRegionManager regionManager)
-                                              : base(regionManager)
+            : base(regionManager)
         {
             this.webcamService = webcamService;
             this.clipService = clipService;
 
             webcamService.OnContentChangedEvent += OnContentChanged;
+
             clipService.OnClipsChangedEvent += OnClipsChanged;
             clipService.OnClipActivatedEvent += OnClipActivated;
 
@@ -113,9 +113,9 @@ namespace WebcamModule.ViewModels
             }
         }
 
-        public ICommand MouseDownCommand { get; }
+        public DelegateCommand MouseDownCommand { get; }
 
-        public ICommand MouseUpCommand { get; }
+        public DelegateCommand MouseUpCommand { get; }
 
         public double MouseX
         {
@@ -144,14 +144,6 @@ namespace WebcamModule.ViewModels
                         activeClip.Width = (activeClip.Width ?? 0) + activeClip.Left.Value - value;
                         activeClip.Left = value;
                         movedToRight = false;
-                    }
-
-                    var actualWidth = GetActualWidth();
-
-                    if ((actualWidth ?? 0) > 0)
-                    {
-                        activeClip.Clip.RelativeX1 = ((activeClip.Left ?? 0) - x1.Value) / actualWidth.Value;
-                        activeClip.Clip.RelativeX2 = ((activeClip.Left ?? 0) + (activeClip.Width ?? 0) - x1.Value) / actualWidth.Value;
                     }
                 }
             }
@@ -184,14 +176,6 @@ namespace WebcamModule.ViewModels
                         activeClip.Height = (activeClip.Height ?? 0) + activeClip.Top.Value - value;
                         activeClip.Top = value;
                         movedToBottom = false;
-                    }
-
-                    var actualHeight = GetActualHeight();
-
-                    if ((actualHeight ?? 0) > 0)
-                    {
-                        activeClip.Clip.RelativeY1 = ((activeClip.Top ?? 0) - y1.Value) / actualHeight.Value;
-                        activeClip.Clip.RelativeY2 = ((activeClip.Top ?? 0) - y1.Value + (activeClip.Height ?? 0)) / actualHeight.Value;
                     }
                 }
             }
@@ -228,8 +212,11 @@ namespace WebcamModule.ViewModels
 
         private void OnClipActivated(object sender, EventArgs e)
         {
-            activeClip = Clips
-                .SingleOrDefault(c => c.Clip == clipService.Active);
+            if (webcamService.IsActive)
+            {
+                activeClip = Clips
+                    .SingleOrDefault(c => c.Clip == clipService.Active);
+            }
         }
 
         private void OnClipsChanged(object sender, System.EventArgs e)
@@ -258,6 +245,28 @@ namespace WebcamModule.ViewModels
 
         private void OnMouseUp()
         {
+            if (activeClip != default
+                && Content != default)
+            {
+                var actualWidth = GetActualWidth();
+
+                if ((actualWidth ?? 0) > 0)
+                {
+                    activeClip.Clip.RelativeX1 = ((activeClip.Left ?? 0) - x1.Value) / actualWidth.Value;
+                    activeClip.Clip.RelativeX2 = ((activeClip.Left ?? 0) + (activeClip.Width ?? 0) - x1.Value) / actualWidth.Value;
+                }
+
+                var actualHeight = GetActualHeight();
+
+                if ((actualHeight ?? 0) > 0)
+                {
+                    activeClip.Clip.RelativeY1 = ((activeClip.Top ?? 0) - y1.Value) / actualHeight.Value;
+                    activeClip.Clip.RelativeY2 = ((activeClip.Top ?? 0) - y1.Value + (activeClip.Height ?? 0)) / actualHeight.Value;
+                }
+
+                clipService.Save();
+            }
+
             isMouseActive = false;
         }
 
@@ -268,7 +277,8 @@ namespace WebcamModule.ViewModels
             var actualWidth = GetActualWidth();
             var actualHeight = GetActualHeight();
 
-            if (actualWidth.HasValue
+            if (webcamService.IsActive
+                && actualWidth.HasValue
                 && actualHeight.HasValue)
             {
                 foreach (var clip in clipService.Clips)

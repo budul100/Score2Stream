@@ -2,7 +2,6 @@
 using Prism.Regions;
 using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Mvvm;
-using System.Windows.Input;
 
 namespace MenuModule.ViewModels
 {
@@ -24,20 +23,29 @@ namespace MenuModule.ViewModels
             this.webcamService = webcamService;
             this.clipService = clipService;
 
-            this.ClipAddCommand = new DelegateCommand(ClipAdd);
-            this.WebcamPlayCommand = new DelegateCommand(WebcamStartAsync);
-            this.WebcamPauseCommand = new DelegateCommand(WebcamStopAsync);
+            webcamService.OnContentChangedEvent += OnContentChanged;
+
+            this.WebcamPlayCommand = new DelegateCommand(
+                executeMethod: WebcamStartAsync,
+                canExecuteMethod: () => !webcamService.IsActive);
+            this.WebcamPauseCommand = new DelegateCommand(
+                executeMethod: WebcamStopAsync,
+                canExecuteMethod: () => webcamService.IsActive);
+
+            this.ClipAddCommand = new DelegateCommand(
+                executeMethod: ClipAdd,
+                canExecuteMethod: () => webcamService.IsActive);
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public ICommand ClipAddCommand { get; }
+        public DelegateCommand ClipAddCommand { get; }
 
-        public ICommand WebcamPauseCommand { get; }
+        public DelegateCommand WebcamPauseCommand { get; }
 
-        public ICommand WebcamPlayCommand { get; }
+        public DelegateCommand WebcamPlayCommand { get; }
 
         #endregion Public Properties
 
@@ -53,6 +61,14 @@ namespace MenuModule.ViewModels
         private void ClipAdd()
         {
             clipService.Add();
+        }
+
+        private void OnContentChanged(object sender, System.EventArgs e)
+        {
+            WebcamPlayCommand.RaiseCanExecuteChanged();
+            WebcamPauseCommand.RaiseCanExecuteChanged();
+
+            ClipAddCommand.RaiseCanExecuteChanged();
         }
 
         private async void WebcamStartAsync()

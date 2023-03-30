@@ -4,6 +4,12 @@ namespace ScoreboardOCR.Core.Models
 {
     public class Clip
     {
+        #region Private Fields
+
+        private const int ThresholdMonochromeDefault = 80;
+
+        #endregion Private Fields
+
         #region Public Properties
 
         public BitmapSource Compare { get; set; }
@@ -20,7 +26,7 @@ namespace ScoreboardOCR.Core.Models
 
         public double RelativeY2 { get; set; }
 
-        public double ThresholdMonochrome { get; set; }
+        public int ThresholdMonochrome { get; set; } = ThresholdMonochromeDefault;
 
         #endregion Public Properties
     }

@@ -10,6 +10,8 @@ namespace ScoreboardOCR.Core.Interfaces
 
         event EventHandler OnClipActivatedEvent;
 
+        event EventHandler OnClipDimensionedEvent;
+
         event EventHandler OnClipsChangedEvent;
 
         #endregion Public Events
@@ -27,6 +29,8 @@ namespace ScoreboardOCR.Core.Interfaces
         void Activate(Clip clip);
 
         void Add();
+
+        void Save();
 
         #endregion Public Methods
     }
