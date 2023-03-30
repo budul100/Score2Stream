@@ -8,24 +8,28 @@ namespace WebcamModule.ViewModels
     {
         #region Private Fields
 
-        private double height;
-
+        private double? height;
         private double? left;
         private double? top;
-        private double width;
+        private double? width;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public ClipViewModel(Clip clip)
+        public ClipViewModel(Clip clip, double? actualLeft, double? actualTop, double? actualWidth,
+            double? actualHeight)
         {
             Clip = clip;
 
-            Left = Clip.BoxLeft;
-            Top = Clip.BoxTop;
-            Width = Clip.BoxWidth ?? 0;
-            Height = Clip.BoxHeight ?? 0;
+            if (actualWidth.HasValue
+                && actualHeight.HasValue)
+            {
+                Left = actualLeft + (Clip.RelativeX1 * actualWidth);
+                Width = (Clip.RelativeX2 - Clip.RelativeX1) * actualWidth;
+                Top = actualTop + (Clip.RelativeY1 * actualHeight);
+                Height = (Clip.RelativeY2 - Clip.RelativeY1) * actualHeight;
+            }
         }
 
         #endregion Public Constructors
@@ -41,7 +45,7 @@ namespace WebcamModule.ViewModels
         public bool HasValue => Left.HasValue
             && Top.HasValue;
 
-        public double Height
+        public double? Height
         {
             get { return height; }
             set { SetProperty(ref height, value); }
@@ -63,7 +67,7 @@ namespace WebcamModule.ViewModels
             set { SetProperty(ref top, value); }
         }
 
-        public double Width
+        public double? Width
         {
             get { return width; }
             set { SetProperty(ref width, value); }

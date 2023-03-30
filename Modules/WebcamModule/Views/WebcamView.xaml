@@ -39,10 +39,11 @@
             CHeight="{Binding FullHeight, Mode=OneWayToSource}"
             CWidth="{Binding FullWidth, Mode=OneWayToSource}">
             <ct:SizeObservingImage
+                Margin="2"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                CHeight="{Binding ImageHeight, Mode=OneWayToSource}"
-                CWidth="{Binding ImageWidth, Mode=OneWayToSource}"
+                CHeight="{Binding ContentHeight, Mode=OneWayToSource}"
+                CWidth="{Binding ContentWidth, Mode=OneWayToSource}"
                 Source="{Binding Content, FallbackValue={StaticResource DesignSource}}"
                 Stretch="Uniform" />
         </ct:SizeObservingBorder>
