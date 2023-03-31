@@ -33,7 +33,7 @@ namespace ClipService
 
         public List<Clip> Clips { get; } = new List<Clip>();
 
-        public Clip Selection { get; private set; }
+        public Clip Clip { get; private set; }
 
         #endregion Public Properties
 
@@ -66,17 +66,15 @@ namespace ClipService
 
         public void Remove()
         {
-            if (Selection != default)
+            if (Clip != default)
             {
-                var current = Selection;
-
-                SelectClip(default);
-
-                Clips.Remove(current);
+                Clips.Remove(Clip);
 
                 eventAggregator
                     .GetEvent<ClipsChangedEvent>()
                     .Publish();
+
+                SelectClip(default);
             }
         }
 
@@ -100,11 +98,11 @@ namespace ClipService
 
         private void SelectClip(Clip clip)
         {
-            Selection = clip;
+            Clip = clip;
 
             eventAggregator
                 .GetEvent<ClipSelectedEvent>()
-                .Publish(Selection);
+                .Publish(Clip);
         }
 
         #endregion Private Methods

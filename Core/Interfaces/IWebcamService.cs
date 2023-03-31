@@ -1,5 +1,4 @@
-﻿using OpenCvSharp;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
 namespace ScoreboardOCR.Core.Interfaces
@@ -10,6 +9,8 @@ namespace ScoreboardOCR.Core.Interfaces
 
         BitmapSource Content { get; }
 
+        bool CropContents { get; set; }
+
         bool IsActive { get; }
 
         double ThresholdCompare { get; set; }
@@ -17,10 +18,6 @@ namespace ScoreboardOCR.Core.Interfaces
         #endregion Public Properties
 
         #region Public Methods
-
-        string Get(Mat image, int firstX, int firstY, int secondX, int secondY);
-
-        void Set(Mat image, int firstX, int firstY, int secondX, int secondY, string value);
 
         Task StartAsync();
 

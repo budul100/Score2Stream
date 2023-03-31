@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using WebcamService.Extensions;
+using WebcamService.Models;
 
 namespace WebcamService
 {
@@ -23,10 +24,9 @@ namespace WebcamService
         private const int Delay = 100;
         private const double thresholdDivider = 100;
 
-        private readonly List<(Clip, Rect?)> clips = new();
+        private readonly List<RecClip> contentClips = new();
         private readonly IDispatcherService dispatcherService;
         private readonly IEventAggregator eventAggregator;
-        private readonly IDictionary<string, Mat> templates = new Dictionary<string, Mat>();
 
         private CancellationTokenSource cancellationTokenSource;
         private Mat frame;
@@ -44,11 +44,11 @@ namespace WebcamService
             this.eventAggregator = eventAggregator;
 
             eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
-                action: c => SetClip(c),
+                action: c => CreateRecClip(c),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<ClipsChangedEvent>().Subscribe(
-                action: () => clips.RemoveAll(c => !clipService.Clips.Contains(c.Item1)),
+                action: () => contentClips.RemoveAll(c => !clipService.Clips.Contains(c.Clip)),
                 keepSubscriberReferenceAlive: true);
         }
 
@@ -64,6 +64,8 @@ namespace WebcamService
 
         public BitmapSource Content { get; private set; }
 
+        public bool CropContents { get; set; }
+
         public bool IsActive => Content != default;
 
         public double ThresholdCompare { get; set; }
@@ -76,64 +78,6 @@ namespace WebcamService
         {
             Dispose(true);
             GC.SuppressFinalize(this);
-        }
-
-        public string Get(Mat image, int firstX, int firstY, int secondX, int secondY)
-        {
-            var result = default(string);
-
-            if (templates.Count > 0)
-            {
-                var converted = GetImage(
-                    image: image,
-                    firstX: firstX,
-                    firstY: firstY,
-                    secondX: secondX,
-                    secondY: secondY);
-
-                if (converted != default)
-                {
-                    //Current = converted;
-
-                    var template = templates
-                        .OrderByDescending(t => t.Value.DiffTo(converted))
-                        .First();
-
-                    if (ThresholdCompare == 0 || template.Value.DiffTo(converted) >= ThresholdCompare)
-                    {
-                        result = template.Key;
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        public void Set(Mat image, int firstX, int firstY, int secondX, int secondY, string value)
-        {
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                var converted = GetImage(
-                    image: image,
-                    firstX: firstX,
-                    firstY: firstY,
-                    secondX: secondX,
-                    secondY: secondY);
-
-                if (converted != default)
-                {
-                    //Current = converted;
-
-                    if (templates.ContainsKey(value))
-                    {
-                        templates.Add(
-                            key: value,
-                            value: default);
-                    }
-
-                    templates[value] = converted;
-                }
-            }
         }
 
         public async Task StartAsync()
@@ -192,38 +136,78 @@ namespace WebcamService
 
         #region Private Methods
 
-        private Mat GetImage(Mat image, int firstX, int firstY, int secondX, int secondY)
+        private void CreateClipContent(RecClip contentClip)
         {
-            var result = default(Mat);
+            var thresholdMonochrome = contentClip.Clip.ThresholdMonochrome / thresholdDivider;
 
-            var cropRectangle = image.Size().GetRectangle(
-                firstX: firstX,
-                firstY: firstY,
-                secondX: secondX,
-                secondY: secondY);
+            var cropImage = frame
+                .Clone(contentClip.Rect)
+                .ToMonochrome(thresholdMonochrome);
 
-            if (cropRectangle.HasValue)
+            if (CropContents)
             {
-                var cropImage = image
-                    .Clone(cropRectangle.Value)
-                    .ToMonochrome(0.8);
-
                 var contourRectangle = cropImage.GetContour();
 
-                if (contourRectangle.HasValue)
-                {
-                    result = cropImage
-                        .Clone(contourRectangle.Value);
-                }
+                contentClip.Clip.Image = cropImage
+                    .Clone(contourRectangle.Value);
+            }
+            else
+            {
+                contentClip.Clip.Image = cropImage;
             }
 
-            return result;
+            if (contentClip.Clip.Image != default)
+            {
+                contentClip.Clip.Content = contentClip.Clip.Image
+                    .ToBitmapSource();
+
+                if (contentClip.Clip.Template?.Samples?.Any() == true)
+                {
+                    var compare = contentClip.Clip.Template.Samples
+                        .Select(s => (Sample: s, Difference: s.Image.DiffTo(contentClip.Clip.Image)))
+                        .Where(x => ThresholdCompare == 0 || x.Difference >= ThresholdCompare)
+                        .OrderByDescending(x => x.Difference).FirstOrDefault();
+
+                    contentClip.Clip.Value = compare.Sample.Value;
+                }
+            }
+        }
+
+        private void CreateRecClip(Clip clip)
+        {
+            if (frame != default
+                && clip.HasDimensions)
+            {
+                var firstX = Convert.ToInt32(clip.RelativeX1 * frame.Size().Width);
+                var secondX = Convert.ToInt32(clip.RelativeX2 * frame.Size().Width);
+
+                var firstY = Convert.ToInt32(clip.RelativeY1 * frame.Size().Height);
+                var secondY = Convert.ToInt32(clip.RelativeY2 * frame.Size().Height);
+
+                var rectangle = frame.Size().GetRectangle(
+                    firstX: firstX,
+                    firstY: firstY,
+                    secondX: secondX,
+                    secondY: secondY);
+
+                if (rectangle.HasValue)
+                {
+                    var value = new RecClip
+                    {
+                        Clip = clip,
+                        Rect = rectangle.Value,
+                    };
+
+                    contentClips.RemoveAll(c => c.Clip == clip);
+                    contentClips.Add(value);
+                }
+            }
         }
 
         private async void RunWebcamAsync()
         {
             var contentUpdatedEvent = eventAggregator
-                .GetEvent<ContentUpdatedEvent>();
+                .GetEvent<WebcamUpdatedEvent>();
 
             try
             {
@@ -250,27 +234,9 @@ namespace WebcamService
 
                         Content = currentFrame.ToBitmapSource();
 
-                        foreach (var clip in clips)
+                        foreach (var contentClip in contentClips)
                         {
-                            if (clip.Item2.HasValue)
-                            {
-                                var thresholdMonochrome = clip.Item1.ThresholdMonochrome / thresholdDivider;
-
-                                var cropImage = frame
-                                    .Clone(clip.Item2.Value)
-                                    .ToMonochrome(thresholdMonochrome);
-
-                                var contourRectangle = cropImage.GetContour();
-
-                                if (contourRectangle.HasValue)
-                                {
-                                    clip.Item1.Image = cropImage
-                                        .Clone(contourRectangle.Value);
-
-                                    clip.Item1.Content = clip.Item1.Image
-                                        .ToBitmapSource();
-                                }
-                            }
+                            CreateClipContent(contentClip);
                         }
 
                         contentUpdatedEvent.Publish();
@@ -288,33 +254,6 @@ namespace WebcamService
             Content = default;
 
             contentUpdatedEvent.Publish();
-        }
-
-        private void SetClip(Clip clip)
-        {
-            if (frame != default
-                && clip.HasDimensions)
-            {
-                var firstX = Convert.ToInt32(clip.RelativeX1 * frame.Size().Width);
-                var secondX = Convert.ToInt32(clip.RelativeX2 * frame.Size().Width);
-
-                var firstY = Convert.ToInt32(clip.RelativeY1 * frame.Size().Height);
-                var secondY = Convert.ToInt32(clip.RelativeY2 * frame.Size().Height);
-
-                var rectangle = frame.Size().GetRectangle(
-                    firstX: firstX,
-                    firstY: firstY,
-                    secondX: secondX,
-                    secondY: secondY);
-
-                if (rectangle.HasValue)
-                {
-                    var value = (clip, rectangle);
-
-                    clips.RemoveAll(c => clip == c.Item1);
-                    clips.Add(value);
-                }
-            }
         }
 
         #endregion Private Methods

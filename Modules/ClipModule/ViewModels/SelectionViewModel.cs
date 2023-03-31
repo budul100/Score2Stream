@@ -14,16 +14,18 @@ namespace ClipModule.ViewModels
 
         private readonly IClipService clipService;
         private readonly IEventAggregator eventAggregator;
+        private readonly ITemplateService templateService;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public SelectionViewModel(IClipService clipService, IRegionManager regionManager,
-            IEventAggregator eventAggregator)
+        public SelectionViewModel(IClipService clipService, ITemplateService templateService,
+            IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
             this.clipService = clipService;
+            this.templateService = templateService;
             this.eventAggregator = eventAggregator;
 
             eventAggregator
@@ -56,7 +58,8 @@ namespace ClipModule.ViewModels
             {
                 var current = new ClipViewModel(
                     clip: clip,
-                    uniqueNameGetter: (n) => clipService.IsUniqueName(n),
+                    clipService: clipService,
+                    templateService: templateService,
                     eventAggregator: eventAggregator);
 
                 Clips.Add(current);

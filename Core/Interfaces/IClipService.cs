@@ -7,9 +7,9 @@ namespace ScoreboardOCR.Core.Interfaces
     {
         #region Public Properties
 
-        List<Clip> Clips { get; }
+        Clip Clip { get; }
 
-        Clip Selection { get; }
+        List<Clip> Clips { get; }
 
         #endregion Public Properties
 

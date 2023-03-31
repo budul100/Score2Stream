@@ -2,7 +2,7 @@
 
 namespace Core.Events
 {
-    public class ContentUpdatedEvent
+    public class WebcamUpdatedEvent
         : PubSubEvent
     { }
 }

@@ -2,7 +2,6 @@
 using Prism.Events;
 using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,33 +12,32 @@ namespace TemplateService
     {
         #region Private Fields
 
-        private readonly IClipService clipService;
         private readonly IEventAggregator eventAggregator;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public Service(IClipService clipService, IEventAggregator eventAggregator)
+        public Service(IEventAggregator eventAggregator)
         {
-            this.clipService = clipService;
             this.eventAggregator = eventAggregator;
 
             eventAggregator.GetEvent<SelectTemplateEvent>().Subscribe(
-                action: c => SelectTemplate(c));
+                action: c => SelectTemplate(c),
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<SelectSampleEvent>().Subscribe(
+                action: s => SelectSample(s),
+                keepSubscriberReferenceAlive: true);
         }
 
         #endregion Public Constructors
 
-        #region Public Events
-
-        public event EventHandler OnSamplesChangedEvent;
-
-        #endregion Public Events
-
         #region Public Properties
 
-        public Template Selection { get; private set; }
+        public Sample Sample { get; private set; }
+
+        public Template Template { get; private set; }
 
         public List<Template> Templates { get; } = new List<Template>();
 
@@ -49,85 +47,107 @@ namespace TemplateService
 
         public void AddSample()
         {
-            if (Selection != default)
+            if (Template != default)
             {
                 var current = new Sample
                 {
-                    Image = Selection.Clip.Image,
-                    Content = Selection.Clip.Content,
+                    Image = Template.Clip.Image,
+                    Content = Template.Clip.Content,
                 };
 
-                Selection.Samples.Add(current);
+                Template.Samples.Add(current);
 
-                OnSamplesChangedEvent?.Invoke(
-                    sender: this,
-                    e: default);
+                eventAggregator.GetEvent<SamplesChangedEvent>()
+                    .Publish(Template);
+
+                SelectSample(current);
             }
         }
 
         public void RemoveSample()
         {
-            throw new NotImplementedException();
+            if (Sample != default
+                && Template?.Samples?.Any() == true)
+            {
+                Template.Samples.Remove(Sample);
+
+                eventAggregator.GetEvent<SamplesChangedEvent>()
+                    .Publish(Template);
+
+                SelectSample(default);
+            }
         }
 
         public void RemoveTemplate()
         {
-            if (Selection != default)
+            if (Template != default)
             {
-                var current = Selection;
+                if (Template.Clip.Template != default)
+                {
+                    Template.Clip.Template = default;
+                }
 
-                Selection = default;
-
-                eventAggregator
-                    .GetEvent<TemplateSelectedEvent>()
-                    .Publish(current);
-
-                Templates.Remove(current);
+                Templates.Remove(Template);
 
                 eventAggregator
                     .GetEvent<TemplatesChangedEvent>()
                     .Publish();
-            }
-        }
 
-        public void SelectSample(Sample sample)
-        {
-            throw new NotImplementedException();
+                SelectTemplate(default);
+            }
         }
 
         #endregion Public Methods
 
         #region Private Methods
 
+        private void SelectSample(Sample sample)
+        {
+            Sample = sample;
+
+            eventAggregator
+                .GetEvent<SampleSelectedEvent>()
+                .Publish(sample);
+        }
+
         private void SelectTemplate(Clip clip)
         {
-            Selection = Templates
-                .SingleOrDefault(t => t.Clip == clip);
-
-            if (Selection == default)
+            if (clip != default)
             {
-                var current = new Template
-                {
-                    Clip = clip,
-                };
+                Template = Templates
+                    .SingleOrDefault(t => t.Clip == clip);
 
-                Templates.Add(
-                    item: current);
+                if (Template == default)
+                {
+                    var current = new Template
+                    {
+                        Clip = clip,
+                    };
+
+                    Templates.Add(
+                        item: current);
+
+                    eventAggregator
+                        .GetEvent<TemplatesChangedEvent>()
+                        .Publish();
+
+                    Template = current;
+                }
+
+                clip.Template = Template;
 
                 eventAggregator
-                    .GetEvent<TemplatesChangedEvent>()
-                    .Publish();
-
-                Selection = current;
+                    .GetEvent<SelectClipEvent>()
+                    .Publish(Template.Clip);
+            }
+            else
+            {
+                Template = default;
             }
 
             eventAggregator
-                .GetEvent<SelectClipEvent>()
-                .Publish(Selection.Clip);
-
-            eventAggregator
                 .GetEvent<TemplateSelectedEvent>()
-                .Publish(Selection);
+                .Publish(Template);
         }
 
         #endregion Private Methods

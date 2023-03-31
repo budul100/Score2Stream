@@ -13,8 +13,6 @@ namespace ScoreboardOCR.Core.Models
 
         #region Public Properties
 
-        public BitmapSource Compare { get; set; }
-
         public BitmapSource Content { get; set; }
 
         public bool HasDimensions { get; set; }
@@ -30,7 +28,12 @@ namespace ScoreboardOCR.Core.Models
         public double RelativeY1 { get; set; }
 
         public double RelativeY2 { get; set; }
+
+        public Template Template { get; set; }
+
         public int ThresholdMonochrome { get; set; } = ThresholdMonochromeDefault;
+
+        public string Value { get; set; }
 
         #endregion Public Properties
     }

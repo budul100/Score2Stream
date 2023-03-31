@@ -27,7 +27,8 @@ namespace MenuModule.ViewModels
                 action: _ => RaisePropertyChanged(nameof(Name)),
                 keepSubscriberReferenceAlive: true);
 
-            OnClickCommand = new DelegateCommand(OnClick);
+            var selectEvent = eventAggregator.GetEvent<SelectTemplateEvent>();
+            OnClickCommand = new DelegateCommand(() => selectEvent.Publish(clip));
         }
 
         #endregion Public Constructors
@@ -39,15 +40,5 @@ namespace MenuModule.ViewModels
         public DelegateCommand OnClickCommand { get; }
 
         #endregion Public Properties
-
-        #region Private Methods
-
-        private void OnClick()
-        {
-            eventAggregator.GetEvent<SelectTemplateEvent>()
-                .Publish(clip);
-        }
-
-        #endregion Private Methods
     }
 }

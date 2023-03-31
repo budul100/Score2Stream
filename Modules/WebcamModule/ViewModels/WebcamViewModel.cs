@@ -60,7 +60,7 @@ namespace WebcamModule.ViewModels
                 action: SetClips,
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<ContentUpdatedEvent>().Subscribe(
+            eventAggregator.GetEvent<WebcamUpdatedEvent>().Subscribe(
                 action: () => Content = webcamService.Content,
                 keepSubscriberReferenceAlive: true);
 

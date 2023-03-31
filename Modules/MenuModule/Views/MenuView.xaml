@@ -12,9 +12,11 @@
     d:DesignWidth="500"
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
+
     <UserControl.Resources>
         <ResourceDictionary Source="pack://application:,,,/Fluent;Component/Themes/Generic.xaml" />
     </UserControl.Resources>
+
     <DockPanel>
         <fl:Ribbon
             AutomaticStateManagement="True"
@@ -23,24 +25,27 @@
             IsQuickAccessToolBarMenuDropDownVisible="False"
             IsQuickAccessToolBarVisible="False"
             SelectedTabIndex="{Binding SelectedTabIndex, Mode=TwoWay}">
+
             <fl:RibbonTabItem Header="Webcam">
                 <fl:RibbonGroupBox Header="Webcam control">
-                    <fl:Button Command="{Binding WebcamPlayCommand}" Header="Play" />
-                    <fl:Button Command="{Binding WebcamPauseCommand}" Header="Pause" />
+                    <fl:Button Command="{Binding WebcamPlayCommand}" Header="Play webcam" />
+                    <fl:Button Command="{Binding WebcamPauseCommand}" Header="Pause webcam" />
                 </fl:RibbonGroupBox>
             </fl:RibbonTabItem>
+
             <fl:RibbonTabItem Header="Clips">
                 <fl:RibbonGroupBox Header="Clips selection">
-                    <fl:Button Command="{Binding ClipAddCommand}" Header="Add" />
-                    <fl:Button Command="{Binding ClipRemoveCommand}" Header="Remove" />
+                    <fl:Button Command="{Binding ClipAddCommand}" Header="Add new clip" />
+                    <fl:Button Command="{Binding ClipRemoveCommand}" Header="Remove selected clip" />
                 </fl:RibbonGroupBox>
                 <fl:RibbonGroupBox Header="Templates selection">
-                    <fl:Button Command="{Binding ClipAsTemplateCommand}" Header="Use as template" />
+                    <fl:Button Command="{Binding ClipAsTemplateCommand}" Header="Use clip as template" />
                 </fl:RibbonGroupBox>
             </fl:RibbonTabItem>
+
             <fl:RibbonTabItem Header="Templates" IsEnabled="{Binding HasTemplates}">
                 <fl:RibbonGroupBox Header="Templates selection">
-                    <fl:DropDownButton Header="Select" ItemsSource="{Binding Templates}">
+                    <fl:DropDownButton Header="Select template" ItemsSource="{Binding Templates}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="vm:TemplateViewModel">
                                 <fl:MenuItem
@@ -50,12 +55,14 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </fl:DropDownButton>
-                    <fl:Button Command="{Binding TemplateRemoveCommand}" Header="Remove" />
+                    <fl:Button Command="{Binding TemplateRemoveCommand}" Header="Remove current template" />
                 </fl:RibbonGroupBox>
                 <fl:RibbonGroupBox Header="Samples detecion">
-                    <fl:ToggleButton Header="Determine samples" />
+                    <fl:Button Command="{Binding SampleAddCommand}" Header="Add image as sample" />
+                    <fl:Button Command="{Binding SampleRemoveCommand}" Header="Remove selected sample" />
                 </fl:RibbonGroupBox>
             </fl:RibbonTabItem>
+
         </fl:Ribbon>
     </DockPanel>
 </UserControl>

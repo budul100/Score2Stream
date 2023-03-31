@@ -2,9 +2,10 @@
 using MvvmValidation;
 using Prism.Commands;
 using Prism.Events;
+using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Models;
 using ScoreboardOCR.Core.Mvvm;
-using System;
+using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using System.Windows.Media.Imaging;
 
@@ -17,8 +18,7 @@ namespace ClipModule.ViewModels
 
         private readonly Clip clip;
         private readonly IEventAggregator eventAggregator;
-
-        private BitmapSource content;
+        private readonly ITemplateService templateService;
         private bool isActive;
         private string name;
 
@@ -26,20 +26,29 @@ namespace ClipModule.ViewModels
 
         #region Public Constructors
 
-        public ClipViewModel(Clip clip, Func<string, bool> uniqueNameGetter, IEventAggregator eventAggregator)
+        public ClipViewModel(Clip clip, IClipService clipService, ITemplateService templateService,
+            IEventAggregator eventAggregator)
         {
             this.clip = clip;
+            this.templateService = templateService;
             this.eventAggregator = eventAggregator;
 
             Name = clip.Name;
-            OnClickCommand = new DelegateCommand(OnClick);
+
+            var selectEvent = eventAggregator.GetEvent<SelectClipEvent>();
+            OnClickCommand = new DelegateCommand(
+                executeMethod: () => selectEvent.Publish(clip));
 
             eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
-                action: (c) => IsActive = c == clip,
+                action: c => IsActive = c == clip,
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<ContentUpdatedEvent>().Subscribe(
-                action: () => Content = clip.Content,
+            eventAggregator.GetEvent<TemplatesChangedEvent>().Subscribe(
+                action: () => OnUpdateTemplates(),
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<WebcamUpdatedEvent>().Subscribe(
+                action: () => OnUpdateWebcam(),
                 keepSubscriberReferenceAlive: true);
 
             Validator.AddRule(
@@ -54,19 +63,17 @@ namespace ClipModule.ViewModels
 
             Validator.AddRule(
                 targetName: nameof(Name),
-                validateDelegate: () => RuleResult.Assert(Name == this.clip.Name || uniqueNameGetter?.Invoke(Name) != false,
+                validateDelegate: () => RuleResult.Assert(Name == this.clip.Name || clipService.IsUniqueName(Name),
                 errorMessage: $"Name {Name} is already used. Please choose another one."));
+
+            OnUpdateTemplates();
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public BitmapSource Content
-        {
-            get { return content; }
-            set { SetProperty(ref content, value); }
-        }
+        public BitmapSource Content => clip.Content;
 
         public bool IsActive
         {
@@ -96,6 +103,18 @@ namespace ClipModule.ViewModels
 
         public DelegateCommand OnClickCommand { get; }
 
+        public Template Template
+        {
+            get { return clip.Template; }
+            set
+            {
+                clip.Template = value;
+                RaisePropertyChanged(nameof(Template));
+            }
+        }
+
+        public ObservableCollection<Template> Templates { get; private set; }
+
         public int ThresholdMonochrome
         {
             get { return this.clip.ThresholdMonochrome; }
@@ -116,13 +135,26 @@ namespace ClipModule.ViewModels
             }
         }
 
+        public string Value => !string.IsNullOrWhiteSpace(clip.Value)
+            ? $"=> {clip.Value}"
+            : default;
+
         #endregion Public Properties
 
         #region Private Methods
 
-        private void OnClick()
+        private void OnUpdateTemplates()
         {
-            eventAggregator.GetEvent<SelectClipEvent>().Publish(clip);
+            Templates = new ObservableCollection<Template>(templateService.Templates);
+
+            RaisePropertyChanged(nameof(Templates));
+            RaisePropertyChanged(nameof(Template));
+        }
+
+        private void OnUpdateWebcam()
+        {
+            RaisePropertyChanged(nameof(Content));
+            RaisePropertyChanged(nameof(Value));
         }
 
         #endregion Private Methods

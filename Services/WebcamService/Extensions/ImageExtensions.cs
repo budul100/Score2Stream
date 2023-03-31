@@ -41,7 +41,6 @@ namespace WebcamService.Extensions
 
             if (image?.Step(0) > 0
                 && image.Rows > 0)
-
             {
                 image.FindContours(
                     contours: out var contours,

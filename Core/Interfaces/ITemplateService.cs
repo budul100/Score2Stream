@@ -1,20 +1,15 @@
 ﻿using ScoreboardOCR.Core.Models;
-using System;
 using System.Collections.Generic;
 
 namespace ScoreboardOCR.Core.Interfaces
 {
     public interface ITemplateService
     {
-        #region Public Events
-
-        event EventHandler OnSamplesChangedEvent;
-
-        #endregion Public Events
-
         #region Public Properties
 
-        Template Selection { get; }
+        Sample Sample { get; }
+
+        Template Template { get; }
 
         List<Template> Templates { get; }
 
@@ -27,8 +22,6 @@ namespace ScoreboardOCR.Core.Interfaces
         void RemoveSample();
 
         void RemoveTemplate();
-
-        void SelectSample(Sample sample);
 
         #endregion Public Methods
     }

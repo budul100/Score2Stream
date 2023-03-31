@@ -18,11 +18,9 @@ namespace MenuModule.ViewModels
         private const int IndexClipView = 1;
         private const int IndexTemplateView = 2;
 
-        private readonly IClipService clipService;
         private readonly IEventAggregator eventAggregator;
         private readonly IRegionManager regionManager;
         private readonly ITemplateService templateService;
-        private readonly IWebcamService webcamService;
 
         private int selectedTabIndex;
 
@@ -30,12 +28,10 @@ namespace MenuModule.ViewModels
 
         #region Public Constructors
 
-        public MenuViewModel(IWebcamService webcamService, IClipService clipService,
-            ITemplateService templateService, IRegionManager regionManager, IEventAggregator eventAggregator)
+        public MenuViewModel(IWebcamService webcamService, IClipService clipService, ITemplateService templateService,
+            IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
-            this.webcamService = webcamService;
-            this.clipService = clipService;
             this.templateService = templateService;
             this.regionManager = regionManager;
             this.eventAggregator = eventAggregator;
@@ -50,29 +46,41 @@ namespace MenuModule.ViewModels
             eventAggregator.GetEvent<TemplateSelectedEvent>().Subscribe(
                 action: _ => OnTemplateSelected());
 
-            eventAggregator.GetEvent<ContentUpdatedEvent>().Subscribe(
+            eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
+                action: _ => OnSampleSelected());
+
+            eventAggregator.GetEvent<WebcamUpdatedEvent>().Subscribe(
                 action: OnContentUpdated);
 
             this.WebcamPlayCommand = new DelegateCommand(
-                executeMethod: WebcamStartAsync,
+                executeMethod: async () => await webcamService.StartAsync(),
                 canExecuteMethod: () => !webcamService.IsActive);
             this.WebcamPauseCommand = new DelegateCommand(
-                executeMethod: WebcamStopAsync,
+                executeMethod: async () => await webcamService.StopAsync(),
                 canExecuteMethod: () => webcamService.IsActive);
 
             this.ClipAddCommand = new DelegateCommand(
-                executeMethod: ClipAdd,
+                executeMethod: () => clipService.Add(),
                 canExecuteMethod: () => webcamService.IsActive);
             this.ClipRemoveCommand = new DelegateCommand(
-                executeMethod: ClipRemove,
-                canExecuteMethod: () => clipService.Selection != default);
+                executeMethod: () => clipService.Remove(),
+                canExecuteMethod: () => clipService.Clip != default);
+
+            var addTemplateEvent = eventAggregator.GetEvent<SelectTemplateEvent>();
             this.ClipAsTemplateCommand = new DelegateCommand(
-                executeMethod: ClipAsTemplate,
-                canExecuteMethod: () => clipService.Selection?.Content != default);
+                executeMethod: () => addTemplateEvent.Publish(clipService.Clip),
+                canExecuteMethod: () => clipService.Clip?.Content != default);
 
             this.TemplateRemoveCommand = new DelegateCommand(
-                executeMethod: TemplateRemove,
-                canExecuteMethod: () => templateService.Selection != default);
+                executeMethod: () => templateService.RemoveTemplate(),
+                canExecuteMethod: () => templateService.Template != default);
+
+            this.SampleAddCommand = new DelegateCommand(
+                executeMethod: () => templateService.AddSample(),
+                canExecuteMethod: () => templateService.Template != default);
+            this.SampleRemoveCommand = new DelegateCommand(
+                executeMethod: () => templateService.RemoveSample(),
+                canExecuteMethod: () => templateService.Sample != default);
         }
 
         #endregion Public Constructors
@@ -86,6 +94,10 @@ namespace MenuModule.ViewModels
         public DelegateCommand ClipRemoveCommand { get; }
 
         public bool HasTemplates => templateService.Templates.Any();
+
+        public DelegateCommand SampleAddCommand { get; }
+
+        public DelegateCommand SampleRemoveCommand { get; }
 
         public int SelectedTabIndex
         {
@@ -103,7 +115,8 @@ namespace MenuModule.ViewModels
 
         public DelegateCommand TemplateRemoveCommand { get; }
 
-        public ObservableCollection<TemplateViewModel> Templates { get; } = new ObservableCollection<TemplateViewModel>();
+        public ObservableCollection<TemplateViewModel> Templates { get; } =
+            new ObservableCollection<TemplateViewModel>();
 
         public DelegateCommand WebcamPauseCommand { get; }
 
@@ -120,25 +133,6 @@ namespace MenuModule.ViewModels
 
         #region Private Methods
 
-        private void ClipAdd()
-        {
-            clipService.Add();
-        }
-
-        private void ClipAsTemplate()
-        {
-            if (clipService.Selection != default)
-            {
-                eventAggregator.GetEvent<SelectTemplateEvent>()
-                    .Publish(clipService.Selection);
-            }
-        }
-
-        private void ClipRemove()
-        {
-            clipService.Remove();
-        }
-
         private void OnClipsChanged()
         {
             ClipAddCommand.RaiseCanExecuteChanged();
@@ -154,6 +148,11 @@ namespace MenuModule.ViewModels
 
             ClipAddCommand.RaiseCanExecuteChanged();
             ClipAsTemplateCommand.RaiseCanExecuteChanged();
+        }
+
+        private void OnSampleSelected()
+        {
+            SampleRemoveCommand.RaiseCanExecuteChanged();
         }
 
         private void OnTemplatesChanged()
@@ -179,11 +178,13 @@ namespace MenuModule.ViewModels
 
         private void OnTemplateSelected()
         {
-            SelectedTabIndex = templateService.Selection != default
+            SelectedTabIndex = templateService.Template != default
                 ? IndexTemplateView
                 : IndexClipView;
 
             TemplateRemoveCommand.RaiseCanExecuteChanged();
+
+            SampleAddCommand.RaiseCanExecuteChanged();
         }
 
         private void SetEditRegion()
@@ -205,21 +206,6 @@ namespace MenuModule.ViewModels
                         source: ViewNames.TemplateView);
                     break;
             }
-        }
-
-        private void TemplateRemove()
-        {
-            templateService.RemoveTemplate();
-        }
-
-        private async void WebcamStartAsync()
-        {
-            await webcamService.StartAsync();
-        }
-
-        private async void WebcamStopAsync()
-        {
-            await webcamService.StopAsync();
         }
 
         #endregion Private Methods
