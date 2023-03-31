@@ -74,6 +74,8 @@ namespace ClipModule.ViewModels
                     && Clip.Name != value)
                 {
                     Clip.Name = value;
+
+                    clipService.Update();
                 }
             }
         }

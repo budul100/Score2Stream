@@ -36,6 +36,8 @@ namespace ScoreboardOCR.Core.Interfaces
 
         void Select(Clip clip);
 
+        void Update();
+
         #endregion Public Methods
     }
 }

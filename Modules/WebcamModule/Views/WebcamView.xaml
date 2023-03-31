@@ -62,12 +62,20 @@
             </ItemsControl.ItemContainerStyle>
             <ItemsControl.Resources>
                 <DataTemplate DataType="{x:Type vm:ClipViewModel}">
-                    <Rectangle
-                        Width="{Binding Width}"
-                        Height="{Binding Height}"
-                        Fill="Transparent"
-                        Stroke="Red"
-                        StrokeThickness="1" />
+                    <Grid>
+                        <Rectangle
+                            Width="{Binding Width}"
+                            Height="{Binding Height}"
+                            Fill="Transparent"
+                            Stroke="Red"
+                            StrokeDashArray="4 2"
+                            StrokeThickness="1" />
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Foreground="Red"
+                            Text="{Binding Name}" />
+                    </Grid>
                 </DataTemplate>
             </ItemsControl.Resources>
         </ItemsControl>

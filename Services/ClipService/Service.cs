@@ -40,9 +40,7 @@ namespace ClipService
 
             Clips.Add(clip);
 
-            OnClipsChangedEvent?.Invoke(
-                sender: this,
-                e: default);
+            Update();
 
             Select(clip);
         }
@@ -71,9 +69,7 @@ namespace ClipService
                 Clips.Remove(Selection);
                 Selection = default;
 
-                OnClipsChangedEvent?.Invoke(
-                    sender: this,
-                    e: default);
+                Update();
             }
         }
 
@@ -82,6 +78,13 @@ namespace ClipService
             Selection = clip;
 
             OnClipSelectedEvent?.Invoke(
+                sender: this,
+                e: default);
+        }
+
+        public void Update()
+        {
+            OnClipsChangedEvent?.Invoke(
                 sender: this,
                 e: default);
         }

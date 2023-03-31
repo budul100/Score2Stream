@@ -48,7 +48,11 @@ namespace WebcamModule.ViewModels
         public double? Height
         {
             get { return height; }
-            set { SetProperty(ref height, value); }
+            set
+            {
+                SetProperty(ref height, value);
+                RaisePropertyChanged(nameof(Name));
+            }
         }
 
         public double? Left
@@ -56,6 +60,10 @@ namespace WebcamModule.ViewModels
             get { return left; }
             set { SetProperty(ref left, value); }
         }
+
+        public string Name => HasValue && (Width > 0 || Height > 0)
+            ? Clip.Name
+            : default;
 
         public double? Right => HasValue
             ? Left.Value + Width
@@ -70,7 +78,11 @@ namespace WebcamModule.ViewModels
         public double? Width
         {
             get { return width; }
-            set { SetProperty(ref width, value); }
+            set
+            {
+                SetProperty(ref width, value);
+                RaisePropertyChanged(nameof(Name));
+            }
         }
 
         #endregion Public Properties
