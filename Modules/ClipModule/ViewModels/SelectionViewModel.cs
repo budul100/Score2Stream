@@ -1,4 +1,6 @@
-﻿using Prism.Regions;
+﻿using Core.Events;
+using Prism.Events;
+using Prism.Regions;
 using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Mvvm;
 using System.Collections.ObjectModel;
@@ -11,20 +13,22 @@ namespace ClipModule.ViewModels
         #region Private Fields
 
         private readonly IClipService clipService;
+        private readonly IEventAggregator eventAggregator;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public SelectionViewModel(IWebcamService webcamService, IClipService clipService, IRegionManager regionManager)
+        public SelectionViewModel(IClipService clipService, IRegionManager regionManager,
+            IEventAggregator eventAggregator)
             : base(regionManager)
         {
             this.clipService = clipService;
+            this.eventAggregator = eventAggregator;
 
-            webcamService.OnContentUpdatedEvent += OnContentUpdated;
-
-            clipService.OnClipsChangedEvent += OnClipsChanged;
-            clipService.OnClipsUpdatedEvent += OnClipsUpdated;
+            eventAggregator
+                .GetEvent<ClipsChangedEvent>()
+                .Subscribe(SetClips);
         }
 
         #endregion Public Constructors
@@ -44,35 +48,18 @@ namespace ClipModule.ViewModels
 
         #region Private Methods
 
-        private void OnClipsChanged(object sender, System.EventArgs e)
+        private void SetClips()
         {
             Clips.Clear();
 
             foreach (var clip in clipService.Clips)
             {
                 var current = new ClipViewModel(
-                    clipService: clipService,
-                    clip: clip);
+                    clip: clip,
+                    uniqueNameGetter: (n) => clipService.IsUniqueName(n),
+                    eventAggregator: eventAggregator);
 
                 Clips.Add(current);
-            }
-        }
-
-        private void OnClipsUpdated(object sender, System.EventArgs e)
-        {
-            UpdateClips();
-        }
-
-        private void OnContentUpdated(object sender, System.EventArgs e)
-        {
-            UpdateClips();
-        }
-
-        private void UpdateClips()
-        {
-            foreach (var clip in Clips)
-            {
-                clip.Update(clipService.Selection);
             }
         }
 

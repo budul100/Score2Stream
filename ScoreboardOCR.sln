@@ -31,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClipService", "Services\Cli
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TemplateModule", "Modules\TemplateModule\TemplateModule.csproj", "{410D67FE-333E-499D-AAFA-48992ECE7D08}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TemplateService", "Services\TemplateService\TemplateService.csproj", "{9336CFDB-BDFA-47DF-9BF4-D95E9EDF217F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TemplateService", "Services\TemplateService\TemplateService.csproj", "{9336CFDB-BDFA-47DF-9BF4-D95E9EDF217F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

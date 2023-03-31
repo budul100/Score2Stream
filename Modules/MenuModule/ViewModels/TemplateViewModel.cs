@@ -1,5 +1,6 @@
-﻿using Prism.Commands;
-using ScoreboardOCR.Core.Interfaces;
+﻿using Core.Events;
+using Prism.Commands;
+using Prism.Events;
 using ScoreboardOCR.Core.Models;
 using ScoreboardOCR.Core.Mvvm;
 
@@ -11,15 +12,22 @@ namespace MenuModule.ViewModels
         #region Private Fields
 
         private readonly Clip clip;
+        private readonly IEventAggregator eventAggregator;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public TemplateViewModel(ITemplateService templateService, Clip clip)
+        public TemplateViewModel(Clip clip, IEventAggregator eventAggregator)
         {
-            OnClickCommand = new DelegateCommand(() => templateService.Select(clip));
             this.clip = clip;
+            this.eventAggregator = eventAggregator;
+
+            eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
+                action: _ => RaisePropertyChanged(nameof(Name)),
+                keepSubscriberReferenceAlive: true);
+
+            OnClickCommand = new DelegateCommand(OnClick);
         }
 
         #endregion Public Constructors
@@ -32,13 +40,14 @@ namespace MenuModule.ViewModels
 
         #endregion Public Properties
 
-        #region Public Methods
+        #region Private Methods
 
-        public void Update()
+        private void OnClick()
         {
-            RaisePropertyChanged(nameof(Name));
+            eventAggregator.GetEvent<SelectTemplateEvent>()
+                .Publish(clip);
         }
 
-        #endregion Public Methods
+        #endregion Private Methods
     }
 }

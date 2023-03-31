@@ -1,4 +1,5 @@
-﻿using System.Windows.Media.Imaging;
+﻿using OpenCvSharp;
+using System.Windows.Media.Imaging;
 
 namespace ScoreboardOCR.Core.Models
 {
@@ -16,6 +17,10 @@ namespace ScoreboardOCR.Core.Models
 
         public BitmapSource Content { get; set; }
 
+        public bool HasDimensions { get; set; }
+
+        public Mat Image { get; set; }
+
         public string Name { get; set; }
 
         public double RelativeX1 { get; set; }
@@ -25,7 +30,6 @@ namespace ScoreboardOCR.Core.Models
         public double RelativeY1 { get; set; }
 
         public double RelativeY2 { get; set; }
-
         public int ThresholdMonochrome { get; set; } = ThresholdMonochromeDefault;
 
         #endregion Public Properties

@@ -10,7 +10,7 @@ namespace WebcamService.Tests
         [Fact]
         public void TestBack()
         {
-            var imageComparer = new WebcamService.Service(default, default);
+            var imageComparer = new WebcamService.Service(default, default, default);
             //imageComparer.ThresholdMonochrome = 0.8;
 
             var image08 = Cv2.ImRead(@"..\..\..\..\Additionals\test_images\test_video_08.png", ImreadModes.Color);
@@ -28,7 +28,7 @@ namespace WebcamService.Tests
         [Fact]
         public void TestFront()
         {
-            var imageComparer = new WebcamService.Service(default, default);
+            var imageComparer = new WebcamService.Service(default, default, default);
             //imageComparer.ThresholdMonochrome = 0.8;
 
             var image08 = Cv2.ImRead(@"..\..\..\..\Additionals\test_images\test_video_08.png", ImreadModes.Color);

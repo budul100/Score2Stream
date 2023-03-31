@@ -1,4 +1,6 @@
-﻿using ScoreboardOCR.Core.Models;
+﻿using Core.Events;
+using Prism.Events;
+using ScoreboardOCR.Core.Models;
 using ScoreboardOCR.Core.Mvvm;
 
 namespace WebcamModule.ViewModels
@@ -19,9 +21,17 @@ namespace WebcamModule.ViewModels
         #region Public Constructors
 
         public ClipViewModel(Clip clip, double? actualLeft, double? actualTop, double? actualWidth,
-            double? actualHeight)
+            double? actualHeight, IEventAggregator eventAggregator)
         {
             Clip = clip;
+
+            eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
+                action: _ => RaisePropertyChanged(nameof(Name)),
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
+                action: c => IsActive = c == clip,
+                keepSubscriberReferenceAlive: true);
 
             if (actualWidth.HasValue
                 && actualHeight.HasValue)
@@ -93,15 +103,5 @@ namespace WebcamModule.ViewModels
         }
 
         #endregion Public Properties
-
-        #region Public Methods
-
-        public void Update()
-        {
-            RaisePropertyChanged(nameof(IsActive));
-            RaisePropertyChanged(nameof(Name));
-        }
-
-        #endregion Public Methods
     }
 }

@@ -8,15 +8,13 @@ namespace ScoreboardOCR.Core.Interfaces
     {
         #region Public Events
 
-        event EventHandler OnTemplatesChangedEvent;
-
-        event EventHandler OnTemplatesUpdatedEvent;
+        event EventHandler OnSamplesChangedEvent;
 
         #endregion Public Events
 
         #region Public Properties
 
-        Template Selection { get; set; }
+        Template Selection { get; }
 
         List<Template> Templates { get; }
 
@@ -24,9 +22,13 @@ namespace ScoreboardOCR.Core.Interfaces
 
         #region Public Methods
 
-        void Remove();
+        void AddSample();
 
-        void Select(Clip clip);
+        void RemoveSample();
+
+        void RemoveTemplate();
+
+        void SelectSample(Sample sample);
 
         #endregion Public Methods
     }

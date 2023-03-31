@@ -1,8 +1,10 @@
-﻿using MvvmValidation;
+﻿using Core.Events;
+using MvvmValidation;
 using Prism.Commands;
-using ScoreboardOCR.Core.Interfaces;
+using Prism.Events;
 using ScoreboardOCR.Core.Models;
 using ScoreboardOCR.Core.Mvvm;
+using System;
 using System.Text.RegularExpressions;
 using System.Windows.Media.Imaging;
 
@@ -13,7 +15,8 @@ namespace ClipModule.ViewModels
     {
         #region Private Fields
 
-        private readonly IClipService clipService;
+        private readonly Clip clip;
+        private readonly IEventAggregator eventAggregator;
 
         private BitmapSource content;
         private bool isActive;
@@ -23,14 +26,21 @@ namespace ClipModule.ViewModels
 
         #region Public Constructors
 
-        public ClipViewModel(IClipService clipService, Clip clip)
+        public ClipViewModel(Clip clip, Func<string, bool> uniqueNameGetter, IEventAggregator eventAggregator)
         {
-            this.clipService = clipService;
+            this.clip = clip;
+            this.eventAggregator = eventAggregator;
 
-            Clip = clip;
             Name = clip.Name;
-
             OnClickCommand = new DelegateCommand(OnClick);
+
+            eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
+                action: (c) => IsActive = c == clip,
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<ContentUpdatedEvent>().Subscribe(
+                action: () => Content = clip.Content,
+                keepSubscriberReferenceAlive: true);
 
             Validator.AddRule(
                 targetName: nameof(Name),
@@ -44,15 +54,13 @@ namespace ClipModule.ViewModels
 
             Validator.AddRule(
                 targetName: nameof(Name),
-                validateDelegate: () => RuleResult.Assert(Name == Clip.Name || clipService.IsUniqueName(Name),
+                validateDelegate: () => RuleResult.Assert(Name == this.clip.Name || uniqueNameGetter?.Invoke(Name) != false,
                 errorMessage: $"Name {Name} is already used. Please choose another one."));
         }
 
         #endregion Public Constructors
 
         #region Public Properties
-
-        public Clip Clip { get; }
 
         public BitmapSource Content
         {
@@ -75,11 +83,13 @@ namespace ClipModule.ViewModels
                 var validation = Validator.Validate(nameof(Name));
 
                 if (validation.IsValid
-                    && Clip.Name != value)
+                    && this.clip.Name != value)
                 {
-                    Clip.Name = value;
+                    this.clip.Name = value;
 
-                    clipService.Update();
+                    eventAggregator
+                        .GetEvent<ClipUpdatedEvent>()
+                        .Publish(clip);
                 }
             }
         }
@@ -88,14 +98,18 @@ namespace ClipModule.ViewModels
 
         public int ThresholdMonochrome
         {
-            get { return Clip.ThresholdMonochrome; }
+            get { return this.clip.ThresholdMonochrome; }
             set
             {
                 if (value >= 0
                     && value <= 100
-                    && Clip.ThresholdMonochrome != value)
+                    && this.clip.ThresholdMonochrome != value)
                 {
-                    Clip.ThresholdMonochrome = value;
+                    this.clip.ThresholdMonochrome = value;
+
+                    eventAggregator
+                        .GetEvent<ClipUpdatedEvent>()
+                        .Publish(clip);
                 }
 
                 RaisePropertyChanged(nameof(ThresholdMonochrome));
@@ -104,21 +118,11 @@ namespace ClipModule.ViewModels
 
         #endregion Public Properties
 
-        #region Public Methods
-
-        public void Update(Clip selectedClip)
-        {
-            Content = Clip.Content;
-            IsActive = Clip == selectedClip;
-        }
-
-        #endregion Public Methods
-
         #region Private Methods
 
         private void OnClick()
         {
-            clipService.Select(Clip);
+            eventAggregator.GetEvent<SelectClipEvent>().Publish(clip);
         }
 
         #endregion Private Methods

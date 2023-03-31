@@ -1,6 +1,7 @@
-﻿using ScoreboardOCR.Core.Interfaces;
+﻿using Core.Events;
+using Prism.Events;
+using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,15 +10,24 @@ namespace ClipService
     public class Service
         : IClipService
     {
-        #region Public Events
+        #region Private Fields
 
-        public event EventHandler OnClipDefinedEvent;
+        private readonly IEventAggregator eventAggregator;
 
-        public event EventHandler OnClipsChangedEvent;
+        #endregion Private Fields
 
-        public event EventHandler OnClipsUpdatedEvent;
+        #region Public Constructors
 
-        #endregion Public Events
+        public Service(IEventAggregator eventAggregator)
+        {
+            this.eventAggregator = eventAggregator;
+
+            eventAggregator.GetEvent<SelectClipEvent>().Subscribe(
+                action: c => SelectClip(c),
+                keepSubscriberReferenceAlive: true);
+        }
+
+        #endregion Public Constructors
 
         #region Public Properties
 
@@ -40,21 +50,11 @@ namespace ClipService
 
             Clips.Add(clip);
 
-            OnClipsChangedEvent?.Invoke(
-                sender: this,
-                e: default);
+            eventAggregator
+                .GetEvent<ClipsChangedEvent>()
+                .Publish();
 
-            Select(clip);
-        }
-
-        public void Define()
-        {
-            if (Selection != default)
-            {
-                OnClipDefinedEvent?.Invoke(
-                    sender: this,
-                    e: default);
-            }
+            SelectClip(clip);
         }
 
         public bool IsUniqueName(string name)
@@ -70,28 +70,14 @@ namespace ClipService
             {
                 var current = Selection;
 
-                Unselect();
+                SelectClip(default);
 
                 Clips.Remove(current);
 
-                OnClipsChangedEvent?.Invoke(
-                    sender: this,
-                    e: default);
+                eventAggregator
+                    .GetEvent<ClipsChangedEvent>()
+                    .Publish();
             }
-        }
-
-        public void Select(Clip clip)
-        {
-            Selection = clip;
-
-            Update();
-        }
-
-        public void Update()
-        {
-            OnClipsUpdatedEvent?.Invoke(
-                sender: this,
-                e: default);
         }
 
         #endregion Public Methods
@@ -112,11 +98,13 @@ namespace ClipService
             return result;
         }
 
-        private void Unselect()
+        private void SelectClip(Clip clip)
         {
-            Selection = default;
+            Selection = clip;
 
-            Update();
+            eventAggregator
+                .GetEvent<ClipSelectedEvent>()
+                .Publish(Selection);
         }
 
         #endregion Private Methods

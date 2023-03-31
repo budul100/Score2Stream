@@ -1,5 +1,7 @@
-﻿using OpenCvSharp;
+﻿using Core.Events;
+using OpenCvSharp;
 using OpenCvSharp.WpfExtensions;
+using Prism.Events;
 using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Models;
 using System;
@@ -22,8 +24,8 @@ namespace WebcamService
         private const double thresholdDivider = 100;
 
         private readonly List<(Clip, Rect?)> clips = new();
-        private readonly IClipService clipService;
         private readonly IDispatcherService dispatcherService;
+        private readonly IEventAggregator eventAggregator;
         private readonly IDictionary<string, Mat> templates = new Dictionary<string, Mat>();
 
         private CancellationTokenSource cancellationTokenSource;
@@ -35,12 +37,19 @@ namespace WebcamService
 
         #region Public Constructors
 
-        public Service(IClipService clipService, IDispatcherService dispatcherService)
+        public Service(IClipService clipService, IDispatcherService dispatcherService,
+            IEventAggregator eventAggregator)
         {
-            this.clipService = clipService;
             this.dispatcherService = dispatcherService;
+            this.eventAggregator = eventAggregator;
 
-            clipService.OnClipDefinedEvent += OnClipDefined;
+            eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
+                action: c => SetClip(c),
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<ClipsChangedEvent>().Subscribe(
+                action: () => clips.RemoveAll(c => !clipService.Clips.Contains(c.Item1)),
+                keepSubscriberReferenceAlive: true);
         }
 
         #endregion Public Constructors
@@ -211,13 +220,11 @@ namespace WebcamService
             return result;
         }
 
-        private void OnClipDefined(object sender, EventArgs e)
-        {
-            SetClips();
-        }
-
         private async void RunWebcamAsync()
         {
+            var contentUpdatedEvent = eventAggregator
+                .GetEvent<ContentUpdatedEvent>();
+
             try
             {
                 //// Creation and disposal of this object should be done in the same thread
@@ -257,16 +264,16 @@ namespace WebcamService
 
                                 if (contourRectangle.HasValue)
                                 {
-                                    clip.Item1.Content = cropImage
-                                        .Clone(contourRectangle.Value)
+                                    clip.Item1.Image = cropImage
+                                        .Clone(contourRectangle.Value);
+
+                                    clip.Item1.Content = clip.Item1.Image
                                         .ToBitmapSource();
                                 }
                             }
                         }
 
-                        OnContentUpdatedEvent?.Invoke(
-                            sender: this,
-                            e: default);
+                        contentUpdatedEvent.Publish();
                     }
 
                     await Task.Delay(Delay);
@@ -280,36 +287,32 @@ namespace WebcamService
             frame = default;
             Content = default;
 
-            OnContentUpdatedEvent?.Invoke(
-                sender: this,
-                e: default);
+            contentUpdatedEvent.Publish();
         }
 
-        private void SetClips()
+        private void SetClip(Clip clip)
         {
-            if (frame != default)
+            if (frame != default
+                && clip.HasDimensions)
             {
-                clips.Clear();
+                var firstX = Convert.ToInt32(clip.RelativeX1 * frame.Size().Width);
+                var secondX = Convert.ToInt32(clip.RelativeX2 * frame.Size().Width);
 
-                foreach (var clip in clipService.Clips)
+                var firstY = Convert.ToInt32(clip.RelativeY1 * frame.Size().Height);
+                var secondY = Convert.ToInt32(clip.RelativeY2 * frame.Size().Height);
+
+                var rectangle = frame.Size().GetRectangle(
+                    firstX: firstX,
+                    firstY: firstY,
+                    secondX: secondX,
+                    secondY: secondY);
+
+                if (rectangle.HasValue)
                 {
-                    var firstX = Convert.ToInt32(clip.RelativeX1 * frame.Size().Width);
-                    var secondX = Convert.ToInt32(clip.RelativeX2 * frame.Size().Width);
+                    var value = (clip, rectangle);
 
-                    var firstY = Convert.ToInt32(clip.RelativeY1 * frame.Size().Height);
-                    var secondY = Convert.ToInt32(clip.RelativeY2 * frame.Size().Height);
-
-                    var rectangle = frame.Size().GetRectangle(
-                        firstX: firstX,
-                        firstY: firstY,
-                        secondX: secondX,
-                        secondY: secondY);
-
-                    if (rectangle.HasValue)
-                    {
-                        var value = (clip, rectangle);
-                        clips.Add(value);
-                    }
+                    clips.RemoveAll(c => clip == c.Item1);
+                    clips.Add(value);
                 }
             }
         }

@@ -1,4 +1,6 @@
-﻿using ScoreboardOCR.Core.Interfaces;
+﻿using Core.Events;
+using Prism.Events;
+using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Models;
 using System;
 using System.Collections.Generic;
@@ -12,31 +14,32 @@ namespace TemplateService
         #region Private Fields
 
         private readonly IClipService clipService;
+        private readonly IEventAggregator eventAggregator;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public Service(IClipService clipService)
+        public Service(IClipService clipService, IEventAggregator eventAggregator)
         {
             this.clipService = clipService;
+            this.eventAggregator = eventAggregator;
+
+            eventAggregator.GetEvent<SelectTemplateEvent>().Subscribe(
+                action: c => SelectTemplate(c));
         }
 
         #endregion Public Constructors
 
         #region Public Events
 
-        public event EventHandler OnTemplatesChangedEvent;
-
-        public event EventHandler OnTemplatesUpdatedEvent;
+        public event EventHandler OnSamplesChangedEvent;
 
         #endregion Public Events
 
         #region Public Properties
 
-        public bool IsActive { get; set; }
-
-        public Template Selection { get; set; }
+        public Template Selection { get; private set; }
 
         public List<Template> Templates { get; } = new List<Template>();
 
@@ -44,23 +47,59 @@ namespace TemplateService
 
         #region Public Methods
 
-        public void Remove()
+        public void AddSample()
         {
             if (Selection != default)
             {
-                var current = Selection;
+                var current = new Sample
+                {
+                    Image = Selection.Clip.Image,
+                    Content = Selection.Clip.Content,
+                };
 
-                Unselect();
+                Selection.Samples.Add(current);
 
-                Templates.Remove(current);
-
-                OnTemplatesChangedEvent?.Invoke(
+                OnSamplesChangedEvent?.Invoke(
                     sender: this,
                     e: default);
             }
         }
 
-        public void Select(Clip clip)
+        public void RemoveSample()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RemoveTemplate()
+        {
+            if (Selection != default)
+            {
+                var current = Selection;
+
+                Selection = default;
+
+                eventAggregator
+                    .GetEvent<TemplateSelectedEvent>()
+                    .Publish(current);
+
+                Templates.Remove(current);
+
+                eventAggregator
+                    .GetEvent<TemplatesChangedEvent>()
+                    .Publish();
+            }
+        }
+
+        public void SelectSample(Sample sample)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion Public Methods
+
+        #region Private Methods
+
+        private void SelectTemplate(Clip clip)
         {
             Selection = Templates
                 .SingleOrDefault(t => t.Clip == clip);
@@ -75,31 +114,20 @@ namespace TemplateService
                 Templates.Add(
                     item: current);
 
-                OnTemplatesChangedEvent?.Invoke(
-                    sender: this,
-                    e: default);
+                eventAggregator
+                    .GetEvent<TemplatesChangedEvent>()
+                    .Publish();
 
                 Selection = current;
             }
 
-            clipService.Select(Selection.Clip);
+            eventAggregator
+                .GetEvent<SelectClipEvent>()
+                .Publish(Selection.Clip);
 
-            OnTemplatesUpdatedEvent?.Invoke(
-                sender: this,
-                e: default);
-        }
-
-        #endregion Public Methods
-
-        #region Private Methods
-
-        private void Unselect()
-        {
-            Selection = default;
-
-            OnTemplatesUpdatedEvent?.Invoke(
-                sender: this,
-                e: default);
+            eventAggregator
+                .GetEvent<TemplateSelectedEvent>()
+                .Publish(Selection);
         }
 
         #endregion Private Methods
