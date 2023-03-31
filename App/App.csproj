@@ -15,6 +15,7 @@
     <ProjectReference Include="..\Modules\WebcamModule\WebcamModule.csproj" />
     <ProjectReference Include="..\Services\ClipService\ClipService.csproj" />
     <ProjectReference Include="..\Services\DispatcherService\DispatcherService.csproj" />
+    <ProjectReference Include="..\Services\TemplateService\TemplateService.csproj" />
     <ProjectReference Include="..\Services\WebcamService\WebcamService.csproj" />
   </ItemGroup>
 </Project>

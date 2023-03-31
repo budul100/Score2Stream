@@ -3,6 +3,8 @@ using Prism.Regions;
 using ScoreboardOCR.Core.Constants;
 using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Mvvm;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace MenuModule.ViewModels
 {
@@ -16,6 +18,7 @@ namespace MenuModule.ViewModels
 
         private readonly IClipService clipService;
         private readonly IRegionManager regionManager;
+        private readonly ITemplateService templateService;
         private readonly IWebcamService webcamService;
 
         private int selectedTabIndex;
@@ -24,15 +27,18 @@ namespace MenuModule.ViewModels
 
         #region Public Constructors
 
-        public MenuViewModel(IWebcamService webcamService, IClipService clipService, IRegionManager regionManager)
+        public MenuViewModel(IWebcamService webcamService, IClipService clipService,
+            ITemplateService templateService, IRegionManager regionManager)
             : base(regionManager)
         {
             this.webcamService = webcamService;
             this.clipService = clipService;
+            this.templateService = templateService;
             this.regionManager = regionManager;
 
             webcamService.OnContentChangedEvent += OnContentChanged;
             clipService.OnClipsChangedEvent += OnClipsChanged;
+            templateService.OnTemplatesChangedEvent += OnTemplatesChanged;
 
             this.WebcamPlayCommand = new DelegateCommand(
                 executeMethod: WebcamStartAsync,
@@ -47,6 +53,10 @@ namespace MenuModule.ViewModels
             this.ClipRemoveCommand = new DelegateCommand(
                 executeMethod: ClipRemove,
                 canExecuteMethod: () => clipService.Active != default);
+
+            this.TemplateRemoveCommand = new DelegateCommand(
+                executeMethod: TemplateRemove,
+                canExecuteMethod: () => templateService.Active != default);
         }
 
         #endregion Public Constructors
@@ -62,24 +72,18 @@ namespace MenuModule.ViewModels
             get { return selectedTabIndex; }
             set
             {
-                SetProperty(ref selectedTabIndex, value);
-
-                switch (SelectedTabIndex)
+                if (SelectedTabIndex != value)
                 {
-                    case IndexClipView:
-                        regionManager.RequestNavigate(
-                            regionName: RegionNames.EditRegion,
-                            source: ViewNames.ClipView);
-                        break;
+                    SetProperty(ref selectedTabIndex, value);
 
-                    case IndexTemplateView:
-                        regionManager.RequestNavigate(
-                            regionName: RegionNames.EditRegion,
-                            source: ViewNames.TemplateView);
-                        break;
+                    SetEditRegion();
                 }
             }
         }
+
+        public DelegateCommand TemplateRemoveCommand { get; }
+
+        public ObservableCollection<TemplateViewModel> Templates { get; } = new ObservableCollection<TemplateViewModel>();
 
         public DelegateCommand WebcamPauseCommand { get; }
 
@@ -108,6 +112,8 @@ namespace MenuModule.ViewModels
 
         private void OnClipsChanged(object sender, System.EventArgs e)
         {
+            SetTemplates();
+
             ClipAddCommand.RaiseCanExecuteChanged();
             ClipRemoveCommand.RaiseCanExecuteChanged();
         }
@@ -118,6 +124,54 @@ namespace MenuModule.ViewModels
             WebcamPauseCommand.RaiseCanExecuteChanged();
 
             ClipAddCommand.RaiseCanExecuteChanged();
+        }
+
+        private void OnTemplatesChanged(object sender, System.EventArgs e)
+        {
+            SetTemplates();
+
+            TemplateRemoveCommand.RaiseCanExecuteChanged();
+        }
+
+        private void SetEditRegion()
+        {
+            switch (SelectedTabIndex)
+            {
+                case IndexClipView:
+                    regionManager.RequestNavigate(
+                        regionName: RegionNames.EditRegion,
+                        source: ViewNames.ClipView);
+                    break;
+
+                case IndexTemplateView:
+                    regionManager.RequestNavigate(
+                        regionName: RegionNames.EditRegion,
+                        source: ViewNames.TemplateView);
+                    break;
+            }
+        }
+
+        private void SetTemplates()
+        {
+            Templates.Clear();
+
+            foreach (var clip in clipService.Clips)
+            {
+                var isActive = templateService.Templates
+                    .Any(t => t.Clip == clip);
+
+                var template = new TemplateViewModel(
+                    templateService: templateService,
+                    clip: clip,
+                    isActive: isActive);
+
+                Templates.Add(template);
+            }
+        }
+
+        private void TemplateRemove()
+        {
+            templateService.Remove();
         }
 
         private async void WebcamStartAsync()

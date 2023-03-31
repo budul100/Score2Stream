@@ -7,16 +7,13 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:fl="clr-namespace:Fluent;assembly=Fluent"
     xmlns:hl="clr-namespace:MenuModule.Helpers"
+    xmlns:vm="clr-namespace:MenuModule.ViewModels"
     d:DataContext="{Binding Source={x:Static hl:DesignTimeViewModelLocator.MenuViewModel}}"
     d:DesignWidth="500"
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
     <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/Fluent;Component/Themes/Generic.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
+        <ResourceDictionary Source="pack://application:,,,/Fluent;Component/Themes/Generic.xaml" />
     </UserControl.Resources>
     <DockPanel>
         <fl:Ribbon
@@ -42,8 +39,18 @@
                     <fl:Button Command="{Binding WebcamPauseCommand}" Header="Pause" />
                 </fl:RibbonGroupBox>
                 <fl:RibbonGroupBox Header="Clips">
-                    <fl:Button Command="{Binding ClipAddCommand}" Header="Add" />
-                    <fl:Button Command="{Binding ClipRemoveCommand}" Header="Remove" />
+                    <fl:DropDownButton Header="Select" ItemsSource="{Binding Templates}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="vm:TemplateViewModel">
+                                <fl:MenuItem
+                                    Command="{Binding OnClickCommand}"
+                                    Header="{Binding Name}"
+                                    IsChecked="{Binding IsActive, Mode=TwoWay}"
+                                    Size="Small" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </fl:DropDownButton>
+                    <fl:Button Command="{Binding TemplateRemoveCommand}" Header="Remove" />
                 </fl:RibbonGroupBox>
             </fl:RibbonTabItem>
         </fl:Ribbon>

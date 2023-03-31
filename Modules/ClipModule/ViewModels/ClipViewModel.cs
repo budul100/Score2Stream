@@ -3,6 +3,7 @@ using Prism.Commands;
 using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Models;
 using ScoreboardOCR.Core.Mvvm;
+using System.Text.RegularExpressions;
 using System.Windows.Media.Imaging;
 
 namespace ClipModule.ViewModels
@@ -24,14 +25,19 @@ namespace ClipModule.ViewModels
         public ClipViewModel(IClipService clipService, Clip clip)
         {
             this.clipService = clipService;
-            this.Clip = clip;
-            this.Name = clip.Name;
+
+            Clip = clip;
+            Name = clip.Name;
 
             OnClickCommand = new DelegateCommand(OnClick);
 
             Validator.AddRule(
                 targetName: nameof(Name),
-                validateDelegate: () => RuleResult.Assert(!string.IsNullOrEmpty(Name), "Name is required"));
+                validateDelegate: () => RuleResult.Assert(!string.IsNullOrEmpty(Name), "Name is required."));
+
+            Validator.AddRule(
+                targetName: nameof(Name),
+                validateDelegate: () => RuleResult.Assert(Regex.IsMatch(Name, "\\S+"), "Name cannot contain whitespaces."));
 
             Validator.AddRule(
                 targetName: nameof(Name),

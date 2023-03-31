@@ -78,6 +78,7 @@ namespace ClipService
             if (Active != default)
             {
                 Clips.Remove(Active);
+                Active = default;
 
                 OnClipsChangedEvent?.Invoke(
                     sender: this,
