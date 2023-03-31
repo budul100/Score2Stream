@@ -9,6 +9,7 @@ namespace WebcamModule.ViewModels
         #region Private Fields
 
         private double? height;
+        private bool isActive;
         private double? left;
         private double? top;
         private double? width;
@@ -55,6 +56,12 @@ namespace WebcamModule.ViewModels
             }
         }
 
+        public bool IsActive
+        {
+            get { return isActive; }
+            set { SetProperty(ref isActive, value); }
+        }
+
         public double? Left
         {
             get { return left; }
@@ -86,5 +93,15 @@ namespace WebcamModule.ViewModels
         }
 
         #endregion Public Properties
+
+        #region Public Methods
+
+        public void Update()
+        {
+            RaisePropertyChanged(nameof(IsActive));
+            RaisePropertyChanged(nameof(Name));
+        }
+
+        #endregion Public Methods
     }
 }

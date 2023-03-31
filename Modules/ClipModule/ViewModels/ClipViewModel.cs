@@ -14,6 +14,7 @@ namespace ClipModule.ViewModels
         #region Private Fields
 
         private readonly IClipService clipService;
+
         private BitmapSource content;
         private bool isActive;
         private string name;
@@ -33,15 +34,18 @@ namespace ClipModule.ViewModels
 
             Validator.AddRule(
                 targetName: nameof(Name),
-                validateDelegate: () => RuleResult.Assert(!string.IsNullOrEmpty(Name), "Name is required."));
+                validateDelegate: () => RuleResult.Assert(!string.IsNullOrEmpty(Name),
+                errorMessage: "Name is required."));
 
             Validator.AddRule(
                 targetName: nameof(Name),
-                validateDelegate: () => RuleResult.Assert(Regex.IsMatch(Name, "\\S+"), "Name cannot contain whitespaces."));
+                validateDelegate: () => RuleResult.Assert(Regex.IsMatch(Name, "^\\S+$"),
+                errorMessage: "Name cannot contain whitespaces."));
 
             Validator.AddRule(
                 targetName: nameof(Name),
-                validateDelegate: () => RuleResult.Assert(clipService.IsUniqueName(Name), $"Name {Name} is already used. Please choose another one."));
+                validateDelegate: () => RuleResult.Assert(Name == Clip.Name || clipService.IsUniqueName(Name),
+                errorMessage: $"Name {Name} is already used. Please choose another one."));
         }
 
         #endregion Public Constructors
@@ -102,9 +106,10 @@ namespace ClipModule.ViewModels
 
         #region Public Methods
 
-        public void Update()
+        public void Update(Clip selectedClip)
         {
             Content = Clip.Content;
+            IsActive = Clip == selectedClip;
         }
 
         #endregion Public Methods

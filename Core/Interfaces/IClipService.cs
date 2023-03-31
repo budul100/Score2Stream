@@ -12,7 +12,7 @@ namespace ScoreboardOCR.Core.Interfaces
 
         event EventHandler OnClipsChangedEvent;
 
-        event EventHandler OnClipSelectedEvent;
+        event EventHandler OnClipsUpdatedEvent;
 
         #endregion Public Events
 

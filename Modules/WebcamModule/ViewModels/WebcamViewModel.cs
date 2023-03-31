@@ -5,7 +5,6 @@ using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Mvvm;
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Windows.Media.Imaging;
 
 namespace WebcamModule.ViewModels
@@ -50,7 +49,7 @@ namespace WebcamModule.ViewModels
             webcamService.OnContentChangedEvent += OnContentChanged;
 
             clipService.OnClipsChangedEvent += OnClipsChanged;
-            clipService.OnClipSelectedEvent += OnClipSelected;
+            clipService.OnClipsUpdatedEvent += OnClipsUpdated;
 
             MouseDownCommand = new DelegateCommand(OnMouseDown);
             MouseUpCommand = new DelegateCommand(OnMouseUp);
@@ -227,9 +226,22 @@ namespace WebcamModule.ViewModels
             SetClips();
         }
 
-        private void OnClipSelected(object sender, EventArgs e)
+        private void OnClipsUpdated(object sender, EventArgs e)
         {
-            SetActiveClip();
+            if (webcamService.IsActive)
+            {
+                foreach (var clip in Clips)
+                {
+                    clip.IsActive = clip.Clip == clipService.Selection;
+
+                    if (clip.IsActive)
+                    {
+                        activeClip = clip;
+                    }
+
+                    clip.Update();
+                }
+            }
         }
 
         private void OnContentChanged(object sender, EventArgs e)
@@ -277,15 +289,6 @@ namespace WebcamModule.ViewModels
             }
 
             isMouseActive = false;
-        }
-
-        private void SetActiveClip()
-        {
-            if (webcamService.IsActive)
-            {
-                activeClip = Clips
-                    .SingleOrDefault(c => c.Clip == clipService.Selection);
-            }
         }
 
         private void SetClips()

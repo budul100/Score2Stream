@@ -24,7 +24,7 @@ namespace ClipModule.ViewModels
             webcamService.OnContentChangedEvent += OnContentChanged;
 
             clipService.OnClipsChangedEvent += OnClipsChanged;
-            clipService.OnClipSelectedEvent += OnClipSelected;
+            clipService.OnClipsUpdatedEvent += OnClipsUpdated;
         }
 
         #endregion Public Constructors
@@ -46,27 +46,6 @@ namespace ClipModule.ViewModels
 
         private void OnClipsChanged(object sender, System.EventArgs e)
         {
-            SetClips();
-        }
-
-        private void OnClipSelected(object sender, System.EventArgs e)
-        {
-            foreach (var clip in Clips)
-            {
-                clip.IsActive = clip.Clip == clipService.Selection;
-            }
-        }
-
-        private void OnContentChanged(object sender, System.EventArgs e)
-        {
-            foreach (var clip in Clips)
-            {
-                clip.Update();
-            }
-        }
-
-        private void SetClips()
-        {
             Clips.Clear();
 
             foreach (var clip in clipService.Clips)
@@ -76,6 +55,24 @@ namespace ClipModule.ViewModels
                     clip: clip);
 
                 Clips.Add(current);
+            }
+        }
+
+        private void OnClipsUpdated(object sender, System.EventArgs e)
+        {
+            UpdateClips();
+        }
+
+        private void OnContentChanged(object sender, System.EventArgs e)
+        {
+            UpdateClips();
+        }
+
+        private void UpdateClips()
+        {
+            foreach (var clip in Clips)
+            {
+                clip.Update(clipService.Selection);
             }
         }
 

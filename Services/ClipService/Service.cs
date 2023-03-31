@@ -15,7 +15,7 @@ namespace ClipService
 
         public event EventHandler OnClipsChangedEvent;
 
-        public event EventHandler OnClipSelectedEvent;
+        public event EventHandler OnClipsUpdatedEvent;
 
         #endregion Public Events
 
@@ -40,7 +40,9 @@ namespace ClipService
 
             Clips.Add(clip);
 
-            Update();
+            OnClipsChangedEvent?.Invoke(
+                sender: this,
+                e: default);
 
             Select(clip);
         }
@@ -66,10 +68,13 @@ namespace ClipService
         {
             if (Selection != default)
             {
-                Clips.Remove(Selection);
-                Selection = default;
+                Unselect();
 
-                Update();
+                Clips.Remove(Selection);
+
+                OnClipsChangedEvent?.Invoke(
+                    sender: this,
+                    e: default);
             }
         }
 
@@ -77,14 +82,12 @@ namespace ClipService
         {
             Selection = clip;
 
-            OnClipSelectedEvent?.Invoke(
-                sender: this,
-                e: default);
+            Update();
         }
 
         public void Update()
         {
-            OnClipsChangedEvent?.Invoke(
+            OnClipsUpdatedEvent?.Invoke(
                 sender: this,
                 e: default);
         }
@@ -111,9 +114,7 @@ namespace ClipService
         {
             Selection = default;
 
-            OnClipSelectedEvent?.Invoke(
-                sender: this,
-                e: default);
+            Update();
         }
 
         #endregion Private Methods
