@@ -139,7 +139,6 @@ namespace MenuModule.ViewModels
             {
                 case IndexClipView:
 
-                    templateService.Deactivate();
                     regionManager.RequestNavigate(
                         regionName: RegionNames.EditRegion,
                         source: ViewNames.ClipView);
@@ -148,7 +147,6 @@ namespace MenuModule.ViewModels
 
                 case IndexTemplateView:
 
-                    clipService.Deactivate();
                     regionManager.RequestNavigate(
                         regionName: RegionNames.EditRegion,
                         source: ViewNames.TemplateView);

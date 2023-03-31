@@ -11,8 +11,6 @@ namespace TemplateService
     {
         #region Public Events
 
-        public event EventHandler OnServiceDeactivatedEvent;
-
         public event EventHandler OnTemplatesChangedEvent;
 
         public event EventHandler OnTemplateSelectedEvent;
@@ -30,15 +28,6 @@ namespace TemplateService
         #endregion Public Properties
 
         #region Public Methods
-
-        public void Deactivate()
-        {
-            Unselect();
-
-            OnServiceDeactivatedEvent?.Invoke(
-                sender: this,
-                e: default);
-        }
 
         public void Remove()
         {

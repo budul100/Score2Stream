@@ -17,8 +17,6 @@ namespace ClipService
 
         public event EventHandler OnClipSelectedEvent;
 
-        public event EventHandler OnServiceDeactivatedEvent;
-
         #endregion Public Events
 
         #region Public Properties
@@ -47,15 +45,6 @@ namespace ClipService
                 e: default);
 
             Select(clip);
-        }
-
-        public void Deactivate()
-        {
-            Unselect();
-
-            OnServiceDeactivatedEvent?.Invoke(
-                sender: this,
-                e: default);
         }
 
         public void Define()

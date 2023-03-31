@@ -1,5 +1,6 @@
 ﻿using Prism.Commands;
 using Prism.Regions;
+using ScoreboardOCR.Core.Constants;
 using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Mvvm;
 using System;
@@ -17,6 +18,7 @@ namespace WebcamModule.ViewModels
         private const int BorderThicknessDefault = 2;
 
         private readonly IClipService clipService;
+        private readonly IRegionManager regionManager;
         private readonly IWebcamService webcamService;
 
         private ClipViewModel activeClip;
@@ -27,7 +29,6 @@ namespace WebcamModule.ViewModels
         private double fullHeight;
         private double fullWidth;
         private bool isMouseActive;
-        private bool isServiceActive;
         private bool movedToBottom;
         private bool movedToRight;
         private double? x1;
@@ -44,6 +45,7 @@ namespace WebcamModule.ViewModels
         {
             this.webcamService = webcamService;
             this.clipService = clipService;
+            this.regionManager = regionManager;
 
             webcamService.OnContentChangedEvent += OnContentChanged;
 
@@ -123,8 +125,7 @@ namespace WebcamModule.ViewModels
             get { return default; }
             set
             {
-                if (isMouseActive
-                    && activeClip != default
+                if (IsMouseEditing()
                     && x1.HasValue
                     && value >= x1
                     && value <= x2)
@@ -155,8 +156,7 @@ namespace WebcamModule.ViewModels
             get { return default; }
             set
             {
-                if (isMouseActive
-                    && activeClip != default
+                if (IsMouseEditing()
                     && y1.HasValue
                     && value >= y1
                     && value <= y2)
@@ -211,6 +211,17 @@ namespace WebcamModule.ViewModels
             return result;
         }
 
+        private bool IsMouseEditing(bool isActivating = false)
+        {
+            var result = (isMouseActive || isActivating)
+                && activeClip != default
+                && Content != default
+                && regionManager.Regions[RegionNames.EditRegion]?.NavigationService.Journal
+                    .CurrentEntry.Uri.OriginalString == ViewNames.ClipView;
+
+            return result;
+        }
+
         private void OnClipsChanged(object sender, System.EventArgs e)
         {
             SetClips();
@@ -228,8 +239,8 @@ namespace WebcamModule.ViewModels
 
         private void OnMouseDown()
         {
-            if (activeClip != default
-                && Content != default)
+            if (IsMouseEditing(
+                isActivating: true))
             {
                 activeClip.Left = default;
                 activeClip.Top = default;
@@ -242,12 +253,12 @@ namespace WebcamModule.ViewModels
 
         private void OnMouseUp()
         {
-            if (activeClip != default
-                && Content != default)
+            if (IsMouseEditing())
             {
                 var actualWidth = GetActualWidth();
 
-                if ((actualWidth ?? 0) > 0)
+                if ((actualWidth ?? 0) > 0
+                    && (activeClip.Left ?? 0) >= x1.Value)
                 {
                     activeClip.Clip.RelativeX1 = ((activeClip.Left ?? 0) - x1.Value) / actualWidth.Value;
                     activeClip.Clip.RelativeX2 = ((activeClip.Left ?? 0) + (activeClip.Width ?? 0) - x1.Value) / actualWidth.Value;
@@ -255,7 +266,8 @@ namespace WebcamModule.ViewModels
 
                 var actualHeight = GetActualHeight();
 
-                if ((actualHeight ?? 0) > 0)
+                if ((actualHeight ?? 0) > 0
+                    && (activeClip.Top ?? 0) >= y1.Value)
                 {
                     activeClip.Clip.RelativeY1 = ((activeClip.Top ?? 0) - y1.Value) / actualHeight.Value;
                     activeClip.Clip.RelativeY2 = ((activeClip.Top ?? 0) - y1.Value + (activeClip.Height ?? 0)) / actualHeight.Value;

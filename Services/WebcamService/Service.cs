@@ -272,7 +272,7 @@ namespace WebcamService
                     await Task.Delay(Delay);
                 }
             }
-            catch
+            catch (Exception ex)
             {
                 Debugger.Break();
             }

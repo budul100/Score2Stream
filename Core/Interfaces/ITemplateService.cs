@@ -8,8 +8,6 @@ namespace ScoreboardOCR.Core.Interfaces
     {
         #region Public Events
 
-        event EventHandler OnServiceDeactivatedEvent;
-
         event EventHandler OnTemplatesChangedEvent;
 
         event EventHandler OnTemplateSelectedEvent;
@@ -25,8 +23,6 @@ namespace ScoreboardOCR.Core.Interfaces
         #endregion Public Properties
 
         #region Public Methods
-
-        void Deactivate();
 
         void Remove();
 

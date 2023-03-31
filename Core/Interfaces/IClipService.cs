@@ -14,8 +14,6 @@ namespace ScoreboardOCR.Core.Interfaces
 
         event EventHandler OnClipSelectedEvent;
 
-        event EventHandler OnServiceDeactivatedEvent;
-
         #endregion Public Events
 
         #region Public Properties
@@ -29,8 +27,6 @@ namespace ScoreboardOCR.Core.Interfaces
         #region Public Methods
 
         void Add();
-
-        void Deactivate();
 
         void Define();
 
