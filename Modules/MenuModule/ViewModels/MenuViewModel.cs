@@ -37,7 +37,7 @@ namespace MenuModule.ViewModels
             this.templateService = templateService;
             this.regionManager = regionManager;
 
-            webcamService.OnContentChangedEvent += OnContentChanged;
+            webcamService.OnContentUpdatedEvent += OnContentUpdated;
 
             clipService.OnClipsChangedEvent += OnClipsChanged;
             clipService.OnClipsUpdatedEvent += OnClipsUpdated;
@@ -141,7 +141,7 @@ namespace MenuModule.ViewModels
             UpdateTemplates();
         }
 
-        private void OnContentChanged(object sender, System.EventArgs e)
+        private void OnContentUpdated(object sender, System.EventArgs e)
         {
             WebcamPlayCommand.RaiseCanExecuteChanged();
             WebcamPauseCommand.RaiseCanExecuteChanged();

@@ -46,7 +46,7 @@ namespace WebcamModule.ViewModels
             this.clipService = clipService;
             this.regionManager = regionManager;
 
-            webcamService.OnContentChangedEvent += OnContentChanged;
+            webcamService.OnContentUpdatedEvent += OnContentUpdated;
 
             clipService.OnClipsChangedEvent += OnClipsChanged;
             clipService.OnClipsUpdatedEvent += OnClipsUpdated;
@@ -244,7 +244,7 @@ namespace WebcamModule.ViewModels
             }
         }
 
-        private void OnContentChanged(object sender, EventArgs e)
+        private void OnContentUpdated(object sender, EventArgs e)
         {
             Content = webcamService.Content;
         }

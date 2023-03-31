@@ -14,7 +14,7 @@ namespace TemplateModule
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterForNavigation<Views.ListView>(
+            containerRegistry.RegisterForNavigation<Views.SelectionView>(
                 name: ViewNames.TemplateView);
         }
 

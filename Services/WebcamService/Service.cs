@@ -47,7 +47,7 @@ namespace WebcamService
 
         #region Public Events
 
-        public event EventHandler OnContentChangedEvent;
+        public event EventHandler OnContentUpdatedEvent;
 
         #endregion Public Events
 
@@ -264,7 +264,7 @@ namespace WebcamService
                             }
                         }
 
-                        OnContentChangedEvent?.Invoke(
+                        OnContentUpdatedEvent?.Invoke(
                             sender: this,
                             e: default);
                     }
@@ -280,7 +280,7 @@ namespace WebcamService
             frame = default;
             Content = default;
 
-            OnContentChangedEvent?.Invoke(
+            OnContentUpdatedEvent?.Invoke(
                 sender: this,
                 e: default);
         }

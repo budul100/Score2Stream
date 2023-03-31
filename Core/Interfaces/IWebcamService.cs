@@ -9,7 +9,7 @@ namespace ScoreboardOCR.Core.Interfaces
     {
         #region Public Events
 
-        event EventHandler OnContentChangedEvent;
+        event EventHandler OnContentUpdatedEvent;
 
         #endregion Public Events
 

@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 
 namespace ClipModule.ViewModels
 {
-    public class ListViewModel
+    public class SelectionViewModel
         : RegionViewModelBase
     {
         #region Private Fields
@@ -16,12 +16,12 @@ namespace ClipModule.ViewModels
 
         #region Public Constructors
 
-        public ListViewModel(IWebcamService webcamService, IClipService clipService, IRegionManager regionManager)
+        public SelectionViewModel(IWebcamService webcamService, IClipService clipService, IRegionManager regionManager)
             : base(regionManager)
         {
             this.clipService = clipService;
 
-            webcamService.OnContentChangedEvent += OnContentChanged;
+            webcamService.OnContentUpdatedEvent += OnContentUpdated;
 
             clipService.OnClipsChangedEvent += OnClipsChanged;
             clipService.OnClipsUpdatedEvent += OnClipsUpdated;
@@ -63,7 +63,7 @@ namespace ClipModule.ViewModels
             UpdateClips();
         }
 
-        private void OnContentChanged(object sender, System.EventArgs e)
+        private void OnContentUpdated(object sender, System.EventArgs e)
         {
             UpdateClips();
         }
