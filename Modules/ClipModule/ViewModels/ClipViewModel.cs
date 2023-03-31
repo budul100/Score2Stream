@@ -111,7 +111,7 @@ namespace ClipModule.ViewModels
 
         private void OnClick()
         {
-            clipService.Activate(Clip);
+            clipService.Select(Clip);
         }
 
         #endregion Private Methods

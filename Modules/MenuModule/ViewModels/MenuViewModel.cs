@@ -13,8 +13,8 @@ namespace MenuModule.ViewModels
     {
         #region Private Fields
 
-        private const int IndexClipView = 0;
-        private const int IndexTemplateView = 1;
+        private const int IndexClipView = 1;
+        private const int IndexTemplateView = 2;
 
         private readonly IClipService clipService;
         private readonly IRegionManager regionManager;
@@ -52,11 +52,11 @@ namespace MenuModule.ViewModels
                 canExecuteMethod: () => webcamService.IsActive);
             this.ClipRemoveCommand = new DelegateCommand(
                 executeMethod: ClipRemove,
-                canExecuteMethod: () => clipService.Active != default);
+                canExecuteMethod: () => clipService.Selection != default);
 
             this.TemplateRemoveCommand = new DelegateCommand(
                 executeMethod: TemplateRemove,
-                canExecuteMethod: () => templateService.Active != default);
+                canExecuteMethod: () => templateService.Selection != default);
         }
 
         #endregion Public Constructors
@@ -138,12 +138,17 @@ namespace MenuModule.ViewModels
             switch (SelectedTabIndex)
             {
                 case IndexClipView:
+
+                    templateService.Deactivate();
                     regionManager.RequestNavigate(
                         regionName: RegionNames.EditRegion,
                         source: ViewNames.ClipView);
+
                     break;
 
                 case IndexTemplateView:
+
+                    clipService.Deactivate();
                     regionManager.RequestNavigate(
                         regionName: RegionNames.EditRegion,
                         source: ViewNames.TemplateView);

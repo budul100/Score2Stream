@@ -279,6 +279,10 @@ namespace WebcamService
 
             frame = default;
             Content = default;
+
+            OnContentChangedEvent?.Invoke(
+                sender: this,
+                e: default);
         }
 
         private void SetClips()

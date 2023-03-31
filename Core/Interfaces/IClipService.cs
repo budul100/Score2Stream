@@ -8,33 +8,37 @@ namespace ScoreboardOCR.Core.Interfaces
     {
         #region Public Events
 
-        event EventHandler OnClipActivatedEvent;
-
         event EventHandler OnClipDefinedEvent;
 
         event EventHandler OnClipsChangedEvent;
+
+        event EventHandler OnClipSelectedEvent;
+
+        event EventHandler OnServiceDeactivatedEvent;
 
         #endregion Public Events
 
         #region Public Properties
 
-        Clip Active { get; }
-
         List<Clip> Clips { get; }
+
+        Clip Selection { get; }
 
         #endregion Public Properties
 
         #region Public Methods
 
-        void Activate(Clip clip);
-
         void Add();
+
+        void Deactivate();
 
         void Define();
 
         bool IsUniqueName(string name);
 
         void Remove();
+
+        void Select(Clip clip);
 
         #endregion Public Methods
     }

@@ -27,6 +27,7 @@ namespace WebcamModule.ViewModels
         private double fullHeight;
         private double fullWidth;
         private bool isMouseActive;
+        private bool isServiceActive;
         private bool movedToBottom;
         private bool movedToRight;
         private double? x1;
@@ -47,7 +48,7 @@ namespace WebcamModule.ViewModels
             webcamService.OnContentChangedEvent += OnContentChanged;
 
             clipService.OnClipsChangedEvent += OnClipsChanged;
-            clipService.OnClipActivatedEvent += OnClipActivated;
+            clipService.OnClipSelectedEvent += OnClipSelected;
 
             MouseDownCommand = new DelegateCommand(OnMouseDown);
             MouseUpCommand = new DelegateCommand(OnMouseUp);
@@ -210,18 +211,14 @@ namespace WebcamModule.ViewModels
             return result;
         }
 
-        private void OnClipActivated(object sender, EventArgs e)
-        {
-            if (webcamService.IsActive)
-            {
-                activeClip = Clips
-                    .SingleOrDefault(c => c.Clip == clipService.Active);
-            }
-        }
-
         private void OnClipsChanged(object sender, System.EventArgs e)
         {
             SetClips();
+        }
+
+        private void OnClipSelected(object sender, EventArgs e)
+        {
+            SetActiveClip();
         }
 
         private void OnContentChanged(object sender, EventArgs e)
@@ -268,6 +265,15 @@ namespace WebcamModule.ViewModels
             }
 
             isMouseActive = false;
+        }
+
+        private void SetActiveClip()
+        {
+            if (webcamService.IsActive)
+            {
+                activeClip = Clips
+                    .SingleOrDefault(c => c.Clip == clipService.Selection);
+            }
         }
 
         private void SetClips()

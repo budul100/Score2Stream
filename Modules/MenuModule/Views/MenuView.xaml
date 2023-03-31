@@ -23,22 +23,20 @@
             IsQuickAccessToolBarMenuDropDownVisible="False"
             IsQuickAccessToolBarVisible="False"
             SelectedTabIndex="{Binding SelectedTabIndex, Mode=TwoWay}">
-            <fl:RibbonTabItem Header="Edit clips">
-                <fl:RibbonGroupBox Header="Webcam">
+            <fl:RibbonTabItem Header="Webcam">
+                <fl:RibbonGroupBox Header="Webcam control">
                     <fl:Button Command="{Binding WebcamPlayCommand}" Header="Play" />
                     <fl:Button Command="{Binding WebcamPauseCommand}" Header="Pause" />
                 </fl:RibbonGroupBox>
-                <fl:RibbonGroupBox Header="Clips">
+            </fl:RibbonTabItem>
+            <fl:RibbonTabItem Header="Clips">
+                <fl:RibbonGroupBox Header="Clips selection">
                     <fl:Button Command="{Binding ClipAddCommand}" Header="Add" />
                     <fl:Button Command="{Binding ClipRemoveCommand}" Header="Remove" />
                 </fl:RibbonGroupBox>
             </fl:RibbonTabItem>
-            <fl:RibbonTabItem Header="Edit templates">
-                <fl:RibbonGroupBox Header="Webcam">
-                    <fl:Button Command="{Binding WebcamPlayCommand}" Header="Play" />
-                    <fl:Button Command="{Binding WebcamPauseCommand}" Header="Pause" />
-                </fl:RibbonGroupBox>
-                <fl:RibbonGroupBox Header="Clips">
+            <fl:RibbonTabItem Header="Templates">
+                <fl:RibbonGroupBox Header="Templates selection">
                     <fl:DropDownButton Header="Select" ItemsSource="{Binding Templates}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="vm:TemplateViewModel">
@@ -51,6 +49,9 @@
                         </ItemsControl.ItemTemplate>
                     </fl:DropDownButton>
                     <fl:Button Command="{Binding TemplateRemoveCommand}" Header="Remove" />
+                </fl:RibbonGroupBox>
+                <fl:RibbonGroupBox Header="Samples detecion">
+                    <fl:ToggleButton Header="Determine samples" />
                 </fl:RibbonGroupBox>
             </fl:RibbonTabItem>
         </fl:Ribbon>

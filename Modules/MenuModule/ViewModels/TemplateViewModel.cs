@@ -50,7 +50,7 @@ namespace MenuModule.ViewModels
 
         private void OnClick()
         {
-            templateService.Activate(Clip);
+            templateService.Select(Clip);
         }
 
         #endregion Private Methods

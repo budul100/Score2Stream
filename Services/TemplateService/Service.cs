@@ -11,15 +11,19 @@ namespace TemplateService
     {
         #region Public Events
 
-        public event EventHandler OnTemplateActivatedEvent;
+        public event EventHandler OnServiceDeactivatedEvent;
 
         public event EventHandler OnTemplatesChangedEvent;
+
+        public event EventHandler OnTemplateSelectedEvent;
 
         #endregion Public Events
 
         #region Public Properties
 
-        public Template Active { get; set; }
+        public bool IsActive { get; set; }
+
+        public Template Selection { get; set; }
 
         public List<Template> Templates { get; } = new List<Template>();
 
@@ -27,12 +31,34 @@ namespace TemplateService
 
         #region Public Methods
 
-        public void Activate(Clip clip)
+        public void Deactivate()
         {
-            Active = Templates
+            Unselect();
+
+            OnServiceDeactivatedEvent?.Invoke(
+                sender: this,
+                e: default);
+        }
+
+        public void Remove()
+        {
+            if (Selection != default)
+            {
+                Templates.Remove(Selection);
+                Selection = default;
+
+                OnTemplatesChangedEvent?.Invoke(
+                    sender: this,
+                    e: default);
+            }
+        }
+
+        public void Select(Clip clip)
+        {
+            Selection = Templates
                 .SingleOrDefault(t => t.Clip == clip);
 
-            if (Active == default)
+            if (Selection == default)
             {
                 var current = new Template
                 {
@@ -46,27 +72,27 @@ namespace TemplateService
                     sender: this,
                     e: default);
 
-                Active = current;
+                Selection = current;
             }
 
-            OnTemplateActivatedEvent?.Invoke(
+            OnTemplateSelectedEvent?.Invoke(
                 sender: this,
                 e: default);
         }
 
-        public void Remove()
-        {
-            if (Active != default)
-            {
-                Templates.Remove(Active);
-                Active = default;
+        #endregion Public Methods
 
-                OnTemplatesChangedEvent?.Invoke(
-                    sender: this,
-                    e: default);
-            }
+        #region Private Methods
+
+        private void Unselect()
+        {
+            Selection = default;
+
+            OnTemplateSelectedEvent?.Invoke(
+                sender: this,
+                e: default);
         }
 
-        #endregion Public Methods
+        #endregion Private Methods
     }
 }

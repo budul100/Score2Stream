@@ -11,32 +11,25 @@ namespace ClipService
     {
         #region Public Events
 
-        public event EventHandler OnClipActivatedEvent;
-
         public event EventHandler OnClipDefinedEvent;
 
         public event EventHandler OnClipsChangedEvent;
+
+        public event EventHandler OnClipSelectedEvent;
+
+        public event EventHandler OnServiceDeactivatedEvent;
 
         #endregion Public Events
 
         #region Public Properties
 
-        public Clip Active { get; private set; }
-
         public List<Clip> Clips { get; } = new List<Clip>();
+
+        public Clip Selection { get; private set; }
 
         #endregion Public Properties
 
         #region Public Methods
-
-        public void Activate(Clip clip)
-        {
-            Active = clip;
-
-            OnClipActivatedEvent?.Invoke(
-                sender: this,
-                e: default);
-        }
 
         public void Add()
         {
@@ -53,12 +46,21 @@ namespace ClipService
                 sender: this,
                 e: default);
 
-            Activate(clip);
+            Select(clip);
+        }
+
+        public void Deactivate()
+        {
+            Unselect();
+
+            OnServiceDeactivatedEvent?.Invoke(
+                sender: this,
+                e: default);
         }
 
         public void Define()
         {
-            if (Active != default)
+            if (Selection != default)
             {
                 OnClipDefinedEvent?.Invoke(
                     sender: this,
@@ -75,15 +77,24 @@ namespace ClipService
 
         public void Remove()
         {
-            if (Active != default)
+            if (Selection != default)
             {
-                Clips.Remove(Active);
-                Active = default;
+                Clips.Remove(Selection);
+                Selection = default;
 
                 OnClipsChangedEvent?.Invoke(
                     sender: this,
                     e: default);
             }
+        }
+
+        public void Select(Clip clip)
+        {
+            Selection = clip;
+
+            OnClipSelectedEvent?.Invoke(
+                sender: this,
+                e: default);
         }
 
         #endregion Public Methods
@@ -102,6 +113,15 @@ namespace ClipService
             } while (!IsUniqueName(result));
 
             return result;
+        }
+
+        private void Unselect()
+        {
+            Selection = default;
+
+            OnClipSelectedEvent?.Invoke(
+                sender: this,
+                e: default);
         }
 
         #endregion Private Methods
