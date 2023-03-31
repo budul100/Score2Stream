@@ -3,6 +3,7 @@ using Prism.Regions;
 using ScoreboardOCR.Core.Constants;
 using ScoreboardOCR.Core.Interfaces;
 using ScoreboardOCR.Core.Mvvm;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -37,8 +38,12 @@ namespace MenuModule.ViewModels
             this.regionManager = regionManager;
 
             webcamService.OnContentChangedEvent += OnContentChanged;
+
             clipService.OnClipsChangedEvent += OnClipsChanged;
+            clipService.OnClipsUpdatedEvent += OnClipsUpdated;
+
             templateService.OnTemplatesChangedEvent += OnTemplatesChanged;
+            templateService.OnTemplatesUpdatedEvent += OnTemplatesUpdated;
 
             this.WebcamPlayCommand = new DelegateCommand(
                 executeMethod: WebcamStartAsync,
@@ -53,6 +58,9 @@ namespace MenuModule.ViewModels
             this.ClipRemoveCommand = new DelegateCommand(
                 executeMethod: ClipRemove,
                 canExecuteMethod: () => clipService.Selection != default);
+            this.ClipAsTemplateCommand = new DelegateCommand(
+                executeMethod: ClipAsTemplate,
+                canExecuteMethod: () => clipService.Selection?.Content != default);
 
             this.TemplateRemoveCommand = new DelegateCommand(
                 executeMethod: TemplateRemove,
@@ -65,7 +73,11 @@ namespace MenuModule.ViewModels
 
         public DelegateCommand ClipAddCommand { get; }
 
+        public DelegateCommand ClipAsTemplateCommand { get; }
+
         public DelegateCommand ClipRemoveCommand { get; }
+
+        public bool HasTemplates => templateService.Templates.Any();
 
         public int SelectedTabIndex
         {
@@ -105,6 +117,14 @@ namespace MenuModule.ViewModels
             clipService.Add();
         }
 
+        private void ClipAsTemplate()
+        {
+            if (clipService.Selection != default)
+            {
+                templateService.Select(clipService.Selection);
+            }
+        }
+
         private void ClipRemove()
         {
             clipService.Remove();
@@ -112,10 +132,13 @@ namespace MenuModule.ViewModels
 
         private void OnClipsChanged(object sender, System.EventArgs e)
         {
-            SetTemplates();
-
             ClipAddCommand.RaiseCanExecuteChanged();
             ClipRemoveCommand.RaiseCanExecuteChanged();
+        }
+
+        private void OnClipsUpdated(object sender, EventArgs e)
+        {
+            UpdateTemplates();
         }
 
         private void OnContentChanged(object sender, System.EventArgs e)
@@ -124,13 +147,19 @@ namespace MenuModule.ViewModels
             WebcamPauseCommand.RaiseCanExecuteChanged();
 
             ClipAddCommand.RaiseCanExecuteChanged();
+            ClipAsTemplateCommand.RaiseCanExecuteChanged();
         }
 
         private void OnTemplatesChanged(object sender, System.EventArgs e)
         {
             SetTemplates();
 
-            TemplateRemoveCommand.RaiseCanExecuteChanged();
+            UpdateTemplatesMenu();
+        }
+
+        private void OnTemplatesUpdated(object sender, EventArgs e)
+        {
+            UpdateTemplatesMenu();
         }
 
         private void SetEditRegion()
@@ -158,23 +187,38 @@ namespace MenuModule.ViewModels
         {
             Templates.Clear();
 
-            foreach (var clip in clipService.Clips)
+            foreach (var template in templateService.Templates)
             {
-                var isActive = templateService.Templates
-                    .Any(t => t.Clip == clip);
-
-                var template = new TemplateViewModel(
+                var current = new TemplateViewModel(
                     templateService: templateService,
-                    clip: clip,
-                    isActive: isActive);
+                    clip: template.Clip);
 
-                Templates.Add(template);
+                Templates.Add(current);
             }
         }
 
         private void TemplateRemove()
         {
             templateService.Remove();
+        }
+
+        private void UpdateTemplates()
+        {
+            foreach (var template in Templates)
+            {
+                template.Update();
+            }
+        }
+
+        private void UpdateTemplatesMenu()
+        {
+            SelectedTabIndex = templateService.Selection != default
+                ? IndexTemplateView
+                : IndexClipView;
+
+            RaisePropertyChanged(nameof(HasTemplates));
+
+            TemplateRemoveCommand.RaiseCanExecuteChanged();
         }
 
         private async void WebcamStartAsync()

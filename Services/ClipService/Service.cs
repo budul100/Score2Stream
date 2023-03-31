@@ -68,9 +68,11 @@ namespace ClipService
         {
             if (Selection != default)
             {
+                var current = Selection;
+
                 Unselect();
 
-                Clips.Remove(Selection);
+                Clips.Remove(current);
 
                 OnClipsChangedEvent?.Invoke(
                     sender: this,

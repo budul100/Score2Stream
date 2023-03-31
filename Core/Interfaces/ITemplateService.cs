@@ -10,7 +10,7 @@ namespace ScoreboardOCR.Core.Interfaces
 
         event EventHandler OnTemplatesChangedEvent;
 
-        event EventHandler OnTemplateSelectedEvent;
+        event EventHandler OnTemplatesUpdatedEvent;
 
         #endregion Public Events
 

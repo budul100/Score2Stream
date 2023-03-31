@@ -10,49 +10,35 @@ namespace MenuModule.ViewModels
     {
         #region Private Fields
 
-        private readonly ITemplateService templateService;
-
-        private bool isActive;
+        private readonly Clip clip;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public TemplateViewModel(ITemplateService templateService, Clip clip, bool isActive)
+        public TemplateViewModel(ITemplateService templateService, Clip clip)
         {
-            this.templateService = templateService;
-
-            Clip = clip;
-            IsActive = isActive;
-
-            OnClickCommand = new DelegateCommand(OnClick);
+            OnClickCommand = new DelegateCommand(() => templateService.Select(clip));
+            this.clip = clip;
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public Clip Clip { get; }
-
-        public bool IsActive
-        {
-            get { return isActive; }
-            set { SetProperty(ref isActive, value); }
-        }
-
-        public string Name => Clip.Name;
+        public string Name => clip.Name;
 
         public DelegateCommand OnClickCommand { get; }
 
         #endregion Public Properties
 
-        #region Private Methods
+        #region Public Methods
 
-        private void OnClick()
+        public void Update()
         {
-            templateService.Select(Clip);
+            RaisePropertyChanged(nameof(Name));
         }
 
-        #endregion Private Methods
+        #endregion Public Methods
     }
 }

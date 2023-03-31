@@ -9,11 +9,26 @@ namespace TemplateService
     public class Service
         : ITemplateService
     {
+        #region Private Fields
+
+        private readonly IClipService clipService;
+
+        #endregion Private Fields
+
+        #region Public Constructors
+
+        public Service(IClipService clipService)
+        {
+            this.clipService = clipService;
+        }
+
+        #endregion Public Constructors
+
         #region Public Events
 
         public event EventHandler OnTemplatesChangedEvent;
 
-        public event EventHandler OnTemplateSelectedEvent;
+        public event EventHandler OnTemplatesUpdatedEvent;
 
         #endregion Public Events
 
@@ -33,8 +48,11 @@ namespace TemplateService
         {
             if (Selection != default)
             {
-                Templates.Remove(Selection);
-                Selection = default;
+                var current = Selection;
+
+                Unselect();
+
+                Templates.Remove(current);
 
                 OnTemplatesChangedEvent?.Invoke(
                     sender: this,
@@ -64,7 +82,9 @@ namespace TemplateService
                 Selection = current;
             }
 
-            OnTemplateSelectedEvent?.Invoke(
+            clipService.Select(Selection.Clip);
+
+            OnTemplatesUpdatedEvent?.Invoke(
                 sender: this,
                 e: default);
         }
@@ -77,7 +97,7 @@ namespace TemplateService
         {
             Selection = default;
 
-            OnTemplateSelectedEvent?.Invoke(
+            OnTemplatesUpdatedEvent?.Invoke(
                 sender: this,
                 e: default);
         }
