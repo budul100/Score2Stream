@@ -2,9 +2,9 @@
 using Prism.Commands;
 using Prism.Events;
 using Prism.Regions;
-using ScoreboardOCR.Core.Constants;
-using ScoreboardOCR.Core.Interfaces;
-using ScoreboardOCR.Core.Mvvm;
+using Core.Constants;
+using Core.Interfaces;
+using Core.Mvvm;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;

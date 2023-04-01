@@ -1,4 +1,4 @@
-﻿namespace ScoreboardOCR.Core.Constants
+﻿namespace Core.Constants
 {
     public static class RegionNames
     {

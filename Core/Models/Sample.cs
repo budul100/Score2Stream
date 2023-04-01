@@ -1,7 +1,7 @@
 ﻿using OpenCvSharp;
 using System.Windows.Media.Imaging;
 
-namespace Core.Models.Receiver
+namespace Core.Models
 {
     public class Sample
     {

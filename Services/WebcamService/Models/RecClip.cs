@@ -1,4 +1,4 @@
-﻿using Core.Models.Receiver;
+﻿using Core.Models;
 using OpenCvSharp;
 
 namespace WebcamService.Models

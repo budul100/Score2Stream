@@ -1,7 +1,7 @@
 ﻿using Core.Events;
-using Core.Models.Receiver;
+using Core.Models;
 using Prism.Events;
-using ScoreboardOCR.Core.Interfaces;
+using Core.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 

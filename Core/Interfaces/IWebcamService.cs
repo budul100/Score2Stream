@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
-namespace ScoreboardOCR.Core.Interfaces
+namespace Core.Interfaces
 {
     public interface IWebcamService
     {

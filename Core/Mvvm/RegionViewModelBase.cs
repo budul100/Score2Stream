@@ -1,7 +1,7 @@
 ﻿using Prism.Regions;
 using System;
 
-namespace ScoreboardOCR.Core.Mvvm
+namespace Core.Mvvm
 {
     public class RegionViewModelBase
         : ViewModelBase, INavigationAware, IConfirmNavigationRequest

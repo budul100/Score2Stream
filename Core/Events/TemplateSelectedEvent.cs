@@ -1,4 +1,4 @@
-﻿using Core.Models.Receiver;
+﻿using Core.Models;
 using Prism.Events;
 
 namespace Core.Events

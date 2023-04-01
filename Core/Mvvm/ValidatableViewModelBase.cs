@@ -4,7 +4,7 @@ using System.Collections;
 using System.ComponentModel;
 using System.Threading.Tasks;
 
-namespace ScoreboardOCR.Core.Mvvm
+namespace Core.Mvvm
 {
     public class ValidatableViewModelBase
         : ViewModelBase, IValidatable, INotifyDataErrorInfo

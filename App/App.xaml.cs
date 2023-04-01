@@ -1,6 +1,6 @@
 ﻿using Prism.Ioc;
 using Prism.Modularity;
-using ScoreboardOCR.Core.Interfaces;
+using Core.Interfaces;
 using ScoreboardOCR.Views;
 using System.Windows;
 

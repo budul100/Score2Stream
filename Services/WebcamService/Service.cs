@@ -1,9 +1,9 @@
 ﻿using Core.Events;
-using Core.Models.Receiver;
+using Core.Models;
 using OpenCvSharp;
 using OpenCvSharp.WpfExtensions;
 using Prism.Events;
-using ScoreboardOCR.Core.Interfaces;
+using Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

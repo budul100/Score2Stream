@@ -1,7 +1,7 @@
 ﻿using Prism.Ioc;
 using Prism.Modularity;
 using Prism.Regions;
-using ScoreboardOCR.Core.Constants;
+using Core.Constants;
 
 namespace ClipModule
 {

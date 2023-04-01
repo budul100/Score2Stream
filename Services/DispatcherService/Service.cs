@@ -1,4 +1,4 @@
-﻿using ScoreboardOCR.Core.Interfaces;
+﻿using Core.Interfaces;
 using System;
 using System.Diagnostics;
 using System.Threading;

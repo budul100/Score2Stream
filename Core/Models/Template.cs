@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Core.Models.Receiver
+namespace Core.Models
 {
     public class Template
     {

@@ -1,6 +1,6 @@
 ﻿using Prism.Ioc;
 using Prism.Modularity;
-using ScoreboardOCR.Core.Constants;
+using Core.Constants;
 
 namespace TemplateModule
 {

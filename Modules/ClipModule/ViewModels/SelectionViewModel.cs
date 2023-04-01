@@ -1,8 +1,8 @@
 ﻿using Core.Events;
+using Core.Interfaces;
+using Core.Mvvm;
 using Prism.Events;
 using Prism.Regions;
-using ScoreboardOCR.Core.Interfaces;
-using ScoreboardOCR.Core.Mvvm;
 using System.Collections.ObjectModel;
 
 namespace ClipModule.ViewModels

@@ -1,7 +1,7 @@
 ﻿using Core.Events;
-using Core.Models.Receiver;
+using Core.Models;
+using Core.Mvvm;
 using Prism.Events;
-using ScoreboardOCR.Core.Mvvm;
 
 namespace WebcamModule.ViewModels
 {

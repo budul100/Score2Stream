@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ScoreboardOCR.Core.Interfaces
+namespace Core.Interfaces
 {
     public interface IDispatcherService
     {

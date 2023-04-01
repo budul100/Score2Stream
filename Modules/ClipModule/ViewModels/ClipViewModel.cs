@@ -1,10 +1,10 @@
 ﻿using Core.Events;
-using Core.Models.Receiver;
+using Core.Interfaces;
+using Core.Models;
+using Core.Mvvm;
 using MvvmValidation;
 using Prism.Commands;
 using Prism.Events;
-using ScoreboardOCR.Core.Interfaces;
-using ScoreboardOCR.Core.Mvvm;
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using System.Windows.Media.Imaging;

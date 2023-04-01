@@ -1,7 +1,7 @@
-﻿using Moq;
+﻿using Core.Interfaces;
+using Moq;
 using Prism.Events;
 using Prism.Regions;
-using ScoreboardOCR.Core.Interfaces;
 using WebcamModule.ViewModels;
 using Xunit;
 

@@ -1,7 +1,7 @@
 ﻿using Prism.Mvvm;
 using Prism.Navigation;
 
-namespace ScoreboardOCR.Core.Mvvm
+namespace Core.Mvvm
 {
     public abstract class ViewModelBase
         : BindableBase, IDestructible

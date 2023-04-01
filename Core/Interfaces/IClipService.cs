@@ -1,7 +1,7 @@
-﻿using Core.Models.Receiver;
+﻿using Core.Models;
 using System.Collections.Generic;
 
-namespace ScoreboardOCR.Core.Interfaces
+namespace Core.Interfaces
 {
     public interface IClipService
     {

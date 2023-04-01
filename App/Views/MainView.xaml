@@ -1,9 +1,9 @@
 ﻿<Window
     x:Class="ScoreboardOCR.Views.MainView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:prism="http://prismlibrary.com/"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:co="clr-namespace:ScoreboardOCR.Core.Constants;assembly=Core"
+    xmlns:co="clr-namespace:Core.Constants;assembly=Core"
+    xmlns:prism="http://prismlibrary.com/"
     Title="{Binding Title}"
     Width="{Binding Width, Mode=TwoWay}"
     Height="{Binding Height, Mode=TwoWay}"
