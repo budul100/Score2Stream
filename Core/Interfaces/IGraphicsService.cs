@@ -14,8 +14,6 @@ namespace Core.Interfaces
 
         void Open(bool openHttps = false);
 
-        void Set(string message);
-
         Task StartAsync(int portWebServer, int portWebSocket);
 
         Task StopAsync();

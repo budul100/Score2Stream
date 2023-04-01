@@ -35,6 +35,7 @@ namespace ScoreboardOCR
             containerRegistry.RegisterSingleton<IWebcamService, WebcamService.Service>();
             containerRegistry.RegisterSingleton<IClipService, ClipService.Service>();
             containerRegistry.RegisterSingleton<ITemplateService, TemplateService.Service>();
+            containerRegistry.RegisterSingleton<IScoreboardService, ScoreboardService.Service>();
             containerRegistry.RegisterSingleton<IGraphicsService, GraphicsService.Service>();
         }
 

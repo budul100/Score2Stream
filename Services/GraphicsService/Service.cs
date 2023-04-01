@@ -17,6 +17,7 @@ namespace GraphicsService
 
         private readonly IDispatcherService dispatcherService;
         private readonly IEventAggregator eventAggregator;
+        private readonly IScoreboardService scoreboardService;
         private CancellationTokenSource cancellationTokenSource;
 
         private WebServer webServer;
@@ -28,10 +29,16 @@ namespace GraphicsService
 
         #region Public Constructors
 
-        public Service(IDispatcherService dispatcherService, IEventAggregator eventAggregator)
+        public Service(IScoreboardService scoreboardService, IDispatcherService dispatcherService,
+            IEventAggregator eventAggregator)
         {
+            this.scoreboardService = scoreboardService;
             this.dispatcherService = dispatcherService;
             this.eventAggregator = eventAggregator;
+
+            eventAggregator.GetEvent<ScoreboardUpdatedEvent>().Subscribe(
+                action: _ => OnScoreboardUpdate(),
+                keepSubscriberReferenceAlive: true);
         }
 
         #endregion Public Constructors
@@ -50,14 +57,6 @@ namespace GraphicsService
             if (IsActive)
             {
                 webServer.Open(openHttps);
-            }
-        }
-
-        public void Set(string message)
-        {
-            if (IsActive)
-            {
-                webSocket.Set(message);
             }
         }
 
@@ -153,6 +152,14 @@ namespace GraphicsService
             }
 
             throw new Exception("No network adapters with an IPv4 address in the system!");
+        }
+
+        private void OnScoreboardUpdate()
+        {
+            if (IsActive)
+            {
+                webSocket.Set(scoreboardService.Message);
+            }
         }
 
         #endregion Private Methods

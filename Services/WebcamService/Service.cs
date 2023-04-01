@@ -136,43 +136,6 @@ namespace WebcamService
 
         #region Private Methods
 
-        private void CreateClipContent(RecClip contentClip)
-        {
-            var thresholdMonochrome = contentClip.Clip.ThresholdMonochrome / thresholdDivider;
-
-            var cropImage = frame
-                .Clone(contentClip.Rect)
-                .ToMonochrome(thresholdMonochrome);
-
-            if (CropContents)
-            {
-                var contourRectangle = cropImage.GetContour();
-
-                contentClip.Clip.Image = cropImage
-                    .Clone(contourRectangle.Value);
-            }
-            else
-            {
-                contentClip.Clip.Image = cropImage;
-            }
-
-            if (contentClip.Clip.Image != default)
-            {
-                contentClip.Clip.Content = contentClip.Clip.Image
-                    .ToBitmapSource();
-
-                if (contentClip.Clip.Template?.Samples?.Any() == true)
-                {
-                    var compare = contentClip.Clip.Template.Samples
-                        .Select(s => (Sample: s, Difference: s.Image.DiffTo(contentClip.Clip.Image)))
-                        .Where(x => ThresholdCompare == 0 || x.Difference >= ThresholdCompare)
-                        .OrderByDescending(x => x.Difference).FirstOrDefault();
-
-                    contentClip.Clip.Value = compare.Sample.Value;
-                }
-            }
-        }
-
         private void CreateRecClip(Clip clip)
         {
             if (frame != default
@@ -236,7 +199,7 @@ namespace WebcamService
 
                         foreach (var contentClip in contentClips)
                         {
-                            CreateClipContent(contentClip);
+                            SetValue(contentClip);
                         }
 
                         contentUpdatedEvent.Publish();
@@ -254,6 +217,44 @@ namespace WebcamService
             Content = default;
 
             contentUpdatedEvent.Publish();
+        }
+
+        private void SetValue(RecClip contentClip)
+        {
+            var thresholdMonochrome = contentClip.Clip.ThresholdMonochrome / thresholdDivider;
+            var thresholdCompare = ThresholdCompare / thresholdDivider;
+
+            var cropImage = frame
+                .Clone(contentClip.Rect)
+                .ToMonochrome(thresholdMonochrome);
+
+            if (CropContents)
+            {
+                var contourRectangle = cropImage.GetContour();
+
+                contentClip.Clip.Image = cropImage
+                    .Clone(contourRectangle.Value);
+            }
+            else
+            {
+                contentClip.Clip.Image = cropImage;
+            }
+
+            if (contentClip.Clip.Image != default)
+            {
+                contentClip.Clip.Content = contentClip.Clip.Image
+                    .ToBitmapSource();
+
+                if (contentClip.Clip.Template?.Samples?.Any() == true)
+                {
+                    var compare = contentClip.Clip.Template.Samples
+                        .Select(s => (Sample: s, Difference: s.Image.DiffTo(contentClip.Clip.Image)))
+                        .Where(x => thresholdCompare == 0 || x.Difference >= thresholdCompare)
+                        .OrderByDescending(x => x.Difference).FirstOrDefault();
+
+                    contentClip.Clip.Value = compare.Sample.Value;
+                }
+            }
         }
 
         #endregion Private Methods
