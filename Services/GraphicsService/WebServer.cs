@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.FileProviders;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -19,6 +20,9 @@ namespace WebserverService
 
         public WebServer(string urlHttp, string urlHttps)
         {
+            UrlHttp = urlHttp;
+            UrlHttps = urlHttps;
+
             var builder = WebApplication.CreateBuilder();
 
             var urls = new List<string>();
@@ -41,7 +45,24 @@ namespace WebserverService
 
         #endregion Public Constructors
 
+        #region Public Properties
+
+        public string UrlHttp { get; }
+
+        public string UrlHttps { get; }
+
+        #endregion Public Properties
+
         #region Public Methods
+
+        public void Open(bool openHttps = false)
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = openHttps ? UrlHttps : UrlHttp,
+                UseShellExecute = true
+            });
+        }
 
         public async Task RunAsync()
         {

@@ -31,6 +31,11 @@
                     <fl:Button Command="{Binding WebcamPlayCommand}" Header="Play webcam" />
                     <fl:Button Command="{Binding WebcamPauseCommand}" Header="Pause webcam" />
                 </fl:RibbonGroupBox>
+                <fl:RibbonGroupBox Header="Graphics control">
+                    <fl:Button Command="{Binding GraphicsStartCommand}" Header="Start graphics server" />
+                    <fl:Button Command="{Binding GraphicsEndCommand}" Header="End graphics server" />
+                    <fl:Button Command="{Binding GraphicsOpenCommand}" Header="Open graphics server" />
+                </fl:RibbonGroupBox>
             </fl:RibbonTabItem>
 
             <fl:RibbonTabItem Header="Clips">

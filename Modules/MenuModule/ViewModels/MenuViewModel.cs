@@ -1,10 +1,10 @@
-﻿using Core.Events;
+﻿using Core.Constants;
+using Core.Events;
+using Core.Interfaces;
+using Core.Mvvm;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Regions;
-using Core.Constants;
-using Core.Interfaces;
-using Core.Mvvm;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -29,7 +29,7 @@ namespace MenuModule.ViewModels
         #region Public Constructors
 
         public MenuViewModel(IWebcamService webcamService, IClipService clipService, ITemplateService templateService,
-            IRegionManager regionManager, IEventAggregator eventAggregator)
+            IGraphicsService graphicsService, IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
             this.templateService = templateService;
@@ -49,8 +49,10 @@ namespace MenuModule.ViewModels
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
                 action: _ => OnSampleSelected());
 
+            eventAggregator.GetEvent<GraphicsUpdatedEvent>().Subscribe(
+                action: OnGraphicsUpdated);
             eventAggregator.GetEvent<WebcamUpdatedEvent>().Subscribe(
-                action: OnContentUpdated);
+                action: OnWebcamUpdated);
 
             this.WebcamPlayCommand = new DelegateCommand(
                 executeMethod: async () => await webcamService.StartAsync(),
@@ -58,6 +60,16 @@ namespace MenuModule.ViewModels
             this.WebcamPauseCommand = new DelegateCommand(
                 executeMethod: async () => await webcamService.StopAsync(),
                 canExecuteMethod: () => webcamService.IsActive);
+
+            this.GraphicsStartCommand = new DelegateCommand(
+                executeMethod: async () => await graphicsService.StartAsync(GraphicsUrls.WebServerHttp, GraphicsUrls.WebSockerHttp),
+                canExecuteMethod: () => !graphicsService.IsActive);
+            this.GraphicsEndCommand = new DelegateCommand(
+                executeMethod: async () => await graphicsService.StopAsync(),
+                canExecuteMethod: () => graphicsService.IsActive);
+            this.GraphicsOpenCommand = new DelegateCommand(
+                executeMethod: () => graphicsService.Open(),
+                canExecuteMethod: () => graphicsService.IsActive);
 
             this.ClipAddCommand = new DelegateCommand(
                 executeMethod: () => clipService.Add(),
@@ -92,6 +104,12 @@ namespace MenuModule.ViewModels
         public DelegateCommand ClipAsTemplateCommand { get; }
 
         public DelegateCommand ClipRemoveCommand { get; }
+
+        public DelegateCommand GraphicsEndCommand { get; }
+
+        public DelegateCommand GraphicsOpenCommand { get; }
+
+        public DelegateCommand GraphicsStartCommand { get; }
 
         public bool HasTemplates => templateService.Templates.Any();
 
@@ -141,13 +159,11 @@ namespace MenuModule.ViewModels
             ClipAsTemplateCommand.RaiseCanExecuteChanged();
         }
 
-        private void OnContentUpdated()
+        private void OnGraphicsUpdated()
         {
-            WebcamPlayCommand.RaiseCanExecuteChanged();
-            WebcamPauseCommand.RaiseCanExecuteChanged();
-
-            ClipAddCommand.RaiseCanExecuteChanged();
-            ClipAsTemplateCommand.RaiseCanExecuteChanged();
+            GraphicsStartCommand.RaiseCanExecuteChanged();
+            GraphicsEndCommand.RaiseCanExecuteChanged();
+            GraphicsOpenCommand.RaiseCanExecuteChanged();
         }
 
         private void OnSampleSelected()
@@ -185,6 +201,15 @@ namespace MenuModule.ViewModels
             TemplateRemoveCommand.RaiseCanExecuteChanged();
 
             SampleAddCommand.RaiseCanExecuteChanged();
+        }
+
+        private void OnWebcamUpdated()
+        {
+            WebcamPlayCommand.RaiseCanExecuteChanged();
+            WebcamPauseCommand.RaiseCanExecuteChanged();
+
+            ClipAddCommand.RaiseCanExecuteChanged();
+            ClipAsTemplateCommand.RaiseCanExecuteChanged();
         }
 
         private void SetEditRegion()

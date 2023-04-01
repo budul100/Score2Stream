@@ -1,9 +1,9 @@
 ﻿using Core.Events;
+using Core.Interfaces;
 using Core.Models;
 using OpenCvSharp;
 using OpenCvSharp.WpfExtensions;
 using Prism.Events;
-using Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

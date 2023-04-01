@@ -14,7 +14,6 @@ namespace WebserverService
     {
         #region Private Fields
 
-        private readonly int requestDelay;
         private readonly WebApplication server;
         private string message;
 
@@ -24,7 +23,9 @@ namespace WebserverService
 
         public WebSocket(string urlHttp, string urlHttps, int requestDelay = 1000)
         {
-            this.requestDelay = requestDelay;
+            UrlHttp = urlHttp;
+            UrlHttps = urlHttps;
+            RequestDelay = requestDelay;
 
             var builder = WebApplication.CreateBuilder();
 
@@ -43,6 +44,16 @@ namespace WebserverService
         }
 
         #endregion Public Constructors
+
+        #region Public Properties
+
+        public int RequestDelay { get; }
+
+        public string UrlHttp { get; }
+
+        public string UrlHttps { get; }
+
+        #endregion Public Properties
 
         #region Public Methods
 
@@ -66,18 +77,17 @@ namespace WebserverService
             {
                 if (context.WebSockets.IsWebSocketRequest)
                 {
-                    using (var webSocket = await context.WebSockets.AcceptWebSocketAsync())
-                    {
-                        while (true)
-                        {
-                            await webSocket.SendAsync(
-                                buffer: Encoding.ASCII.GetBytes(message),
-                                messageType: WebSocketMessageType.Text,
-                                endOfMessage: true,
-                                cancellationToken: CancellationToken.None);
+                    using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
 
-                            await Task.Delay(requestDelay);
-                        }
+                    while (true)
+                    {
+                        await webSocket.SendAsync(
+                            buffer: Encoding.ASCII.GetBytes(message),
+                            messageType: WebSocketMessageType.Text,
+                            endOfMessage: true,
+                            cancellationToken: CancellationToken.None);
+
+                        await Task.Delay(RequestDelay);
                     }
                 }
                 else

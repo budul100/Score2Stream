@@ -1,6 +1,6 @@
-﻿using Prism.Ioc;
+﻿using Core.Interfaces;
+using Prism.Ioc;
 using Prism.Modularity;
-using Core.Interfaces;
 using ScoreboardOCR.Views;
 using System.Windows;
 
@@ -35,6 +35,7 @@ namespace ScoreboardOCR
             containerRegistry.RegisterSingleton<IWebcamService, WebcamService.Service>();
             containerRegistry.RegisterSingleton<IClipService, ClipService.Service>();
             containerRegistry.RegisterSingleton<ITemplateService, TemplateService.Service>();
+            containerRegistry.RegisterSingleton<IGraphicsService, GraphicsService.Service>();
         }
 
         #endregion Protected Methods
