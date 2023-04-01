@@ -62,13 +62,15 @@ namespace WebcamService
 
         #region Public Properties
 
+        public int CameraDeviceId { get; set; }
+
         public BitmapSource Content { get; private set; }
 
         public bool CropContents { get; set; }
 
         public bool IsActive => Content != default;
 
-        public double ThresholdCompare { get; set; }
+        public int ThresholdCompare { get; set; }
 
         #endregion Public Properties
 
@@ -174,16 +176,17 @@ namespace WebcamService
 
             try
             {
+                //using var video = VideoCapture.FromFile(@"..\..\..\..\Additionals\test_images\test_video.mp4");
+
                 //// Creation and disposal of this object should be done in the same thread
                 //// because if not it throws disconnectedContext exception
-                //var video = new VideoCapture();
 
-                using var video = VideoCapture.FromFile(@"..\..\..\..\Additionals\test_images\test_video.mp4");
+                using var video = new VideoCapture();
 
-                //if (!video.Open(CameraDeviceId))
-                //{
-                //    throw new ApplicationException("Cannot connect to camera");
-                //}
+                if (!video.Open(CameraDeviceId))
+                {
+                    throw new ApplicationException("Cannot connect to camera");
+                }
 
                 using var currentFrame = new Mat();
 

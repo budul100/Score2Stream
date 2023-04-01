@@ -21,7 +21,7 @@ namespace MenuModule.ViewModels
         private readonly IEventAggregator eventAggregator;
         private readonly IRegionManager regionManager;
         private readonly ITemplateService templateService;
-
+        private readonly IWebcamService webcamService;
         private int selectedTabIndex;
 
         #endregion Private Fields
@@ -32,6 +32,7 @@ namespace MenuModule.ViewModels
             IGraphicsService graphicsService, IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
+            this.webcamService = webcamService;
             this.templateService = templateService;
             this.regionManager = regionManager;
             this.eventAggregator = eventAggregator;
@@ -99,6 +100,16 @@ namespace MenuModule.ViewModels
 
         #region Public Properties
 
+        public int CameraDeviceId
+        {
+            get { return webcamService.CameraDeviceId; }
+            set
+            {
+                webcamService.CameraDeviceId = value;
+                RaisePropertyChanged(nameof(CameraDeviceId));
+            }
+        }
+
         public DelegateCommand ClipAddCommand { get; }
 
         public DelegateCommand ClipAsTemplateCommand { get; }
@@ -135,6 +146,16 @@ namespace MenuModule.ViewModels
 
         public ObservableCollection<TemplateViewModel> Templates { get; } =
             new ObservableCollection<TemplateViewModel>();
+
+        public int ThresholdCompare
+        {
+            get { return webcamService.ThresholdCompare; }
+            set
+            {
+                webcamService.ThresholdCompare = value;
+                RaisePropertyChanged(nameof(ThresholdCompare));
+            }
+        }
 
         public DelegateCommand WebcamPauseCommand { get; }
 

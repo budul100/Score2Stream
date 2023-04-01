@@ -7,13 +7,15 @@ namespace Core.Interfaces
     {
         #region Public Properties
 
+        int CameraDeviceId { get; set; }
+
         BitmapSource Content { get; }
 
         bool CropContents { get; set; }
 
         bool IsActive { get; }
 
-        double ThresholdCompare { get; set; }
+        int ThresholdCompare { get; set; }
 
         #endregion Public Properties
 

@@ -28,6 +28,7 @@
 
             <fl:RibbonTabItem Header="Webcam">
                 <fl:RibbonGroupBox Header="Webcam control">
+                    <fl:Spinner Header="Camera device id" Value="{Binding CameraDeviceId}" />
                     <fl:Button Command="{Binding WebcamPlayCommand}" Header="Play webcam" />
                     <fl:Button Command="{Binding WebcamPauseCommand}" Header="Pause webcam" />
                 </fl:RibbonGroupBox>
@@ -42,6 +43,7 @@
                 <fl:RibbonGroupBox Header="Clips selection">
                     <fl:Button Command="{Binding ClipAddCommand}" Header="Add new clip" />
                     <fl:Button Command="{Binding ClipRemoveCommand}" Header="Remove selected clip" />
+                    <fl:Spinner Header="Comparison threshold" Value="{Binding ThresholdCompare}" />
                 </fl:RibbonGroupBox>
                 <fl:RibbonGroupBox Header="Templates selection">
                     <fl:Button Command="{Binding ClipAsTemplateCommand}" Header="Use clip as template" />
@@ -67,7 +69,6 @@
                     <fl:Button Command="{Binding SampleRemoveCommand}" Header="Remove selected sample" />
                 </fl:RibbonGroupBox>
             </fl:RibbonTabItem>
-
         </fl:Ribbon>
     </DockPanel>
 </UserControl>
