@@ -1,4 +1,4 @@
-﻿using ScoreboardOCR.Core.Models;
+﻿using Core.Models.Receiver;
 using System.Collections.Generic;
 
 namespace ScoreboardOCR.Core.Interfaces

@@ -1,8 +1,8 @@
 ﻿using Core.Events;
+using Core.Models.Receiver;
 using Prism.Events;
 using Prism.Regions;
 using ScoreboardOCR.Core.Interfaces;
-using ScoreboardOCR.Core.Models;
 using ScoreboardOCR.Core.Mvvm;
 using System.Collections.ObjectModel;
 using System.Windows.Media.Imaging;

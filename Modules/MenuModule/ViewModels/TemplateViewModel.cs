@@ -1,7 +1,7 @@
 ﻿using Core.Events;
+using Core.Models.Receiver;
 using Prism.Commands;
 using Prism.Events;
-using ScoreboardOCR.Core.Models;
 using ScoreboardOCR.Core.Mvvm;
 
 namespace MenuModule.ViewModels

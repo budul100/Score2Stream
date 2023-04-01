@@ -1,9 +1,9 @@
 ﻿using Core.Events;
+using Core.Models.Receiver;
 using MvvmValidation;
 using Prism.Commands;
 using Prism.Events;
 using ScoreboardOCR.Core.Interfaces;
-using ScoreboardOCR.Core.Models;
 using ScoreboardOCR.Core.Mvvm;
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;

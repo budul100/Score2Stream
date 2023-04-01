@@ -31,6 +31,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TemplateModule", "Modules\T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TemplateService", "Services\TemplateService\TemplateService.csproj", "{9336CFDB-BDFA-47DF-9BF4-D95E9EDF217F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScoreboardService", "Services\ScoreboardService\ScoreboardService.csproj", "{01FEB0CE-D52A-4367-A3A9-403FC25B0E9A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,10 @@ Global
 		{9336CFDB-BDFA-47DF-9BF4-D95E9EDF217F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9336CFDB-BDFA-47DF-9BF4-D95E9EDF217F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9336CFDB-BDFA-47DF-9BF4-D95E9EDF217F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01FEB0CE-D52A-4367-A3A9-403FC25B0E9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01FEB0CE-D52A-4367-A3A9-403FC25B0E9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01FEB0CE-D52A-4367-A3A9-403FC25B0E9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01FEB0CE-D52A-4367-A3A9-403FC25B0E9A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -95,6 +101,7 @@ Global
 		{78814D07-4F6F-484C-BDF4-A1FA1789C3EE} = {C0B49111-01A0-454E-9B4A-BCB3AFA2C666}
 		{410D67FE-333E-499D-AAFA-48992ECE7D08} = {EBC465E9-5272-4414-ADAA-7C616C5D3E97}
 		{9336CFDB-BDFA-47DF-9BF4-D95E9EDF217F} = {C0B49111-01A0-454E-9B4A-BCB3AFA2C666}
+		{01FEB0CE-D52A-4367-A3A9-403FC25B0E9A} = {C0B49111-01A0-454E-9B4A-BCB3AFA2C666}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FED80FA8-DED9-46DD-A68D-9ED470D0BE83}

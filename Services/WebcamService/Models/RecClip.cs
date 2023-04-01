@@ -1,5 +1,5 @@
-﻿using OpenCvSharp;
-using ScoreboardOCR.Core.Models;
+﻿using Core.Models.Receiver;
+using OpenCvSharp;
 
 namespace WebcamService.Models
 {

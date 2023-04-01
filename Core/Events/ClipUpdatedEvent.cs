@@ -1,5 +1,5 @@
-﻿using Prism.Events;
-using ScoreboardOCR.Core.Models;
+﻿using Core.Models.Receiver;
+using Prism.Events;
 
 namespace Core.Events
 {
