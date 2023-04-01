@@ -1,6 +1,9 @@
 ﻿using Core.Events;
 using Core.Interfaces;
 using Prism.Events;
+using System;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using WebserverService;
@@ -16,9 +19,10 @@ namespace GraphicsService
         private readonly IEventAggregator eventAggregator;
         private CancellationTokenSource cancellationTokenSource;
 
-        private Task graphicsTask;
         private WebServer webServer;
+        private Task webServerTask;
         private WebSocket webSocket;
+        private Task webSocketTask;
 
         #endregion Private Fields
 
@@ -57,39 +61,52 @@ namespace GraphicsService
             }
         }
 
-        public async Task StartAsync(string urlWebServer, string urlWebSocket)
+        public async Task StartAsync(int portWebServer, int portWebSocket)
         {
-            if (graphicsTask?.IsCompleted == false)
+            if ((webServerTask?.IsCompleted == false)
+                || (webSocketTask?.IsCompleted == false))
             {
                 return;
             }
 
             cancellationTokenSource = new CancellationTokenSource();
 
-            webServer = new WebServer(
-                urlHttp: urlWebServer,
-                urlHttps: default);
+            var ipAddress = GetLocalIPAddress();
 
-            var webServerTask = webServer.RunAsync();
+            var urlWebSocket = $"http://{ipAddress}:{portWebSocket}";
 
             webSocket = new WebSocket(
                 urlHttp: urlWebSocket,
                 urlHttps: default);
 
-            var webSocketTask = webSocket.RunAsync();
+            webSocketTask = Task.Run(
+                function: async () => dispatcherService.Invoke(() => webSocket.RunAsync()),
+                cancellationToken: cancellationTokenSource.Token);
 
-            graphicsTask = Task.Run(
-                function: async () => dispatcherService.Invoke(() => Task.WhenAll(webServerTask, webSocketTask)),
+            var urlWebServer = $"http://{ipAddress}:{portWebServer}";
+
+            webServer = new WebServer(
+                urlHttp: urlWebServer,
+                urlHttps: default);
+
+            webServerTask = Task.Run(
+                function: async () => dispatcherService.Invoke(() => webServer.RunAsync()),
                 cancellationToken: cancellationTokenSource.Token);
 
             eventAggregator
                 .GetEvent<GraphicsUpdatedEvent>()
                 .Publish();
 
-            if (graphicsTask.IsFaulted)
+            if (webServerTask.IsFaulted)
             {
                 // To let the exceptions exit
-                await graphicsTask;
+                await webServerTask;
+            }
+
+            if (webSocketTask.IsFaulted)
+            {
+                // To let the exceptions exit
+                await webSocketTask;
             }
         }
 
@@ -106,12 +123,38 @@ namespace GraphicsService
                 .GetEvent<GraphicsUpdatedEvent>()
                 .Publish();
 
-            if (graphicsTask != default)
+            if (webServerTask != default)
             {
-                await graphicsTask;
+                // To let the exceptions exit
+                await webServerTask;
+            }
+
+            if (webSocketTask != default)
+            {
+                // To let the exceptions exit
+                await webSocketTask;
             }
         }
 
         #endregion Public Methods
+
+        #region Private Methods
+
+        private static string GetLocalIPAddress()
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return ip.ToString();
+                }
+            }
+
+            throw new Exception("No network adapters with an IPv4 address in the system!");
+        }
+
+        #endregion Private Methods
     }
 }

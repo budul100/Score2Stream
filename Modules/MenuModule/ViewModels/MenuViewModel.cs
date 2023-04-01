@@ -62,7 +62,7 @@ namespace MenuModule.ViewModels
                 canExecuteMethod: () => webcamService.IsActive);
 
             this.GraphicsStartCommand = new DelegateCommand(
-                executeMethod: async () => await graphicsService.StartAsync(GraphicsUrls.WebServerHttp, GraphicsUrls.WebSockerHttp),
+                executeMethod: async () => await graphicsService.StartAsync(GraphicsUrls.PortHttpWebServer, GraphicsUrls.PortHttpWebSocket),
                 canExecuteMethod: () => !graphicsService.IsActive);
             this.GraphicsEndCommand = new DelegateCommand(
                 executeMethod: async () => await graphicsService.StopAsync(),

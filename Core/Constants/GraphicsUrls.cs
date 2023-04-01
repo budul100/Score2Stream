@@ -4,8 +4,8 @@
     {
         #region Public Fields
 
-        public const string WebServerHttp = "http://localhost:5003";
-        public const string WebSockerHttp = "http://localhost:9000";
+        public const int PortHttpWebServer = 5003;
+        public const int PortHttpWebSocket = 9000;
 
         #endregion Public Fields
     }

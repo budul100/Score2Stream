@@ -16,7 +16,7 @@ namespace Core.Interfaces
 
         void Set(string message);
 
-        Task StartAsync(string urlWebServer, string urlWebSocket);
+        Task StartAsync(int portWebServer, int portWebSocket);
 
         Task StopAsync();
 
