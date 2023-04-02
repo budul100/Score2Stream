@@ -1,4 +1,5 @@
 ﻿using Core.Events;
+using Core.Events.Video;
 using Core.Interfaces;
 using Core.Models;
 using OpenCvSharp;
@@ -7,68 +8,63 @@ using Prism.Events;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
-using WebcamService.Extensions;
-using WebcamService.Models;
+using VideoService.Extensions;
+using VideoService.Models;
 
-namespace WebcamService
+namespace VideoService
 {
     public class Service
-        : IWebcamService, IDisposable
+        : IVideoService
     {
         #region Private Fields
 
-        private const int Delay = 100;
-        private const double thresholdDivider = 100;
+        private const int DelayMin = 10;
+        private const double ThresholdDivider = 100;
 
-        private readonly List<RecClip> contentClips = new();
         private readonly IDispatcherService dispatcherService;
         private readonly IEventAggregator eventAggregator;
+        private readonly List<RecClip> recClips = new();
+        private readonly VideoUpdatedEvent videoUpdatedEvent;
 
         private CancellationTokenSource cancellationTokenSource;
         private Mat frame;
         private bool isDisposed;
-        private Task webcamTask;
+        private Task serviceTask;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public Service(IClipService clipService, IDispatcherService dispatcherService,
+        public Service(IDispatcherService dispatcherService,
             IEventAggregator eventAggregator)
         {
             this.dispatcherService = dispatcherService;
             this.eventAggregator = eventAggregator;
 
-            eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
-                action: c => CreateRecClip(c),
-                keepSubscriberReferenceAlive: true);
-
-            eventAggregator.GetEvent<ClipsChangedEvent>().Subscribe(
-                action: () => contentClips.RemoveAll(c => !clipService.Clips.Contains(c.Clip)),
-                keepSubscriberReferenceAlive: true);
+            videoUpdatedEvent = eventAggregator
+                .GetEvent<VideoUpdatedEvent>();
         }
 
         #endregion Public Constructors
 
-        #region Public Events
-
-        public event EventHandler OnContentUpdatedEvent;
-
-        #endregion Public Events
-
         #region Public Properties
 
-        public int CameraDeviceId { get; set; }
+        public BitmapSource Bitmap { get; private set; }
 
-        public BitmapSource Content { get; private set; }
+        public IClipService ClipService { get; private set; }
 
-        public bool CropContents { get; set; }
+        public bool CropImage { get; set; }
 
-        public bool IsActive => Content != default;
+        public int Delay { get; set; }
+
+        public bool IsActive => Bitmap != default;
+
+        public string Name { get; private set; }
 
         public int ThresholdCompare { get; set; }
 
@@ -82,39 +78,22 @@ namespace WebcamService
             GC.SuppressFinalize(this);
         }
 
-        public async Task StartAsync()
+        public async Task RunAsync(int deviceId, string name, IClipService clipService)
         {
-            if (webcamTask?.IsCompleted == false)
-            {
-                return;
-            }
+            this.ClipService = clipService;
+            this.Name = name;
 
-            cancellationTokenSource = new CancellationTokenSource();
+            eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
+                action: c => CreateRecClip(c),
+                keepSubscriberReferenceAlive: true);
 
-            webcamTask = Task.Run(
-                function: async () => dispatcherService.Invoke(() => RunWebcamAsync()),
-                cancellationToken: cancellationTokenSource.Token);
+            eventAggregator.GetEvent<ClipsChangedEvent>().Subscribe(
+                action: () => recClips.RemoveAll(c => !clipService.Clips.Contains(c.Clip)),
+                keepSubscriberReferenceAlive: true);
 
-            if (webcamTask.IsFaulted)
-            {
-                // To let the exceptions exit
-                await webcamTask;
-            }
-        }
-
-        public async Task StopAsync()
-        {
-            if (cancellationTokenSource?.IsCancellationRequested == true)
-            {
-                return;
-            }
-
-            cancellationTokenSource?.Cancel();
-
-            if (webcamTask != default)
-            {
-                await webcamTask;
-            }
+            await StartAsync(
+                deviceId: deviceId,
+                fileName: default);
         }
 
         #endregion Public Methods
@@ -163,29 +142,43 @@ namespace WebcamService
                         Rect = rectangle.Value,
                     };
 
-                    contentClips.RemoveAll(c => c.Clip == clip);
-                    contentClips.Add(value);
+                    recClips.RemoveAll(c => c.Clip == clip);
+                    recClips.Add(value);
                 }
             }
         }
 
-        private async void RunWebcamAsync()
+        private async void RunInputAsync(int? deviceId, string fileName)
         {
-            var contentUpdatedEvent = eventAggregator
-                .GetEvent<WebcamUpdatedEvent>();
-
             try
             {
-                //using var video = VideoCapture.FromFile(@"..\..\..\..\Additionals\test_images\test_video.mp4");
-
                 //// Creation and disposal of this object should be done in the same thread
                 //// because if not it throws disconnectedContext exception
 
+                await UpdateVideoAsync();
+
                 using var video = new VideoCapture();
 
-                if (!video.Open(CameraDeviceId))
+                if (deviceId.HasValue)
                 {
-                    throw new ApplicationException("Cannot connect to camera");
+                    if (!video.Open(deviceId.Value))
+                    {
+                        throw new ApplicationException(
+                            message: $"Cannot connect to camera {Name}.");
+                    }
+                }
+                else
+                {
+                    if (!File.Exists(fileName))
+                    {
+                        throw new FileNotFoundException(
+                            message: $"The file {fileName} coud not be found.");
+                    }
+                    else if (!video.Open(fileName))
+                    {
+                        throw new ApplicationException(
+                            message: $"Cannot open file {fileName}.");
+                    }
                 }
 
                 using var currentFrame = new Mat();
@@ -198,17 +191,15 @@ namespace WebcamService
                     {
                         frame = currentFrame;
 
-                        Content = currentFrame.ToBitmapSource();
+                        Bitmap = currentFrame.ToBitmapSource();
 
-                        foreach (var contentClip in contentClips)
+                        foreach (var contentClip in recClips)
                         {
                             SetValue(contentClip);
                         }
-
-                        contentUpdatedEvent.Publish();
                     }
 
-                    await Task.Delay(Delay);
+                    await UpdateVideoAsync();
                 }
             }
             catch (Exception ex)
@@ -217,21 +208,21 @@ namespace WebcamService
             }
 
             frame = default;
-            Content = default;
+            Bitmap = default;
 
-            contentUpdatedEvent.Publish();
+            await UpdateVideoAsync();
         }
 
         private void SetValue(RecClip contentClip)
         {
-            var thresholdMonochrome = contentClip.Clip.ThresholdMonochrome / thresholdDivider;
-            var thresholdCompare = ThresholdCompare / thresholdDivider;
+            var thresholdMonochrome = contentClip.Clip.ThresholdMonochrome / ThresholdDivider;
+            var thresholdCompare = ThresholdCompare / ThresholdDivider;
 
             var cropImage = frame
                 .Clone(contentClip.Rect)
                 .ToMonochrome(thresholdMonochrome);
-            CropContents = false;
-            if (CropContents)
+
+            if (CropImage)
             {
                 var contourRectangle = cropImage.GetContour();
 
@@ -245,7 +236,7 @@ namespace WebcamService
 
             if (contentClip.Clip.Image != default)
             {
-                contentClip.Clip.Content = contentClip.Clip.Image
+                contentClip.Clip.Bitmap = contentClip.Clip.Image
                     .ToBitmapSource();
 
                 if (contentClip.Clip.Template?.Samples?.Any() == true)
@@ -264,6 +255,37 @@ namespace WebcamService
             {
                 contentClip.Clip.Value = default;
             }
+        }
+
+        private async Task StartAsync(int? deviceId, string fileName)
+        {
+            if (serviceTask?.IsCompleted == false)
+            {
+                return;
+            }
+
+            cancellationTokenSource = new CancellationTokenSource();
+
+            async Task runTask() => dispatcherService.Invoke(() => RunInputAsync(
+                deviceId: deviceId,
+                fileName: fileName));
+
+            serviceTask = Task.Run(
+                function: runTask,
+                cancellationToken: cancellationTokenSource.Token);
+
+            if (serviceTask.IsFaulted)
+            {
+                // To let the exceptions exit
+                await serviceTask;
+            }
+        }
+
+        private async Task UpdateVideoAsync()
+        {
+            videoUpdatedEvent.Publish();
+
+            await Task.Delay(Delay + DelayMin);
         }
 
         #endregion Private Methods

@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Modules\WebcamModule\WebcamModule.csproj" />
+    <ProjectReference Include="..\..\Modules\WebcamModule\VideoModule.csproj" />
   </ItemGroup>
 
 </Project>

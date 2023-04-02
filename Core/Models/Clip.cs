@@ -13,7 +13,7 @@ namespace Core.Models
 
         #region Public Properties
 
-        public BitmapSource Content { get; set; }
+        public BitmapSource Bitmap { get; set; }
 
         public bool HasDimensions { get; set; }
 

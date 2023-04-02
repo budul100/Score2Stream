@@ -6,6 +6,7 @@ using Core.Interfaces;
 using Core.Mvvm;
 using System.Collections.ObjectModel;
 using System.Windows.Media.Imaging;
+using Core.Events.Video;
 
 namespace TemplateModule.ViewModels
 {
@@ -40,7 +41,7 @@ namespace TemplateModule.ViewModels
                 action: _ => UpdateTemplate(),
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<WebcamUpdatedEvent>().Subscribe(
+            eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
                 action: () => OnUpdateCurrent(),
                 keepSubscriberReferenceAlive: true);
 
@@ -51,7 +52,7 @@ namespace TemplateModule.ViewModels
 
         #region Public Properties
 
-        public BitmapSource Content => template?.Clip?.Content;
+        public BitmapSource Content => template?.Clip?.Bitmap;
 
         public string Current => !string.IsNullOrWhiteSpace(template?.Clip?.Value)
             ? $"{template.Name} => {template.Clip.Value}"

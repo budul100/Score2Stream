@@ -1,12 +1,14 @@
 ﻿<UserControl
     x:Class="MenuModule.Views.MenuView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:prism="http://prismlibrary.com/"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:fl="clr-namespace:Fluent;assembly=Fluent"
     xmlns:hl="clr-namespace:MenuModule.Helpers"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mo="clr-namespace:Core.Models;assembly=Core"
+    xmlns:prism="http://prismlibrary.com/"
     xmlns:vm="clr-namespace:MenuModule.ViewModels"
     d:DataContext="{Binding Source={x:Static hl:DesignTimeViewModelLocator.MenuViewModel}}"
     d:DesignWidth="500"
@@ -26,12 +28,7 @@
             IsQuickAccessToolBarVisible="False"
             SelectedTabIndex="{Binding SelectedTabIndex, Mode=TwoWay}">
 
-            <fl:RibbonTabItem Header="Webcam">
-                <fl:RibbonGroupBox Header="Webcam control">
-                    <fl:Spinner Header="Camera device id" Value="{Binding CameraDeviceId}" />
-                    <fl:Button Command="{Binding WebcamPlayCommand}" Header="Play webcam" />
-                    <fl:Button Command="{Binding WebcamPauseCommand}" Header="Pause webcam" />
-                </fl:RibbonGroupBox>
+            <fl:RibbonTabItem Header="Board">
                 <fl:RibbonGroupBox Header="Graphics control">
                     <fl:Button Command="{Binding GraphicsStartCommand}" Header="Start graphics server" />
                     <fl:Button Command="{Binding GraphicsEndCommand}" Header="End graphics server" />
@@ -39,11 +36,36 @@
                 </fl:RibbonGroupBox>
             </fl:RibbonTabItem>
 
-            <fl:RibbonTabItem Header="Clips">
+            <fl:RibbonTabItem Header="Video">
+                <fl:RibbonGroupBox Header="Video control">
+                    <fl:DropDownButton
+                        x:Name="Inputs"
+                        Header="Select video source"
+                        ItemsSource="{Binding Inputs}">
+                        <b:Interaction.Triggers>
+                            <b:EventTrigger EventName="DropDownOpened">
+                                <b:InvokeCommandAction Command="{Binding InputsUpdateCommand}" />
+                            </b:EventTrigger>
+                        </b:Interaction.Triggers>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="mo:Input">
+                                <fl:MenuItem
+                                    Command="{Binding ElementName=Inputs, Path=DataContext.InputSelectCommand}"
+                                    CommandParameter="{Binding}"
+                                    Header="{Binding Name}"
+                                    IsCheckable="True"
+                                    IsChecked="{Binding IsActive, Mode=TwoWay}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </fl:DropDownButton>
+                </fl:RibbonGroupBox>
                 <fl:RibbonGroupBox Header="Clips selection">
                     <fl:Button Command="{Binding ClipAddCommand}" Header="Add new clip" />
                     <fl:Button Command="{Binding ClipRemoveCommand}" Header="Remove selected clip" />
-                    <fl:Spinner Header="Comparison threshold" Value="{Binding ThresholdCompare}" />
+                    <fl:Spinner
+                        Format="0"
+                        Header="Comparison threshold"
+                        Value="{Binding ThresholdCompare}" />
                 </fl:RibbonGroupBox>
                 <fl:RibbonGroupBox Header="Templates selection">
                     <fl:Button Command="{Binding ClipAsTemplateCommand}" Header="Use clip as template" />
@@ -52,7 +74,7 @@
 
             <fl:RibbonTabItem Header="Templates" IsEnabled="{Binding HasTemplates}">
                 <fl:RibbonGroupBox Header="Templates selection">
-                    <fl:DropDownButton Header="Select template" ItemsSource="{Binding Templates}">
+                    <fl:DropDownButton Header="Select template">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="vm:TemplateViewModel">
                                 <fl:MenuItem
@@ -69,8 +91,6 @@
                     <fl:Button Command="{Binding SampleRemoveCommand}" Header="Remove selected sample" />
                 </fl:RibbonGroupBox>
             </fl:RibbonTabItem>
-
-            <fl:RibbonTabItem Header="Content" />
         </fl:Ribbon>
     </DockPanel>
 </UserControl>

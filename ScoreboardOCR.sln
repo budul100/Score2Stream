@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebcamModule.Tests", "Tests
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{EBC465E9-5272-4414-ADAA-7C616C5D3E97}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebcamModule", "Modules\WebcamModule\WebcamModule.csproj", "{1BA27381-6814-4050-8696-C06AC215CCA6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VideoModule", "Modules\WebcamModule\VideoModule.csproj", "{1BA27381-6814-4050-8696-C06AC215CCA6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{C0B49111-01A0-454E-9B4A-BCB3AFA2C666}"
 EndProject
@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "App", "App\App.csproj", "{5
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", "{43DD475B-7EB7-428A-A9C6-610C988EF63B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebcamService", "Services\WebcamService\WebcamService.csproj", "{1171BF17-9872-42B6-BE76-6401E923308C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VideoService", "Services\WebcamService\VideoService.csproj", "{1171BF17-9872-42B6-BE76-6401E923308C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DispatcherService", "Services\DispatcherService\DispatcherService.csproj", "{C26C8983-9CD9-4E6F-A166-4F3A39BC4E0E}"
 EndProject
@@ -35,7 +35,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphicsService", "Services
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScoreboardService", "Services\ScoreboardService\ScoreboardService.csproj", "{370FEF05-3ABA-4226-9390-8DE6F6751852}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScoreboardModule", "Modules\ScoreboardModule\ScoreboardModule.csproj", "{5EDE643C-339F-4FA8-99B9-23EA4884C8D6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScoreboardModule", "Modules\ScoreboardModule\ScoreboardModule.csproj", "{5EDE643C-339F-4FA8-99B9-23EA4884C8D6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InputService", "Services\InputService\InputService.csproj", "{BB9F9820-FC47-4FD2-A38E-9BFC29E3C093}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -99,6 +101,10 @@ Global
 		{5EDE643C-339F-4FA8-99B9-23EA4884C8D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5EDE643C-339F-4FA8-99B9-23EA4884C8D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5EDE643C-339F-4FA8-99B9-23EA4884C8D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB9F9820-FC47-4FD2-A38E-9BFC29E3C093}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB9F9820-FC47-4FD2-A38E-9BFC29E3C093}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB9F9820-FC47-4FD2-A38E-9BFC29E3C093}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB9F9820-FC47-4FD2-A38E-9BFC29E3C093}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -116,6 +122,7 @@ Global
 		{01FEB0CE-D52A-4367-A3A9-403FC25B0E9A} = {C0B49111-01A0-454E-9B4A-BCB3AFA2C666}
 		{370FEF05-3ABA-4226-9390-8DE6F6751852} = {C0B49111-01A0-454E-9B4A-BCB3AFA2C666}
 		{5EDE643C-339F-4FA8-99B9-23EA4884C8D6} = {EBC465E9-5272-4414-ADAA-7C616C5D3E97}
+		{BB9F9820-FC47-4FD2-A38E-9BFC29E3C093} = {C0B49111-01A0-454E-9B4A-BCB3AFA2C666}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FED80FA8-DED9-46DD-A68D-9ED470D0BE83}

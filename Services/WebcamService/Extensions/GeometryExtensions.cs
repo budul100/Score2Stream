@@ -1,7 +1,7 @@
 ﻿using OpenCvSharp;
 using System;
 
-namespace WebcamService.Extensions
+namespace VideoService.Extensions
 {
     internal static class GeometryExtensions
     {

@@ -13,6 +13,7 @@ namespace ClipModule.ViewModels
         #region Private Fields
 
         private readonly IClipService clipService;
+        private readonly IInputService inputService;
         private readonly IEventAggregator eventAggregator;
         private readonly ITemplateService templateService;
 
@@ -20,12 +21,11 @@ namespace ClipModule.ViewModels
 
         #region Public Constructors
 
-        public SelectionViewModel(IClipService clipService, ITemplateService templateService,
-            IRegionManager regionManager, IEventAggregator eventAggregator)
+        public SelectionViewModel(IInputService inputService, IRegionManager regionManager,
+            IEventAggregator eventAggregator)
             : base(regionManager)
         {
-            this.clipService = clipService;
-            this.templateService = templateService;
+            this.inputService = inputService;
             this.eventAggregator = eventAggregator;
 
             eventAggregator

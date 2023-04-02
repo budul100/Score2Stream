@@ -1,4 +1,5 @@
 ﻿using Core.Events;
+using Core.Events.Video;
 using Core.Interfaces;
 using Core.Models;
 using Core.Mvvm;
@@ -47,7 +48,7 @@ namespace ClipModule.ViewModels
                 action: () => OnUpdateTemplates(),
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<WebcamUpdatedEvent>().Subscribe(
+            eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
                 action: () => OnUpdateWebcam(),
                 keepSubscriberReferenceAlive: true);
 
@@ -73,7 +74,7 @@ namespace ClipModule.ViewModels
 
         #region Public Properties
 
-        public BitmapSource Content => clip.Content;
+        public BitmapSource Content => clip.Bitmap;
 
         public bool IsActive
         {

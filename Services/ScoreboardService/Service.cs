@@ -1,4 +1,5 @@
 ﻿using Core.Events;
+using Core.Events.Video;
 using Core.Interfaces;
 using Core.Models;
 using Core.Models.Sender;
@@ -37,7 +38,7 @@ namespace ScoreboardService
                 action: _ => OnClipUpdate(),
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<WebcamUpdatedEvent>().Subscribe(
+            eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
                 action: UpdateScoreboard,
                 keepSubscriberReferenceAlive: true);
 

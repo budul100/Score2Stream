@@ -1,7 +1,7 @@
-﻿using Prism.Ioc;
+﻿using Core.Constants;
+using Prism.Ioc;
 using Prism.Modularity;
 using Prism.Regions;
-using Core.Constants;
 
 namespace MenuModule
 {

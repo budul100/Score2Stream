@@ -34,8 +34,10 @@ namespace ScoreboardOCR
             var dispatcherService = new DispatcherService.Service(Current.Dispatcher);
             containerRegistry.RegisterInstance<IDispatcherService>(dispatcherService);
 
-            containerRegistry.RegisterSingleton<IWebcamService, WebcamService.Service>();
-            containerRegistry.RegisterSingleton<IClipService, ClipService.Service>();
+            containerRegistry.RegisterSingleton<IInputService, InputService.Service>();
+            containerRegistry.Register<IVideoService, VideoService.Service>();
+            containerRegistry.Register<IClipService, ClipService.Service>();
+
             containerRegistry.RegisterSingleton<ITemplateService, TemplateService.Service>();
             containerRegistry.RegisterSingleton<IScoreboardService, ScoreboardService.Service>();
             containerRegistry.RegisterSingleton<IGraphicsService, GraphicsService.Service>();

@@ -1,10 +1,11 @@
-﻿using Core.Events;
+﻿using Core.Constants;
+using Core.Events;
+using Core.Events.Video;
+using Core.Interfaces;
+using Core.Mvvm;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Regions;
-using Core.Constants;
-using Core.Interfaces;
-using Core.Mvvm;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -19,10 +20,9 @@ namespace WebcamModule.ViewModels
 
         private const int BorderThicknessDefault = 2;
 
-        private readonly IClipService clipService;
         private readonly IEventAggregator eventAggregator;
+        private readonly IInputService inputService;
         private readonly IRegionManager regionManager;
-        private readonly IWebcamService webcamService;
 
         private ClipViewModel activeSelection;
         private int borderThickness;
@@ -43,12 +43,10 @@ namespace WebcamModule.ViewModels
 
         #region Public Constructors
 
-        public WebcamViewModel(IWebcamService webcamService, IClipService clipService, IRegionManager regionManager,
-            IEventAggregator eventAggregator)
+        public WebcamViewModel(IInputService inputService, IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
-            this.webcamService = webcamService;
-            this.clipService = clipService;
+            this.inputService = inputService;
             this.regionManager = regionManager;
             this.eventAggregator = eventAggregator;
 
@@ -60,8 +58,8 @@ namespace WebcamModule.ViewModels
                 action: SetClips,
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<WebcamUpdatedEvent>().Subscribe(
-                action: () => Content = webcamService.Content,
+            eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
+                action: () => Content = inputService.VideoService?.Bitmap,
                 keepSubscriberReferenceAlive: true);
 
             MouseDownCommand = new DelegateCommand(OnMouseDown);
@@ -127,6 +125,7 @@ namespace WebcamModule.ViewModels
         }
 
         public DelegateCommand MouseDownCommand { get; }
+
         public DelegateCommand MouseUpCommand { get; }
 
         public double MouseX
@@ -292,11 +291,11 @@ namespace WebcamModule.ViewModels
             var actualWidth = GetActualWidth();
             var actualHeight = GetActualHeight();
 
-            if (webcamService.IsActive
+            if (inputService.IsActive
                 && actualWidth.HasValue
                 && actualHeight.HasValue)
             {
-                foreach (var clip in clipService.Clips)
+                foreach (var clip in inputService.ClipService.Clips)
                 {
                     var current = new ClipViewModel(
                         clip: clip,

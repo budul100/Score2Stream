@@ -1,6 +1,9 @@
 ﻿using Core.Constants;
 using Core.Events;
+using Core.Events.Input;
+using Core.Events.Video;
 using Core.Interfaces;
+using Core.Models;
 using Core.Mvvm;
 using Prism.Commands;
 using Prism.Events;
@@ -15,28 +18,40 @@ namespace MenuModule.ViewModels
     {
         #region Private Fields
 
+        private const int ViewIndexBoard = 0;
         private const int ViewIndexClip = 1;
-        private const int ViewIndexContent = 3;
         private const int ViewIndexTemplate = 2;
 
         private readonly IEventAggregator eventAggregator;
+        private readonly IInputService inputService;
         private readonly IRegionManager regionManager;
         private readonly ITemplateService templateService;
-        private readonly IWebcamService webcamService;
+
         private int selectedTabIndex;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public MenuViewModel(IWebcamService webcamService, IClipService clipService, ITemplateService templateService,
-            IGraphicsService graphicsService, IRegionManager regionManager, IEventAggregator eventAggregator)
+        public MenuViewModel(ITemplateService templateService, IGraphicsService graphicsService, IInputService inputService,
+            IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
-            this.webcamService = webcamService;
             this.templateService = templateService;
+            this.inputService = inputService;
             this.regionManager = regionManager;
             this.eventAggregator = eventAggregator;
+
+            this.InputsUpdateCommand = new DelegateCommand(UpdateInputs);
+            this.InputSelectCommand = new DelegateCommand<Input>(i => inputService.Select(i));
+
+            eventAggregator.GetEvent<InputSelectedEvent>().Subscribe(
+                action: _ => UpdateInputs());
+            eventAggregator.GetEvent<InputsChangedEvent>().Subscribe(
+                action: UpdateInputs);
+
+            eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
+                action: OnVideoUpdated);
 
             eventAggregator.GetEvent<ClipsChangedEvent>().Subscribe(
                 action: OnClipsChanged);
@@ -53,15 +68,6 @@ namespace MenuModule.ViewModels
 
             eventAggregator.GetEvent<GraphicsUpdatedEvent>().Subscribe(
                 action: OnGraphicsUpdated);
-            eventAggregator.GetEvent<WebcamUpdatedEvent>().Subscribe(
-                action: OnWebcamUpdated);
-
-            this.WebcamPlayCommand = new DelegateCommand(
-                executeMethod: async () => await webcamService.StartAsync(),
-                canExecuteMethod: () => !webcamService.IsActive);
-            this.WebcamPauseCommand = new DelegateCommand(
-                executeMethod: async () => await webcamService.StopAsync(),
-                canExecuteMethod: () => webcamService.IsActive);
 
             this.GraphicsStartCommand = new DelegateCommand(
                 executeMethod: async () => await graphicsService.StartAsync(GraphicsUrls.PortHttpWebServer, GraphicsUrls.PortHttpWebSocket),
@@ -74,16 +80,16 @@ namespace MenuModule.ViewModels
                 canExecuteMethod: () => graphicsService.IsActive);
 
             this.ClipAddCommand = new DelegateCommand(
-                executeMethod: () => clipService.Add(),
-                canExecuteMethod: () => webcamService.IsActive);
+                executeMethod: () => inputService.ClipService?.Add(),
+                canExecuteMethod: () => inputService.IsActive);
             this.ClipRemoveCommand = new DelegateCommand(
-                executeMethod: () => clipService.Remove(),
-                canExecuteMethod: () => clipService.Clip != default);
+                executeMethod: () => inputService.ClipService?.Remove(),
+                canExecuteMethod: () => inputService.ClipService?.Clip != default);
 
             var addTemplateEvent = eventAggregator.GetEvent<SelectTemplateEvent>();
             this.ClipAsTemplateCommand = new DelegateCommand(
-                executeMethod: () => addTemplateEvent.Publish(clipService.Clip),
-                canExecuteMethod: () => clipService.Clip?.Content != default);
+                executeMethod: () => addTemplateEvent.Publish(inputService.ClipService?.Clip),
+                canExecuteMethod: () => inputService.ClipService?.Clip?.Bitmap != default);
 
             this.TemplateRemoveCommand = new DelegateCommand(
                 executeMethod: () => templateService.RemoveTemplate(),
@@ -95,36 +101,24 @@ namespace MenuModule.ViewModels
             this.SampleRemoveCommand = new DelegateCommand(
                 executeMethod: () => templateService.RemoveSample(),
                 canExecuteMethod: () => templateService.Sample != default);
+
+            inputService.Update();
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public int CameraDeviceId
-        {
-            get { return webcamService.CameraDeviceId; }
-            set
-            {
-                webcamService.CameraDeviceId = value;
-                RaisePropertyChanged(nameof(CameraDeviceId));
-            }
-        }
-
         public DelegateCommand ClipAddCommand { get; }
-
         public DelegateCommand ClipAsTemplateCommand { get; }
-
         public DelegateCommand ClipRemoveCommand { get; }
-
         public DelegateCommand GraphicsEndCommand { get; }
-
         public DelegateCommand GraphicsOpenCommand { get; }
-
         public DelegateCommand GraphicsStartCommand { get; }
-
         public bool HasTemplates => templateService.Templates.Any();
-
+        public ObservableCollection<Input> Inputs { get; private set; }
+        public DelegateCommand<Input> InputSelectCommand { get; }
+        public DelegateCommand InputsUpdateCommand { get; }
         public DelegateCommand SampleAddCommand { get; }
 
         public DelegateCommand SampleRemoveCommand { get; }
@@ -138,29 +132,14 @@ namespace MenuModule.ViewModels
                 {
                     SetProperty(ref selectedTabIndex, value);
 
-                    SetEditRegion();
+                    UpdateRegions();
                 }
             }
         }
 
         public DelegateCommand TemplateRemoveCommand { get; }
 
-        public ObservableCollection<TemplateViewModel> Templates { get; } =
-            new ObservableCollection<TemplateViewModel>();
-
-        public int ThresholdCompare
-        {
-            get { return webcamService.ThresholdCompare; }
-            set
-            {
-                webcamService.ThresholdCompare = value;
-                RaisePropertyChanged(nameof(ThresholdCompare));
-            }
-        }
-
-        public DelegateCommand WebcamPauseCommand { get; }
-
-        public DelegateCommand WebcamPlayCommand { get; }
+        public ObservableCollection<TemplateViewModel> Templates { get; private set; } = new ObservableCollection<TemplateViewModel>();
 
         #endregion Public Properties
 
@@ -225,19 +204,29 @@ namespace MenuModule.ViewModels
             SampleAddCommand.RaiseCanExecuteChanged();
         }
 
-        private void OnWebcamUpdated()
+        private void OnVideoUpdated()
         {
-            WebcamPlayCommand.RaiseCanExecuteChanged();
-            WebcamPauseCommand.RaiseCanExecuteChanged();
-
             ClipAddCommand.RaiseCanExecuteChanged();
             ClipAsTemplateCommand.RaiseCanExecuteChanged();
         }
 
-        private void SetEditRegion()
+        private void UpdateInputs()
+        {
+            Inputs = new ObservableCollection<Input>(inputService.Inputs);
+            RaisePropertyChanged(nameof(Inputs));
+        }
+
+        private void UpdateRegions()
         {
             switch (SelectedTabIndex)
             {
+                case ViewIndexBoard:
+
+                    regionManager.RequestNavigate(
+                        regionName: RegionNames.EditRegion,
+                        source: ViewNames.ContentView);
+                    break;
+
                 case ViewIndexClip:
 
                     regionManager.RequestNavigate(
@@ -251,13 +240,6 @@ namespace MenuModule.ViewModels
                     regionManager.RequestNavigate(
                         regionName: RegionNames.EditRegion,
                         source: ViewNames.TemplateView);
-                    break;
-
-                case ViewIndexContent:
-
-                    regionManager.RequestNavigate(
-                        regionName: RegionNames.EditRegion,
-                        source: ViewNames.ContentView);
                     break;
             }
         }

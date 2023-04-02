@@ -2,7 +2,7 @@
 using System;
 using System.Linq;
 
-namespace WebcamService.Extensions
+namespace VideoService.Extensions
 {
     internal static class ImageExtensions
     {

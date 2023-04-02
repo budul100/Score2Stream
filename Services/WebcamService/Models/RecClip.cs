@@ -1,7 +1,7 @@
 ﻿using Core.Models;
 using OpenCvSharp;
 
-namespace WebcamService.Models
+namespace VideoService.Models
 {
     internal struct RecClip
     {

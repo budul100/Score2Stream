@@ -52,7 +52,7 @@ namespace TemplateService
                 var current = new Sample
                 {
                     Image = Template.Clip.Image,
-                    Content = Template.Clip.Content,
+                    Content = Template.Clip.Bitmap,
                 };
 
                 Template.Samples.Add(current);

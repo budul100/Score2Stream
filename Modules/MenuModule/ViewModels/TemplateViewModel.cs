@@ -12,7 +12,6 @@ namespace MenuModule.ViewModels
         #region Private Fields
 
         private readonly Clip clip;
-        private readonly IEventAggregator eventAggregator;
 
         #endregion Private Fields
 
@@ -21,7 +20,6 @@ namespace MenuModule.ViewModels
         public TemplateViewModel(Clip clip, IEventAggregator eventAggregator)
         {
             this.clip = clip;
-            this.eventAggregator = eventAggregator;
 
             eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
                 action: _ => RaisePropertyChanged(nameof(Name)),
