@@ -15,8 +15,9 @@ namespace MenuModule.ViewModels
     {
         #region Private Fields
 
-        private const int IndexClipView = 1;
-        private const int IndexTemplateView = 2;
+        private const int ViewIndexClip = 1;
+        private const int ViewIndexContent = 3;
+        private const int ViewIndexTemplate = 2;
 
         private readonly IEventAggregator eventAggregator;
         private readonly IRegionManager regionManager;
@@ -216,8 +217,8 @@ namespace MenuModule.ViewModels
         private void OnTemplateSelected()
         {
             SelectedTabIndex = templateService.Template != default
-                ? IndexTemplateView
-                : IndexClipView;
+                ? ViewIndexTemplate
+                : ViewIndexClip;
 
             TemplateRemoveCommand.RaiseCanExecuteChanged();
 
@@ -237,7 +238,7 @@ namespace MenuModule.ViewModels
         {
             switch (SelectedTabIndex)
             {
-                case IndexClipView:
+                case ViewIndexClip:
 
                     regionManager.RequestNavigate(
                         regionName: RegionNames.EditRegion,
@@ -245,11 +246,18 @@ namespace MenuModule.ViewModels
 
                     break;
 
-                case IndexTemplateView:
+                case ViewIndexTemplate:
 
                     regionManager.RequestNavigate(
                         regionName: RegionNames.EditRegion,
                         source: ViewNames.TemplateView);
+                    break;
+
+                case ViewIndexContent:
+
+                    regionManager.RequestNavigate(
+                        regionName: RegionNames.EditRegion,
+                        source: ViewNames.ContentView);
                     break;
             }
         }

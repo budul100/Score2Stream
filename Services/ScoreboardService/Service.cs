@@ -4,7 +4,6 @@ using Core.Models;
 using Core.Models.Sender;
 using Prism.Events;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Text.Json;
 
@@ -39,7 +38,11 @@ namespace ScoreboardService
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<WebcamUpdatedEvent>().Subscribe(
-                action: OnWebcamUpdate,
+                action: UpdateScoreboard,
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<UpdateScoreboardEvent>().Subscribe(
+                action: UpdateScoreboard,
                 keepSubscriberReferenceAlive: true);
         }
 
@@ -47,7 +50,21 @@ namespace ScoreboardService
 
         #region Public Properties
 
+        public bool IsGameOver { get; set; }
+
         public string Message { get; private set; }
+
+        public int Period { get; set; }
+
+        public int ScoreGuest { get; set; }
+
+        public int ScoreHome { get; set; }
+
+        public string TeamGuest { get; set; }
+
+        public string TeamHome { get; set; }
+
+        public string Ticker { get; set; }
 
         #endregion Public Properties
 
@@ -61,7 +78,7 @@ namespace ScoreboardService
             {
                 Clock = clock,
                 Possesion = default,
-                Quarter = default,
+                Quarter = Period,
                 ShotClock = default,
             };
 
@@ -70,8 +87,8 @@ namespace ScoreboardService
                 Color = default,
                 Fouls = default,
                 ImagePath = default,
-                Name = default,
-                Score = default,
+                Name = TeamHome,
+                Score = ScoreHome.ToString(),
             };
 
             var guest = new Guest
@@ -79,8 +96,8 @@ namespace ScoreboardService
                 Color = default,
                 Fouls = default,
                 ImagePath = default,
-                Name = default,
-                Score = default,
+                Name = TeamGuest,
+                Score = ScoreGuest.ToString(),
             };
 
             var result = new Board
@@ -90,7 +107,7 @@ namespace ScoreboardService
                 Home = home,
                 GameID = default,
                 GameOver = false,
-                Ticker = default,
+                Ticker = Ticker,
             };
 
             return result;
@@ -138,20 +155,17 @@ namespace ScoreboardService
             }
         }
 
-        private void OnWebcamUpdate()
+        private void UpdateScoreboard()
         {
-            if (clipService.Clips.Any())
-            {
-                var board = GetBoard();
+            var board = GetBoard();
 
-                Message = JsonSerializer.Serialize(
-                    value: board,
-                    options: serializeOptions);
+            Message = JsonSerializer.Serialize(
+                value: board,
+                options: serializeOptions);
 
-                eventAggregator
-                    .GetEvent<ScoreboardUpdatedEvent>()
-                    .Publish(Message);
-            }
+            eventAggregator
+                .GetEvent<ScoreboardUpdatedEvent>()
+                .Publish(Message);
         }
 
         #endregion Private Methods

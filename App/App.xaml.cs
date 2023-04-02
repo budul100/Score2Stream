@@ -20,6 +20,8 @@ namespace ScoreboardOCR
                 name: nameof(ClipModule));
             moduleCatalog.AddModule<TemplateModule.Module>(
                 name: nameof(TemplateModule));
+            moduleCatalog.AddModule<ScoreboardModule.Module>(
+                name: nameof(ScoreboardModule));
         }
 
         protected override Window CreateShell()

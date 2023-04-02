@@ -33,7 +33,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TemplateService", "Services
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphicsService", "Services\GraphicsService\GraphicsService.csproj", "{01FEB0CE-D52A-4367-A3A9-403FC25B0E9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScoreboardService", "Services\ScoreboardService\ScoreboardService.csproj", "{370FEF05-3ABA-4226-9390-8DE6F6751852}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScoreboardService", "Services\ScoreboardService\ScoreboardService.csproj", "{370FEF05-3ABA-4226-9390-8DE6F6751852}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScoreboardModule", "Modules\ScoreboardModule\ScoreboardModule.csproj", "{5EDE643C-339F-4FA8-99B9-23EA4884C8D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -93,6 +95,10 @@ Global
 		{370FEF05-3ABA-4226-9390-8DE6F6751852}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{370FEF05-3ABA-4226-9390-8DE6F6751852}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{370FEF05-3ABA-4226-9390-8DE6F6751852}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5EDE643C-339F-4FA8-99B9-23EA4884C8D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5EDE643C-339F-4FA8-99B9-23EA4884C8D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5EDE643C-339F-4FA8-99B9-23EA4884C8D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5EDE643C-339F-4FA8-99B9-23EA4884C8D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -109,6 +115,7 @@ Global
 		{9336CFDB-BDFA-47DF-9BF4-D95E9EDF217F} = {C0B49111-01A0-454E-9B4A-BCB3AFA2C666}
 		{01FEB0CE-D52A-4367-A3A9-403FC25B0E9A} = {C0B49111-01A0-454E-9B4A-BCB3AFA2C666}
 		{370FEF05-3ABA-4226-9390-8DE6F6751852} = {C0B49111-01A0-454E-9B4A-BCB3AFA2C666}
+		{5EDE643C-339F-4FA8-99B9-23EA4884C8D6} = {EBC465E9-5272-4414-ADAA-7C616C5D3E97}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FED80FA8-DED9-46DD-A68D-9ED470D0BE83}

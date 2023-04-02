@@ -230,7 +230,7 @@ namespace WebcamService
             var cropImage = frame
                 .Clone(contentClip.Rect)
                 .ToMonochrome(thresholdMonochrome);
-
+            CropContents = false;
             if (CropContents)
             {
                 var contourRectangle = cropImage.GetContour();
@@ -252,11 +252,17 @@ namespace WebcamService
                 {
                     var compare = contentClip.Clip.Template.Samples
                         .Select(s => (Sample: s, Difference: s.Image.DiffTo(contentClip.Clip.Image)))
-                        .Where(x => thresholdCompare == 0 || x.Difference >= thresholdCompare)
+                        .Where(x => thresholdCompare == 0 || x.Difference <= thresholdCompare)
                         .OrderByDescending(x => x.Difference).FirstOrDefault();
 
-                    contentClip.Clip.Value = compare.Sample.Value;
+                    contentClip.Clip.Value = compare != default
+                        ? compare.Sample?.Value
+                        : default;
                 }
+            }
+            else
+            {
+                contentClip.Clip.Value = default;
             }
         }
 

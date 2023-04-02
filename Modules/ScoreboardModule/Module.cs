@@ -2,7 +2,7 @@
 using Prism.Ioc;
 using Prism.Modularity;
 
-namespace TemplateModule
+namespace ScoreboardModule
 {
     public class Module
         : IModule
@@ -14,8 +14,8 @@ namespace TemplateModule
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterForNavigation<Views.SelectionView>(
-                name: ViewNames.TemplateView);
+            containerRegistry.RegisterForNavigation<Views.ContentView>(
+                name: ViewNames.ContentView);
         }
 
         #endregion Public Methods
