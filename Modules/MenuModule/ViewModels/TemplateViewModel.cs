@@ -1,6 +1,6 @@
 ﻿using Core.Events;
 using Core.Models;
-using Core.Mvvm;
+using Core.Prism;
 using Prism.Commands;
 using Prism.Events;
 

@@ -3,7 +3,7 @@ using Prism.Ioc;
 using Prism.Modularity;
 using Prism.Regions;
 
-namespace MenuModule
+namespace VideoModule
 {
     public class Module
         : IModule
@@ -28,14 +28,16 @@ namespace MenuModule
         public void OnInitialized(IContainerProvider containerProvider)
         {
             regionManager.RequestNavigate(
-                regionName: nameof(RegionType.MenuRegion),
-                source: nameof(ViewType.Menu));
+                regionName: nameof(RegionType.OutputRegion),
+                source: nameof(ViewType.Video));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterForNavigation<Views.MenuView>(
-                name: nameof(ViewType.Menu));
+            containerRegistry.RegisterForNavigation<Views.VideoView>(
+                name: nameof(ViewType.Video));
+
+            containerRegistry.Register<ViewModels.SelectionViewModel>();
         }
 
         #endregion Public Methods

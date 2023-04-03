@@ -8,7 +8,7 @@ namespace ClipModule.Helpers
 
         public static ClipViewModel ClipViewModel => default;
 
-        public static SelectionViewModel SelectionViewModel => default;
+        public static ClipsViewModel SelectionViewModel => default;
 
         #endregion Public Properties
     }

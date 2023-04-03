@@ -1,4 +1,4 @@
-﻿using Core.Constants;
+﻿using Core.Enums;
 using Prism.Ioc;
 using Prism.Modularity;
 
@@ -15,7 +15,7 @@ namespace TemplateModule
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.RegisterForNavigation<Views.SelectionView>(
-                name: ViewNames.TemplateView);
+                name: nameof(ViewType.Templates));
         }
 
         #endregion Public Methods

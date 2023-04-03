@@ -1,7 +1,7 @@
 ﻿using Core.Events;
+using Core.Interfaces;
 using Core.Models;
 using Prism.Events;
-using Core.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -31,9 +31,8 @@ namespace ClipService
 
         #region Public Properties
 
-        public List<Clip> Clips { get; } = new List<Clip>();
-
         public Clip Clip { get; private set; }
+        public List<Clip> Clips { get; } = new List<Clip>();
 
         #endregion Public Properties
 

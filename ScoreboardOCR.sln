@@ -5,11 +5,11 @@ VisualStudioVersion = 17.5.33424.131
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{2D5D7EE3-E28B-4981-A190-88D302110206}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebcamModule.Tests", "Tests\ScoreboardOCR.Modules.ModuleName.Tests\WebcamModule.Tests.csproj", "{1DD9FD00-A407-4694-90B2-DF8309BDE09A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VideoModule.Tests", "Tests\Modules\VideoModule.Tests.csproj", "{1DD9FD00-A407-4694-90B2-DF8309BDE09A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{EBC465E9-5272-4414-ADAA-7C616C5D3E97}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VideoModule", "Modules\WebcamModule\VideoModule.csproj", "{1BA27381-6814-4050-8696-C06AC215CCA6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VideoModule", "Modules\VideoModule\VideoModule.csproj", "{1BA27381-6814-4050-8696-C06AC215CCA6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{C0B49111-01A0-454E-9B4A-BCB3AFA2C666}"
 EndProject
@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "App", "App\App.csproj", "{5
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", "{43DD475B-7EB7-428A-A9C6-610C988EF63B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VideoService", "Services\WebcamService\VideoService.csproj", "{1171BF17-9872-42B6-BE76-6401E923308C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VideoService", "Services\VideoService\VideoService.csproj", "{1171BF17-9872-42B6-BE76-6401E923308C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DispatcherService", "Services\DispatcherService\DispatcherService.csproj", "{C26C8983-9CD9-4E6F-A166-4F3A39BC4E0E}"
 EndProject
@@ -37,7 +37,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScoreboardService", "Servic
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScoreboardModule", "Modules\ScoreboardModule\ScoreboardModule.csproj", "{5EDE643C-339F-4FA8-99B9-23EA4884C8D6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InputService", "Services\InputService\InputService.csproj", "{BB9F9820-FC47-4FD2-A38E-9BFC29E3C093}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InputService", "Services\InputService\InputService.csproj", "{BB9F9820-FC47-4FD2-A38E-9BFC29E3C093}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

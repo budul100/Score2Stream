@@ -1,8 +1,7 @@
 ﻿using Core.Events;
 using Core.Events.Video;
-using Core.Interfaces;
 using Core.Models;
-using Core.Mvvm;
+using Core.Prism;
 using MvvmValidation;
 using Prism.Commands;
 using Prism.Events;
@@ -17,9 +16,9 @@ namespace ClipModule.ViewModels
     {
         #region Private Fields
 
-        private readonly Clip clip;
         private readonly IEventAggregator eventAggregator;
-        private readonly ITemplateService templateService;
+
+        private Clip clip;
         private bool isActive;
         private string name;
 
@@ -27,14 +26,9 @@ namespace ClipModule.ViewModels
 
         #region Public Constructors
 
-        public ClipViewModel(Clip clip, IClipService clipService, ITemplateService templateService,
-            IEventAggregator eventAggregator)
+        public ClipViewModel(IEventAggregator eventAggregator)
         {
-            this.clip = clip;
-            this.templateService = templateService;
             this.eventAggregator = eventAggregator;
-
-            Name = clip.Name;
 
             var selectEvent = eventAggregator.GetEvent<SelectClipEvent>();
             OnClickCommand = new DelegateCommand(
@@ -62,10 +56,10 @@ namespace ClipModule.ViewModels
                 validateDelegate: () => RuleResult.Assert(Regex.IsMatch(Name, "^\\S+$"),
                 errorMessage: "Name cannot contain whitespaces."));
 
-            Validator.AddRule(
-                targetName: nameof(Name),
-                validateDelegate: () => RuleResult.Assert(Name == this.clip.Name || clipService.IsUniqueName(Name),
-                errorMessage: $"Name {Name} is already used. Please choose another one."));
+            //Validator.AddRule(
+            //    targetName: nameof(Name),
+            //    validateDelegate: () => RuleResult.Assert(Name == clip.Name || clipService.IsUniqueName(Name),
+            //    errorMessage: $"Name {Name} is already used. Please choose another one."));
 
             OnUpdateTemplates();
         }
@@ -74,7 +68,7 @@ namespace ClipModule.ViewModels
 
         #region Public Properties
 
-        public BitmapSource Content => clip.Bitmap;
+        public BitmapSource Content => clip?.Bitmap;
 
         public bool IsActive
         {
@@ -91,9 +85,9 @@ namespace ClipModule.ViewModels
                 var validation = Validator.Validate(nameof(Name));
 
                 if (validation.IsValid
-                    && this.clip.Name != value)
+                    && clip?.Name != value)
                 {
-                    this.clip.Name = value;
+                    clip.Name = value;
 
                     eventAggregator
                         .GetEvent<ClipUpdatedEvent>()
@@ -106,7 +100,7 @@ namespace ClipModule.ViewModels
 
         public Template Template
         {
-            get { return clip.Template; }
+            get { return clip?.Template; }
             set
             {
                 clip.Template = value;
@@ -118,14 +112,14 @@ namespace ClipModule.ViewModels
 
         public int ThresholdMonochrome
         {
-            get { return this.clip.ThresholdMonochrome; }
+            get { return clip?.ThresholdMonochrome ?? 0; }
             set
             {
                 if (value >= 0
                     && value <= 100
-                    && this.clip.ThresholdMonochrome != value)
+                    && clip?.ThresholdMonochrome != value)
                 {
-                    this.clip.ThresholdMonochrome = value;
+                    clip.ThresholdMonochrome = value;
 
                     eventAggregator
                         .GetEvent<ClipUpdatedEvent>()
@@ -136,17 +130,27 @@ namespace ClipModule.ViewModels
             }
         }
 
-        public string Value => !string.IsNullOrWhiteSpace(clip.Value)
+        public string Value => !string.IsNullOrWhiteSpace(clip?.Value)
             ? $"=> {clip.Value}"
             : default;
 
         #endregion Public Properties
 
+        #region Public Methods
+
+        public void Initialize(Clip clip)
+        {
+            this.clip = clip;
+            Name = clip.Name;
+        }
+
+        #endregion Public Methods
+
         #region Private Methods
 
         private void OnUpdateTemplates()
         {
-            Templates = new ObservableCollection<Template>(templateService.Templates);
+            //Templates = new ObservableCollection<Template>(templateService.Templates);
 
             RaisePropertyChanged(nameof(Templates));
             RaisePropertyChanged(nameof(Template));

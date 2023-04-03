@@ -1,10 +1,11 @@
 ﻿using Core.Constants;
+using Core.Enums;
 using Core.Events;
 using Core.Events.Input;
 using Core.Events.Video;
 using Core.Interfaces;
 using Core.Models;
-using Core.Mvvm;
+using Core.Prism;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Regions;
@@ -110,15 +111,25 @@ namespace MenuModule.ViewModels
         #region Public Properties
 
         public DelegateCommand ClipAddCommand { get; }
+
         public DelegateCommand ClipAsTemplateCommand { get; }
+
         public DelegateCommand ClipRemoveCommand { get; }
+
         public DelegateCommand GraphicsEndCommand { get; }
+
         public DelegateCommand GraphicsOpenCommand { get; }
+
         public DelegateCommand GraphicsStartCommand { get; }
+
         public bool HasTemplates => templateService.Templates.Any();
-        public ObservableCollection<Input> Inputs { get; private set; }
+
+        public ObservableCollection<Input> Inputs { get; } = new ObservableCollection<Input>();
+
         public DelegateCommand<Input> InputSelectCommand { get; }
+
         public DelegateCommand InputsUpdateCommand { get; }
+
         public DelegateCommand SampleAddCommand { get; }
 
         public DelegateCommand SampleRemoveCommand { get; }
@@ -212,7 +223,9 @@ namespace MenuModule.ViewModels
 
         private void UpdateInputs()
         {
-            Inputs = new ObservableCollection<Input>(inputService.Inputs);
+            Inputs.Clear();
+            Inputs.AddRange(inputService.Inputs);
+
             RaisePropertyChanged(nameof(Inputs));
         }
 
@@ -223,23 +236,23 @@ namespace MenuModule.ViewModels
                 case ViewIndexBoard:
 
                     regionManager.RequestNavigate(
-                        regionName: RegionNames.EditRegion,
-                        source: ViewNames.ContentView);
+                        regionName: nameof(RegionType.EditRegion),
+                        source: nameof(ViewType.Board));
                     break;
 
                 case ViewIndexClip:
 
                     regionManager.RequestNavigate(
-                        regionName: RegionNames.EditRegion,
-                        source: ViewNames.ClipView);
+                        regionName: nameof(RegionType.EditRegion),
+                        source: nameof(ViewType.Clips));
 
                     break;
 
                 case ViewIndexTemplate:
 
                     regionManager.RequestNavigate(
-                        regionName: RegionNames.EditRegion,
-                        source: ViewNames.TemplateView);
+                        regionName: nameof(RegionType.EditRegion),
+                        source: nameof(ViewType.Templates));
                     break;
             }
         }

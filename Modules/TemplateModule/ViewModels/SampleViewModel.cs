@@ -1,8 +1,8 @@
 ﻿using Core.Events;
 using Core.Models;
+using Core.Prism;
 using Prism.Commands;
 using Prism.Events;
-using Core.Mvvm;
 using System.Windows.Media.Imaging;
 
 namespace TemplateModule.ViewModels

@@ -14,8 +14,8 @@ namespace ScoreboardOCR
         {
             moduleCatalog.AddModule<MenuModule.Module>(
                 name: nameof(MenuModule));
-            moduleCatalog.AddModule<WebcamModule.Module>(
-                name: nameof(WebcamModule));
+            moduleCatalog.AddModule<VideoModule.Module>(
+                name: nameof(VideoModule));
             moduleCatalog.AddModule<ClipModule.Module>(
                 name: nameof(ClipModule));
             moduleCatalog.AddModule<TemplateModule.Module>(

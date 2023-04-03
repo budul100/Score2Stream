@@ -7,7 +7,7 @@ namespace Core.Models
     {
         #region Private Fields
 
-        private const int ThresholdMonochromeDefault = 80;
+        private const int ThresholdMonochromeDefault = 60;
 
         #endregion Private Fields
 

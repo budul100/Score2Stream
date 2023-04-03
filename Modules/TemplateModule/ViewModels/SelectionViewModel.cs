@@ -3,7 +3,7 @@ using Core.Models;
 using Prism.Events;
 using Prism.Regions;
 using Core.Interfaces;
-using Core.Mvvm;
+using Core.Prism;
 using System.Collections.ObjectModel;
 using System.Windows.Media.Imaging;
 using Core.Events.Video;

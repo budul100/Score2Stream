@@ -1,6 +1,6 @@
 ﻿using Core.Events;
 using Core.Interfaces;
-using Core.Mvvm;
+using Core.Prism;
 using Prism.Events;
 using System;
 

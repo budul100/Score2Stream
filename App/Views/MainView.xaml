@@ -1,24 +1,40 @@
 ﻿<Window
     x:Class="ScoreboardOCR.Views.MainView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:co="clr-namespace:Core.Constants;assembly=Core"
     xmlns:prism="http://prismlibrary.com/"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:co="clr-namespace:Core.Converters;assembly=Core"
+    xmlns:en="clr-namespace:Core.Enums;assembly=Core"
     Title="{Binding Title}"
     Width="{Binding Width, Mode=TwoWay}"
     Height="{Binding Height, Mode=TwoWay}"
     prism:ViewModelLocator.AutoWireViewModel="True">
+    <Window.Resources>
+        <co:EnumToStringConverter x:Key="EnumToStringConverter" />
+    </Window.Resources>
     <DockPanel LastChildFill="True">
-        <ContentControl prism:RegionManager.RegionName="{x:Static co:RegionNames.MenuRegion}" DockPanel.Dock="Top" />
+        <ContentControl DockPanel.Dock="Top">
+            <prism:RegionManager.RegionName>
+                <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.MenuRegion}" />
+            </prism:RegionManager.RegionName>
+        </ContentControl>
         <Grid DockPanel.Dock="Bottom">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*" />
                 <ColumnDefinition Width="3" />
                 <ColumnDefinition Width="1*" />
             </Grid.ColumnDefinitions>
-            <ContentControl Grid.Column="0" prism:RegionManager.RegionName="{x:Static co:RegionNames.WebcamRegion}" />
+            <ContentControl Grid.Column="0">
+                <prism:RegionManager.RegionName>
+                    <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.OutputRegion}" />
+                </prism:RegionManager.RegionName>
+            </ContentControl>
             <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" />
-            <ContentControl Grid.Column="2" prism:RegionManager.RegionName="{x:Static co:RegionNames.EditRegion}" />
+            <ContentControl Grid.Column="2">
+                <prism:RegionManager.RegionName>
+                    <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.EditRegion}" />
+                </prism:RegionManager.RegionName>
+            </ContentControl>
         </Grid>
     </DockPanel>
 </Window>

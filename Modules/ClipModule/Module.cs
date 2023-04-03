@@ -1,7 +1,7 @@
-﻿using Prism.Ioc;
+﻿using Core.Enums;
+using Prism.Ioc;
 using Prism.Modularity;
 using Prism.Regions;
-using Core.Constants;
 
 namespace ClipModule
 {
@@ -28,14 +28,17 @@ namespace ClipModule
         public void OnInitialized(IContainerProvider containerProvider)
         {
             regionManager.RequestNavigate(
-                regionName: RegionNames.EditRegion,
-                source: ViewNames.ClipView);
+                regionName: nameof(RegionType.EditRegion),
+                source: nameof(ViewType.Clips));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterForNavigation<Views.SelectionView>(
-                name: ViewNames.ClipView);
+            containerRegistry.RegisterForNavigation<Views.ClipsView>(
+                name: nameof(ViewType.Clips));
+
+            containerRegistry.RegisterForNavigation<Views.ClipView>(
+                name: typeof(Views.ClipView).FullName);
         }
 
         #endregion Public Methods
