@@ -19,7 +19,9 @@ namespace Core.Interfaces
 
         #region Public Methods
 
-        void Select(Input input);
+        void Select(int deviceId);
+
+        void Select(string fileName);
 
         void Update();
 

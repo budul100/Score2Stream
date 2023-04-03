@@ -6,6 +6,7 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Prism.DryIoc" Version="8.1.97" />
+		<PackageReference Include="MvvmDialogs" Version="9.1.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Core\Core.csproj" />

@@ -1,11 +1,14 @@
-﻿using Core.Events.Input;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Core.Constants;
+using Core.Events.Input;
+using Core.Events.Video;
 using Core.Interfaces;
 using Core.Models;
 using Hompus.VideoInputDevices;
 using Prism.Events;
 using Prism.Ioc;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace InputService
 {
@@ -16,6 +19,7 @@ namespace InputService
 
         private readonly IContainerProvider containerProvider;
         private readonly IEventAggregator eventAggregator;
+
         private Input currentInput;
 
         #endregion Private Fields
@@ -26,6 +30,10 @@ namespace InputService
         {
             this.containerProvider = containerProvider;
             this.eventAggregator = eventAggregator;
+
+            eventAggregator.GetEvent<VideoEndedEvent>().Subscribe(
+                action: UpdateDevices,
+                keepSubscriberReferenceAlive: true);
         }
 
         #endregion Public Constructors
@@ -44,11 +52,67 @@ namespace InputService
 
         #region Public Methods
 
-        public void Select(Input input)
+        public void Select(int deviceId)
+        {
+            var input = Inputs
+                .SingleOrDefault(i => i.DeviceId == deviceId);
+
+            SelectInput(input);
+        }
+
+        public void Select(string fileName)
+        {
+            var input = Inputs
+                .SingleOrDefault(i => i.FileName == fileName);
+
+            if (input == default)
+            {
+                input = new Input(true)
+                {
+                    FileName = fileName,
+                    Name = Path.GetFileName(fileName),
+                };
+
+                Inputs.Add(input);
+            }
+
+            SelectInput(input);
+        }
+
+        public void Update()
+        {
+            UpdateDevices();
+        }
+
+        #endregion Public Methods
+
+        #region Private Methods
+
+        private void AddFileSelection()
+        {
+            if (!Inputs.Any(i => i.IsFile
+                && string.IsNullOrWhiteSpace(i.FileName)))
+            {
+                var input = new Input(true)
+                {
+                    Name = Constants.InputFileText,
+                };
+
+                Inputs.Add(input);
+
+                eventAggregator
+                    .GetEvent<InputsChangedEvent>()
+                    .Publish();
+            }
+        }
+
+        private void SelectInput(Input input)
         {
             if (input.VideoService == default)
             {
-                InitializeService(input);
+                containerProvider
+                    .Resolve<IVideoService>()
+                    .RunAsync(input);
             }
 
             if (currentInput != input)
@@ -61,27 +125,6 @@ namespace InputService
             }
         }
 
-        public void Update()
-        {
-            UpdateDevices();
-        }
-
-        #endregion Public Methods
-
-        #region Private Methods
-
-        private void InitializeService(Input input)
-        {
-            var clipService = containerProvider.Resolve<IClipService>();
-
-            input.VideoService = containerProvider.Resolve<IVideoService>();
-
-            input.VideoService.RunAsync(
-                deviceId: input.DeviceId,
-                name: input.Name,
-                clipService: clipService);
-        }
-
         private void UpdateDevices()
         {
             using var deviceEnumerator = new SystemDeviceEnumerator();
@@ -90,7 +133,8 @@ namespace InputService
                 .OrderBy(d => d.Value).ToArray();
 
             var toBeRemoveds = Inputs
-                .Where(i => !devices.Any(d => d.Key == i.DeviceId)).ToArray();
+                .Where(i => !devices.Any(d => d.Key == i.DeviceId)
+                    && !i.IsActive).ToArray();
 
             foreach (var toBeRemoved in toBeRemoveds)
             {
@@ -103,7 +147,7 @@ namespace InputService
 
             foreach (var toBeAdded in toBeAddeds)
             {
-                var current = new Input
+                var current = new Input(false)
                 {
                     DeviceId = toBeAdded.Key,
                     Name = toBeAdded.Value,
@@ -115,6 +159,8 @@ namespace InputService
             if (toBeRemoveds.Any()
                 || toBeAddeds.Any())
             {
+                AddFileSelection();
+
                 eventAggregator
                     .GetEvent<InputsChangedEvent>()
                     .Publish();

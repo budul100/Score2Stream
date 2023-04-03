@@ -31,7 +31,8 @@ namespace ClipService
 
         #region Public Properties
 
-        public Clip Clip { get; private set; }
+        public Clip Active { get; private set; }
+
         public List<Clip> Clips { get; } = new List<Clip>();
 
         #endregion Public Properties
@@ -65,9 +66,9 @@ namespace ClipService
 
         public void Remove()
         {
-            if (Clip != default)
+            if (Active != default)
             {
-                Clips.Remove(Clip);
+                Clips.Remove(Active);
 
                 eventAggregator
                     .GetEvent<ClipsChangedEvent>()
@@ -75,6 +76,17 @@ namespace ClipService
 
                 SelectClip(default);
             }
+        }
+
+        public void RemoveAll()
+        {
+            Clips.Clear();
+
+            eventAggregator
+                .GetEvent<ClipsChangedEvent>()
+                .Publish();
+
+            SelectClip(default);
         }
 
         #endregion Public Methods
@@ -97,11 +109,11 @@ namespace ClipService
 
         private void SelectClip(Clip clip)
         {
-            Clip = clip;
+            Active = clip;
 
             eventAggregator
                 .GetEvent<ClipSelectedEvent>()
-                .Publish(Clip);
+                .Publish(Active);
         }
 
         #endregion Private Methods

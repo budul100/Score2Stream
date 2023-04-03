@@ -1,8 +1,10 @@
 ﻿namespace Core.Constants
 {
-    public static class GraphicsUrls
+    public static class Constants
     {
         #region Public Fields
+
+        public const string InputFileText = "Select file ...";
 
         public const int PortHttpWebServer = 5003;
         public const int PortHttpWebSocket = 9000;

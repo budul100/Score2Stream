@@ -6,11 +6,15 @@ using Core.Events.Video;
 using Core.Interfaces;
 using Core.Models;
 using Core.Prism;
+using MvvmDialogs;
+using MvvmDialogs.FrameworkDialogs.OpenFile;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Regions;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Windows;
 
 namespace MenuModule.ViewModels
 {
@@ -23,6 +27,7 @@ namespace MenuModule.ViewModels
         private const int ViewIndexClip = 1;
         private const int ViewIndexTemplate = 2;
 
+        private readonly IDialogService dialogService;
         private readonly IEventAggregator eventAggregator;
         private readonly IInputService inputService;
         private readonly IRegionManager regionManager;
@@ -35,16 +40,27 @@ namespace MenuModule.ViewModels
         #region Public Constructors
 
         public MenuViewModel(ITemplateService templateService, IGraphicsService graphicsService, IInputService inputService,
-            IRegionManager regionManager, IEventAggregator eventAggregator)
+            IDialogService dialogService, IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
             this.templateService = templateService;
             this.inputService = inputService;
+            this.dialogService = dialogService;
             this.regionManager = regionManager;
             this.eventAggregator = eventAggregator;
 
             this.InputsUpdateCommand = new DelegateCommand(UpdateInputs);
-            this.InputSelectCommand = new DelegateCommand<Input>(i => inputService.Select(i));
+            this.InputSelectCommand = new DelegateCommand<Input>(i => SelectInput(i));
+
+            this.ClipAddCommand = new DelegateCommand(
+                executeMethod: () => inputService.ClipService?.Add(),
+                canExecuteMethod: () => inputService.IsActive);
+            this.ClipRemoveCommand = new DelegateCommand(
+                executeMethod: () => RemoveClip(),
+                canExecuteMethod: () => inputService.ClipService?.Active != default);
+            this.ClipRemoveAllCommand = new DelegateCommand(
+                executeMethod: () => RemoveAllClips(),
+                canExecuteMethod: () => inputService.ClipService?.Clips?.Any() == true);
 
             eventAggregator.GetEvent<InputSelectedEvent>().Subscribe(
                 action: _ => UpdateInputs());
@@ -71,7 +87,7 @@ namespace MenuModule.ViewModels
                 action: OnGraphicsUpdated);
 
             this.GraphicsStartCommand = new DelegateCommand(
-                executeMethod: async () => await graphicsService.StartAsync(GraphicsUrls.PortHttpWebServer, GraphicsUrls.PortHttpWebSocket),
+                executeMethod: async () => await graphicsService.StartAsync(Constants.PortHttpWebServer, Constants.PortHttpWebSocket),
                 canExecuteMethod: () => !graphicsService.IsActive);
             this.GraphicsEndCommand = new DelegateCommand(
                 executeMethod: async () => await graphicsService.StopAsync(),
@@ -80,17 +96,10 @@ namespace MenuModule.ViewModels
                 executeMethod: () => graphicsService.Open(),
                 canExecuteMethod: () => graphicsService.IsActive);
 
-            this.ClipAddCommand = new DelegateCommand(
-                executeMethod: () => inputService.ClipService?.Add(),
-                canExecuteMethod: () => inputService.IsActive);
-            this.ClipRemoveCommand = new DelegateCommand(
-                executeMethod: () => inputService.ClipService?.Remove(),
-                canExecuteMethod: () => inputService.ClipService?.Clip != default);
-
             var addTemplateEvent = eventAggregator.GetEvent<SelectTemplateEvent>();
             this.ClipAsTemplateCommand = new DelegateCommand(
-                executeMethod: () => addTemplateEvent.Publish(inputService.ClipService?.Clip),
-                canExecuteMethod: () => inputService.ClipService?.Clip?.Bitmap != default);
+                executeMethod: () => addTemplateEvent.Publish(inputService.ClipService?.Active),
+                canExecuteMethod: () => inputService.ClipService?.Active?.Bitmap != default);
 
             this.TemplateRemoveCommand = new DelegateCommand(
                 executeMethod: () => templateService.RemoveTemplate(),
@@ -113,6 +122,8 @@ namespace MenuModule.ViewModels
         public DelegateCommand ClipAddCommand { get; }
 
         public DelegateCommand ClipAsTemplateCommand { get; }
+
+        public DelegateCommand ClipRemoveAllCommand { get; }
 
         public DelegateCommand ClipRemoveCommand { get; }
 
@@ -167,6 +178,7 @@ namespace MenuModule.ViewModels
         {
             ClipAddCommand.RaiseCanExecuteChanged();
             ClipRemoveCommand.RaiseCanExecuteChanged();
+            ClipRemoveAllCommand.RaiseCanExecuteChanged();
 
             ClipAsTemplateCommand.RaiseCanExecuteChanged();
         }
@@ -221,10 +233,90 @@ namespace MenuModule.ViewModels
             ClipAsTemplateCommand.RaiseCanExecuteChanged();
         }
 
+        private void RemoveAllClips()
+        {
+            var result = dialogService.ShowMessageBox(
+                ownerViewModel: this,
+                messageBoxText: "Shall all clips be removed?",
+                caption: "Remove all clips",
+                button: MessageBoxButton.YesNo,
+                icon: MessageBoxImage.Question,
+                defaultResult: MessageBoxResult.No);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                inputService?.ClipService?.RemoveAll();
+            }
+        }
+
+        private void RemoveClip()
+        {
+            var result = MessageBoxResult.Yes;
+
+            if (inputService?.ClipService?.Active?.HasDimensions == true)
+            {
+                result = dialogService.ShowMessageBox(
+                    ownerViewModel: this,
+                    messageBoxText: "Shall the current clip be removed?",
+                    caption: "Remove clip",
+                    button: MessageBoxButton.YesNo,
+                    icon: MessageBoxImage.Question,
+                    defaultResult: MessageBoxResult.No);
+            }
+
+            if (result == MessageBoxResult.Yes)
+            {
+                inputService?.ClipService?.Remove();
+            }
+        }
+
+        private void SelectInput(Input input)
+        {
+            if (input.IsFile)
+            {
+                var fileName = input.FileName;
+
+                if (!File.Exists(input.FileName))
+                {
+                    var settings = new OpenFileDialogSettings();
+                    settings.Title = Constants.InputFileText;
+                    settings.Multiselect = false;
+                    settings.CheckFileExists = true;
+
+                    var result = dialogService.ShowOpenFileDialog(
+                        ownerViewModel: this,
+                        settings: settings);
+
+                    if (result ?? false)
+                    {
+                        fileName = settings.FileName;
+                    }
+                }
+
+                if (File.Exists(fileName))
+                {
+                    inputService.Select(fileName);
+                }
+            }
+            else
+            {
+                inputService.Select(input.DeviceId.Value);
+            }
+        }
+
         private void UpdateInputs()
         {
             Inputs.Clear();
-            Inputs.AddRange(inputService.Inputs);
+
+            var ordereds = inputService.Inputs
+                .OrderByDescending(i => i.Name != Constants.InputFileText)
+                .ThenBy(i => i.IsFile)
+                .ThenBy(i => i.Name).ToArray();
+
+            foreach (var ordered in ordereds)
+            {
+                Inputs.Add(ordered);
+            }
 
             RaisePropertyChanged(nameof(Inputs));
         }

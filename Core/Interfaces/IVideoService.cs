@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Core.Models;
+using System;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
@@ -27,7 +28,7 @@ namespace Core.Interfaces
 
         #region Public Methods
 
-        Task RunAsync(int deviceId, string name, IClipService clipService);
+        Task RunAsync(Input input);
 
         #endregion Public Methods
     }

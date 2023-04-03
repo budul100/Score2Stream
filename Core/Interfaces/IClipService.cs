@@ -7,7 +7,7 @@ namespace Core.Interfaces
     {
         #region Public Properties
 
-        Clip Clip { get; }
+        Clip Active { get; }
 
         List<Clip> Clips { get; }
 
@@ -20,6 +20,8 @@ namespace Core.Interfaces
         bool IsUniqueName(string name);
 
         void Remove();
+
+        void RemoveAll();
 
         #endregion Public Methods
     }

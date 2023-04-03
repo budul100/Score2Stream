@@ -40,9 +40,10 @@ namespace VideoService
 
         #region Public Constructors
 
-        public Service(IDispatcherService dispatcherService,
-            IEventAggregator eventAggregator)
+        public Service(IClipService clipService, IDispatcherService dispatcherService, IEventAggregator eventAggregator)
         {
+            ClipService = clipService;
+
             this.dispatcherService = dispatcherService;
             this.eventAggregator = eventAggregator;
 
@@ -56,7 +57,7 @@ namespace VideoService
 
         public BitmapSource Bitmap { get; private set; }
 
-        public IClipService ClipService { get; private set; }
+        public IClipService ClipService { get; }
 
         public bool CropImage { get; set; }
 
@@ -78,22 +79,22 @@ namespace VideoService
             GC.SuppressFinalize(this);
         }
 
-        public async Task RunAsync(int deviceId, string name, IClipService clipService)
+        public async Task RunAsync(Input input)
         {
-            this.ClipService = clipService;
-            this.Name = name;
+            input.VideoService = this;
+            this.Name = input.Name;
 
             eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
                 action: c => CreateRecClip(c),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<ClipsChangedEvent>().Subscribe(
-                action: () => recClips.RemoveAll(c => !clipService.Clips.Contains(c.Clip)),
+                action: () => recClips.RemoveAll(c => !ClipService.Clips.Contains(c.Clip)),
                 keepSubscriberReferenceAlive: true);
 
             await StartAsync(
-                deviceId: deviceId,
-                fileName: default);
+                deviceId: input.DeviceId,
+                fileName: input.FileName);
         }
 
         #endregion Public Methods
@@ -148,14 +149,15 @@ namespace VideoService
             }
         }
 
-        private async void RunInputAsync(int? deviceId, string fileName)
+        private async void RunAsync(int? deviceId, string fileName)
         {
             try
             {
                 //// Creation and disposal of this object should be done in the same thread
                 //// because if not it throws disconnectedContext exception
 
-                await UpdateVideoAsync();
+                await UpdateVideoAsync(
+                    isEnded: false);
 
                 using var video = new VideoCapture();
 
@@ -183,9 +185,11 @@ namespace VideoService
 
                 using var currentFrame = new Mat();
 
-                while (!cancellationTokenSource.IsCancellationRequested)
+                var hasContent = false;
+
+                do
                 {
-                    video.Read(currentFrame);
+                    hasContent = video.Read(currentFrame);
 
                     if (!currentFrame.Empty())
                     {
@@ -199,8 +203,11 @@ namespace VideoService
                         }
                     }
 
-                    await UpdateVideoAsync();
+                    await UpdateVideoAsync(
+                        isEnded: false);
                 }
+                while (hasContent
+                    && !cancellationTokenSource.IsCancellationRequested);
             }
             catch (Exception ex)
             {
@@ -210,7 +217,8 @@ namespace VideoService
             frame = default;
             Bitmap = default;
 
-            await UpdateVideoAsync();
+            await UpdateVideoAsync(
+                isEnded: true);
         }
 
         private void SetValue(RecClip contentClip)
@@ -266,7 +274,7 @@ namespace VideoService
 
             cancellationTokenSource = new CancellationTokenSource();
 
-            async Task runTask() => dispatcherService.Invoke(() => RunInputAsync(
+            async Task runTask() => dispatcherService.Invoke(() => RunAsync(
                 deviceId: deviceId,
                 fileName: fileName));
 
@@ -281,9 +289,14 @@ namespace VideoService
             }
         }
 
-        private async Task UpdateVideoAsync()
+        private async Task UpdateVideoAsync(bool isEnded)
         {
             videoUpdatedEvent.Publish();
+
+            if (isEnded)
+            {
+                eventAggregator.GetEvent<VideoEndedEvent>().Publish();
+            }
 
             await Task.Delay(Delay + DelayMin);
         }
