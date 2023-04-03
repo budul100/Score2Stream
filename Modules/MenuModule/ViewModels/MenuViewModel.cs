@@ -23,6 +23,7 @@ namespace MenuModule.ViewModels
     {
         #region Private Fields
 
+        private const int DelayMax = 1000;
         private const int ViewIndexBoard = 0;
         private const int ViewIndexClip = 1;
         private const int ViewIndexTemplate = 2;
@@ -127,6 +128,20 @@ namespace MenuModule.ViewModels
 
         public DelegateCommand ClipRemoveCommand { get; }
 
+        public bool CropClips
+        {
+            get { return inputService.VideoService?.CropImage ?? false; }
+            set
+            {
+                if (HasVideoService)
+                {
+                    inputService.VideoService.CropImage = value;
+                }
+
+                RaisePropertyChanged(nameof(CropClips));
+            }
+        }
+
         public DelegateCommand GraphicsEndCommand { get; }
 
         public DelegateCommand GraphicsOpenCommand { get; }
@@ -135,11 +150,29 @@ namespace MenuModule.ViewModels
 
         public bool HasTemplates => templateService.Templates.Any();
 
+        public bool HasVideoService => inputService.VideoService != default;
+
         public ObservableCollection<Input> Inputs { get; } = new ObservableCollection<Input>();
 
         public DelegateCommand<Input> InputSelectCommand { get; }
 
         public DelegateCommand InputsUpdateCommand { get; }
+
+        public int ProcessingDelay
+        {
+            get { return inputService.VideoService?.Delay ?? 0; }
+            set
+            {
+                if (HasVideoService
+                    && value >= 0
+                    && value <= DelayMax)
+                {
+                    inputService.VideoService.Delay = value;
+                }
+
+                RaisePropertyChanged(nameof(ThresholdCompare));
+            }
+        }
 
         public DelegateCommand SampleAddCommand { get; }
 
@@ -162,6 +195,22 @@ namespace MenuModule.ViewModels
         public DelegateCommand TemplateRemoveCommand { get; }
 
         public ObservableCollection<TemplateViewModel> Templates { get; private set; } = new ObservableCollection<TemplateViewModel>();
+
+        public int ThresholdCompare
+        {
+            get { return inputService.VideoService?.ThresholdCompare ?? 0; }
+            set
+            {
+                if (HasVideoService
+                    && value >= 0
+                    && value <= 100)
+                {
+                    inputService.VideoService.ThresholdCompare = value;
+                }
+
+                RaisePropertyChanged(nameof(ThresholdCompare));
+            }
+        }
 
         #endregion Public Properties
 
@@ -319,6 +368,10 @@ namespace MenuModule.ViewModels
             }
 
             RaisePropertyChanged(nameof(Inputs));
+            RaisePropertyChanged(nameof(HasVideoService));
+            RaisePropertyChanged(nameof(CropClips));
+            RaisePropertyChanged(nameof(ThresholdCompare));
+            RaisePropertyChanged(nameof(ProcessingDelay));
         }
 
         private void UpdateRegions()
@@ -333,7 +386,6 @@ namespace MenuModule.ViewModels
                     break;
 
                 case ViewIndexClip:
-
                     regionManager.RequestNavigate(
                         regionName: nameof(RegionType.EditRegion),
                         source: nameof(ViewType.Clips));

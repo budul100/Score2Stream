@@ -1,16 +1,16 @@
 ﻿<UserControl
     x:Class="MenuModule.Views.MenuView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:prism="http://prismlibrary.com/"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mo="clr-namespace:Core.Models;assembly=Core"
     xmlns:fl="clr-namespace:Fluent;assembly=Fluent"
     xmlns:hl="clr-namespace:MenuModule.Helpers"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:md="https://github.com/fantasticfiasco/mvvm-dialogs"
-    xmlns:mo="clr-namespace:Core.Models;assembly=Core"
-    xmlns:prism="http://prismlibrary.com/"
     xmlns:vm="clr-namespace:MenuModule.ViewModels"
+    xmlns:md="https://github.com/fantasticfiasco/mvvm-dialogs"
     d:DataContext="{Binding Source={x:Static hl:DesignTimeViewModelLocator.MenuViewModel}}"
     d:DesignWidth="500"
     md:DialogServiceViews.IsRegistered="True"
@@ -67,10 +67,20 @@
                     <fl:Button Command="{Binding ClipRemoveAllCommand}" Header="Remove all clips" />
                 </fl:RibbonGroupBox>
                 <fl:RibbonGroupBox Header="Clips options">
+                    <fl:CheckBox
+                        Header="Crop clips"
+                        IsChecked="{Binding CropClips, Mode=TwoWay}"
+                        IsEnabled="{Binding HasVideoService}" />
                     <fl:Spinner
                         Format="0"
                         Header="Comparison threshold"
-                        Value="{Binding ThresholdCompare}" />
+                        IsEnabled="{Binding HasVideoService}"
+                        Value="{Binding ThresholdCompare, Mode=TwoWay}" />
+                    <fl:Spinner
+                        Format="0"
+                        Header="Processing delay"
+                        IsEnabled="{Binding HasVideoService}"
+                        Value="{Binding ProcessingDelay, Mode=TwoWay}" />
                 </fl:RibbonGroupBox>
                 <fl:RibbonGroupBox Header="Templates selection">
                     <fl:Button Command="{Binding ClipAsTemplateCommand}" Header="Use clip as template" />

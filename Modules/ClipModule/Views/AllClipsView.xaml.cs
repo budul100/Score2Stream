@@ -2,12 +2,12 @@
 
 namespace ClipModule.Views
 {
-    public partial class ClipsView
+    public partial class AllClipsView
         : UserControl
     {
         #region Public Constructors
 
-        public ClipsView()
+        public AllClipsView()
         {
             InitializeComponent();
         }

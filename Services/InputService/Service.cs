@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Core.Constants;
+﻿using Core.Constants;
 using Core.Events.Input;
 using Core.Events.Video;
 using Core.Interfaces;
@@ -9,6 +6,9 @@ using Core.Models;
 using Hompus.VideoInputDevices;
 using Prism.Events;
 using Prism.Ioc;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace InputService
 {
@@ -133,11 +133,13 @@ namespace InputService
                 .OrderBy(d => d.Value).ToArray();
 
             var toBeRemoveds = Inputs
-                .Where(i => !devices.Any(d => d.Key == i.DeviceId)
-                    && !i.IsActive).ToArray();
+                .Where(i => !i.IsActive
+                    && i.Name != Constants.InputFileText
+                    && !devices.Any(d => d.Key == i.DeviceId)).ToArray();
 
             foreach (var toBeRemoved in toBeRemoveds)
             {
+                toBeRemoved.ClipService.RemoveAll();
                 toBeRemoved.VideoService?.Dispose();
                 Inputs.Remove(toBeRemoved);
             }

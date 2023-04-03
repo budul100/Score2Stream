@@ -5,6 +5,7 @@ using Core.Models;
 using Core.Models.Sender;
 using Prism.Events;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 
@@ -16,18 +17,19 @@ namespace ScoreboardService
         #region Private Fields
 
         private readonly IDictionary<string, Clip> clips = new Dictionary<string, Clip>();
-        private readonly IClipService clipService;
         private readonly IEventAggregator eventAggregator;
+        private readonly IInputService inputService;
         private readonly JsonSerializerOptions serializeOptions;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public Service(IClipService clipService, IEventAggregator eventAggregator)
+        public Service(IInputService inputService, IEventAggregator eventAggregator)
         {
-            this.clipService = clipService;
+            this.inputService = inputService;
             this.eventAggregator = eventAggregator;
+
             serializeOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -148,11 +150,14 @@ namespace ScoreboardService
         {
             clips.Clear();
 
-            foreach (var clip in clipService.Clips)
+            if (inputService?.ClipService?.Clips?.Any() == true)
             {
-                clips.Add(
-                    key: clip.Name,
-                    value: clip);
+                foreach (var clip in inputService.ClipService.Clips)
+                {
+                    clips.Add(
+                        key: clip.Name,
+                        value: clip);
+                }
             }
         }
 

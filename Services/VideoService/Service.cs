@@ -121,7 +121,8 @@ namespace VideoService
         private void CreateRecClip(Clip clip)
         {
             if (frame != default
-                && clip.HasDimensions)
+                && clip.HasDimensions
+                && ClipService.Clips.Contains(clip))
             {
                 var firstX = Convert.ToInt32(clip.RelativeX1 * frame.Size().Width);
                 var secondX = Convert.ToInt32(clip.RelativeX2 * frame.Size().Width);
@@ -230,10 +231,12 @@ namespace VideoService
                 .Clone(contentClip.Rect)
                 .ToMonochrome(thresholdMonochrome);
 
-            if (CropImage)
-            {
-                var contourRectangle = cropImage.GetContour();
+            var contourRectangle = CropImage
+                ? cropImage.GetContour()
+                : default;
 
+            if (contourRectangle.HasValue)
+            {
                 contentClip.Clip.Image = cropImage
                     .Clone(contourRectangle.Value);
             }

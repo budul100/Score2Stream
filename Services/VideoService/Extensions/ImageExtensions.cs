@@ -39,7 +39,8 @@ namespace VideoService.Extensions
         {
             var result = default(Rect?);
 
-            if (image?.Step(0) > 0
+            if (image != default
+                && image?.Step(0) > 0
                 && image.Rows > 0)
             {
                 image.FindContours(

@@ -9,7 +9,7 @@ using System.Collections.ObjectModel;
 
 namespace ClipModule.ViewModels
 {
-    public class ClipsViewModel
+    public class AllClipsViewModel
         : RegionViewModelBase
     {
         #region Private Fields
@@ -21,7 +21,7 @@ namespace ClipModule.ViewModels
 
         #region Public Constructors
 
-        public ClipsViewModel(IInputService inputService, IContainerProvider containerProvider,
+        public AllClipsViewModel(IInputService inputService, IContainerProvider containerProvider,
             IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
@@ -31,6 +31,10 @@ namespace ClipModule.ViewModels
             eventAggregator
                 .GetEvent<InputSelectedEvent>()
                 .Subscribe(_ => UpdateClips());
+
+            eventAggregator
+                .GetEvent<InputsChangedEvent>()
+                .Subscribe(UpdateClips);
 
             eventAggregator
                 .GetEvent<ClipsChangedEvent>()

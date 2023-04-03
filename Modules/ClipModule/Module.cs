@@ -34,7 +34,7 @@ namespace ClipModule
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterForNavigation<Views.ClipsView>(
+            containerRegistry.RegisterForNavigation<Views.AllClipsView>(
                 name: nameof(ViewType.Clips));
 
             containerRegistry.RegisterForNavigation<Views.ClipView>(
