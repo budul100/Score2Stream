@@ -14,13 +14,13 @@ namespace Core.Interfaces
 
         IClipService ClipService { get; }
 
-        bool NoCentering { get; set; }
-
         int Delay { get; set; }
 
         bool IsActive { get; }
 
         string Name { get; }
+
+        bool NoCentering { get; set; }
 
         int ThresholdCompare { get; set; }
 
@@ -29,6 +29,8 @@ namespace Core.Interfaces
         #region Public Methods
 
         Task RunAsync(Input input);
+
+        void StopAll();
 
         #endregion Public Methods
     }

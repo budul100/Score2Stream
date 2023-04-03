@@ -100,6 +100,11 @@ namespace VideoService
                 fileName: input.FileName);
         }
 
+        public void StopAll()
+        {
+            cancellationTokenSource.Cancel();
+        }
+
         #endregion Public Methods
 
         #region Protected Methods

@@ -40,8 +40,9 @@ namespace MenuModule.ViewModels
 
         #region Public Constructors
 
-        public MenuViewModel(ITemplateService templateService, IGraphicsService graphicsService, IInputService inputService,
-            IDialogService dialogService, IRegionManager regionManager, IEventAggregator eventAggregator)
+        public MenuViewModel(ITemplateService templateService, IGraphicsService graphicsService,
+            IInputService inputService, IDialogService dialogService, IRegionManager regionManager,
+            IEventAggregator eventAggregator)
             : base(regionManager)
         {
             this.templateService = templateService;
@@ -52,6 +53,9 @@ namespace MenuModule.ViewModels
 
             this.InputsUpdateCommand = new DelegateCommand(UpdateInputs);
             this.InputSelectCommand = new DelegateCommand<Input>(i => SelectInput(i));
+            this.InputStopAllCommand = new DelegateCommand(
+                executeMethod: () => StopAllInpus(),
+                canExecuteMethod: () => inputService.IsActive);
 
             this.ClipAddCommand = new DelegateCommand(
                 executeMethod: () => inputService.ClipService?.Add(),
@@ -63,8 +67,6 @@ namespace MenuModule.ViewModels
                 executeMethod: () => RemoveAllClips(),
                 canExecuteMethod: () => inputService.ClipService?.Clips?.Any() == true);
 
-            eventAggregator.GetEvent<InputSelectedEvent>().Subscribe(
-                action: _ => UpdateInputs());
             eventAggregator.GetEvent<InputsChangedEvent>().Subscribe(
                 action: UpdateInputs);
 
@@ -136,20 +138,22 @@ namespace MenuModule.ViewModels
 
         public bool HasTemplates => templateService.Templates.Any();
 
-        public bool HasVideoService => inputService.VideoService != default;
-
         public ObservableCollection<Input> Inputs { get; } = new ObservableCollection<Input>();
 
         public DelegateCommand<Input> InputSelectCommand { get; }
 
+        public DelegateCommand InputStopAllCommand { get; }
+
         public DelegateCommand InputsUpdateCommand { get; }
+
+        public bool IsActive => inputService.IsActive;
 
         public bool NoCentering
         {
             get { return inputService.VideoService?.NoCentering ?? false; }
             set
             {
-                if (HasVideoService)
+                if (IsActive)
                 {
                     inputService.VideoService.NoCentering = value;
                 }
@@ -163,7 +167,7 @@ namespace MenuModule.ViewModels
             get { return inputService.VideoService?.Delay ?? 0; }
             set
             {
-                if (HasVideoService
+                if (IsActive
                     && value >= 0
                     && value <= DelayMax)
                 {
@@ -201,7 +205,7 @@ namespace MenuModule.ViewModels
             get { return inputService.VideoService?.ThresholdCompare ?? 0; }
             set
             {
-                if (HasVideoService
+                if (IsActive
                     && value >= 0
                     && value <= 100)
                 {
@@ -278,8 +282,15 @@ namespace MenuModule.ViewModels
 
         private void OnVideoUpdated()
         {
+            InputStopAllCommand.RaiseCanExecuteChanged();
+
             ClipAddCommand.RaiseCanExecuteChanged();
             ClipAsTemplateCommand.RaiseCanExecuteChanged();
+
+            RaisePropertyChanged(nameof(IsActive));
+            RaisePropertyChanged(nameof(NoCentering));
+            RaisePropertyChanged(nameof(ThresholdCompare));
+            RaisePropertyChanged(nameof(ProcessingDelay));
         }
 
         private void RemoveAllClips()
@@ -353,6 +364,22 @@ namespace MenuModule.ViewModels
             }
         }
 
+        private void StopAllInpus()
+        {
+            var result = dialogService.ShowMessageBox(
+                ownerViewModel: this,
+                messageBoxText: "Shall all inputs be stopped?",
+                caption: "Stop all inputs",
+                button: MessageBoxButton.YesNo,
+                icon: MessageBoxImage.Question,
+                defaultResult: MessageBoxResult.No);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                inputService?.VideoService?.StopAll();
+            }
+        }
+
         private void UpdateInputs()
         {
             Inputs.Clear();
@@ -368,10 +395,6 @@ namespace MenuModule.ViewModels
             }
 
             RaisePropertyChanged(nameof(Inputs));
-            RaisePropertyChanged(nameof(HasVideoService));
-            RaisePropertyChanged(nameof(NoCentering));
-            RaisePropertyChanged(nameof(ThresholdCompare));
-            RaisePropertyChanged(nameof(ProcessingDelay));
         }
 
         private void UpdateRegions()
