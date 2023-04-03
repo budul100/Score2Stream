@@ -68,8 +68,8 @@
                 </fl:RibbonGroupBox>
                 <fl:RibbonGroupBox Header="Clips options">
                     <fl:CheckBox
-                        Header="Crop clips"
-                        IsChecked="{Binding CropClips, Mode=TwoWay}"
+                        Header="Deactivate clip centering"
+                        IsChecked="{Binding NoCentering, Mode=TwoWay}"
                         IsEnabled="{Binding HasVideoService}" />
                     <fl:Spinner
                         Format="0"

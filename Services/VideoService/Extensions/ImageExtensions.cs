@@ -61,6 +61,25 @@ namespace VideoService.Extensions
             return result;
         }
 
+        public static Mat ToCentered(this Mat image, Rect contourRectangle, int fullWidth,
+            int fullHeight)
+        {
+            var horizontal = (int)Math.Ceiling((double)(fullWidth - contourRectangle.Width) / 2);
+            var vertical = (int)Math.Ceiling((double)(fullHeight - contourRectangle.Height) / 2);
+
+            var result = image
+                .Clone(contourRectangle)
+                .CopyMakeBorder(
+                    top: vertical,
+                    bottom: vertical,
+                    left: horizontal,
+                    right: horizontal,
+                    borderType: BorderTypes.Constant,
+                    value: 0);
+
+            return result;
+        }
+
         public static Mat ToMonochrome(this Mat image, double threshold)
         {
             var result = default(Mat);

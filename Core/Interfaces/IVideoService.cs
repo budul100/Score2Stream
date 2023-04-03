@@ -14,7 +14,7 @@ namespace Core.Interfaces
 
         IClipService ClipService { get; }
 
-        bool CropImage { get; set; }
+        bool NoCentering { get; set; }
 
         int Delay { get; set; }
 

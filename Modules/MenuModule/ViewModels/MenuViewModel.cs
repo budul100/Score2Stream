@@ -128,20 +128,6 @@ namespace MenuModule.ViewModels
 
         public DelegateCommand ClipRemoveCommand { get; }
 
-        public bool CropClips
-        {
-            get { return inputService.VideoService?.CropImage ?? false; }
-            set
-            {
-                if (HasVideoService)
-                {
-                    inputService.VideoService.CropImage = value;
-                }
-
-                RaisePropertyChanged(nameof(CropClips));
-            }
-        }
-
         public DelegateCommand GraphicsEndCommand { get; }
 
         public DelegateCommand GraphicsOpenCommand { get; }
@@ -157,6 +143,20 @@ namespace MenuModule.ViewModels
         public DelegateCommand<Input> InputSelectCommand { get; }
 
         public DelegateCommand InputsUpdateCommand { get; }
+
+        public bool NoCentering
+        {
+            get { return inputService.VideoService?.NoCentering ?? false; }
+            set
+            {
+                if (HasVideoService)
+                {
+                    inputService.VideoService.NoCentering = value;
+                }
+
+                RaisePropertyChanged(nameof(NoCentering));
+            }
+        }
 
         public int ProcessingDelay
         {
@@ -369,7 +369,7 @@ namespace MenuModule.ViewModels
 
             RaisePropertyChanged(nameof(Inputs));
             RaisePropertyChanged(nameof(HasVideoService));
-            RaisePropertyChanged(nameof(CropClips));
+            RaisePropertyChanged(nameof(NoCentering));
             RaisePropertyChanged(nameof(ThresholdCompare));
             RaisePropertyChanged(nameof(ProcessingDelay));
         }

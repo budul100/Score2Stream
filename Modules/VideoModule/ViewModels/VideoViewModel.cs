@@ -1,5 +1,6 @@
 ﻿using Core.Enums;
 using Core.Events;
+using Core.Events.Input;
 using Core.Events.Video;
 using Core.Interfaces;
 using Core.Prism;
@@ -54,12 +55,16 @@ namespace VideoModule.ViewModels
             this.regionManager = regionManager;
             this.eventAggregator = eventAggregator;
 
-            eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
-                action: c => activeSelection = Selections.SingleOrDefault(v => v.Clip == c),
+            eventAggregator.GetEvent<InputSelectedEvent>().Subscribe(
+                action: _ => UpdateSelections(),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<ClipsChangedEvent>().Subscribe(
                 action: UpdateSelections,
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
+                action: c => activeSelection = Selections.SingleOrDefault(v => v.Clip == c),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(

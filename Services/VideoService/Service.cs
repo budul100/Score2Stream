@@ -23,6 +23,7 @@ namespace VideoService
     {
         #region Private Fields
 
+        private const int DefaultDelay = 300;
         private const int DelayMin = 10;
         private const double ThresholdDivider = 100;
 
@@ -34,6 +35,8 @@ namespace VideoService
         private CancellationTokenSource cancellationTokenSource;
         private Mat frame;
         private bool isDisposed;
+        private int maxHeight;
+        private int maxWidth;
         private Task serviceTask;
 
         #endregion Private Fields
@@ -59,13 +62,13 @@ namespace VideoService
 
         public IClipService ClipService { get; }
 
-        public bool CropImage { get; set; }
-
-        public int Delay { get; set; }
+        public int Delay { get; set; } = DefaultDelay;
 
         public bool IsActive => Bitmap != default;
 
         public string Name { get; private set; }
+
+        public bool NoCentering { get; set; }
 
         public int ThresholdCompare { get; set; }
 
@@ -146,6 +149,9 @@ namespace VideoService
 
                     recClips.RemoveAll(c => c.Clip == clip);
                     recClips.Add(value);
+
+                    maxHeight = recClips.Max(r => r.Rect.Height);
+                    maxWidth = recClips.Max(r => r.Rect.Width);
                 }
             }
         }
@@ -200,7 +206,7 @@ namespace VideoService
 
                         foreach (var contentClip in recClips)
                         {
-                            SetValue(contentClip);
+                            UpdateClip(contentClip);
                         }
                     }
 
@@ -220,52 +226,6 @@ namespace VideoService
 
             await UpdateVideoAsync(
                 isEnded: true);
-        }
-
-        private void SetValue(RecClip contentClip)
-        {
-            var thresholdMonochrome = contentClip.Clip.ThresholdMonochrome / ThresholdDivider;
-            var thresholdCompare = ThresholdCompare / ThresholdDivider;
-
-            var cropImage = frame
-                .Clone(contentClip.Rect)
-                .ToMonochrome(thresholdMonochrome);
-
-            var contourRectangle = CropImage
-                ? cropImage.GetContour()
-                : default;
-
-            if (contourRectangle.HasValue)
-            {
-                contentClip.Clip.Image = cropImage
-                    .Clone(contourRectangle.Value);
-            }
-            else
-            {
-                contentClip.Clip.Image = cropImage;
-            }
-
-            if (contentClip.Clip.Image != default)
-            {
-                contentClip.Clip.Bitmap = contentClip.Clip.Image
-                    .ToBitmapSource();
-
-                if (contentClip.Clip.Template?.Samples?.Any() == true)
-                {
-                    var compare = contentClip.Clip.Template.Samples
-                        .Select(s => (Sample: s, Difference: s.Image.DiffTo(contentClip.Clip.Image)))
-                        .Where(x => thresholdCompare == 0 || x.Difference <= thresholdCompare)
-                        .OrderByDescending(x => x.Difference).FirstOrDefault();
-
-                    contentClip.Clip.Value = compare != default
-                        ? compare.Sample?.Value
-                        : default;
-                }
-            }
-            else
-            {
-                contentClip.Clip.Value = default;
-            }
         }
 
         private async Task StartAsync(int? deviceId, string fileName)
@@ -289,6 +249,54 @@ namespace VideoService
             {
                 // To let the exceptions exit
                 await serviceTask;
+            }
+        }
+
+        private void UpdateClip(RecClip contentClip)
+        {
+            var thresholdMonochrome = contentClip.Clip.ThresholdMonochrome / ThresholdDivider;
+            var thresholdCompare = ThresholdCompare / ThresholdDivider;
+
+            var monochromImage = frame
+                .Clone(contentClip.Rect)
+                .ToMonochrome(thresholdMonochrome);
+
+            var contourRectangle = !NoCentering
+                ? monochromImage.GetContour()
+                : default;
+
+            if (contourRectangle.HasValue)
+            {
+                contentClip.Clip.Image = monochromImage.ToCentered(
+                    contourRectangle: contourRectangle.Value,
+                    fullWidth: maxWidth,
+                    fullHeight: maxHeight);
+            }
+            else
+            {
+                contentClip.Clip.Image = monochromImage;
+            }
+
+            if (contentClip.Clip.Image != default)
+            {
+                contentClip.Clip.Bitmap = contentClip.Clip.Image
+                    .ToBitmapSource();
+
+                if (contentClip.Clip.Template?.Samples?.Any() == true)
+                {
+                    var compare = contentClip.Clip.Template.Samples
+                        .Select(s => (Sample: s, Difference: s.Image.DiffTo(contentClip.Clip.Image)))
+                        .Where(x => thresholdCompare == 0 || x.Difference <= thresholdCompare)
+                        .OrderByDescending(x => x.Difference).FirstOrDefault();
+
+                    contentClip.Clip.Value = compare != default
+                        ? compare.Sample?.Value
+                        : default;
+                }
+            }
+            else
+            {
+                contentClip.Clip.Value = default;
             }
         }
 

@@ -28,7 +28,7 @@ namespace VideoModule.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
-                action: c => UpdateIsActive(c),
+                action: c => IsActive = c == Clip,
                 keepSubscriberReferenceAlive: true);
         }
 
@@ -126,14 +126,5 @@ namespace VideoModule.ViewModels
         }
 
         #endregion Public Methods
-
-        #region Private Methods
-
-        private void UpdateIsActive(Clip clip)
-        {
-            IsActive = clip == Clip;
-        }
-
-        #endregion Private Methods
     }
 }
