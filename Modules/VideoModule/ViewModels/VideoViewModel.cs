@@ -4,6 +4,7 @@ using Core.Events.Input;
 using Core.Events.Video;
 using Core.Interfaces;
 using Core.Prism;
+using MvvmDialogs;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
@@ -11,6 +12,7 @@ using Prism.Regions;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows;
 using System.Windows.Media.Imaging;
 
 namespace VideoModule.ViewModels
@@ -23,6 +25,7 @@ namespace VideoModule.ViewModels
         private const int BorderThicknessDefault = 2;
 
         private readonly IContainerProvider containerProvider;
+        private readonly IDialogService dialogService;
         private readonly IEventAggregator eventAggregator;
         private readonly IInputService inputService;
         private readonly IRegionManager regionManager;
@@ -47,11 +50,12 @@ namespace VideoModule.ViewModels
         #region Public Constructors
 
         public VideoViewModel(IInputService inputService, IContainerProvider containerProvider,
-            IRegionManager regionManager, IEventAggregator eventAggregator)
+            IDialogService dialogService, IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
             this.inputService = inputService;
             this.containerProvider = containerProvider;
+            this.dialogService = dialogService;
             this.regionManager = regionManager;
             this.eventAggregator = eventAggregator;
 
@@ -259,36 +263,58 @@ namespace VideoModule.ViewModels
         {
             if (IsMouseEditing())
             {
-                activeSelection.Clip.HasDimensions = false;
+                var dimensionsCanBeSet = true;
 
-                var actualWidth = GetActualWidth();
-
-                if ((actualWidth ?? 0) > 0
-                    && (activeSelection.Left ?? 0) >= x1.Value)
+                if (activeSelection.Clip.HasDimensions
+                    && (activeSelection.Clip?.Template?.Clip == activeSelection.Clip)
+                    && (activeSelection.Clip?.Template?.Samples?.Any() == true))
                 {
-                    activeSelection.Clip.RelativeX1 = ((activeSelection.Left ?? 0) - x1.Value) / actualWidth.Value;
-                    activeSelection.Clip.RelativeX2 = ((activeSelection.Left ?? 0) +
-                        (activeSelection.Width ?? 0) - x1.Value) / actualWidth.Value;
-
-                    activeSelection.Clip.HasDimensions = true;
+                    dimensionsCanBeSet = dialogService.ShowMessageBox(
+                        ownerViewModel: this,
+                        messageBoxText: "Shall the dimension of the clip be changed?",
+                        caption: "Change dimension",
+                        button: MessageBoxButton.YesNo,
+                        icon: MessageBoxImage.Question,
+                        defaultResult: MessageBoxResult.No) == MessageBoxResult.Yes;
                 }
 
-                var actualHeight = GetActualHeight();
-
-                if ((actualHeight ?? 0) > 0
-                    && (activeSelection.Top ?? 0) >= y1.Value)
+                if (dimensionsCanBeSet)
                 {
-                    activeSelection.Clip.RelativeY1 = ((activeSelection.Top ?? 0) - y1.Value) / actualHeight.Value;
-                    activeSelection.Clip.RelativeY2 = ((activeSelection.Top ?? 0) - y1.Value +
-                        (activeSelection.Height ?? 0)) / actualHeight.Value;
+                    activeSelection.Clip.HasDimensions = false;
 
-                    activeSelection.Clip.HasDimensions = true;
+                    var actualWidth = GetActualWidth();
+
+                    if ((actualWidth ?? 0) > 0
+                        && (activeSelection.Left ?? 0) >= x1.Value)
+                    {
+                        activeSelection.Clip.RelativeX1 = ((activeSelection.Left ?? 0) - x1.Value) / actualWidth.Value;
+                        activeSelection.Clip.RelativeX2 = ((activeSelection.Left ?? 0) +
+                            (activeSelection.Width ?? 0) - x1.Value) / actualWidth.Value;
+
+                        activeSelection.Clip.HasDimensions = true;
+                    }
+
+                    var actualHeight = GetActualHeight();
+
+                    if ((actualHeight ?? 0) > 0
+                        && (activeSelection.Top ?? 0) >= y1.Value)
+                    {
+                        activeSelection.Clip.RelativeY1 = ((activeSelection.Top ?? 0) - y1.Value) / actualHeight.Value;
+                        activeSelection.Clip.RelativeY2 = ((activeSelection.Top ?? 0) - y1.Value +
+                            (activeSelection.Height ?? 0)) / actualHeight.Value;
+
+                        activeSelection.Clip.HasDimensions = true;
+                    }
+
+                    if (activeSelection.Clip.HasDimensions)
+                    {
+                        eventAggregator.GetEvent<ClipUpdatedEvent>()
+                            .Publish(activeSelection.Clip);
+                    }
                 }
-
-                if (activeSelection.Clip.HasDimensions)
+                else
                 {
-                    eventAggregator.GetEvent<ClipUpdatedEvent>()
-                        .Publish(activeSelection.Clip);
+                    SetDimensions();
                 }
             }
 

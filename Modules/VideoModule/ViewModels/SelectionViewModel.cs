@@ -2,12 +2,11 @@
 using Core.Models;
 using Prism.Events;
 using Prism.Mvvm;
-using Prism.Regions;
 
 namespace VideoModule.ViewModels
 {
     public class SelectionViewModel
-        : BindableBase, INavigationAware
+        : BindableBase
     {
         #region Private Fields
 
@@ -108,21 +107,6 @@ namespace VideoModule.ViewModels
                 Top = actualTop + (Clip.RelativeY1 * actualHeight);
                 Height = (Clip.RelativeY2 - Clip.RelativeY1) * actualHeight;
             }
-        }
-
-        public bool IsNavigationTarget(NavigationContext navigationContext)
-        {
-            return false;
-        }
-
-        public void OnNavigatedFrom(NavigationContext navigationContext)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void OnNavigatedTo(NavigationContext navigationContext)
-        {
-            throw new System.NotImplementedException();
         }
 
         #endregion Public Methods

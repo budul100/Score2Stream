@@ -7,7 +7,7 @@ namespace VideoService.Extensions
     {
         #region Public Methods
 
-        public static void SetDifferences(this RecClip recClip)
+        public static void SetSimilarities(this RecClip recClip)
         {
             if (recClip.Clip?.Template?.Samples?.Any() == true)
             {

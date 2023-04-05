@@ -24,11 +24,11 @@ namespace VideoService
     {
         #region Private Fields
 
-        private const int DefaultDelay = 300;
+        private const int DefaultDelay = 100;
         private const int DelayMin = 10;
         private const double DividerThreshold = 100;
-        private const int ThresholdDetectingDefault = 90;
-        private const int ThresholdMatchingDefault = 90;
+        private const int ThresholdDetectingDefault = 80;
+        private const int ThresholdMatchingDefault = 70;
 
         private readonly IDispatcherService dispatcherService;
         private readonly IEventAggregator eventAggregator;
@@ -279,10 +279,9 @@ namespace VideoService
 
             if (contourRectangle.HasValue)
             {
-                contentClip.Clip.Image = monochromImage.ToCentered(
-                    contourRectangle: contourRectangle.Value,
-                    fullWidth: maxWidth,
-                    fullHeight: maxHeight);
+                contentClip.Clip.Image = monochromImage
+                    .ToCropped(
+                        contourRectangle: contourRectangle.Value);
             }
             else
             {
@@ -292,9 +291,12 @@ namespace VideoService
             if (contentClip.Clip.Image != default)
             {
                 contentClip.Clip.Bitmap = contentClip.Clip.Image
+                    .ToCentered(
+                        fullWidth: maxWidth,
+                        fullHeight: maxHeight)
                     .ToBitmapSource();
 
-                contentClip.SetDifferences();
+                contentClip.SetSimilarities();
 
                 var matchingSample = contentClip.Clip?.Template?.Samples?
                     .OrderByDescending(c => c.Similarity).FirstOrDefault();
@@ -307,14 +309,14 @@ namespace VideoService
                 else
                 {
                     contentClip.Clip.Value = default;
+                }
 
-                    if ((contentClip.Clip?.Template?.Samples.Any() != true)
-                        || ((matchingSample != default) && (matchingSample.Similarity < thresholdDetecting)))
-                    {
-                        eventAggregator
-                            .GetEvent<SampleDetectedEvent>()
-                            .Publish(contentClip.Clip);
-                    }
+                if ((contentClip.Clip?.Template?.Samples.Any() != true)
+                    || ((matchingSample != default) && (matchingSample.Similarity < thresholdDetecting)))
+                {
+                    eventAggregator
+                        .GetEvent<SampleDetectedEvent>()
+                        .Publish(contentClip.Clip);
                 }
             }
             else

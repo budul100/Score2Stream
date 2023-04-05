@@ -4,6 +4,7 @@ using Prism.Ioc;
 using Prism.Modularity;
 using ScoreboardOCR.Views;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace ScoreboardOCR
 {
@@ -30,6 +31,15 @@ namespace ScoreboardOCR
             return Container.Resolve<MainView>();
         }
 
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            EventManager.RegisterClassHandler(typeof(TextBox),
+                routedEvent: TextBox.GotFocusEvent,
+                handler: new RoutedEventHandler(OnTextBoxFocus));
+
+            base.OnStartup(e);
+        }
+
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
             var dispatcherService = new DispatcherService.Service(Current.Dispatcher);
@@ -48,5 +58,14 @@ namespace ScoreboardOCR
         }
 
         #endregion Protected Methods
+
+        #region Private Methods
+
+        private void OnTextBoxFocus(object sender, RoutedEventArgs e)
+        {
+            (sender as TextBox)?.SelectAll();
+        }
+
+        #endregion Private Methods
     }
 }

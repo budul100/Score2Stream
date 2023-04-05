@@ -61,14 +61,12 @@ namespace VideoService.Extensions
             return result;
         }
 
-        public static Mat ToCentered(this Mat image, Rect contourRectangle, int fullWidth,
-            int fullHeight)
+        public static Mat ToCentered(this Mat image, int fullWidth, int fullHeight)
         {
-            var horizontal = (int)Math.Ceiling((double)(fullWidth - contourRectangle.Width) / 2);
-            var vertical = (int)Math.Ceiling((double)(fullHeight - contourRectangle.Height) / 2);
+            var horizontal = (int)Math.Ceiling((double)(fullWidth - image.Width) / 2);
+            var vertical = (int)Math.Ceiling((double)(fullHeight - image.Height) / 2);
 
             var result = image
-                .Clone(contourRectangle)
                 .CopyMakeBorder(
                     top: vertical,
                     bottom: vertical,
@@ -76,6 +74,14 @@ namespace VideoService.Extensions
                     right: horizontal,
                     borderType: BorderTypes.Constant,
                     value: 0);
+
+            return result;
+        }
+
+        public static Mat ToCropped(this Mat image, Rect contourRectangle)
+        {
+            var result = image
+                .Clone(contourRectangle);
 
             return result;
         }

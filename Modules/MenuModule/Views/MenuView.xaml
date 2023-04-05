@@ -61,6 +61,13 @@
                     </fl:DropDownButton>
                     <fl:Button Command="{Binding InputStopAllCommand}" Header="Stop all videos" />
                 </fl:RibbonGroupBox>
+                <fl:RibbonGroupBox Header="Video options">
+                    <fl:Spinner
+                        Format="0"
+                        Header="Processing delay"
+                        IsEnabled="{Binding IsActive}"
+                        Value="{Binding ProcessingDelay, Mode=TwoWay}" />
+                </fl:RibbonGroupBox>
                 <fl:RibbonGroupBox Header="Clips selection">
                     <fl:Button Command="{Binding ClipAddCommand}" Header="Add new clip" />
                     <fl:Button Command="{Binding ClipRemoveCommand}" Header="Remove selected clip" />
@@ -76,11 +83,6 @@
                         Header="Matching threshold"
                         IsEnabled="{Binding IsActive}"
                         Value="{Binding ThresholdMatching, Mode=TwoWay}" />
-                    <fl:Spinner
-                        Format="0"
-                        Header="Processing delay"
-                        IsEnabled="{Binding IsActive}"
-                        Value="{Binding ProcessingDelay, Mode=TwoWay}" />
                 </fl:RibbonGroupBox>
                 <fl:RibbonGroupBox Header="Templates selection">
                     <fl:Button Command="{Binding ClipAsTemplateCommand}" Header="Use clip as template" />
@@ -118,7 +120,6 @@
                         Value="{Binding ThresholdDetecting, Mode=TwoWay}" />
                 </fl:RibbonGroupBox>
             </fl:RibbonTabItem>
-
         </fl:Ribbon>
     </DockPanel>
 </UserControl>

@@ -8,12 +8,14 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:hl="clr-namespace:VideoModule.Helpers"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:md="https://github.com/fantasticfiasco/mvvm-dialogs"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:v="clr-namespace:VideoModule.Views"
     xmlns:vm="clr-namespace:VideoModule.ViewModels"
     d:DataContext="{Binding Source={x:Static hl:DesignTimeViewModelLocator.WebcamViewModel}}"
     d:DesignHeight="500"
     d:DesignWidth="500"
+    md:DialogServiceViews.IsRegistered="True"
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
     <UserControl.Resources>
