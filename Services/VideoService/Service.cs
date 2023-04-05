@@ -1,4 +1,5 @@
 ﻿using Core.Events.Clips;
+using Core.Events.Samples;
 using Core.Events.Video;
 using Core.Interfaces;
 using Core.Models;
@@ -25,7 +26,9 @@ namespace VideoService
 
         private const int DefaultDelay = 300;
         private const int DelayMin = 10;
-        private const double ThresholdDivider = 100;
+        private const double DividerThreshold = 100;
+        private const int ThresholdDetectingDefault = 90;
+        private const int ThresholdMatchingDefault = 90;
 
         private readonly IDispatcherService dispatcherService;
         private readonly IEventAggregator eventAggregator;
@@ -70,7 +73,9 @@ namespace VideoService
 
         public bool NoCentering { get; set; }
 
-        public int ThresholdCompare { get; set; }
+        public int ThresholdDetecting { get; set; } = ThresholdDetectingDefault;
+
+        public int ThresholdMatching { get; set; } = ThresholdMatchingDefault;
 
         #endregion Public Properties
 
@@ -259,8 +264,10 @@ namespace VideoService
 
         private void UpdateClip(RecClip contentClip)
         {
-            var thresholdMonochrome = contentClip.Clip.ThresholdMonochrome / ThresholdDivider;
-            var thresholdCompare = ThresholdCompare / ThresholdDivider;
+            var thresholdMonochrome = contentClip.Clip.ThresholdMonochrome / DividerThreshold;
+
+            var thresholdDetecting = ThresholdDetecting / DividerThreshold;
+            var thresholdMatching = ThresholdMatching / DividerThreshold;
 
             var monochromImage = frame
                 .Clone(contentClip.Rect)
@@ -287,16 +294,27 @@ namespace VideoService
                 contentClip.Clip.Bitmap = contentClip.Clip.Image
                     .ToBitmapSource();
 
-                if (contentClip.Clip.Template?.Samples?.Any() == true)
-                {
-                    var compare = contentClip.Clip.Template.Samples
-                        .Select(s => (Sample: s, Difference: s.Image.DiffTo(contentClip.Clip.Image)))
-                        .Where(x => thresholdCompare == 0 || x.Difference <= thresholdCompare)
-                        .OrderByDescending(x => x.Difference).FirstOrDefault();
+                contentClip.SetDifferences();
 
-                    contentClip.Clip.Value = compare != default
-                        ? compare.Sample?.Value
-                        : default;
+                var matchingSample = contentClip.Clip?.Template?.Samples?
+                    .OrderByDescending(c => c.Similarity).FirstOrDefault();
+
+                if ((matchingSample != default)
+                    && (matchingSample.Similarity >= thresholdMatching))
+                {
+                    contentClip.Clip.Value = matchingSample?.Value;
+                }
+                else
+                {
+                    contentClip.Clip.Value = default;
+
+                    if ((contentClip.Clip?.Template?.Samples.Any() != true)
+                        || ((matchingSample != default) && (matchingSample.Similarity < thresholdDetecting)))
+                    {
+                        eventAggregator
+                            .GetEvent<SampleDetectedEvent>()
+                            .Publish(contentClip.Clip);
+                    }
                 }
             }
             else

@@ -21,11 +21,17 @@ namespace SampleService
         public Service(IEventAggregator eventAggregator)
         {
             this.eventAggregator = eventAggregator;
+
+            eventAggregator.GetEvent<SampleDetectedEvent>().Subscribe(
+                action: c => OnSampleDetected(c),
+                keepSubscriberReferenceAlive: true);
         }
 
         #endregion Public Constructors
 
         #region Public Properties
+
+        public bool IsDetection { get; set; }
 
         public Sample Sample { get; private set; }
 
@@ -64,9 +70,10 @@ namespace SampleService
             {
                 var samples = template.Samples.ToArray();
 
-                for (var index = 0; index < samples.Length; index++)
+                for (var index = template.Samples.Count; index < 0; index--)
                 {
-                    RemoveSample(samples[index]);
+                    var sample = samples[index - 1];
+                    RemoveSample(sample);
                 }
 
                 eventAggregator.GetEvent<SamplesChangedEvent>()
@@ -98,6 +105,14 @@ namespace SampleService
         #endregion Public Methods
 
         #region Private Methods
+
+        private void OnSampleDetected(Clip clip)
+        {
+            if (IsDetection)
+            {
+                Add(clip);
+            }
+        }
 
         private void RemoveSample(Sample sample)
         {

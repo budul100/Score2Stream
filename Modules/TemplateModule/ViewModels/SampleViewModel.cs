@@ -1,4 +1,5 @@
 ﻿using Core.Events.Samples;
+using Core.Events.Video;
 using Core.Interfaces;
 using Core.Models;
 using Core.Prism;
@@ -29,6 +30,10 @@ namespace TemplateModule.ViewModels
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
                 action: s => IsActive = s == sample,
                 keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
+                action: () => RaisePropertyChanged(nameof(Difference)),
+                keepSubscriberReferenceAlive: true);
         }
 
         #endregion Public Constructors
@@ -36,6 +41,10 @@ namespace TemplateModule.ViewModels
         #region Public Properties
 
         public BitmapSource Bitmap => sample?.Bitmap;
+
+        public string Difference => sample?.Image != default
+            ? $"Difference: {(int)(sample.Similarity * 100)}"
+            : default;
 
         public bool IsActive
         {

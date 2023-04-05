@@ -44,8 +44,11 @@ namespace Core.Converters
 
             for (var index = 1; index < valueName.Length; index++)
             {
-                if (char.IsUpper(valueName, index) && char.IsLower(valueName, index + 1))
+                if (char.IsUpper(valueName, index)
+                    && char.IsLower(valueName, index + 1))
+                {
                     sb.Append(WordSeparator);
+                }
 
                 sb.Append(valueName[index]);
             }

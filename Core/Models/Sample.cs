@@ -11,6 +11,8 @@ namespace Core.Models
 
         public Mat Image { get; set; }
 
+        public double Similarity { get; set; }
+
         public Template Template { get; set; }
 
         public string Value { get; set; }

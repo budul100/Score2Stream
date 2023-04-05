@@ -154,6 +154,20 @@ namespace MenuModule.ViewModels
 
         public bool IsActive => inputService.IsActive;
 
+        public bool IsSampleDetection
+        {
+            get { return inputService?.SampleService?.IsDetection ?? false; }
+            set
+            {
+                if (IsActive)
+                {
+                    inputService.SampleService.IsDetection = value;
+                }
+
+                RaisePropertyChanged(nameof(IsSampleDetection));
+            }
+        }
+
         public bool NoCentering
         {
             get { return inputService.VideoService?.NoCentering ?? false; }
@@ -180,7 +194,7 @@ namespace MenuModule.ViewModels
                     inputService.VideoService.Delay = value;
                 }
 
-                RaisePropertyChanged(nameof(ThresholdCompare));
+                RaisePropertyChanged(nameof(ProcessingDelay));
             }
         }
 
@@ -210,19 +224,35 @@ namespace MenuModule.ViewModels
 
         public DelegateCommand<Template> TemplateSelectCommand { get; }
 
-        public int ThresholdCompare
+        public int ThresholdDetecting
         {
-            get { return inputService.VideoService?.ThresholdCompare ?? 0; }
+            get { return inputService.VideoService?.ThresholdDetecting ?? 0; }
             set
             {
                 if (IsActive
                     && value >= 0
                     && value <= 100)
                 {
-                    inputService.VideoService.ThresholdCompare = value;
+                    inputService.VideoService.ThresholdDetecting = value;
                 }
 
-                RaisePropertyChanged(nameof(ThresholdCompare));
+                RaisePropertyChanged(nameof(ThresholdDetecting));
+            }
+        }
+
+        public int ThresholdMatching
+        {
+            get { return inputService.VideoService?.ThresholdMatching ?? 0; }
+            set
+            {
+                if (IsActive
+                    && value >= 0
+                    && value <= 100)
+                {
+                    inputService.VideoService.ThresholdMatching = value;
+                }
+
+                RaisePropertyChanged(nameof(ThresholdMatching));
             }
         }
 
@@ -272,8 +302,9 @@ namespace MenuModule.ViewModels
 
             RaisePropertyChanged(nameof(IsActive));
             RaisePropertyChanged(nameof(NoCentering));
-            RaisePropertyChanged(nameof(ThresholdCompare));
+            RaisePropertyChanged(nameof(ThresholdMatching));
             RaisePropertyChanged(nameof(ProcessingDelay));
+            RaisePropertyChanged(nameof(ThresholdDetecting));
         }
 
         private void RemoveAllClips()

@@ -1,15 +1,15 @@
 ﻿<UserControl
     x:Class="MenuModule.Views.MenuView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:prism="http://prismlibrary.com/"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:mo="clr-namespace:Core.Models;assembly=Core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:fl="clr-namespace:Fluent;assembly=Fluent"
     xmlns:hl="clr-namespace:MenuModule.Helpers"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:md="https://github.com/fantasticfiasco/mvvm-dialogs"
+    xmlns:mo="clr-namespace:Core.Models;assembly=Core"
+    xmlns:prism="http://prismlibrary.com/"
     d:DataContext="{Binding Source={x:Static hl:DesignTimeViewModelLocator.MenuViewModel}}"
     d:DesignWidth="500"
     md:DialogServiceViews.IsRegistered="True"
@@ -73,9 +73,9 @@
                         IsEnabled="{Binding IsActive}" />
                     <fl:Spinner
                         Format="0"
-                        Header="Comparison threshold"
+                        Header="Matching threshold"
                         IsEnabled="{Binding IsActive}"
-                        Value="{Binding ThresholdCompare, Mode=TwoWay}" />
+                        Value="{Binding ThresholdMatching, Mode=TwoWay}" />
                     <fl:Spinner
                         Format="0"
                         Header="Processing delay"
@@ -105,11 +105,20 @@
                     <fl:Button Command="{Binding TemplateRemoveCommand}" Header="Remove current template" />
                 </fl:RibbonGroupBox>
                 <fl:RibbonGroupBox Header="Samples detecion">
+                    <fl:ToggleButton Header="Detect samples" IsChecked="{Binding IsSampleDetection}" />
                     <fl:Button Command="{Binding SampleAddCommand}" Header="Add image as sample" />
                     <fl:Button Command="{Binding SampleRemoveCommand}" Header="Remove selected sample" />
                     <fl:Button Command="{Binding SampleRemoveAllCommand}" Header="Remove all samples" />
                 </fl:RibbonGroupBox>
+                <fl:RibbonGroupBox Header="Detecion options">
+                    <fl:Spinner
+                        Format="0"
+                        Header="Detection threshold"
+                        IsEnabled="{Binding IsActive}"
+                        Value="{Binding ThresholdDetecting, Mode=TwoWay}" />
+                </fl:RibbonGroupBox>
             </fl:RibbonTabItem>
+
         </fl:Ribbon>
     </DockPanel>
 </UserControl>

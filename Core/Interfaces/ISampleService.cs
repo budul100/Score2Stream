@@ -7,6 +7,8 @@ namespace Core.Interfaces
     {
         #region Public Properties
 
+        bool IsDetection { get; set; }
+
         Sample Sample { get; }
 
         List<Sample> Samples { get; }
