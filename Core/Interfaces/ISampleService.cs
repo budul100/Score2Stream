@@ -3,29 +3,25 @@ using System.Collections.Generic;
 
 namespace Core.Interfaces
 {
-    public interface IClipService
+    public interface ISampleService
     {
         #region Public Properties
 
-        Clip Clip { get; }
+        Sample Sample { get; }
 
-        List<Clip> Clips { get; }
-
-        ITemplateService TemplateService { get; }
+        List<Sample> Samples { get; }
 
         #endregion Public Properties
 
         #region Public Methods
 
-        void Add();
+        void Add(Clip clip);
 
-        void Clear();
+        void Remove(Template template);
 
         void Remove();
 
-        void Remove(Clip clip);
-
-        void Select(Clip clip);
+        void Select(Sample sample);
 
         #endregion Public Methods
     }

@@ -31,6 +31,10 @@ namespace Core.Models
 
         public string Name { get; set; }
 
+        public ISampleService SampleService => TemplateService?.SampleService;
+
+        public ITemplateService TemplateService => ClipService?.TemplateService;
+
         public IVideoService VideoService { get; set; }
 
         #endregion Public Properties

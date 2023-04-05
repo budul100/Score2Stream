@@ -37,13 +37,14 @@ namespace ScoreboardOCR
 
             containerRegistry.RegisterSingleton<IDialogService, DialogService>();
 
-            containerRegistry.RegisterSingleton<ITemplateService, TemplateService.Service>();
             containerRegistry.RegisterSingleton<IScoreboardService, ScoreboardService.Service>();
             containerRegistry.RegisterSingleton<IGraphicsService, GraphicsService.Service>();
 
             containerRegistry.RegisterSingleton<IInputService, InputService.Service>();
             containerRegistry.Register<IVideoService, VideoService.Service>();
             containerRegistry.Register<IClipService, ClipService.Service>();
+            containerRegistry.Register<ITemplateService, TemplateService.Service>();
+            containerRegistry.Register<ISampleService, SampleService.Service>();
         }
 
         #endregion Protected Methods

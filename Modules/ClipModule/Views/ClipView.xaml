@@ -105,7 +105,7 @@
                     Width="40"
                     Height="60"
                     VerticalAlignment="Center"
-                    Source="{Binding Content, FallbackValue={StaticResource DesignSource}}"
+                    Source="{Binding Bitmap, FallbackValue={StaticResource DesignSource}}"
                     Stretch="Uniform" />
             </Border>
 
@@ -141,6 +141,7 @@
                 Margin="5,0"
                 VerticalAlignment="Center"
                 DisplayMemberPath="Name"
+                IsEnabled="{Binding HasItems, RelativeSource={RelativeSource Self}}"
                 IsSynchronizedWithCurrentItem="True"
                 ItemsSource="{Binding Templates}"
                 SelectedItem="{Binding Template}" />

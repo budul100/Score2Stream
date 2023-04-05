@@ -1,7 +1,10 @@
 ﻿using Core.Constants;
 using Core.Enums;
 using Core.Events;
+using Core.Events.Clips;
 using Core.Events.Input;
+using Core.Events.Samples;
+using Core.Events.Templates;
 using Core.Events.Video;
 using Core.Interfaces;
 using Core.Models;
@@ -29,10 +32,8 @@ namespace MenuModule.ViewModels
         private const int ViewIndexTemplate = 2;
 
         private readonly IDialogService dialogService;
-        private readonly IEventAggregator eventAggregator;
         private readonly IInputService inputService;
         private readonly IRegionManager regionManager;
-        private readonly ITemplateService templateService;
 
         private int selectedTabIndex;
 
@@ -40,19 +41,18 @@ namespace MenuModule.ViewModels
 
         #region Public Constructors
 
-        public MenuViewModel(ITemplateService templateService, IGraphicsService graphicsService,
-            IInputService inputService, IDialogService dialogService, IRegionManager regionManager,
-            IEventAggregator eventAggregator)
+        public MenuViewModel(IGraphicsService graphicsService, IInputService inputService, IDialogService dialogService,
+            IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
-            this.templateService = templateService;
             this.inputService = inputService;
             this.dialogService = dialogService;
             this.regionManager = regionManager;
-            this.eventAggregator = eventAggregator;
 
-            this.InputsUpdateCommand = new DelegateCommand(UpdateInputs);
-            this.InputSelectCommand = new DelegateCommand<Input>(i => SelectInput(i));
+            this.InputsUpdateCommand = new DelegateCommand(
+                executeMethod: UpdateInputs);
+            this.InputSelectCommand = new DelegateCommand<Input>(
+                executeMethod: i => SelectInput(i));
             this.InputStopAllCommand = new DelegateCommand(
                 executeMethod: () => StopAllInpus(),
                 canExecuteMethod: () => inputService.IsActive);
@@ -62,14 +62,33 @@ namespace MenuModule.ViewModels
                 canExecuteMethod: () => inputService.IsActive);
             this.ClipRemoveCommand = new DelegateCommand(
                 executeMethod: () => RemoveClip(),
-                canExecuteMethod: () => inputService.ClipService?.Active != default);
+                canExecuteMethod: () => inputService.ClipService?.Clip != default);
             this.ClipRemoveAllCommand = new DelegateCommand(
                 executeMethod: () => RemoveAllClips(),
                 canExecuteMethod: () => inputService.ClipService?.Clips?.Any() == true);
 
+            this.ClipAsTemplateCommand = new DelegateCommand(
+                executeMethod: () => inputService.TemplateService.Add(inputService.ClipService.Clip),
+                canExecuteMethod: () => inputService.ClipService?.Clip != default);
+
+            this.TemplateSelectCommand = new DelegateCommand<Template>(
+                executeMethod: t => inputService?.TemplateService?.Select(t));
+            this.TemplateRemoveCommand = new DelegateCommand(
+                executeMethod: () => RemoveTemplate(),
+                canExecuteMethod: () => inputService?.TemplateService?.Template != default);
+
+            this.SampleAddCommand = new DelegateCommand(
+                executeMethod: () => inputService.SampleService.Add(inputService.ClipService.Clip),
+                canExecuteMethod: () => inputService?.ClipService?.Clip != default);
+            this.SampleRemoveCommand = new DelegateCommand(
+                executeMethod: () => inputService.SampleService.Remove(),
+                canExecuteMethod: () => inputService?.SampleService?.Sample != default);
+            this.SampleRemoveAllCommand = new DelegateCommand(
+                executeMethod: () => RemoveAllSamples(),
+                canExecuteMethod: () => inputService?.SampleService?.Samples?.Any() == true);
+
             eventAggregator.GetEvent<InputsChangedEvent>().Subscribe(
                 action: UpdateInputs);
-
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
                 action: OnVideoUpdated);
 
@@ -79,13 +98,16 @@ namespace MenuModule.ViewModels
                 action: _ => OnClipsChanged());
 
             eventAggregator.GetEvent<TemplatesChangedEvent>().Subscribe(
-                action: OnTemplatesChanged);
+                action: UpdateTemplates);
             eventAggregator.GetEvent<TemplateSelectedEvent>().Subscribe(
                 action: _ => OnTemplateSelected());
 
+            eventAggregator.GetEvent<SamplesChangedEvent>().Subscribe(
+                action: () => SampleRemoveAllCommand.RaiseCanExecuteChanged());
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
-                action: _ => OnSampleSelected());
+                action: _ => SampleRemoveCommand.RaiseCanExecuteChanged());
 
+            /// Must be tidied
             eventAggregator.GetEvent<GraphicsUpdatedEvent>().Subscribe(
                 action: OnGraphicsUpdated);
 
@@ -98,22 +120,6 @@ namespace MenuModule.ViewModels
             this.GraphicsOpenCommand = new DelegateCommand(
                 executeMethod: () => graphicsService.Open(),
                 canExecuteMethod: () => graphicsService.IsActive);
-
-            var addTemplateEvent = eventAggregator.GetEvent<SelectTemplateEvent>();
-            this.ClipAsTemplateCommand = new DelegateCommand(
-                executeMethod: () => addTemplateEvent.Publish(inputService.ClipService?.Active),
-                canExecuteMethod: () => inputService.ClipService?.Active?.Bitmap != default);
-
-            this.TemplateRemoveCommand = new DelegateCommand(
-                executeMethod: () => templateService.RemoveTemplate(),
-                canExecuteMethod: () => templateService.Template != default);
-
-            this.SampleAddCommand = new DelegateCommand(
-                executeMethod: () => templateService.AddSample(),
-                canExecuteMethod: () => templateService.Template != default);
-            this.SampleRemoveCommand = new DelegateCommand(
-                executeMethod: () => templateService.RemoveSample(),
-                canExecuteMethod: () => templateService.Sample != default);
 
             inputService.Update();
         }
@@ -136,7 +142,7 @@ namespace MenuModule.ViewModels
 
         public DelegateCommand GraphicsStartCommand { get; }
 
-        public bool HasTemplates => templateService.Templates.Any();
+        public bool HasTemplates => inputService?.TemplateService?.Templates?.Any() == true;
 
         public ObservableCollection<Input> Inputs { get; } = new ObservableCollection<Input>();
 
@@ -180,6 +186,8 @@ namespace MenuModule.ViewModels
 
         public DelegateCommand SampleAddCommand { get; }
 
+        public DelegateCommand SampleRemoveAllCommand { get; }
+
         public DelegateCommand SampleRemoveCommand { get; }
 
         public int SelectedTabIndex
@@ -198,7 +206,9 @@ namespace MenuModule.ViewModels
 
         public DelegateCommand TemplateRemoveCommand { get; }
 
-        public ObservableCollection<TemplateViewModel> Templates { get; private set; } = new ObservableCollection<TemplateViewModel>();
+        public ObservableCollection<Template> Templates { get; } = new ObservableCollection<Template>();
+
+        public DelegateCommand<Template> TemplateSelectCommand { get; }
 
         public int ThresholdCompare
         {
@@ -243,40 +253,13 @@ namespace MenuModule.ViewModels
             GraphicsOpenCommand.RaiseCanExecuteChanged();
         }
 
-        private void OnSampleSelected()
-        {
-            SampleRemoveCommand.RaiseCanExecuteChanged();
-        }
-
-        private void OnTemplatesChanged()
-        {
-            Templates.Clear();
-
-            var relevants = templateService.Templates
-                .OrderBy(t => t.Clip.Name).ToArray();
-
-            foreach (var relevant in relevants)
-            {
-                var current = new TemplateViewModel(
-                    clip: relevant.Clip,
-                    eventAggregator: eventAggregator);
-
-                Templates.Add(current);
-            }
-
-            RaisePropertyChanged(nameof(HasTemplates));
-
-            OnTemplateSelected();
-        }
-
         private void OnTemplateSelected()
         {
-            SelectedTabIndex = templateService.Template != default
+            SelectedTabIndex = inputService.TemplateService?.Template != default
                 ? ViewIndexTemplate
                 : ViewIndexClip;
 
             TemplateRemoveCommand.RaiseCanExecuteChanged();
-
             SampleAddCommand.RaiseCanExecuteChanged();
         }
 
@@ -305,7 +288,23 @@ namespace MenuModule.ViewModels
 
             if (result == MessageBoxResult.Yes)
             {
-                inputService?.ClipService?.RemoveAll();
+                inputService?.ClipService?.Clear();
+            }
+        }
+
+        private void RemoveAllSamples()
+        {
+            var result = dialogService.ShowMessageBox(
+                ownerViewModel: this,
+                messageBoxText: "Shall all samples be removed?",
+                caption: "Remove all samples",
+                button: MessageBoxButton.YesNo,
+                icon: MessageBoxImage.Question,
+                defaultResult: MessageBoxResult.No);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                inputService?.SampleService?.Remove(inputService?.TemplateService?.Template);
             }
         }
 
@@ -313,7 +312,7 @@ namespace MenuModule.ViewModels
         {
             var result = MessageBoxResult.Yes;
 
-            if (inputService?.ClipService?.Active?.HasDimensions == true)
+            if (inputService?.ClipService?.Clip?.HasDimensions == true)
             {
                 result = dialogService.ShowMessageBox(
                     ownerViewModel: this,
@@ -330,6 +329,32 @@ namespace MenuModule.ViewModels
             }
         }
 
+        private void RemoveTemplate()
+        {
+            var result = MessageBoxResult.Yes;
+
+            if (inputService?.TemplateService?.Template != default)
+            {
+                result = dialogService.ShowMessageBox(
+                    ownerViewModel: this,
+                    messageBoxText: "Shall the current template be removed?",
+                    caption: "Remove template",
+                    button: MessageBoxButton.YesNo,
+                    icon: MessageBoxImage.Question,
+                    defaultResult: MessageBoxResult.No);
+            }
+
+            if (result == MessageBoxResult.Yes
+                && inputService?.TemplateService?.Template != default)
+            {
+                inputService.TemplateService.Remove();
+
+                var template = inputService.ClipService?.Clip?.Template
+                    ?? inputService.TemplateService.Templates.FirstOrDefault();
+                inputService.TemplateService.Select(template);
+            }
+        }
+
         private void SelectInput(Input input)
         {
             if (input.IsFile)
@@ -338,10 +363,12 @@ namespace MenuModule.ViewModels
 
                 if (!File.Exists(input.FileName))
                 {
-                    var settings = new OpenFileDialogSettings();
-                    settings.Title = Constants.InputFileText;
-                    settings.Multiselect = false;
-                    settings.CheckFileExists = true;
+                    var settings = new OpenFileDialogSettings
+                    {
+                        Title = Constants.InputFileText,
+                        Multiselect = false,
+                        CheckFileExists = true
+                    };
 
                     var result = dialogService.ShowOpenFileDialog(
                         ownerViewModel: this,
@@ -389,10 +416,7 @@ namespace MenuModule.ViewModels
                 .ThenBy(i => i.IsFile)
                 .ThenBy(i => i.Name).ToArray();
 
-            foreach (var ordered in ordereds)
-            {
-                Inputs.Add(ordered);
-            }
+            Inputs.AddRange(ordereds);
 
             RaisePropertyChanged(nameof(Inputs));
         }
@@ -421,6 +445,22 @@ namespace MenuModule.ViewModels
                         regionName: nameof(RegionType.EditRegion),
                         source: nameof(ViewType.Templates));
                     break;
+            }
+        }
+
+        private void UpdateTemplates()
+        {
+            Templates.Clear();
+
+            if (inputService.TemplateService != default)
+            {
+                var ordereds = inputService.TemplateService.Templates
+                    .OrderBy(t => t.Clip.Name).ToArray();
+
+                Templates.AddRange(ordereds);
+
+                RaisePropertyChanged(nameof(Templates));
+                RaisePropertyChanged(nameof(HasTemplates));
             }
         }
 

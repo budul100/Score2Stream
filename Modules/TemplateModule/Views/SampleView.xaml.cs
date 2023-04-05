@@ -2,12 +2,12 @@
 
 namespace TemplateModule.Views
 {
-    public partial class SelectionView
+    public partial class SampleView
         : UserControl
     {
         #region Public Constructors
 
-        public SelectionView()
+        public SampleView()
         {
             InitializeComponent();
         }

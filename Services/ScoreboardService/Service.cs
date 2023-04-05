@@ -1,4 +1,5 @@
 ﻿using Core.Events;
+using Core.Events.Clips;
 using Core.Events.Video;
 using Core.Interfaces;
 using Core.Models;

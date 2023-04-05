@@ -7,7 +7,7 @@ namespace Core.Interfaces
     {
         #region Public Properties
 
-        Sample Sample { get; }
+        ISampleService SampleService { get; }
 
         Template Template { get; }
 
@@ -17,11 +17,13 @@ namespace Core.Interfaces
 
         #region Public Methods
 
-        void AddSample();
+        void Add(Clip clip);
 
-        void RemoveSample();
+        void Remove();
 
-        void RemoveTemplate();
+        void Remove(Template template);
+
+        void Select(Template template);
 
         #endregion Public Methods
     }

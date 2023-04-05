@@ -1,4 +1,4 @@
-﻿using Core.Events;
+﻿using Core.Events.Clips;
 using Core.Events.Input;
 using Core.Interfaces;
 using Core.Prism;
@@ -9,7 +9,7 @@ using System.Collections.ObjectModel;
 
 namespace ClipModule.ViewModels
 {
-    public class AllClipsViewModel
+    public class ClipsViewModel
         : RegionViewModelBase
     {
         #region Private Fields
@@ -21,7 +21,7 @@ namespace ClipModule.ViewModels
 
         #region Public Constructors
 
-        public AllClipsViewModel(IInputService inputService, IContainerProvider containerProvider,
+        public ClipsViewModel(IInputService inputService, IContainerProvider containerProvider,
             IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
@@ -66,7 +66,9 @@ namespace ClipModule.ViewModels
             {
                 var current = containerProvider.Resolve<ClipViewModel>();
 
-                current.Initialize(clip);
+                current.Initialize(
+                    clip: clip,
+                    clipService: inputService.ClipService);
 
                 Clips.Add(current);
             }

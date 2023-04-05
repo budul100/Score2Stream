@@ -1,11 +1,14 @@
-﻿using Core.Events;
+﻿using Core.Events.Clips;
+using Core.Events.Templates;
 using Core.Events.Video;
+using Core.Interfaces;
 using Core.Models;
 using Core.Prism;
 using MvvmValidation;
 using Prism.Commands;
 using Prism.Events;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Media.Imaging;
 
@@ -17,8 +20,8 @@ namespace ClipModule.ViewModels
         #region Private Fields
 
         private readonly IEventAggregator eventAggregator;
-
         private Clip clip;
+        private IClipService clipService;
         private bool isActive;
         private string name;
 
@@ -30,20 +33,22 @@ namespace ClipModule.ViewModels
         {
             this.eventAggregator = eventAggregator;
 
-            var selectEvent = eventAggregator.GetEvent<SelectClipEvent>();
             OnClickCommand = new DelegateCommand(
-                executeMethod: () => selectEvent.Publish(clip));
+                executeMethod: () => clipService?.Select(clip));
 
             eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
                 action: c => IsActive = c == clip,
                 keepSubscriberReferenceAlive: true);
 
+            eventAggregator.GetEvent<TemplateSelectedEvent>().Subscribe(
+                action: _ => OnTemplateSelected(),
+                keepSubscriberReferenceAlive: true);
             eventAggregator.GetEvent<TemplatesChangedEvent>().Subscribe(
-                action: () => OnUpdateTemplates(),
+                action: () => UpdateTemplates(),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
-                action: () => OnUpdateWebcam(),
+                action: () => UpdateBitmap(),
                 keepSubscriberReferenceAlive: true);
 
             Validator.AddRule(
@@ -60,15 +65,13 @@ namespace ClipModule.ViewModels
             //    targetName: nameof(Name),
             //    validateDelegate: () => RuleResult.Assert(Name == clip.Name || clipService.IsUniqueName(Name),
             //    errorMessage: $"Name {Name} is already used. Please choose another one."));
-
-            OnUpdateTemplates();
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public BitmapSource Content => clip?.Bitmap;
+        public BitmapSource Bitmap => clip?.Bitmap;
 
         public bool IsActive
         {
@@ -108,7 +111,7 @@ namespace ClipModule.ViewModels
             }
         }
 
-        public ObservableCollection<Template> Templates { get; private set; }
+        public ObservableCollection<Template> Templates { get; } = new ObservableCollection<Template>();
 
         public int ThresholdMonochrome
         {
@@ -138,28 +141,52 @@ namespace ClipModule.ViewModels
 
         #region Public Methods
 
-        public void Initialize(Clip clip)
+        public void Initialize(Clip clip, IClipService clipService)
         {
             this.clip = clip;
-            Name = clip.Name;
+            this.clipService = clipService;
+
+            Name = clip?.Name;
+
+            UpdateTemplates();
         }
 
         #endregion Public Methods
 
         #region Private Methods
 
-        private void OnUpdateTemplates()
+        private void OnTemplateSelected()
         {
-            //Templates = new ObservableCollection<Template>(templateService.Templates);
+            Template = clip.Template;
 
-            RaisePropertyChanged(nameof(Templates));
             RaisePropertyChanged(nameof(Template));
+            RaisePropertyChanged(nameof(Templates));
         }
 
-        private void OnUpdateWebcam()
+        private void UpdateBitmap()
         {
-            RaisePropertyChanged(nameof(Content));
+            RaisePropertyChanged(nameof(Bitmap));
             RaisePropertyChanged(nameof(Value));
+        }
+
+        private void UpdateTemplates()
+        {
+            var givens = clipService?.TemplateService?.Templates;
+
+            var toBeRemoveds = Templates
+                .Where(t => givens?.Contains(t) != true).ToArray();
+
+            foreach (var toBeRemoved in toBeRemoveds)
+            {
+                Templates.Remove(toBeRemoved);
+            }
+
+            var toBeAddeds = givens
+                .Where(t => !Templates.Contains(t)).ToArray();
+
+            Templates.AddRange(toBeAddeds);
+
+            OnTemplateSelected();
         }
 
         #endregion Private Methods

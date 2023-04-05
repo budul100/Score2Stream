@@ -10,7 +10,7 @@
     <ProjectReference Include="..\..\Core\Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Views\SelectionView.xaml">
+    <Page Update="Views\TemplateView.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

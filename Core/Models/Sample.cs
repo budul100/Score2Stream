@@ -7,9 +7,11 @@ namespace Core.Models
     {
         #region Public Properties
 
-        public BitmapSource Content { get; set; }
+        public BitmapSource Bitmap { get; set; }
 
         public Mat Image { get; set; }
+
+        public Template Template { get; set; }
 
         public string Value { get; set; }
 

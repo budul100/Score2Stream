@@ -1,4 +1,5 @@
-﻿using Core.Events;
+﻿using Core.Events.Samples;
+using Core.Interfaces;
 using Core.Models;
 using Core.Prism;
 using Prism.Commands;
@@ -12,24 +13,18 @@ namespace TemplateModule.ViewModels
     {
         #region Private Fields
 
-        private readonly Sample sample;
-
         private bool isActive;
+        private Sample sample;
+        private ISampleService sampleService;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public SampleViewModel(Sample sample, IEventAggregator eventAggregator)
+        public SampleViewModel(IEventAggregator eventAggregator)
         {
-            this.sample = sample;
-
-            Content = sample.Content;
-            Value = sample.Value;
-
-            var selectEvent = eventAggregator.GetEvent<SelectSampleEvent>();
             OnClickCommand = new DelegateCommand(
-                executeMethod: () => selectEvent.Publish(sample));
+                executeMethod: () => sampleService.Select(sample));
 
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
                 action: s => IsActive = s == sample,
@@ -40,7 +35,7 @@ namespace TemplateModule.ViewModels
 
         #region Public Properties
 
-        public BitmapSource Content { get; }
+        public BitmapSource Bitmap => sample?.Bitmap;
 
         public bool IsActive
         {
@@ -52,7 +47,7 @@ namespace TemplateModule.ViewModels
 
         public string Value
         {
-            get { return sample.Value; }
+            get { return sample?.Value; }
             set
             {
                 sample.Value = value;
@@ -61,5 +56,19 @@ namespace TemplateModule.ViewModels
         }
 
         #endregion Public Properties
+
+        #region Public Methods
+
+        public void Initialize(Sample sample, ISampleService sampleService)
+        {
+            this.sample = sample;
+            this.sampleService = sampleService;
+
+            Value = sample.Value;
+
+            RaisePropertyChanged(nameof(Bitmap));
+        }
+
+        #endregion Public Methods
     }
 }

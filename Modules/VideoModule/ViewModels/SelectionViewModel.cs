@@ -1,4 +1,4 @@
-﻿using Core.Events;
+﻿using Core.Events.Clips;
 using Core.Models;
 using Prism.Events;
 using Prism.Mvvm;

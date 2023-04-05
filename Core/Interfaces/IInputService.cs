@@ -13,6 +13,10 @@ namespace Core.Interfaces
 
         bool IsActive { get; }
 
+        ISampleService SampleService { get; }
+
+        ITemplateService TemplateService { get; }
+
         IVideoService VideoService { get; }
 
         #endregion Public Properties

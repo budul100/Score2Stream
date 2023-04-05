@@ -1,16 +1,15 @@
 ﻿<UserControl
     x:Class="MenuModule.Views.MenuView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:prism="http://prismlibrary.com/"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mo="clr-namespace:Core.Models;assembly=Core"
     xmlns:fl="clr-namespace:Fluent;assembly=Fluent"
     xmlns:hl="clr-namespace:MenuModule.Helpers"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:md="https://github.com/fantasticfiasco/mvvm-dialogs"
-    xmlns:mo="clr-namespace:Core.Models;assembly=Core"
-    xmlns:prism="http://prismlibrary.com/"
-    xmlns:vm="clr-namespace:MenuModule.ViewModels"
     d:DataContext="{Binding Source={x:Static hl:DesignTimeViewModelLocator.MenuViewModel}}"
     d:DesignWidth="500"
     md:DialogServiceViews.IsRegistered="True"
@@ -90,13 +89,16 @@
 
             <fl:RibbonTabItem Header="Templates" IsEnabled="{Binding HasTemplates}">
                 <fl:RibbonGroupBox Header="Templates selection">
-                    <fl:DropDownButton Header="Select template">
+                    <fl:DropDownButton
+                        x:Name="Templates"
+                        Header="Select template"
+                        ItemsSource="{Binding Templates}">
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="vm:TemplateViewModel">
+                            <DataTemplate DataType="mo:Template">
                                 <fl:MenuItem
-                                    Command="{Binding OnClickCommand}"
-                                    Header="{Binding Name}"
-                                    Size="Small" />
+                                    Command="{Binding ElementName=Templates, Path=DataContext.TemplateSelectCommand}"
+                                    CommandParameter="{Binding}"
+                                    Header="{Binding Name}" />
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </fl:DropDownButton>
@@ -105,6 +107,7 @@
                 <fl:RibbonGroupBox Header="Samples detecion">
                     <fl:Button Command="{Binding SampleAddCommand}" Header="Add image as sample" />
                     <fl:Button Command="{Binding SampleRemoveCommand}" Header="Remove selected sample" />
+                    <fl:Button Command="{Binding SampleRemoveAllCommand}" Header="Remove all samples" />
                 </fl:RibbonGroupBox>
             </fl:RibbonTabItem>
         </fl:Ribbon>

@@ -46,6 +46,10 @@ namespace InputService
 
         public bool IsActive => VideoService?.IsActive ?? false;
 
+        public ISampleService SampleService => currentInput?.SampleService;
+
+        public ITemplateService TemplateService => currentInput?.TemplateService;
+
         public IVideoService VideoService => currentInput?.VideoService;
 
         #endregion Public Properties
@@ -139,7 +143,7 @@ namespace InputService
 
             foreach (var toBeRemoved in toBeRemoveds)
             {
-                toBeRemoved.ClipService.RemoveAll();
+                toBeRemoved.ClipService.Clear();
                 toBeRemoved.VideoService?.Dispose();
                 Inputs.Remove(toBeRemoved);
             }

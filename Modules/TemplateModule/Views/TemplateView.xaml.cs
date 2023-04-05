@@ -1,13 +1,13 @@
 ﻿using System.Windows.Controls;
 
-namespace ClipModule.Views
+namespace TemplateModule.Views
 {
-    public partial class AllClipsView
+    public partial class TemplateView
         : UserControl
     {
         #region Public Constructors
 
-        public AllClipsView()
+        public TemplateView()
         {
             InitializeComponent();
         }

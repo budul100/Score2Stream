@@ -1,4 +1,4 @@
-﻿using Core.Events;
+﻿using Core.Events.Clips;
 using Core.Interfaces;
 using Core.Models;
 using Prism.Events;
@@ -18,22 +18,21 @@ namespace ClipService
 
         #region Public Constructors
 
-        public Service(IEventAggregator eventAggregator)
+        public Service(ITemplateService templateService, IEventAggregator eventAggregator)
         {
+            TemplateService = templateService;
             this.eventAggregator = eventAggregator;
-
-            eventAggregator.GetEvent<SelectClipEvent>().Subscribe(
-                action: c => SelectClip(c),
-                keepSubscriberReferenceAlive: true);
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public Clip Active { get; private set; }
+        public Clip Clip { get; private set; }
 
         public List<Clip> Clips { get; } = new List<Clip>();
+
+        public ITemplateService TemplateService { get; }
 
         #endregion Public Properties
 
@@ -54,39 +53,50 @@ namespace ClipService
                 .GetEvent<ClipsChangedEvent>()
                 .Publish();
 
-            SelectClip(clip);
+            Select(clip);
         }
 
-        public bool IsUniqueName(string name)
+        public void Clear()
         {
-            var result = !Clips.Any(c => c.Name == name);
+            if (Clips.Any())
+            {
+                foreach (var clip in Clips)
+                {
+                    RemoveClip(clip);
+                }
 
-            return result;
+                eventAggregator.GetEvent<ClipsChangedEvent>()
+                    .Publish();
+
+                Select(default);
+            }
         }
 
         public void Remove()
         {
-            if (Active != default)
-            {
-                Clips.Remove(Active);
+            Remove(Clip);
+        }
 
-                eventAggregator
-                    .GetEvent<ClipsChangedEvent>()
+        public void Remove(Clip clip)
+        {
+            if (clip != default)
+            {
+                RemoveClip(clip);
+
+                eventAggregator.GetEvent<ClipsChangedEvent>()
                     .Publish();
 
-                SelectClip(default);
+                Select(default);
             }
         }
 
-        public void RemoveAll()
+        public void Select(Clip clip)
         {
-            Clips.Clear();
+            Clip = clip;
 
             eventAggregator
-                .GetEvent<ClipsChangedEvent>()
-                .Publish();
-
-            SelectClip(default);
+                .GetEvent<ClipSelectedEvent>()
+                .Publish(Clip);
         }
 
         #endregion Public Methods
@@ -102,18 +112,19 @@ namespace ClipService
             do
             {
                 result = $"Clip{++index}";
-            } while (!IsUniqueName(result));
+            } while (Clips.Any(c => c.Name == result));
 
             return result;
         }
 
-        private void SelectClip(Clip clip)
+        private void RemoveClip(Clip clip)
         {
-            Active = clip;
+            if (clip != default)
+            {
+                TemplateService.Remove(clip.Template);
 
-            eventAggregator
-                .GetEvent<ClipSelectedEvent>()
-                .Publish(Active);
+                Clips.Remove(clip);
+            }
         }
 
         #endregion Private Methods

@@ -8,7 +8,7 @@ namespace TemplateModule.Helpers
 
         public static SampleViewModel SampleViewModel => default;
 
-        public static SelectionViewModel SelectionViewModel => default;
+        public static TemplateViewModel TemplateViewModel => default;
 
         #endregion Public Properties
     }

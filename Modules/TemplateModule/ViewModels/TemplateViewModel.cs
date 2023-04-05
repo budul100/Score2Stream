@@ -1,58 +1,60 @@
-﻿using Core.Events;
-using Core.Models;
-using Prism.Events;
-using Prism.Regions;
-using Core.Interfaces;
-using Core.Prism;
-using System.Collections.ObjectModel;
-using System.Windows.Media.Imaging;
+﻿using Core.Events.Samples;
+using Core.Events.Templates;
 using Core.Events.Video;
+using Core.Interfaces;
+using Core.Models;
+using Core.Prism;
+using Prism.Events;
+using Prism.Ioc;
+using Prism.Regions;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Windows.Media.Imaging;
 
 namespace TemplateModule.ViewModels
 {
-    public class SelectionViewModel
+    public class TemplateViewModel
         : RegionViewModelBase
     {
         #region Private Fields
 
+        private readonly IContainerProvider containerProvider;
         private readonly IEventAggregator eventAggregator;
-
+        private readonly IInputService inputService;
         private Template template;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public SelectionViewModel(ITemplateService templateService, IRegionManager regionManager,
-            IEventAggregator eventAggregator)
+        public TemplateViewModel(IInputService inputService, IContainerProvider containerProvider,
+            IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
+            this.inputService = inputService;
+            this.containerProvider = containerProvider;
             this.eventAggregator = eventAggregator;
 
             eventAggregator.GetEvent<TemplateSelectedEvent>().Subscribe(
-                action: t => SetCurrent(t),
-                keepSubscriberReferenceAlive: true);
-
-            eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
-                action: _ => OnUpdateCurrent(),
+                action: t => UpdateTemplate(t),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<SamplesChangedEvent>().Subscribe(
-                action: _ => UpdateTemplate(),
+                action: () => UpdateSamples(),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
-                action: () => OnUpdateCurrent(),
+                action: () => UpdateBitmap(),
                 keepSubscriberReferenceAlive: true);
 
-            SetCurrent(templateService.Template);
+            UpdateTemplate(inputService?.TemplateService?.Template);
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public BitmapSource Content => template?.Clip?.Bitmap;
+        public BitmapSource Bitmap => template?.Clip?.Bitmap;
 
         public string Current => !string.IsNullOrWhiteSpace(template?.Clip?.Value)
             ? $"{template.Name} => {template.Clip.Value}"
@@ -64,36 +66,38 @@ namespace TemplateModule.ViewModels
 
         #region Private Methods
 
-        private void OnUpdateCurrent()
+        private void UpdateBitmap()
         {
-            RaisePropertyChanged(nameof(Content));
-            RaisePropertyChanged(nameof(Current));
+            RaisePropertyChanged(nameof(Bitmap));
         }
 
-        private void SetCurrent(Template template)
-        {
-            this.template = template;
-
-            UpdateTemplate();
-
-            OnUpdateCurrent();
-        }
-
-        private void UpdateTemplate()
+        private void UpdateSamples()
         {
             Samples.Clear();
 
-            if (this.template != default)
+            if (template?.Samples?.Any() == true)
             {
-                foreach (var sample in this.template?.Samples)
+                foreach (var sample in template.Samples)
                 {
-                    var current = new SampleViewModel(
+                    var current = containerProvider.Resolve<SampleViewModel>();
+
+                    current.Initialize(
                         sample: sample,
-                        eventAggregator: eventAggregator);
+                        sampleService: inputService.SampleService);
 
                     Samples.Add(current);
                 }
             }
+        }
+
+        private void UpdateTemplate(Template template)
+        {
+            this.template = template;
+
+            RaisePropertyChanged(nameof(Current));
+            UpdateBitmap();
+
+            UpdateSamples();
         }
 
         #endregion Private Methods
