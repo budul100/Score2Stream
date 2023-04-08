@@ -44,7 +44,7 @@ namespace TemplateModule.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
-                action: () => UpdateBitmap(),
+                action: () => UpdateImage(),
                 keepSubscriberReferenceAlive: true);
 
             UpdateTemplate(inputService?.TemplateService?.Template);
@@ -66,9 +66,10 @@ namespace TemplateModule.ViewModels
 
         #region Private Methods
 
-        private void UpdateBitmap()
+        private void UpdateImage()
         {
             RaisePropertyChanged(nameof(Bitmap));
+            RaisePropertyChanged(nameof(Current));
         }
 
         private void UpdateSamples()
@@ -94,9 +95,7 @@ namespace TemplateModule.ViewModels
         {
             this.template = template;
 
-            RaisePropertyChanged(nameof(Current));
-            UpdateBitmap();
-
+            UpdateImage();
             UpdateSamples();
         }
 

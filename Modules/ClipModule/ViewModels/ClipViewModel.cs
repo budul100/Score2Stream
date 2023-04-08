@@ -48,7 +48,7 @@ namespace ClipModule.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
-                action: () => UpdateBitmap(),
+                action: () => UpdateImage(),
                 keepSubscriberReferenceAlive: true);
 
             Validator.AddRule(
@@ -163,7 +163,7 @@ namespace ClipModule.ViewModels
             RaisePropertyChanged(nameof(Templates));
         }
 
-        private void UpdateBitmap()
+        private void UpdateImage()
         {
             RaisePropertyChanged(nameof(Bitmap));
             RaisePropertyChanged(nameof(Value));
