@@ -6,6 +6,21 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Page Remove="Resources\Material-VideoOffOutline.xaml" />
+	  <Page Remove="Resources\Material-VideoOutline.xaml" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Resource Include="Resources\Material-VideoOffOutline.xaml">
+	    <Generator></Generator>
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </Resource>
+	  <Resource Include="Resources\Material-VideoOutline.xaml">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </Resource>
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="ControlzEx" Version="5.0.2" />
 		<PackageReference Include="Fluent.Ribbon" Version="9.0.4" />
 		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
