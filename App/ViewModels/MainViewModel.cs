@@ -1,11 +1,17 @@
-﻿using Prism.Mvvm;
+﻿using MvvmDialogs;
+using Prism.Commands;
+using Prism.Mvvm;
+using System.ComponentModel;
+using System.Windows;
 
 namespace ScoreboardOCR.ViewModels
 {
-    public class MainViewModel : BindableBase
+    public class MainViewModel
+        : BindableBase
     {
         #region Private Fields
 
+        private readonly IDialogService dialogService;
         private int height;
         private string title = "ScoreboardOCR";
         private int width;
@@ -14,10 +20,14 @@ namespace ScoreboardOCR.ViewModels
 
         #region Public Constructors
 
-        public MainViewModel()
+        public MainViewModel(IDialogService dialogService)
         {
+            this.dialogService = dialogService;
+
             Height = 800;
             Width = 1200;
+
+            this.OnClosingCommand = new DelegateCommand<CancelEventArgs>(OnClosing);
         }
 
         #endregion Public Constructors
@@ -29,6 +39,8 @@ namespace ScoreboardOCR.ViewModels
             get { return height; }
             set { SetProperty(ref height, value); }
         }
+
+        public DelegateCommand<CancelEventArgs> OnClosingCommand { get; }
 
         public string Title
         {
@@ -43,5 +55,22 @@ namespace ScoreboardOCR.ViewModels
         }
 
         #endregion Public Properties
+
+        #region Private Methods
+
+        private void OnClosing(CancelEventArgs eventArgs)
+        {
+            var result = dialogService.ShowMessageBox(
+                ownerViewModel: this,
+                messageBoxText: "Shall the application be closed?",
+                caption: "Close application",
+                button: MessageBoxButton.YesNo,
+                icon: MessageBoxImage.Question,
+                defaultResult: MessageBoxResult.No);
+
+            eventArgs.Cancel = result == MessageBoxResult.No;
+        }
+
+        #endregion Private Methods
     }
 }

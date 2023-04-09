@@ -1,11 +1,11 @@
 ﻿<UserControl
     x:Class="TemplateModule.Views.SampleView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:hl="clr-namespace:TemplateModule.Helpers"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:hl="clr-namespace:TemplateModule.Helpers"
     d:DataContext="{Binding Source={x:Static hl:DesignTimeViewModelLocator.SampleViewModel}}"
     mc:Ignorable="d">
     <UserControl.Resources>

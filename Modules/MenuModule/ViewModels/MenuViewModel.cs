@@ -31,6 +31,7 @@ namespace MenuModule.ViewModels
         private const int ViewIndexBoard = 0;
         private const int ViewIndexClip = 1;
         private const int ViewIndexTemplate = 2;
+
         private readonly IDialogService dialogService;
         private readonly IInputService inputService;
         private readonly IRegionManager regionManager;
