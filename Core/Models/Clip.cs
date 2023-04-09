@@ -1,4 +1,5 @@
 ﻿using OpenCvSharp;
+using System;
 using System.Windows.Media.Imaging;
 
 namespace Core.Models
@@ -21,6 +22,8 @@ namespace Core.Models
 
         public string Name { get; set; }
 
+        public Rect? Rect { get; set; }
+
         public double RelativeX1 { get; set; }
 
         public double RelativeX2 { get; set; }
@@ -32,6 +35,10 @@ namespace Core.Models
         public Template Template { get; set; }
 
         public int ThresholdMonochrome { get; set; } = ThresholdMonochromeDefault;
+
+        public DateTime UpdateTime { get; set; }
+
+        public string UpdateValue { get; set; }
 
         public string Value { get; set; }
 

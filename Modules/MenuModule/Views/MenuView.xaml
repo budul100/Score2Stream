@@ -92,15 +92,21 @@
                 </fl:RibbonGroupBox>
 
                 <fl:RibbonGroupBox Header="Clips options">
-                    <fl:CheckBox
-                        Header="Deactivate clip centering"
-                        IsChecked="{Binding NoCentering, Mode=TwoWay}"
-                        IsEnabled="{Binding IsActive}" />
                     <fl:Spinner
                         Format="0"
                         Header="Matching threshold"
                         IsEnabled="{Binding IsActive}"
                         Value="{Binding ThresholdMatching, Mode=TwoWay}" />
+                    <fl:Spinner
+                        Margin="0,5,0,5"
+                        Format="0"
+                        Header="Update waiting"
+                        IsEnabled="{Binding IsActive}"
+                        Value="{Binding WaitingDuration, Mode=TwoWay}" />
+                    <fl:CheckBox
+                        Header="Deactivate cropping"
+                        IsChecked="{Binding NoCentering, Mode=TwoWay}"
+                        IsEnabled="{Binding IsActive}" />
                 </fl:RibbonGroupBox>
             </fl:RibbonTabItem>
 

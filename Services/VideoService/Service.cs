@@ -15,7 +15,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using VideoService.Extensions;
-using VideoService.Models;
 
 namespace VideoService
 {
@@ -29,10 +28,10 @@ namespace VideoService
         private const double DividerThreshold = 100;
         private const int ThresholdDetectingDefault = 80;
         private const int ThresholdMatchingDefault = 70;
+        private const int WaitingDurationDefault = 50;
 
         private readonly IDispatcherService dispatcherService;
         private readonly IEventAggregator eventAggregator;
-        private readonly List<RecClip> recClips = new();
         private readonly VideoUpdatedEvent videoUpdatedEvent;
 
         private CancellationTokenSource cancellationTokenSource;
@@ -77,6 +76,8 @@ namespace VideoService
 
         public int ThresholdMatching { get; set; } = ThresholdMatchingDefault;
 
+        public int WaitingDuration { get; set; } = WaitingDurationDefault;
+
         #endregion Public Properties
 
         #region Public Methods
@@ -94,10 +95,6 @@ namespace VideoService
 
             eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
                 action: c => CreateRecClip(c),
-                keepSubscriberReferenceAlive: true);
-
-            eventAggregator.GetEvent<ClipsChangedEvent>().Subscribe(
-                action: () => recClips.RemoveAll(c => !ClipService.Clips.Contains(c.Clip)),
                 keepSubscriberReferenceAlive: true);
 
             await StartAsync(
@@ -149,21 +146,22 @@ namespace VideoService
                     secondX: secondX,
                     secondY: secondY);
 
+                clip.Rect = rectangle;
+
                 if (rectangle.HasValue)
                 {
-                    var value = new RecClip
-                    {
-                        Clip = clip,
-                        Rect = rectangle.Value,
-                    };
-
-                    recClips.RemoveAll(c => c.Clip == clip);
-                    recClips.Add(value);
-
-                    maxHeight = recClips.Max(r => r.Rect.Height);
-                    maxWidth = recClips.Max(r => r.Rect.Width);
+                    maxHeight = GetRelevantClips().Max(r => r.Rect.Value.Height);
+                    maxWidth = GetRelevantClips().Max(r => r.Rect.Value.Width);
                 }
             }
+        }
+
+        private IEnumerable<Clip> GetRelevantClips()
+        {
+            var result = ClipService.Clips
+                .Where(c => c.Rect.HasValue);
+
+            return result;
         }
 
         private async void RunAsync(int? deviceId, string fileName)
@@ -211,12 +209,13 @@ namespace VideoService
                     if (!currentFrame.Empty())
                     {
                         frame = currentFrame;
-
                         Bitmap = currentFrame.ToBitmapSource();
 
-                        foreach (var contentClip in recClips)
+                        var relevants = GetRelevantClips().ToArray();
+
+                        foreach (var relevant in relevants)
                         {
-                            UpdateClip(contentClip);
+                            UpdateClip(relevant);
                         }
                     }
 
@@ -262,15 +261,17 @@ namespace VideoService
             }
         }
 
-        private void UpdateClip(RecClip contentClip)
+        private void UpdateClip(Clip clip)
         {
-            var thresholdMonochrome = contentClip.Clip.ThresholdMonochrome / DividerThreshold;
+            var thresholdMonochrome = clip.ThresholdMonochrome / DividerThreshold;
 
             var thresholdDetecting = ThresholdDetecting / DividerThreshold;
             var thresholdMatching = ThresholdMatching / DividerThreshold;
 
+            var waitingSpan = TimeSpan.FromMilliseconds(WaitingDuration);
+
             var monochromImage = frame
-                .Clone(contentClip.Rect)
+                .Clone(clip.Rect.Value)
                 .ToMonochrome(thresholdMonochrome);
 
             var contourRectangle = !NoCentering
@@ -279,49 +280,54 @@ namespace VideoService
 
             if (contourRectangle.HasValue)
             {
-                contentClip.Clip.Image = monochromImage
-                    .ToCropped(
-                        contourRectangle: contourRectangle.Value);
+                clip.Image = monochromImage
+                    .ToCropped(contourRectangle.Value);
             }
             else
             {
-                contentClip.Clip.Image = monochromImage;
+                clip.Image = monochromImage;
             }
 
-            if (contentClip.Clip.Image != default)
+            if (clip.Image != default)
             {
-                contentClip.Clip.Bitmap = contentClip.Clip.Image
+                clip.Bitmap = clip.Image
                     .ToCentered(
                         fullWidth: maxWidth,
                         fullHeight: maxHeight)
                     .ToBitmapSource();
 
-                contentClip.SetSimilarities();
+                clip.SetSimilarities();
 
-                var matchingSample = contentClip.Clip?.Template?.Samples?
+                var matchingSample = clip.Template?.Samples?
                     .OrderByDescending(c => c.Similarity).FirstOrDefault();
 
                 if ((matchingSample != default)
                     && (matchingSample.Similarity >= thresholdMatching))
                 {
-                    contentClip.Clip.Value = matchingSample?.Value;
+                    clip.SetValue(
+                        value: matchingSample?.Value,
+                        waitingSpan: waitingSpan);
                 }
                 else
                 {
-                    contentClip.Clip.Value = default;
+                    clip.SetValue(
+                        value: default,
+                        waitingSpan: waitingSpan);
                 }
 
-                if ((contentClip.Clip?.Template?.Samples.Any() != true)
+                if ((clip.Template?.Samples.Any() != true)
                     || ((matchingSample != default) && (matchingSample.Similarity < thresholdDetecting)))
                 {
                     eventAggregator
                         .GetEvent<SampleDetectedEvent>()
-                        .Publish(contentClip.Clip);
+                        .Publish(clip);
                 }
             }
             else
             {
-                contentClip.Clip.Value = default;
+                clip.SetValue(
+                    value: default,
+                        waitingSpan: waitingSpan);
             }
         }
 

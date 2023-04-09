@@ -26,11 +26,11 @@ namespace MenuModule.ViewModels
     {
         #region Private Fields
 
-        private const int DelayMax = 1000;
+        private const int DurationMax = 1000;
+        private const int ThresholdMax = 100;
         private const int ViewIndexBoard = 0;
         private const int ViewIndexClip = 1;
         private const int ViewIndexTemplate = 2;
-
         private readonly IDialogService dialogService;
         private readonly IInputService inputService;
         private readonly IRegionManager regionManager;
@@ -189,7 +189,7 @@ namespace MenuModule.ViewModels
             {
                 if (IsActive
                     && value >= 0
-                    && value <= DelayMax)
+                    && value <= DurationMax)
                 {
                     inputService.VideoService.Delay = value;
                 }
@@ -231,7 +231,7 @@ namespace MenuModule.ViewModels
             {
                 if (IsActive
                     && value >= 0
-                    && value <= 100)
+                    && value <= ThresholdMax)
                 {
                     inputService.VideoService.ThresholdDetecting = value;
                 }
@@ -247,12 +247,28 @@ namespace MenuModule.ViewModels
             {
                 if (IsActive
                     && value >= 0
-                    && value <= 100)
+                    && value <= ThresholdMax)
                 {
                     inputService.VideoService.ThresholdMatching = value;
                 }
 
                 RaisePropertyChanged(nameof(ThresholdMatching));
+            }
+        }
+
+        public int WaitingDuration
+        {
+            get { return inputService.VideoService?.WaitingDuration ?? 0; }
+            set
+            {
+                if (IsActive
+                    && value >= 0
+                    && value <= DurationMax)
+                {
+                    inputService.VideoService.WaitingDuration = value;
+                }
+
+                RaisePropertyChanged(nameof(WaitingDuration));
             }
         }
 
@@ -302,9 +318,10 @@ namespace MenuModule.ViewModels
 
             RaisePropertyChanged(nameof(IsActive));
             RaisePropertyChanged(nameof(NoCentering));
-            RaisePropertyChanged(nameof(ThresholdMatching));
             RaisePropertyChanged(nameof(ProcessingDelay));
             RaisePropertyChanged(nameof(ThresholdDetecting));
+            RaisePropertyChanged(nameof(ThresholdMatching));
+            RaisePropertyChanged(nameof(WaitingDuration));
         }
 
         private void RemoveAllClips()

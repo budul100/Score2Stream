@@ -22,9 +22,11 @@ namespace Core.Interfaces
 
         bool NoCentering { get; set; }
 
+        int ThresholdDetecting { get; set; }
+
         int ThresholdMatching { get; set; }
 
-        int ThresholdDetecting { get; set; }
+        int WaitingDuration { get; set; }
 
         #endregion Public Properties
 
