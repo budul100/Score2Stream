@@ -45,20 +45,7 @@ namespace SampleService
         {
             if (clip != default)
             {
-                var sample = new Sample
-                {
-                    Image = clip.Image,
-                    Bitmap = clip.Bitmap,
-                    Template = clip.Template,
-                };
-
-                clip.Template.Samples.Add(sample);
-
-                Samples.Add(sample);
-
-                eventAggregator
-                    .GetEvent<SamplesChangedEvent>()
-                    .Publish();
+                var sample = GetSample(clip);
 
                 Select(sample);
             }
@@ -106,11 +93,31 @@ namespace SampleService
 
         #region Private Methods
 
+        private Sample GetSample(Clip clip)
+        {
+            var result = new Sample
+            {
+                Image = clip.Image,
+                Bitmap = clip.Bitmap,
+                Template = clip.Template,
+            };
+
+            clip.Template.Samples.Add(result);
+
+            Samples.Add(result);
+
+            eventAggregator
+                .GetEvent<SamplesChangedEvent>()
+                .Publish();
+
+            return result;
+        }
+
         private void OnSampleDetected(Clip clip)
         {
             if (IsDetection)
             {
-                Add(clip);
+                GetSample(clip);
             }
         }
 

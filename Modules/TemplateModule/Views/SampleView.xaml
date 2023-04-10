@@ -23,6 +23,9 @@
                 <Style TargetType="StackPanel">
                     <Setter Property="Background" Value="Gainsboro" />
                     <Style.Triggers>
+                        <DataTrigger Binding="{Binding HasNoValue}" Value="True">
+                            <Setter Property="Background" Value="LightPink" />
+                        </DataTrigger>
                         <DataTrigger Binding="{Binding IsActive}" Value="True">
                             <Setter Property="Background" Value="LightBlue" />
                         </DataTrigger>
@@ -69,7 +72,7 @@
                         Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="GotFocus">
-                                <b:InvokeCommandAction Command="{Binding OnClickCommand}" />
+                                <b:InvokeCommandAction Command="{Binding OnFocusCommand}" />
                             </b:EventTrigger>
                         </b:Interaction.Triggers>
                     </TextBox>

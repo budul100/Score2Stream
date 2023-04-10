@@ -55,7 +55,7 @@ namespace MenuModule.ViewModels
             this.InputSelectCommand = new DelegateCommand<Input>(
                 executeMethod: i => SelectInput(i));
             this.InputStopAllCommand = new DelegateCommand(
-                executeMethod: () => StopAllInpus(),
+                executeMethod: () => StopAllInputs(),
                 canExecuteMethod: () => inputService.IsActive);
 
             this.ClipAddCommand = new DelegateCommand(
@@ -64,7 +64,7 @@ namespace MenuModule.ViewModels
             this.ClipRemoveCommand = new DelegateCommand(
                 executeMethod: () => RemoveClip(),
                 canExecuteMethod: () => inputService.ClipService?.Clip != default);
-            this.ClipRemoveAllCommand = new DelegateCommand(
+            this.ClipsRemoveAllCommand = new DelegateCommand(
                 executeMethod: () => RemoveAllClips(),
                 canExecuteMethod: () => inputService.ClipService?.Clips?.Any() == true);
 
@@ -84,8 +84,11 @@ namespace MenuModule.ViewModels
             this.SampleRemoveCommand = new DelegateCommand(
                 executeMethod: () => inputService.SampleService.Remove(),
                 canExecuteMethod: () => inputService?.SampleService?.Sample != default);
-            this.SampleRemoveAllCommand = new DelegateCommand(
+            this.SamplesRemoveAllCommand = new DelegateCommand(
                 executeMethod: () => RemoveAllSamples(),
+                canExecuteMethod: () => inputService?.SampleService?.Samples?.Any() == true);
+            this.SamplesOrderCommand = new DelegateCommand(
+                executeMethod: () => eventAggregator.GetEvent<OrderSamplesEvent>().Publish(),
                 canExecuteMethod: () => inputService?.SampleService?.Samples?.Any() == true);
 
             eventAggregator.GetEvent<InputsChangedEvent>().Subscribe(
@@ -104,9 +107,9 @@ namespace MenuModule.ViewModels
                 action: _ => OnTemplateSelected());
 
             eventAggregator.GetEvent<SamplesChangedEvent>().Subscribe(
-                action: () => SampleRemoveAllCommand.RaiseCanExecuteChanged());
+                action: UpdateSamples);
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
-                action: _ => SampleRemoveCommand.RaiseCanExecuteChanged());
+                action: _ => OnSampleSelected());
 
             /// Must be tidied
             eventAggregator.GetEvent<GraphicsUpdatedEvent>().Subscribe(
@@ -133,9 +136,9 @@ namespace MenuModule.ViewModels
 
         public DelegateCommand ClipAsTemplateCommand { get; }
 
-        public DelegateCommand ClipRemoveAllCommand { get; }
-
         public DelegateCommand ClipRemoveCommand { get; }
+
+        public DelegateCommand ClipsRemoveAllCommand { get; }
 
         public DelegateCommand GraphicsEndCommand { get; }
 
@@ -201,9 +204,11 @@ namespace MenuModule.ViewModels
 
         public DelegateCommand SampleAddCommand { get; }
 
-        public DelegateCommand SampleRemoveAllCommand { get; }
-
         public DelegateCommand SampleRemoveCommand { get; }
+
+        public DelegateCommand SamplesOrderCommand { get; }
+
+        public DelegateCommand SamplesRemoveAllCommand { get; }
 
         public int SelectedTabIndex
         {
@@ -288,7 +293,7 @@ namespace MenuModule.ViewModels
         {
             ClipAddCommand.RaiseCanExecuteChanged();
             ClipRemoveCommand.RaiseCanExecuteChanged();
-            ClipRemoveAllCommand.RaiseCanExecuteChanged();
+            ClipsRemoveAllCommand.RaiseCanExecuteChanged();
 
             ClipAsTemplateCommand.RaiseCanExecuteChanged();
         }
@@ -298,6 +303,11 @@ namespace MenuModule.ViewModels
             GraphicsStartCommand.RaiseCanExecuteChanged();
             GraphicsEndCommand.RaiseCanExecuteChanged();
             GraphicsOpenCommand.RaiseCanExecuteChanged();
+        }
+
+        private void OnSampleSelected()
+        {
+            SampleRemoveCommand.RaiseCanExecuteChanged();
         }
 
         private void OnTemplateSelected()
@@ -440,7 +450,7 @@ namespace MenuModule.ViewModels
             }
         }
 
-        private void StopAllInpus()
+        private void StopAllInputs()
         {
             var result = dialogService.ShowMessageBox(
                 ownerViewModel: this,
@@ -495,6 +505,12 @@ namespace MenuModule.ViewModels
                         source: nameof(ViewType.Templates));
                     break;
             }
+        }
+
+        private void UpdateSamples()
+        {
+            SamplesRemoveAllCommand.RaiseCanExecuteChanged();
+            SamplesOrderCommand.RaiseCanExecuteChanged();
         }
 
         private void UpdateTemplates()

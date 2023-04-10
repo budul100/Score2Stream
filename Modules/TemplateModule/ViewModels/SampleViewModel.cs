@@ -15,7 +15,6 @@ namespace TemplateModule.ViewModels
         #region Private Fields
 
         private bool isActive;
-        private Sample sample;
         private ISampleService sampleService;
 
         #endregion Private Fields
@@ -24,11 +23,11 @@ namespace TemplateModule.ViewModels
 
         public SampleViewModel(IEventAggregator eventAggregator)
         {
-            OnClickCommand = new DelegateCommand(
-                executeMethod: () => sampleService.Select(sample));
+            OnFocusCommand = new DelegateCommand(
+                executeMethod: () => sampleService.Select(Sample));
 
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
-                action: s => IsActive = s == sample,
+                action: s => IsActive = s == Sample,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
@@ -40,11 +39,13 @@ namespace TemplateModule.ViewModels
 
         #region Public Properties
 
-        public BitmapSource Bitmap => sample?.Bitmap;
+        public BitmapSource Bitmap => Sample?.Bitmap;
 
-        public string Difference => sample?.Image != default
-            ? $"Difference: {(int)(sample.Similarity * 100)}"
+        public string Difference => Sample?.Image != default
+            ? $"Difference: {(int)(Sample.Similarity * 100)}"
             : default;
+
+        public bool HasNoValue => string.IsNullOrWhiteSpace(Value);
 
         public bool IsActive
         {
@@ -52,15 +53,19 @@ namespace TemplateModule.ViewModels
             set { SetProperty(ref isActive, value); }
         }
 
-        public DelegateCommand OnClickCommand { get; }
+        public DelegateCommand OnFocusCommand { get; }
+
+        public Sample Sample { get; private set; }
 
         public string Value
         {
-            get { return sample?.Value; }
+            get { return Sample?.Value; }
             set
             {
-                sample.Value = value;
+                Sample.Value = value;
+
                 RaisePropertyChanged(nameof(Value));
+                RaisePropertyChanged(nameof(HasNoValue));
             }
         }
 
@@ -70,7 +75,7 @@ namespace TemplateModule.ViewModels
 
         public void Initialize(Sample sample, ISampleService sampleService)
         {
-            this.sample = sample;
+            this.Sample = sample;
             this.sampleService = sampleService;
 
             Value = sample.Value;

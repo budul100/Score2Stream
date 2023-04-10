@@ -20,7 +20,7 @@ namespace ClipModule.ViewModels
         #region Private Fields
 
         private readonly IEventAggregator eventAggregator;
-        private Clip clip;
+
         private IClipService clipService;
         private bool isActive;
         private string name;
@@ -34,10 +34,10 @@ namespace ClipModule.ViewModels
             this.eventAggregator = eventAggregator;
 
             OnClickCommand = new DelegateCommand(
-                executeMethod: () => clipService?.Select(clip));
+                executeMethod: () => clipService?.Select(Clip));
 
             eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
-                action: c => IsActive = c == clip,
+                action: c => IsActive = c == Clip,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<TemplateSelectedEvent>().Subscribe(
@@ -71,7 +71,9 @@ namespace ClipModule.ViewModels
 
         #region Public Properties
 
-        public BitmapSource Bitmap => clip?.Bitmap;
+        public BitmapSource Bitmap => Clip?.Bitmap;
+
+        public Clip Clip { get; private set; }
 
         public bool IsActive
         {
@@ -88,13 +90,13 @@ namespace ClipModule.ViewModels
                 var validation = Validator.Validate(nameof(Name));
 
                 if (validation.IsValid
-                    && clip?.Name != value)
+                    && Clip?.Name != value)
                 {
-                    clip.Name = value;
+                    Clip.Name = value;
 
                     eventAggregator
                         .GetEvent<ClipUpdatedEvent>()
-                        .Publish(clip);
+                        .Publish(Clip);
                 }
             }
         }
@@ -103,10 +105,10 @@ namespace ClipModule.ViewModels
 
         public Template Template
         {
-            get { return clip?.Template; }
+            get { return Clip?.Template; }
             set
             {
-                clip.Template = value;
+                Clip.Template = value;
                 RaisePropertyChanged(nameof(Template));
             }
         }
@@ -115,26 +117,26 @@ namespace ClipModule.ViewModels
 
         public int ThresholdMonochrome
         {
-            get { return clip?.ThresholdMonochrome ?? 0; }
+            get { return Clip?.ThresholdMonochrome ?? 0; }
             set
             {
                 if (value >= 0
                     && value <= 100
-                    && clip?.ThresholdMonochrome != value)
+                    && Clip?.ThresholdMonochrome != value)
                 {
-                    clip.ThresholdMonochrome = value;
+                    Clip.ThresholdMonochrome = value;
 
                     eventAggregator
                         .GetEvent<ClipUpdatedEvent>()
-                        .Publish(clip);
+                        .Publish(Clip);
                 }
 
                 RaisePropertyChanged(nameof(ThresholdMonochrome));
             }
         }
 
-        public string Value => !string.IsNullOrWhiteSpace(clip?.Value)
-            ? $"=> {clip.Value}"
+        public string Value => !string.IsNullOrWhiteSpace(Clip?.Value)
+            ? $"=> {Clip.Value}"
             : default;
 
         #endregion Public Properties
@@ -143,7 +145,7 @@ namespace ClipModule.ViewModels
 
         public void Initialize(Clip clip, IClipService clipService)
         {
-            this.clip = clip;
+            this.Clip = clip;
             this.clipService = clipService;
 
             Name = clip?.Name;
@@ -157,7 +159,7 @@ namespace ClipModule.ViewModels
 
         private void OnTemplateSelected()
         {
-            Template = clip.Template;
+            Template = Clip.Template;
 
             RaisePropertyChanged(nameof(Template));
             RaisePropertyChanged(nameof(Templates));

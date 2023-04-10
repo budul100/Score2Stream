@@ -1,15 +1,15 @@
 ﻿<UserControl
     x:Class="MenuModule.Views.MenuView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:prism="http://prismlibrary.com/"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mo="clr-namespace:Core.Models;assembly=Core"
     xmlns:fl="clr-namespace:Fluent;assembly=Fluent"
     xmlns:hl="clr-namespace:MenuModule.Helpers"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:md="https://github.com/fantasticfiasco/mvvm-dialogs"
-    xmlns:mo="clr-namespace:Core.Models;assembly=Core"
-    xmlns:prism="http://prismlibrary.com/"
     d:DataContext="{Binding Source={x:Static hl:DesignTimeViewModelLocator.MenuViewModel}}"
     d:DesignWidth="500"
     md:DialogServiceViews.IsRegistered="True"
@@ -76,7 +76,7 @@
                 <fl:RibbonGroupBox Header="Clips selection">
                     <fl:Button Command="{Binding ClipAddCommand}" Header="Add new clip" />
                     <fl:Button Command="{Binding ClipRemoveCommand}" Header="Remove selected clip" />
-                    <fl:Button Command="{Binding ClipRemoveAllCommand}" Header="Remove all clips" />
+                    <fl:Button Command="{Binding ClipsRemoveAllCommand}" Header="Remove all clips" />
                 </fl:RibbonGroupBox>
 
                 <fl:RibbonGroupBox Header="Templates selection">
@@ -129,14 +129,18 @@
                     <fl:Button Command="{Binding TemplateRemoveCommand}" Header="Remove current template" />
                 </fl:RibbonGroupBox>
 
-                <fl:RibbonGroupBox Header="Samples detecion">
+                <fl:RibbonGroupBox Header="Samples detection">
                     <fl:ToggleButton Header="Detect samples" IsChecked="{Binding IsSampleDetection}" />
                     <fl:Button Command="{Binding SampleAddCommand}" Header="Add image as sample" />
                     <fl:Button Command="{Binding SampleRemoveCommand}" Header="Remove selected sample" />
-                    <fl:Button Command="{Binding SampleRemoveAllCommand}" Header="Remove all samples" />
+                    <fl:Button Command="{Binding SamplesRemoveAllCommand}" Header="Remove all samples" />
                 </fl:RibbonGroupBox>
 
-                <fl:RibbonGroupBox Header="Detecion options">
+                <fl:RibbonGroupBox Header="Samples handling">
+                    <fl:Button Command="{Binding SamplesOrderCommand}" Header="Order samples" />
+                </fl:RibbonGroupBox>
+
+                <fl:RibbonGroupBox Header="Detection options">
                     <fl:Spinner
                         Format="0"
                         Header="Detection threshold"

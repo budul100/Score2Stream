@@ -19,8 +19,8 @@ namespace TemplateModule.ViewModels
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
-        private readonly IEventAggregator eventAggregator;
         private readonly IInputService inputService;
+
         private Template template;
 
         #endregion Private Fields
@@ -33,7 +33,6 @@ namespace TemplateModule.ViewModels
         {
             this.inputService = inputService;
             this.containerProvider = containerProvider;
-            this.eventAggregator = eventAggregator;
 
             eventAggregator.GetEvent<TemplateSelectedEvent>().Subscribe(
                 action: t => UpdateTemplate(t),
@@ -41,6 +40,10 @@ namespace TemplateModule.ViewModels
 
             eventAggregator.GetEvent<SamplesChangedEvent>().Subscribe(
                 action: () => UpdateSamples(),
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<OrderSamplesEvent>().Subscribe(
+                action: () => OrderSamples(),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
@@ -66,6 +69,20 @@ namespace TemplateModule.ViewModels
 
         #region Private Methods
 
+        private void OrderSamples()
+        {
+            var ordereds = Samples
+                .OrderByDescending(s => s.HasNoValue)
+                .ThenBy(s => s.Value).ToArray();
+
+            Samples.Clear();
+
+            foreach (var ordered in ordereds)
+            {
+                Samples.Add(ordered);
+            }
+        }
+
         private void UpdateImage()
         {
             RaisePropertyChanged(nameof(Bitmap));
@@ -74,20 +91,26 @@ namespace TemplateModule.ViewModels
 
         private void UpdateSamples()
         {
-            Samples.Clear();
+            var toBeRemoveds = Samples
+                .Where(s => template.Samples?.Contains(s.Sample) != true).ToArray();
 
-            if (template?.Samples?.Any() == true)
+            foreach (var toBeRemoved in toBeRemoveds)
             {
-                foreach (var sample in template.Samples)
-                {
-                    var current = containerProvider.Resolve<SampleViewModel>();
+                Samples.Remove(toBeRemoved);
+            }
 
-                    current.Initialize(
-                        sample: sample,
-                        sampleService: inputService.SampleService);
+            var toBeAddeds = template.Samples
+                .Where(t => !Samples.Any(s => s.Sample == t)).ToArray();
 
-                    Samples.Add(current);
-                }
+            foreach (var toBeAdded in toBeAddeds)
+            {
+                var current = containerProvider.Resolve<SampleViewModel>();
+
+                current.Initialize(
+                    sample: toBeAdded,
+                    sampleService: inputService.SampleService);
+
+                Samples.Add(current);
             }
         }
 
