@@ -12,8 +12,9 @@ namespace ScoreboardOCR.ViewModels
         #region Private Fields
 
         private readonly IDialogService dialogService;
+
         private int height;
-        private string title = "ScoreboardOCR";
+        private string title = "Score2Stream";
         private int width;
 
         #endregion Private Fields
