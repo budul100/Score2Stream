@@ -57,7 +57,7 @@ namespace SampleService
             {
                 var samples = template.Samples.ToArray();
 
-                for (var index = template.Samples.Count; index < 0; index--)
+                for (var index = template.Samples.Count; index > 0; index--)
                 {
                     var sample = samples[index - 1];
                     RemoveSample(sample);

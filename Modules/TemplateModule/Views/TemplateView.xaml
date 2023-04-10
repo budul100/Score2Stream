@@ -1,13 +1,13 @@
 ﻿<UserControl
     x:Class="TemplateModule.Views.TemplateView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:prism="http://prismlibrary.com/"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:hl="clr-namespace:TemplateModule.Helpers"
-    xmlns:vm="clr-namespace:TemplateModule.ViewModels"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:prism="http://prismlibrary.com/"
     xmlns:v="clr-namespace:TemplateModule.Views"
+    xmlns:vm="clr-namespace:TemplateModule.ViewModels"
     d:DataContext="{Binding Source={x:Static hl:DesignTimeViewModelLocator.TemplateViewModel}}"
     d:DesignHeight="300"
     d:DesignWidth="300"
@@ -37,11 +37,32 @@
                     Stretch="Uniform" />
             </Border>
 
-            <TextBlock
-                Margin="10,0,5,0"
-                VerticalAlignment="Center"
-                d:Text="LoremIpsum"
-                Text="{Binding Current}" />
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                    <TextBlock
+                        Margin="10,0,5,0"
+                        VerticalAlignment="Center"
+                        Text="Empty value" />
+                    <TextBox
+                        Width="40"
+                        Margin="5,0"
+                        VerticalAlignment="Center"
+                        d:Text="LoremIspum"
+                        Text="{Binding ValueEmpty, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+                </StackPanel>
+
+                <TextBlock
+                    Grid.Row="1"
+                    Margin="10,0,5,0"
+                    VerticalAlignment="Center"
+                    d:Text="LoremIpsum"
+                    Text="{Binding Current}" />
+            </Grid>
         </StackPanel>
 
         <ScrollViewer

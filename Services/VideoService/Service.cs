@@ -94,7 +94,7 @@ namespace VideoService
             this.Name = input.Name;
 
             eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
-                action: c => CreateRecClip(c),
+                action: c => UpdateRectangle(c),
                 keepSubscriberReferenceAlive: true);
 
             await StartAsync(
@@ -127,34 +127,6 @@ namespace VideoService
         #endregion Protected Methods
 
         #region Private Methods
-
-        private void CreateRecClip(Clip clip)
-        {
-            if (frame != default
-                && clip.HasDimensions
-                && ClipService.Clips.Contains(clip))
-            {
-                var firstX = Convert.ToInt32(clip.RelativeX1 * frame.Size().Width);
-                var secondX = Convert.ToInt32(clip.RelativeX2 * frame.Size().Width);
-
-                var firstY = Convert.ToInt32(clip.RelativeY1 * frame.Size().Height);
-                var secondY = Convert.ToInt32(clip.RelativeY2 * frame.Size().Height);
-
-                var rectangle = frame.Size().GetRectangle(
-                    firstX: firstX,
-                    firstY: firstY,
-                    secondX: secondX,
-                    secondY: secondY);
-
-                clip.Rect = rectangle;
-
-                if (rectangle.HasValue)
-                {
-                    maxHeight = GetRelevantClips().Max(r => r.Rect.Value.Height);
-                    maxWidth = GetRelevantClips().Max(r => r.Rect.Value.Width);
-                }
-            }
-        }
 
         private IEnumerable<Clip> GetRelevantClips()
         {
@@ -311,7 +283,7 @@ namespace VideoService
                 else
                 {
                     clip.SetValue(
-                        value: default,
+                        value: clip.Template?.ValueEmpty,
                         waitingSpan: waitingSpan);
                 }
 
@@ -326,8 +298,36 @@ namespace VideoService
             else
             {
                 clip.SetValue(
-                    value: default,
+                    value: clip.Template?.ValueEmpty,
                         waitingSpan: waitingSpan);
+            }
+        }
+
+        private void UpdateRectangle(Clip clip)
+        {
+            if (frame != default
+                && clip.HasDimensions
+                && ClipService.Clips.Contains(clip))
+            {
+                var firstX = Convert.ToInt32(clip.RelativeX1 * frame.Size().Width);
+                var secondX = Convert.ToInt32(clip.RelativeX2 * frame.Size().Width);
+
+                var firstY = Convert.ToInt32(clip.RelativeY1 * frame.Size().Height);
+                var secondY = Convert.ToInt32(clip.RelativeY2 * frame.Size().Height);
+
+                var rectangle = frame.Size().GetRectangle(
+                    firstX: firstX,
+                    firstY: firstY,
+                    secondX: secondX,
+                    secondY: secondY);
+
+                clip.Rect = rectangle;
+
+                if (rectangle.HasValue)
+                {
+                    maxHeight = GetRelevantClips().Max(r => r.Rect.Value.Height);
+                    maxWidth = GetRelevantClips().Max(r => r.Rect.Value.Width);
+                }
             }
         }
 

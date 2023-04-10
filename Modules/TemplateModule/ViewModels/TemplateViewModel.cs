@@ -21,8 +21,6 @@ namespace TemplateModule.ViewModels
         private readonly IContainerProvider containerProvider;
         private readonly IInputService inputService;
 
-        private Template template;
-
         #endregion Private Fields
 
         #region Public Constructors
@@ -57,13 +55,26 @@ namespace TemplateModule.ViewModels
 
         #region Public Properties
 
-        public BitmapSource Bitmap => template?.Clip?.Bitmap;
+        public BitmapSource Bitmap => Template?.Clip?.Bitmap;
 
-        public string Current => !string.IsNullOrWhiteSpace(template?.Clip?.Value)
-            ? $"{template.Name} => {template.Clip.Value}"
-            : template?.Name;
+        public string Current => !string.IsNullOrWhiteSpace(Template?.Clip?.Value)
+            ? $"{Template.Name} => {Template.Clip.Value}"
+            : Template?.Name;
 
         public ObservableCollection<SampleViewModel> Samples { get; } = new ObservableCollection<SampleViewModel>();
+
+        public Template Template { get; private set; }
+
+        public string ValueEmpty
+        {
+            get { return Template?.ValueEmpty; }
+            set
+            {
+                Template.ValueEmpty = value;
+
+                RaisePropertyChanged(nameof(ValueEmpty));
+            }
+        }
 
         #endregion Public Properties
 
@@ -92,14 +103,14 @@ namespace TemplateModule.ViewModels
         private void UpdateSamples()
         {
             var toBeRemoveds = Samples
-                .Where(s => template.Samples?.Contains(s.Sample) != true).ToArray();
+                .Where(s => Template.Samples?.Contains(s.Sample) != true).ToArray();
 
             foreach (var toBeRemoved in toBeRemoveds)
             {
                 Samples.Remove(toBeRemoved);
             }
 
-            var toBeAddeds = template.Samples
+            var toBeAddeds = Template.Samples
                 .Where(t => !Samples.Any(s => s.Sample == t)).ToArray();
 
             foreach (var toBeAdded in toBeAddeds)
@@ -116,7 +127,7 @@ namespace TemplateModule.ViewModels
 
         private void UpdateTemplate(Template template)
         {
-            this.template = template;
+            this.Template = template;
 
             UpdateImage();
             UpdateSamples();

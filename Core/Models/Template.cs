@@ -12,6 +12,8 @@ namespace Core.Models
 
         public List<Sample> Samples { get; } = new List<Sample>();
 
+        public string ValueEmpty { get; set; }
+
         #endregion Public Properties
     }
 }

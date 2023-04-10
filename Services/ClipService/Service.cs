@@ -60,7 +60,7 @@ namespace ClipService
         {
             if (Clips.Any())
             {
-                for (var index = Clips.Count; index < 0; index--)
+                for (var index = Clips.Count; index > 0; index--)
                 {
                     var clip = Clips[index - 1];
                     RemoveClip(clip);
