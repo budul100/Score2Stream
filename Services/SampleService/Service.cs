@@ -1,4 +1,4 @@
-﻿using Core.Events.Samples;
+﻿using Core.Events.Sample;
 using Core.Interfaces;
 using Core.Models;
 using Prism.Events;

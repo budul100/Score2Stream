@@ -13,7 +13,7 @@ namespace Core.Models.Sender
         public int Quarter { get; set; }
 
         [JsonPropertyName("shot_clock")]
-        public string ShotClock { get; set; }
+        public string Shot { get; set; }
 
         #endregion Public Properties
     }

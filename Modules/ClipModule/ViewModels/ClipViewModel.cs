@@ -1,36 +1,37 @@
-﻿using Core.Events.Clips;
-using Core.Events.Templates;
+﻿using Core.Enums;
+using Core.Events.Clip;
+using Core.Events.Template;
 using Core.Events.Video;
 using Core.Interfaces;
 using Core.Models;
-using Core.Prism;
-using MvvmValidation;
 using Prism.Commands;
 using Prism.Events;
+using Prism.Mvvm;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Windows.Media.Imaging;
 
 namespace ClipModule.ViewModels
 {
     public class ClipViewModel
-        : ValidatableViewModelBase
+        : BindableBase
     {
         #region Private Fields
 
         private readonly IEventAggregator eventAggregator;
+        private readonly IScoreboardService scoreboardService;
 
         private IClipService clipService;
         private bool isActive;
-        private string name;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public ClipViewModel(IEventAggregator eventAggregator)
+        public ClipViewModel(IScoreboardService scoreboardService, IEventAggregator eventAggregator)
         {
+            this.scoreboardService = scoreboardService;
             this.eventAggregator = eventAggregator;
 
             OnClickCommand = new DelegateCommand(
@@ -39,9 +40,12 @@ namespace ClipModule.ViewModels
             eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
                 action: c => IsActive = c == Clip,
                 keepSubscriberReferenceAlive: true);
+            eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
+                action: _ => UpdateTemplates(),
+                keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<TemplateSelectedEvent>().Subscribe(
-                action: _ => OnTemplateSelected(),
+                action: _ => SelectTemplate(),
                 keepSubscriberReferenceAlive: true);
             eventAggregator.GetEvent<TemplatesChangedEvent>().Subscribe(
                 action: () => UpdateTemplates(),
@@ -51,20 +55,7 @@ namespace ClipModule.ViewModels
                 action: () => UpdateImage(),
                 keepSubscriberReferenceAlive: true);
 
-            Validator.AddRule(
-                targetName: nameof(Name),
-                validateDelegate: () => RuleResult.Assert(!string.IsNullOrEmpty(Name),
-                errorMessage: "Name is required."));
-
-            Validator.AddRule(
-                targetName: nameof(Name),
-                validateDelegate: () => RuleResult.Assert(Regex.IsMatch(Name, "^\\S+$"),
-                errorMessage: "Name cannot contain whitespaces."));
-
-            //Validator.AddRule(
-            //    targetName: nameof(Name),
-            //    validateDelegate: () => RuleResult.Assert(Name == clip.Name || clipService.IsUniqueName(Name),
-            //    errorMessage: $"Name {Name} is already used. Please choose another one."));
+            InitializeTypes();
         }
 
         #endregion Public Constructors
@@ -81,26 +72,6 @@ namespace ClipModule.ViewModels
             set { SetProperty(ref isActive, value); }
         }
 
-        public string Name
-        {
-            get { return name; }
-            set
-            {
-                SetProperty(ref name, value);
-                var validation = Validator.Validate(nameof(Name));
-
-                if (validation.IsValid
-                    && Clip?.Name != value)
-                {
-                    Clip.Name = value;
-
-                    eventAggregator
-                        .GetEvent<ClipUpdatedEvent>()
-                        .Publish(Clip);
-                }
-            }
-        }
-
         public DelegateCommand OnClickCommand { get; }
 
         public Template Template
@@ -109,6 +80,7 @@ namespace ClipModule.ViewModels
             set
             {
                 Clip.Template = value;
+
                 RaisePropertyChanged(nameof(Template));
             }
         }
@@ -135,6 +107,21 @@ namespace ClipModule.ViewModels
             }
         }
 
+        public ClipType Type
+        {
+            get { return Clip?.Type ?? ClipType.None; }
+            set
+            {
+                scoreboardService.SetClip(
+                    contentType: value,
+                    clip: Clip);
+
+                RaisePropertyChanged(nameof(Type));
+            }
+        }
+
+        public ObservableCollection<ClipType> Types { get; } = new ObservableCollection<ClipType>();
+
         public string Value => !string.IsNullOrWhiteSpace(Clip?.Value)
             ? $"=> {Clip.Value}"
             : default;
@@ -148,8 +135,6 @@ namespace ClipModule.ViewModels
             this.Clip = clip;
             this.clipService = clipService;
 
-            Name = clip?.Name;
-
             UpdateTemplates();
         }
 
@@ -157,7 +142,17 @@ namespace ClipModule.ViewModels
 
         #region Private Methods
 
-        private void OnTemplateSelected()
+        private void InitializeTypes()
+        {
+            foreach (ClipType clipType in Enum.GetValues(typeof(ClipType)))
+            {
+                Types.Add(clipType);
+            }
+
+            RaisePropertyChanged(nameof(Types));
+        }
+
+        private void SelectTemplate()
         {
             Template = Clip.Template;
 
@@ -173,22 +168,28 @@ namespace ClipModule.ViewModels
 
         private void UpdateTemplates()
         {
-            var givens = clipService?.TemplateService?.Templates;
+            var template = Clip?.Template;
+            var templates = clipService?.TemplateService?.Templates;
+
+            Template = default;
 
             var toBeRemoveds = Templates
-                .Where(t => givens?.Contains(t) != true).ToArray();
+                .Where(t => templates?.Contains(t) != true).ToArray();
 
             foreach (var toBeRemoved in toBeRemoveds)
             {
                 Templates.Remove(toBeRemoved);
             }
 
-            var toBeAddeds = givens
+            var toBeAddeds = templates
                 .Where(t => !Templates.Contains(t)).ToArray();
 
             Templates.AddRange(toBeAddeds);
 
-            OnTemplateSelected();
+            Template = template;
+
+            RaisePropertyChanged(nameof(Template));
+            RaisePropertyChanged(nameof(Templates));
         }
 
         #endregion Private Methods

@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:be="clr-namespace:VideoModule.Behaviors"
+    xmlns:co="clr-namespace:Core.Converters;assembly=Core"
     xmlns:ct="clr-namespace:VideoModule.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:hl="clr-namespace:VideoModule.Helpers"
@@ -12,15 +13,18 @@
     xmlns:prism="http://prismlibrary.com/"
     xmlns:v="clr-namespace:VideoModule.Views"
     xmlns:vm="clr-namespace:VideoModule.ViewModels"
-    d:DataContext="{Binding Source={x:Static hl:DesignTimeViewModelLocator.WebcamViewModel}}"
+    d:DataContext="{Binding Source={x:Static hl:DesignTimeViewModelLocator.VideoViewModel}}"
     d:DesignHeight="500"
     d:DesignWidth="500"
     md:DialogServiceViews.IsRegistered="True"
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
+
     <UserControl.Resources>
         <BitmapImage x:Key="DesignSource" UriSource="/Images/scoreboard.png" />
+        <co:ExpandedSizeConverter x:Key="ExpandedSizeConverter" />
     </UserControl.Resources>
+
     <Grid Margin="5">
 
         <b:Interaction.Triggers>
@@ -59,8 +63,24 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemContainerStyle>
                 <Style>
-                    <Setter Property="Canvas.Left" Value="{Binding Left}" />
-                    <Setter Property="Canvas.Top" Value="{Binding Top}" />
+                    <Setter Property="Canvas.Left">
+                        <Setter.Value>
+                            <MultiBinding Converter="{StaticResource ExpandedSizeConverter}">
+                                <Binding Path="Left" />
+                                <Binding Path="Width" />
+                                <Binding Path="WidthName" />
+                            </MultiBinding>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="Canvas.Top">
+                        <Setter.Value>
+                            <MultiBinding Converter="{StaticResource ExpandedSizeConverter}">
+                                <Binding Path="Top" />
+                                <Binding Path="Height" />
+                                <Binding Path="HeightName" />
+                            </MultiBinding>
+                        </Setter.Value>
+                    </Setter>
                 </Style>
             </ItemsControl.ItemContainerStyle>
             <ItemsControl.Resources>

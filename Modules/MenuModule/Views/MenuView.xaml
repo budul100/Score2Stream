@@ -122,7 +122,7 @@
                                 <fl:MenuItem
                                     Command="{Binding ElementName=Templates, Path=DataContext.TemplateSelectCommand}"
                                     CommandParameter="{Binding}"
-                                    Header="{Binding Name}" />
+                                    Header="{Binding Description}" />
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </fl:DropDownButton>

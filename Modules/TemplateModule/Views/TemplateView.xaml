@@ -9,26 +9,29 @@
     xmlns:v="clr-namespace:TemplateModule.Views"
     xmlns:vm="clr-namespace:TemplateModule.ViewModels"
     d:DataContext="{Binding Source={x:Static hl:DesignTimeViewModelLocator.TemplateViewModel}}"
-    d:DesignHeight="300"
-    d:DesignWidth="300"
+    d:DesignHeight="200"
+    d:DesignWidth="400"
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
+
     <UserControl.Resources>
         <BitmapImage x:Key="DesignSource" UriSource="/Images/digit.png" />
     </UserControl.Resources>
+
     <Grid Margin="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="70" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Orientation="Horizontal">
+        <DockPanel Grid.Row="0">
 
             <Border
                 Margin="5"
                 VerticalAlignment="Center"
                 Background="LightGray"
                 BorderBrush="LightSlateGray"
-                BorderThickness="2">
+                BorderThickness="2"
+                DockPanel.Dock="Left">
                 <Image
                     Width="40"
                     Height="60"
@@ -37,33 +40,41 @@
                     Stretch="Uniform" />
             </Border>
 
-            <Grid>
+            <Grid Width="Auto" Margin="5">
                 <Grid.RowDefinitions>
                     <RowDefinition />
                     <RowDefinition />
                 </Grid.RowDefinitions>
-
-                <StackPanel Grid.Row="0" Orientation="Horizontal">
-                    <TextBlock
-                        Margin="10,0,5,0"
-                        VerticalAlignment="Center"
-                        Text="Empty value" />
-                    <TextBox
-                        Width="40"
-                        Margin="5,0"
-                        VerticalAlignment="Center"
-                        d:Text="LoremIspum"
-                        Text="{Binding ValueEmpty, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
-                </StackPanel>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="70" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
 
                 <TextBlock
-                    Grid.Row="1"
-                    Margin="10,0,5,0"
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     d:Text="LoremIpsum"
                     Text="{Binding Current}" />
+
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Text="Empty value" />
+                <TextBox
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Width="40"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    d:Text="LoremIspum"
+                    Text="{Binding ValueEmpty, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
             </Grid>
-        </StackPanel>
+        </DockPanel>
 
         <ScrollViewer
             Grid.Row="1"

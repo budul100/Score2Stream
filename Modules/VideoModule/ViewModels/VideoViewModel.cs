@@ -1,5 +1,5 @@
 ﻿using Core.Enums;
-using Core.Events.Clips;
+using Core.Events.Clip;
 using Core.Events.Input;
 using Core.Events.Video;
 using Core.Interfaces;
@@ -31,18 +31,31 @@ namespace VideoModule.ViewModels
         private readonly IRegionManager regionManager;
 
         private SelectionViewModel activeSelection;
+
         private int borderThickness;
+
         private BitmapSource content;
+
         private double contentHeight;
+
         private double contentWidth;
+
         private double fullHeight;
+
         private double fullWidth;
+
         private bool isMouseActive;
+
         private bool movedToBottom;
+
         private bool movedToRight;
+
         private double? x1;
+
         private double? x2;
+
         private double? y1;
+
         private double? y2;
 
         #endregion Private Fields
@@ -63,12 +76,15 @@ namespace VideoModule.ViewModels
                 action: _ => UpdateSelections(),
                 keepSubscriberReferenceAlive: true);
 
+            eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
+                action: c => ActiveSelection = Selections.SingleOrDefault(v => v.Clip == c),
+                keepSubscriberReferenceAlive: true);
             eventAggregator.GetEvent<ClipsChangedEvent>().Subscribe(
                 action: UpdateSelections,
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
-                action: c => activeSelection = Selections.SingleOrDefault(v => v.Clip == c),
+            eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
+                action: _ => UpdateSelections(),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
@@ -84,6 +100,12 @@ namespace VideoModule.ViewModels
         #endregion Public Constructors
 
         #region Public Properties
+
+        public SelectionViewModel ActiveSelection
+        {
+            get { return activeSelection; }
+            set { SetProperty(ref activeSelection, value); }
+        }
 
         public int BorderThickness
         {
@@ -357,14 +379,22 @@ namespace VideoModule.ViewModels
                 {
                     var current = containerProvider.Resolve<SelectionViewModel>();
 
+                    var isActive = inputService.ClipService.Clip == clip;
+
                     current.Initialize(
                         clip: clip,
+                        isActive: isActive,
                         actualLeft: x1,
                         actualTop: y1,
                         actualWidth: actualWidth,
                         actualHeight: actualHeight);
 
                     Selections.Add(current);
+
+                    if (isActive)
+                    {
+                        ActiveSelection = current;
+                    }
                 }
             }
         }

@@ -1,4 +1,4 @@
-﻿using Core.Events.Clips;
+﻿using Core.Events.Clip;
 using Core.Events.Input;
 using Core.Interfaces;
 using Core.Prism;

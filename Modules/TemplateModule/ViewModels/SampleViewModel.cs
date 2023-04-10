@@ -1,16 +1,16 @@
-﻿using Core.Events.Samples;
+﻿using Core.Events.Sample;
 using Core.Events.Video;
 using Core.Interfaces;
 using Core.Models;
-using Core.Prism;
 using Prism.Commands;
 using Prism.Events;
+using Prism.Mvvm;
 using System.Windows.Media.Imaging;
 
 namespace TemplateModule.ViewModels
 {
     public class SampleViewModel
-        : ValidatableViewModelBase
+        : BindableBase
     {
         #region Private Fields
 
@@ -23,7 +23,7 @@ namespace TemplateModule.ViewModels
 
         public SampleViewModel(IEventAggregator eventAggregator)
         {
-            OnFocusCommand = new DelegateCommand(
+            OnClickCommand = new DelegateCommand(
                 executeMethod: () => sampleService.Select(Sample));
 
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
@@ -53,7 +53,7 @@ namespace TemplateModule.ViewModels
             set { SetProperty(ref isActive, value); }
         }
 
-        public DelegateCommand OnFocusCommand { get; }
+        public DelegateCommand OnClickCommand { get; }
 
         public Sample Sample { get; private set; }
 

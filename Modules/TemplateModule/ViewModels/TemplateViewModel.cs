@@ -1,5 +1,5 @@
-﻿using Core.Events.Samples;
-using Core.Events.Templates;
+﻿using Core.Events.Sample;
+using Core.Events.Template;
 using Core.Events.Video;
 using Core.Interfaces;
 using Core.Models;
@@ -57,9 +57,7 @@ namespace TemplateModule.ViewModels
 
         public BitmapSource Bitmap => Template?.Clip?.Bitmap;
 
-        public string Current => !string.IsNullOrWhiteSpace(Template?.Clip?.Value)
-            ? $"{Template.Name} => {Template.Clip.Value}"
-            : Template?.Name;
+        public string Current => GetCurrent();
 
         public ObservableCollection<SampleViewModel> Samples { get; } = new ObservableCollection<SampleViewModel>();
 
@@ -79,6 +77,15 @@ namespace TemplateModule.ViewModels
         #endregion Public Properties
 
         #region Private Methods
+
+        private string GetCurrent()
+        {
+            var result = !string.IsNullOrWhiteSpace(Template?.Clip?.Value)
+                ? $"{Template.Description} => {Template.Clip.Value}"
+                : Template?.Description;
+
+            return result;
+        }
 
         private void OrderSamples()
         {

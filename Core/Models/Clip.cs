@@ -1,4 +1,6 @@
-﻿using OpenCvSharp;
+﻿using Core.Enums;
+using Core.Extensions;
+using OpenCvSharp;
 using System;
 using System.Windows.Media.Imaging;
 
@@ -15,6 +17,10 @@ namespace Core.Models
         #region Public Properties
 
         public BitmapSource Bitmap { get; set; }
+
+        public string Description => Type != ClipType.None
+            ? Type.GetDescription()
+            : Name;
 
         public bool HasDimensions { get; set; }
 
@@ -35,6 +41,8 @@ namespace Core.Models
         public Template Template { get; set; }
 
         public int ThresholdMonochrome { get; set; } = ThresholdMonochromeDefault;
+
+        public ClipType Type { get; set; }
 
         public DateTime UpdateTime { get; set; }
 

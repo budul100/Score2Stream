@@ -1,4 +1,4 @@
-﻿using Core.Events.Clips;
+﻿using Core.Events.Clip;
 using Core.Models;
 using Prism.Events;
 using Prism.Mvvm;
@@ -11,10 +11,12 @@ namespace VideoModule.ViewModels
         #region Private Fields
 
         private double? height;
+        private double? heightName;
         private bool isActive;
         private double? left;
         private double? top;
         private double? width;
+        private double? widthName;
 
         #endregion Private Fields
 
@@ -22,10 +24,6 @@ namespace VideoModule.ViewModels
 
         public SelectionViewModel(IEventAggregator eventAggregator)
         {
-            eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
-                action: _ => RaisePropertyChanged(nameof(Name)),
-                keepSubscriberReferenceAlive: true);
-
             eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
                 action: c => IsActive = c == Clip,
                 keepSubscriberReferenceAlive: true);
@@ -41,8 +39,11 @@ namespace VideoModule.ViewModels
 
         public Clip Clip { get; private set; }
 
-        public bool HasValue => Left.HasValue
-            && Top.HasValue;
+        public string Description => HasValue && Width > 0 && Height > 0
+            ? Clip?.Description
+            : default;
+
+        public bool HasValue => Left.HasValue && Top.HasValue;
 
         public double? Height
         {
@@ -50,8 +51,13 @@ namespace VideoModule.ViewModels
             set
             {
                 SetProperty(ref height, value);
-                RaisePropertyChanged(nameof(Name));
             }
+        }
+
+        public double? HeightName
+        {
+            get { return heightName; }
+            set { SetProperty(ref heightName, value); }
         }
 
         public bool IsActive
@@ -65,10 +71,6 @@ namespace VideoModule.ViewModels
             get { return left; }
             set { SetProperty(ref left, value); }
         }
-
-        public string Name => HasValue && (Width > 0 || Height > 0)
-            ? Clip.Name
-            : default;
 
         public double? Right => HasValue
             ? Left.Value + Width
@@ -86,18 +88,26 @@ namespace VideoModule.ViewModels
             set
             {
                 SetProperty(ref width, value);
-                RaisePropertyChanged(nameof(Name));
             }
+        }
+
+        public double? WidthName
+        {
+            get { return widthName; }
+            set { SetProperty(ref widthName, value); }
         }
 
         #endregion Public Properties
 
         #region Public Methods
 
-        public void Initialize(Clip clip, double? actualLeft, double? actualTop, double? actualWidth,
+        public void Initialize(Clip clip, bool isActive, double? actualLeft, double? actualTop, double? actualWidth,
             double? actualHeight)
         {
             Clip = clip;
+            IsActive = isActive;
+
+            RaisePropertyChanged(nameof(Description));
 
             if (actualWidth.HasValue
                 && actualHeight.HasValue)

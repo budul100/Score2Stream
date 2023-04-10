@@ -1,9 +1,9 @@
 ﻿using Core.Models;
 using Prism.Events;
 
-namespace Core.Events.Samples
+namespace Core.Events.Sample
 {
     public class SampleSelectedEvent
-        : PubSubEvent<Sample>
+        : PubSubEvent<Models.Sample>
     { }
 }

@@ -7,6 +7,5 @@
 		<PackageReference Include="Prism.Wpf" Version="8.1.97" />
 		<PackageReference Include="OpenCVSharp4" Version="4.7.0.20230115" />
 		<PackageReference Include="System.Drawing.Common" Version="7.0.0" />
-		<PackageReference Include="MvvmValidation" Version="3.1.2" />
 	</ItemGroup>
 </Project>

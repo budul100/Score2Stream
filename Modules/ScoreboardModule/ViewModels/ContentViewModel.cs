@@ -1,13 +1,13 @@
 ﻿using Core.Events;
 using Core.Interfaces;
-using Core.Prism;
 using Prism.Events;
+using Prism.Mvvm;
 using System;
 
 namespace ScoreboardModule.ViewModels
 {
     public class ContentViewModel
-        : ValidatableViewModelBase
+        : BindableBase
     {
         #region Private Fields
 

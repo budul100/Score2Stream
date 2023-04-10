@@ -1,4 +1,7 @@
-﻿namespace Core.Interfaces
+﻿using Core.Enums;
+using Core.Models;
+
+namespace Core.Interfaces
 {
     public interface IScoreboardService
     {
@@ -21,5 +24,11 @@
         string Ticker { get; set; }
 
         #endregion Public Properties
+
+        #region Public Methods
+
+        void SetClip(ClipType contentType, Clip clip);
+
+        #endregion Public Methods
     }
 }

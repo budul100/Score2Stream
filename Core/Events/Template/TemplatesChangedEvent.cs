@@ -1,6 +1,6 @@
 ﻿using Prism.Events;
 
-namespace Core.Events.Templates
+namespace Core.Events.Template
 {
     public class TemplatesChangedEvent
         : PubSubEvent

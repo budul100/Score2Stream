@@ -79,7 +79,6 @@
                             </b:EventTrigger>
                         </b:Interaction.Triggers>
                     </TextBox>
-
                 </StackPanel>
 
                 <StackPanel Grid.Row="1" Orientation="Horizontal">
@@ -89,7 +88,6 @@
                         d:Text="Difference: 77"
                         Text="{Binding Difference}" />
                 </StackPanel>
-
             </Grid>
         </StackPanel>
     </Border>

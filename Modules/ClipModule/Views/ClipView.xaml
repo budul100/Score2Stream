@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:co="clr-namespace:Core.Converters;assembly=Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:hl="clr-namespace:ClipModule.Helpers"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -11,6 +12,8 @@
     d:DesignWidth="500"
     mc:Ignorable="d">
     <UserControl.Resources>
+        <co:DescriptionToStringConverter x:Key="DescriptionToStringConverter" />
+
         <BitmapImage x:Key="DesignSource" UriSource="/Images/digit.png" />
 
         <ControlTemplate x:Key="DefaultErrorTemplate">
@@ -77,9 +80,9 @@
         BorderBrush="LightGray"
         BorderThickness="2"
         CornerRadius="3">
-        <StackPanel Orientation="Horizontal">
-            <StackPanel.Style>
-                <Style TargetType="StackPanel">
+        <DockPanel>
+            <DockPanel.Style>
+                <Style TargetType="DockPanel">
                     <Setter Property="Background" Value="Gainsboro" />
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsActive}" Value="True">
@@ -87,7 +90,7 @@
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
-            </StackPanel.Style>
+            </DockPanel.Style>
 
             <b:Interaction.Triggers>
                 <b:EventTrigger EventName="MouseDown">
@@ -100,7 +103,8 @@
                 VerticalAlignment="Center"
                 Background="LightGray"
                 BorderBrush="LightSlateGray"
-                BorderThickness="2">
+                BorderThickness="2"
+                DockPanel.Dock="Left">
                 <Image
                     Width="40"
                     Height="60"
@@ -109,47 +113,90 @@
                     Stretch="Uniform" />
             </Border>
 
-            <TextBlock
-                Margin="10,0,5,0"
-                VerticalAlignment="Center"
-                Text="Name" />
-            <TextBox
-                Width="80"
-                Margin="5,0"
-                VerticalAlignment="Center"
-                d:Text="LoremIspum"
-                Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+            <Grid Width="Auto" Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="70" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="3" />
+                    <ColumnDefinition Width="70" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
 
-            <TextBlock
-                Margin="10,0,5,0"
-                VerticalAlignment="Center"
-                Text="Contrast" />
-            <ud:NumericUpDown
-                Width="40"
-                Margin="5,0"
-                VerticalAlignment="Center"
-                MaxValue="100"
-                MinValue="0"
-                Value="{Binding ThresholdMonochrome, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Text="Type" />
+                <ComboBox
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Width="120"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    IsEnabled="{Binding HasItems, RelativeSource={RelativeSource Self}}"
+                    IsSynchronizedWithCurrentItem="True"
+                    ItemsSource="{Binding Types}"
+                    SelectedItem="{Binding Type}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource DescriptionToStringConverter}}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
 
-            <TextBlock
-                Margin="10,0,5,0"
-                VerticalAlignment="Center"
-                Text="Template" />
-            <ComboBox
-                Width="80"
-                Margin="5,0"
-                VerticalAlignment="Center"
-                DisplayMemberPath="Name"
-                IsEnabled="{Binding HasItems, RelativeSource={RelativeSource Self}}"
-                IsSynchronizedWithCurrentItem="True"
-                ItemsSource="{Binding Templates}"
-                SelectedItem="{Binding Template}" />
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Text="Contrast" />
+                <ud:NumericUpDown
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Width="40"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    MaxValue="100"
+                    MinValue="0"
+                    Value="{Binding ThresholdMonochrome, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-            <TextBlock
-                Margin="10,0,5,0"
-                VerticalAlignment="Center"
-                Text="{Binding Value}" />
-        </StackPanel>
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="3"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Text="Template" />
+                <ComboBox
+                    Grid.Row="0"
+                    Grid.Column="4"
+                    Width="120"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    IsEnabled="{Binding HasItems, RelativeSource={RelativeSource Self}}"
+                    IsSynchronizedWithCurrentItem="True"
+                    ItemsSource="{Binding Templates}"
+                    SelectedItem="{Binding Template, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Description}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="3"
+                    Grid.ColumnSpan="2"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    d:Text="=&gt; LoremIspum"
+                    Text="{Binding Value}" />
+            </Grid>
+        </DockPanel>
     </Border>
 </UserControl>

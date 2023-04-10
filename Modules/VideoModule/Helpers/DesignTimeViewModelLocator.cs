@@ -6,7 +6,9 @@ namespace VideoModule.Helpers
     {
         #region Public Properties
 
-        public static VideoViewModel WebcamViewModel => default;
+        public static SelectionViewModel SelectionViewModel => default;
+
+        public static VideoViewModel VideoViewModel => default;
 
         #endregion Public Properties
     }

@@ -1,10 +1,10 @@
 ﻿using Core.Constants;
 using Core.Enums;
 using Core.Events;
-using Core.Events.Clips;
+using Core.Events.Clip;
 using Core.Events.Input;
-using Core.Events.Samples;
-using Core.Events.Templates;
+using Core.Events.Sample;
+using Core.Events.Template;
 using Core.Events.Video;
 using Core.Interfaces;
 using Core.Models;
@@ -73,7 +73,7 @@ namespace MenuModule.ViewModels
                 canExecuteMethod: () => inputService.ClipService?.Clip != default);
 
             this.TemplateSelectCommand = new DelegateCommand<Template>(
-                executeMethod: t => inputService?.TemplateService?.Select(t));
+                executeMethod: t => SelectTemplate(t));
             this.TemplateRemoveCommand = new DelegateCommand(
                 executeMethod: () => RemoveTemplate(),
                 canExecuteMethod: () => inputService?.TemplateService?.Template != default);
@@ -100,6 +100,8 @@ namespace MenuModule.ViewModels
                 action: OnClipsChanged);
             eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
                 action: _ => OnClipsChanged());
+            eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
+                action: _ => UpdateTemplates());
 
             eventAggregator.GetEvent<TemplatesChangedEvent>().Subscribe(
                 action: UpdateTemplates);
@@ -450,6 +452,15 @@ namespace MenuModule.ViewModels
             }
         }
 
+        private void SelectTemplate(Template template)
+        {
+            if (template != default)
+            {
+                inputService?.TemplateService?.Select(template);
+                inputService?.ClipService?.Select(template.Clip);
+            }
+        }
+
         private void StopAllInputs()
         {
             var result = dialogService.ShowMessageBox(
@@ -520,7 +531,7 @@ namespace MenuModule.ViewModels
             if (inputService.TemplateService != default)
             {
                 var ordereds = inputService.TemplateService.Templates
-                    .OrderBy(t => t.Clip.Name).ToArray();
+                    .OrderBy(t => t.Description).ToArray();
 
                 Templates.AddRange(ordereds);
 

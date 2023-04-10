@@ -1,9 +1,9 @@
 ﻿using Core.Models;
 using Prism.Events;
 
-namespace Core.Events.Clips
+namespace Core.Events.Clip
 {
     public class ClipUpdatedEvent
-        : PubSubEvent<Clip>
+        : PubSubEvent<Models.Clip>
     { }
 }

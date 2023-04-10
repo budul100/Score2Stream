@@ -1,10 +1,12 @@
-﻿using Core.Events;
-using Core.Events.Clips;
+﻿using Core.Enums;
+using Core.Events;
+using Core.Events.Clip;
 using Core.Events.Video;
 using Core.Interfaces;
 using Core.Models;
 using Core.Models.Sender;
 using Prism.Events;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,18 +19,18 @@ namespace ScoreboardService
     {
         #region Private Fields
 
-        private readonly IDictionary<string, Clip> clips = new Dictionary<string, Clip>();
+        private const char GameClockSplitterDefault = ':';
+
+        private readonly IDictionary<ClipType, Clip> clips = new Dictionary<ClipType, Clip>();
         private readonly IEventAggregator eventAggregator;
-        private readonly IInputService inputService;
         private readonly JsonSerializerOptions serializeOptions;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public Service(IInputService inputService, IEventAggregator eventAggregator)
+        public Service(IEventAggregator eventAggregator)
         {
-            this.inputService = inputService;
             this.eventAggregator = eventAggregator;
 
             serializeOptions = new JsonSerializerOptions
@@ -37,10 +39,6 @@ namespace ScoreboardService
                 WriteIndented = true
             };
 
-            eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
-                action: _ => OnClipUpdate(),
-                keepSubscriberReferenceAlive: true);
-
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
                 action: UpdateScoreboard,
                 keepSubscriberReferenceAlive: true);
@@ -48,6 +46,8 @@ namespace ScoreboardService
             eventAggregator.GetEvent<UpdateScoreboardEvent>().Subscribe(
                 action: UpdateScoreboard,
                 keepSubscriberReferenceAlive: true);
+
+            InitializeContents();
         }
 
         #endregion Public Constructors
@@ -72,18 +72,49 @@ namespace ScoreboardService
 
         #endregion Public Properties
 
+        #region Public Methods
+
+        public void SetClip(ClipType clipType, Clip clip)
+        {
+            if (clipType != clip.Type)
+            {
+                if (clip.Type != ClipType.None
+                    && clips[clip.Type].Type != ClipType.None)
+                {
+                    var current = clips[clip.Type];
+
+                    clips[clip.Type] = default;
+                    current.Type = ClipType.None;
+                }
+
+                if (clipType != ClipType.None)
+                {
+                    clips[clipType] = clip;
+                }
+
+                clip.Type = clipType;
+
+                eventAggregator
+                    .GetEvent<ClipUpdatedEvent>()
+                    .Publish(clip);
+            }
+        }
+
+        #endregion Public Methods
+
         #region Private Methods
 
         private Board GetBoard()
         {
-            var clock = GetClock();
+            var clock = GetClockGame();
+            var shot = GetClockShot();
 
             var game = new Game
             {
                 Clock = clock,
                 Possesion = default,
                 Quarter = Period,
-                ShotClock = default,
+                Shot = shot,
             };
 
             var home = new Home
@@ -117,48 +148,76 @@ namespace ScoreboardService
             return result;
         }
 
-        private string GetClock()
+        private string GetClockGame()
         {
             var result = new StringBuilder();
 
-            if (clips.ContainsKey("Clip1"))
+            if (clips[ClipType.ClockGameMin1] != default)
             {
-                result.Append(clips["Clip1"].Value);
+                result.Append(clips[ClipType.ClockGameMin1].Value);
             }
-            if (clips.ContainsKey("Clip2"))
+            if (clips[ClipType.ClockGameMin2] != default)
             {
-                result.Append(clips["Clip2"].Value);
+                result.Append(clips[ClipType.ClockGameMin2].Value);
             }
 
             if (result.Length > 0)
             {
-                result.Append(":");
+                if (clips[ClipType.ClockGameSplit] != default)
+                {
+                    result.Append(clips[ClipType.ClockGameSplit].Value);
+                }
+                else
+                {
+                    result.Append(GameClockSplitterDefault);
+                }
             }
 
-            if (clips.ContainsKey("Clip3"))
+            if (clips[ClipType.ClockGameSec1] != default)
             {
-                result.Append(clips["Clip3"].Value);
+                result.Append(clips[ClipType.ClockGameSec1].Value);
             }
-            if (clips.ContainsKey("Clip4"))
+            if (clips[ClipType.ClockGameSec2] != default)
             {
-                result.Append(clips["Clip4"].Value);
+                result.Append(clips[ClipType.ClockGameSec2].Value);
             }
 
             return result.ToString();
         }
 
-        private void OnClipUpdate()
+        private string GetClockShot()
         {
-            clips.Clear();
+            var result = new StringBuilder();
 
-            if (inputService?.ClipService?.Clips?.Any() == true)
+            if (clips[ClipType.ClockShot1] != default)
             {
-                foreach (var clip in inputService.ClipService.Clips)
-                {
-                    clips.Add(
-                        key: clip.Name,
-                        value: clip);
-                }
+                result.Append(clips[ClipType.ClockShot1].Value);
+            }
+
+            if (clips[ClipType.ClockGameSplit] != default)
+            {
+                result.Append(clips[ClipType.ClockShotSplit].Value);
+            }
+
+            if (clips[ClipType.ClockShot2] != default)
+            {
+                result.Append(clips[ClipType.ClockShot2].Value);
+            }
+
+            return result.ToString();
+        }
+
+        private void InitializeContents()
+        {
+            var relevants = Enum.GetValues(typeof(ClipType))
+                .OfType<ClipType>()
+                .Where(t => t != ClipType.None).ToArray();
+
+            foreach (var relevant in relevants)
+            {
+                clips.Add(
+                    key: relevant,
+                    value: default);
             }
         }
 
