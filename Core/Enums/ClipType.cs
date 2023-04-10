@@ -7,6 +7,9 @@ namespace Core.Enums
         [Description("[Clip]")]
         None,
 
+        [Description("Period")]
+        Period,
+
         [Description("Clock min1")]
         ClockGameMin1,
 
@@ -30,9 +33,6 @@ namespace Core.Enums
 
         [Description("Shot splitter")]
         ClockShotSplit,
-
-        [Description("Game period")]
-        Period,
 
         [Description("Score home")]
         ScoreHome,

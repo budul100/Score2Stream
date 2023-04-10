@@ -1,8 +1,7 @@
-﻿using Core.Events;
+﻿using Core.Events.Scoreboard;
 using Core.Interfaces;
 using Prism.Events;
 using Prism.Mvvm;
-using System;
 
 namespace ScoreboardModule.ViewModels
 {
@@ -11,8 +10,11 @@ namespace ScoreboardModule.ViewModels
     {
         #region Private Fields
 
-        private readonly IEventAggregator eventAggregator;
         private readonly IScoreboardService scoreboardService;
+
+        private bool isGameOver;
+        private string period;
+        private string periods;
 
         #endregion Private Fields
 
@@ -21,118 +23,102 @@ namespace ScoreboardModule.ViewModels
         public ContentViewModel(IScoreboardService scoreboardService, IEventAggregator eventAggregator)
         {
             this.scoreboardService = scoreboardService;
-            this.eventAggregator = eventAggregator;
+
+            eventAggregator.GetEvent<UpdateScoreboardEvent>().Subscribe(
+                action: UpdateScoreboard,
+                keepSubscriberReferenceAlive: true);
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public bool IsGameOver
+        public bool ClockNotFromClip
         {
-            get { return scoreboardService.IsGameOver; }
+            get { return scoreboardService.ClockNotFromClip; }
             set
             {
-                scoreboardService.IsGameOver = value; ;
+                scoreboardService.ClockNotFromClip = value;
+                RaisePropertyChanged(nameof(ClockNotFromClip));
+            }
+        }
 
-                RaisePropertyChanged(nameof(IsGameOver));
-                eventAggregator.GetEvent<UpdateScoreboardEvent>().Publish();
+        public bool IsGameOver
+        {
+            get { return isGameOver; }
+            set
+            {
+                if (isGameOver != value)
+                {
+                    SetProperty(ref isGameOver, value);
+                    scoreboardService.Announce();
+                }
             }
         }
 
         public string Period
         {
-            get { return scoreboardService.Period.ToString(); }
+            get { return period; }
             set
             {
-                if (Int32.TryParse(value, out int result))
+                if (period != value)
                 {
-                    scoreboardService.Period = result; ;
+                    SetProperty(ref period, value);
+                    scoreboardService.Announce();
                 }
-                else
-                {
-                    scoreboardService.Period = default;
-                }
-
-                RaisePropertyChanged(nameof(Period));
-                eventAggregator.GetEvent<UpdateScoreboardEvent>().Publish();
             }
         }
 
-        public string ScoreGuest
+        public bool PeriodNotFromClip
         {
-            get { return scoreboardService.ScoreGuest.ToString(); }
+            get { return scoreboardService.PeriodNotFromClip; }
             set
             {
-                if (Int32.TryParse(value, out int result))
-                {
-                    scoreboardService.ScoreGuest = result; ;
-                }
-                else
-                {
-                    scoreboardService.ScoreGuest = default;
-                }
-
-                RaisePropertyChanged(nameof(ScoreGuest));
-                eventAggregator.GetEvent<UpdateScoreboardEvent>().Publish();
+                scoreboardService.PeriodNotFromClip = value;
+                RaisePropertyChanged(nameof(PeriodNotFromClip));
             }
         }
 
-        public string ScoreHome
+        public string Periods
         {
-            get { return scoreboardService.ScoreHome.ToString(); }
+            get { return periods; }
             set
             {
-                if (Int32.TryParse(value, out int result))
+                if (periods != value)
                 {
-                    scoreboardService.ScoreHome = result; ;
+                    SetProperty(ref periods, value);
+                    scoreboardService.Announce();
                 }
-                else
-                {
-                    scoreboardService.ScoreHome = default;
-                }
-
-                RaisePropertyChanged(nameof(ScoreHome));
-                eventAggregator.GetEvent<UpdateScoreboardEvent>().Publish();
             }
         }
 
-        public string TeamGuest
+        public bool ShotNotFromClip
         {
-            get { return scoreboardService.TeamGuest; }
+            get { return scoreboardService.ShotNotFromClip; }
             set
             {
-                scoreboardService.TeamGuest = value;
-
-                RaisePropertyChanged(nameof(TeamGuest));
-                eventAggregator.GetEvent<UpdateScoreboardEvent>().Publish();
-            }
-        }
-
-        public string TeamHome
-        {
-            get { return scoreboardService.TeamHome; }
-            set
-            {
-                scoreboardService.TeamHome = value;
-
-                RaisePropertyChanged(nameof(TeamHome));
-                eventAggregator.GetEvent<UpdateScoreboardEvent>().Publish();
-            }
-        }
-
-        public string Ticker
-        {
-            get { return scoreboardService.Ticker; }
-            set
-            {
-                scoreboardService.Ticker = value;
-
-                RaisePropertyChanged(nameof(Ticker));
-                eventAggregator.GetEvent<UpdateScoreboardEvent>().Publish();
+                scoreboardService.ShotNotFromClip = value;
+                RaisePropertyChanged(nameof(ShotNotFromClip));
             }
         }
 
         #endregion Public Properties
+
+        #region Private Methods
+
+        private void UpdateScoreboard()
+        {
+            scoreboardService.Update(
+                period: Period,
+                periods: Periods,
+                isGameOver: IsGameOver,
+                teamHome: default,
+                teamGuest: default,
+                scoreHome: default,
+                scoreGuest: default,
+                tickers: default);
+        }
+
+        #endregion Private Methods
     }
 }

@@ -8,9 +8,11 @@ namespace Core.Models.Sender
 
         public string Clock { get; set; }
 
-        public string Possesion { get; set; }
+        public string Period { get; set; }
 
-        public int Quarter { get; set; }
+        public string Periods { get; set; }
+
+        public string Possesion { get; set; }
 
         [JsonPropertyName("shot_clock")]
         public string Shot { get; set; }

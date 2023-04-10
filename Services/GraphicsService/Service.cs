@@ -1,4 +1,5 @@
 ﻿using Core.Events;
+using Core.Events.Scoreboard;
 using Core.Interfaces;
 using Prism.Events;
 using System;
@@ -15,9 +16,11 @@ namespace GraphicsService
     {
         #region Private Fields
 
+        private const int PortServerHttpDefault = 5000;
+        private const int PortSocketHttpDefault = 9000;
+
         private readonly IDispatcherService dispatcherService;
         private readonly IEventAggregator eventAggregator;
-        private readonly IScoreboardService scoreboardService;
         private CancellationTokenSource cancellationTokenSource;
 
         private WebServer webServer;
@@ -29,15 +32,13 @@ namespace GraphicsService
 
         #region Public Constructors
 
-        public Service(IScoreboardService scoreboardService, IDispatcherService dispatcherService,
-            IEventAggregator eventAggregator)
+        public Service(IDispatcherService dispatcherService, IEventAggregator eventAggregator)
         {
-            this.scoreboardService = scoreboardService;
             this.dispatcherService = dispatcherService;
             this.eventAggregator = eventAggregator;
 
             eventAggregator.GetEvent<ScoreboardUpdatedEvent>().Subscribe(
-                action: _ => OnScoreboardUpdate(),
+                action: m => OnScoreboardUpdate(m),
                 keepSubscriberReferenceAlive: true);
         }
 
@@ -47,6 +48,14 @@ namespace GraphicsService
 
         public bool IsActive => webSocket != default
             && webServer != default;
+
+        public int PortServerHttp { get; set; } = PortServerHttpDefault;
+
+        public int PortServerHttps { get; set; }
+
+        public int PortSocketHttp { get; set; } = PortSocketHttpDefault;
+
+        public int PortSocketHttps { get; set; }
 
         #endregion Public Properties
 
@@ -60,7 +69,14 @@ namespace GraphicsService
             }
         }
 
-        public async Task StartAsync(int portWebServer, int portWebSocket)
+        public async Task ReloadAsync()
+        {
+            await StopAsync();
+
+            await StartAsync();
+        }
+
+        public async Task StartAsync()
         {
             if ((webServerTask?.IsCompleted == false)
                 || (webSocketTask?.IsCompleted == false))
@@ -72,7 +88,7 @@ namespace GraphicsService
 
             var ipAddress = GetLocalIPAddress();
 
-            var urlWebSocket = $"http://{ipAddress}:{portWebSocket}";
+            var urlWebSocket = $"http://{ipAddress}:{PortSocketHttp}";
 
             webSocket = new WebSocket(
                 urlHttp: urlWebSocket,
@@ -82,7 +98,7 @@ namespace GraphicsService
                 function: async () => dispatcherService.Invoke(() => webSocket.RunAsync()),
                 cancellationToken: cancellationTokenSource.Token);
 
-            var urlWebServer = $"http://{ipAddress}:{portWebServer}";
+            var urlWebServer = $"http://{ipAddress}:{PortServerHttp}";
 
             webServer = new WebServer(
                 urlHttp: urlWebServer,
@@ -154,11 +170,11 @@ namespace GraphicsService
             throw new Exception("No network adapters with an IPv4 address in the system!");
         }
 
-        private void OnScoreboardUpdate()
+        private void OnScoreboardUpdate(string message)
         {
             if (IsActive)
             {
-                webSocket.Set(scoreboardService.Message);
+                webSocket.Set(message);
             }
         }
 

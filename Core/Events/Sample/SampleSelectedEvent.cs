@@ -1,5 +1,4 @@
-﻿using Core.Models;
-using Prism.Events;
+﻿using Prism.Events;
 
 namespace Core.Events.Sample
 {

@@ -35,12 +35,12 @@
 
             <b:Interaction.Triggers>
                 <b:EventTrigger EventName="MouseDown">
-                    <b:InvokeCommandAction Command="{Binding OnClickCommand}" />
+                    <b:InvokeCommandAction Command="{Binding OnSelectionCommand}" />
                 </b:EventTrigger>
             </b:Interaction.Triggers>
 
             <Border
-                Margin="5"
+                Margin="2"
                 VerticalAlignment="Center"
                 Background="LightGray"
                 BorderBrush="LightSlateGray"
@@ -58,36 +58,41 @@
                     <RowDefinition />
                     <RowDefinition />
                 </Grid.RowDefinitions>
+                <Grid.Resources>
+                    <Style TargetType="{x:Type TextBox}">
+                        <Setter Property="Margin" Value="5" />
+                    </Style>
+                    <Style TargetType="{x:Type TextBlock}">
+                        <Setter Property="Margin" Value="5" />
+                    </Style>
+                    <Style TargetType="{x:Type CheckBox}">
+                        <Setter Property="Margin" Value="5" />
+                    </Style>
+                </Grid.Resources>
 
                 <StackPanel Grid.Row="0" Orientation="Horizontal">
 
-                    <TextBlock
-                        Margin="10,0,5,0"
-                        VerticalAlignment="Center"
-                        Text="Value" />
+                    <TextBlock VerticalAlignment="Center" Text="Value" />
 
                     <TextBox
                         x:Name="ValueTextBox"
                         Width="40"
-                        Margin="5,0"
                         VerticalAlignment="Center"
                         d:Text="LoremIspum"
                         Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="GotFocus">
-                                <b:InvokeCommandAction Command="{Binding OnFocusCommand}" />
+                                <b:InvokeCommandAction Command="{Binding OnSelectionCommand}" />
                             </b:EventTrigger>
                         </b:Interaction.Triggers>
                     </TextBox>
                 </StackPanel>
 
-                <StackPanel Grid.Row="1" Orientation="Horizontal">
-                    <TextBlock
-                        Margin="10,0,5,0"
-                        VerticalAlignment="Center"
-                        d:Text="Difference: 77"
-                        Text="{Binding Difference}" />
-                </StackPanel>
+                <TextBlock
+                    Grid.Row="1"
+                    VerticalAlignment="Center"
+                    d:Text="Difference: 77"
+                    Text="{Binding Difference}" />
             </Grid>
         </StackPanel>
     </Border>

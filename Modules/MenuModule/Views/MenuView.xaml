@@ -20,6 +20,9 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/Fluent;Component/Themes/Generic.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MenuModule;component/Resources/Material-BackupRestore.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MenuModule;component/Resources/Material-OpenInApp.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MenuModule;component/Resources/Material-Update.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MenuModule;component/Resources/Material-VideoOutline.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MenuModule;component/Resources/Material-VideoOffOutline.xaml" />
             </ResourceDictionary.MergedDictionaries>
@@ -36,10 +39,21 @@
             SelectedTabIndex="{Binding SelectedTabIndex, Mode=TwoWay}">
 
             <fl:RibbonTabItem Header="Board">
-                <fl:RibbonGroupBox Header="Graphics control">
-                    <fl:Button Command="{Binding GraphicsStartCommand}" Header="Start graphics server" />
-                    <fl:Button Command="{Binding GraphicsEndCommand}" Header="End graphics server" />
-                    <fl:Button Command="{Binding GraphicsOpenCommand}" Header="Open graphics server" />
+                <fl:RibbonGroupBox Header="Graphics server control">
+                    <fl:Button
+                        Command="{Binding GraphicsReloadCommand}"
+                        Header="Reload server"
+                        Icon="{StaticResource IconReload}" />
+                    <fl:Button
+                        Command="{Binding GraphicsOpenCommand}"
+                        Header="Open server"
+                        Icon="{StaticResource IconOpen}" />
+                </fl:RibbonGroupBox>
+                <fl:RibbonGroupBox Header="Scoreboard control">
+                    <fl:Button
+                        Command="{Binding ScoreboardUpdateCommand}"
+                        Header="Update scoreboard"
+                        Icon="{StaticResource IconUpdate}" />
                 </fl:RibbonGroupBox>
             </fl:RibbonTabItem>
 

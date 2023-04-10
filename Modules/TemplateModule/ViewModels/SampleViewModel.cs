@@ -23,7 +23,7 @@ namespace TemplateModule.ViewModels
 
         public SampleViewModel(IEventAggregator eventAggregator)
         {
-            OnClickCommand = new DelegateCommand(
+            OnSelectionCommand = new DelegateCommand(
                 executeMethod: () => sampleService.Select(Sample));
 
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
@@ -53,7 +53,7 @@ namespace TemplateModule.ViewModels
             set { SetProperty(ref isActive, value); }
         }
 
-        public DelegateCommand OnClickCommand { get; }
+        public DelegateCommand OnSelectionCommand { get; }
 
         public Sample Sample { get; private set; }
 

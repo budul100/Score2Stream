@@ -23,12 +23,12 @@ namespace VideoService
     {
         #region Private Fields
 
-        private const int DefaultDelay = 100;
+        private const int DefaultDelay = 50;
         private const int DelayMin = 10;
         private const double DividerThreshold = 100;
         private const int ThresholdDetectingDefault = 80;
         private const int ThresholdMatchingDefault = 70;
-        private const int WaitingDurationDefault = 50;
+        private const int WaitingDurationDefault = 10;
 
         private readonly IDispatcherService dispatcherService;
         private readonly IEventAggregator eventAggregator;

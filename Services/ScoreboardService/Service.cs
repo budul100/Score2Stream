@@ -1,6 +1,6 @@
 ﻿using Core.Enums;
-using Core.Events;
 using Core.Events.Clip;
+using Core.Events.Scoreboard;
 using Core.Events.Video;
 using Core.Interfaces;
 using Core.Models;
@@ -25,6 +25,15 @@ namespace ScoreboardService
         private readonly IEventAggregator eventAggregator;
         private readonly JsonSerializerOptions serializeOptions;
 
+        private bool isGameOver;
+        private string period;
+        private string periods;
+        private int scoreGuest;
+        private int scoreHome;
+        private string teamGuest;
+        private string teamHome;
+        private IEnumerable<string> tickers;
+
         #endregion Private Fields
 
         #region Public Constructors
@@ -40,11 +49,7 @@ namespace ScoreboardService
             };
 
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
-                action: UpdateScoreboard,
-                keepSubscriberReferenceAlive: true);
-
-            eventAggregator.GetEvent<UpdateScoreboardEvent>().Subscribe(
-                action: UpdateScoreboard,
+                action: UpdateMessage,
                 keepSubscriberReferenceAlive: true);
 
             InitializeContents();
@@ -54,25 +59,28 @@ namespace ScoreboardService
 
         #region Public Properties
 
-        public bool IsGameOver { get; set; }
+        public bool ClockNotFromClip { get; set; }
+
+        public bool HasUpdates { get; private set; }
 
         public string Message { get; private set; }
 
-        public int Period { get; set; }
+        public bool PeriodNotFromClip { get; set; }
 
-        public int ScoreGuest { get; set; }
-
-        public int ScoreHome { get; set; }
-
-        public string TeamGuest { get; set; }
-
-        public string TeamHome { get; set; }
-
-        public string Ticker { get; set; }
+        public bool ShotNotFromClip { get; set; }
 
         #endregion Public Properties
 
         #region Public Methods
+
+        public void Announce()
+        {
+            HasUpdates = true;
+
+            eventAggregator
+                .GetEvent<ScoreboardAnnouncedEvent>()
+                .Publish();
+        }
 
         public void SetClip(ClipType clipType, Clip clip)
         {
@@ -100,20 +108,50 @@ namespace ScoreboardService
             }
         }
 
+        public void Update(string period, string periods, bool isGameOver, string teamHome, string teamGuest,
+            int scoreHome, int scoreGuest, IEnumerable<string> tickers)
+        {
+            this.period = period;
+            this.periods = periods;
+            this.isGameOver = isGameOver;
+            this.teamHome = teamHome;
+            this.teamGuest = teamGuest;
+            this.scoreHome = scoreHome;
+            this.scoreGuest = scoreGuest;
+            this.tickers = tickers;
+
+            UpdateMessage();
+
+            HasUpdates = false;
+
+            eventAggregator
+                .GetEvent<ScoreboardAnnouncedEvent>()
+                .Publish();
+        }
+
         #endregion Public Methods
 
         #region Private Methods
 
         private Board GetBoard()
         {
-            var clock = GetClockGame();
-            var shot = GetClockShot();
+            var clock = !ClockNotFromClip
+                ? GetClockGame()
+                : default;
+            var shot = !ShotNotFromClip
+                ? GetClockShot()
+                : default;
+
+            var currentPeriod = !PeriodNotFromClip
+                ? clips[ClipType.Period]?.Value
+                : period;
 
             var game = new Game
             {
                 Clock = clock,
                 Possesion = default,
-                Quarter = Period,
+                Period = currentPeriod,
+                Periods = periods,
                 Shot = shot,
             };
 
@@ -122,8 +160,8 @@ namespace ScoreboardService
                 Color = default,
                 Fouls = default,
                 ImagePath = default,
-                Name = TeamHome,
-                Score = ScoreHome.ToString(),
+                Name = teamHome,
+                Score = scoreHome.ToString(),
             };
 
             var guest = new Guest
@@ -131,8 +169,8 @@ namespace ScoreboardService
                 Color = default,
                 Fouls = default,
                 ImagePath = default,
-                Name = TeamGuest,
-                Score = ScoreGuest.ToString(),
+                Name = teamGuest,
+                Score = scoreGuest.ToString(),
             };
 
             var result = new Board
@@ -141,8 +179,8 @@ namespace ScoreboardService
                 Guest = guest,
                 Home = home,
                 GameID = default,
-                GameOver = false,
-                Ticker = Ticker,
+                GameOver = isGameOver,
+                Ticker = default,
             };
 
             return result;
@@ -221,7 +259,7 @@ namespace ScoreboardService
             }
         }
 
-        private void UpdateScoreboard()
+        private void UpdateMessage()
         {
             var board = GetBoard();
 

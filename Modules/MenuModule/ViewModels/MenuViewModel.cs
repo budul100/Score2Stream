@@ -4,6 +4,7 @@ using Core.Events;
 using Core.Events.Clip;
 using Core.Events.Input;
 using Core.Events.Sample;
+using Core.Events.Scoreboard;
 using Core.Events.Template;
 using Core.Events.Video;
 using Core.Interfaces;
@@ -42,8 +43,8 @@ namespace MenuModule.ViewModels
 
         #region Public Constructors
 
-        public MenuViewModel(IGraphicsService graphicsService, IInputService inputService, IDialogService dialogService,
-            IRegionManager regionManager, IEventAggregator eventAggregator)
+        public MenuViewModel(IGraphicsService graphicsService, IScoreboardService scoreboardService, IInputService inputService,
+            IDialogService dialogService, IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
             this.inputService = inputService;
@@ -91,6 +92,16 @@ namespace MenuModule.ViewModels
                 executeMethod: () => eventAggregator.GetEvent<OrderSamplesEvent>().Publish(),
                 canExecuteMethod: () => inputService?.SampleService?.Samples?.Any() == true);
 
+            this.GraphicsReloadCommand = new DelegateCommand(
+                executeMethod: async () => await graphicsService.ReloadAsync());
+            this.GraphicsOpenCommand = new DelegateCommand(
+                executeMethod: () => graphicsService.Open(),
+                canExecuteMethod: () => graphicsService.IsActive);
+
+            this.ScoreboardUpdateCommand = new DelegateCommand(
+                executeMethod: () => eventAggregator.GetEvent<UpdateScoreboardEvent>().Publish(),
+                canExecuteMethod: () => scoreboardService.HasUpdates);
+
             eventAggregator.GetEvent<InputsChangedEvent>().Subscribe(
                 action: UpdateInputs);
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
@@ -113,19 +124,10 @@ namespace MenuModule.ViewModels
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
                 action: _ => OnSampleSelected());
 
-            /// Must be tidied
             eventAggregator.GetEvent<GraphicsUpdatedEvent>().Subscribe(
                 action: OnGraphicsUpdated);
-
-            this.GraphicsStartCommand = new DelegateCommand(
-                executeMethod: async () => await graphicsService.StartAsync(Constants.PortHttpWebServer, Constants.PortHttpWebSocket),
-                canExecuteMethod: () => !graphicsService.IsActive);
-            this.GraphicsEndCommand = new DelegateCommand(
-                executeMethod: async () => await graphicsService.StopAsync(),
-                canExecuteMethod: () => graphicsService.IsActive);
-            this.GraphicsOpenCommand = new DelegateCommand(
-                executeMethod: () => graphicsService.Open(),
-                canExecuteMethod: () => graphicsService.IsActive);
+            eventAggregator.GetEvent<ScoreboardAnnouncedEvent>().Subscribe(
+                action: ScoreboardUpdateCommand.RaiseCanExecuteChanged);
 
             inputService.Update();
         }
@@ -142,11 +144,9 @@ namespace MenuModule.ViewModels
 
         public DelegateCommand ClipsRemoveAllCommand { get; }
 
-        public DelegateCommand GraphicsEndCommand { get; }
-
         public DelegateCommand GraphicsOpenCommand { get; }
 
-        public DelegateCommand GraphicsStartCommand { get; }
+        public DelegateCommand GraphicsReloadCommand { get; }
 
         public bool HasTemplates => inputService?.TemplateService?.Templates?.Any() == true;
 
@@ -211,6 +211,8 @@ namespace MenuModule.ViewModels
         public DelegateCommand SamplesOrderCommand { get; }
 
         public DelegateCommand SamplesRemoveAllCommand { get; }
+
+        public DelegateCommand ScoreboardUpdateCommand { get; }
 
         public int SelectedTabIndex
         {
@@ -302,9 +304,10 @@ namespace MenuModule.ViewModels
 
         private void OnGraphicsUpdated()
         {
-            GraphicsStartCommand.RaiseCanExecuteChanged();
-            GraphicsEndCommand.RaiseCanExecuteChanged();
+            GraphicsReloadCommand.RaiseCanExecuteChanged();
             GraphicsOpenCommand.RaiseCanExecuteChanged();
+
+            ScoreboardUpdateCommand.RaiseCanExecuteChanged();
         }
 
         private void OnSampleSelected()

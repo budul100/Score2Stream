@@ -8,13 +8,23 @@ namespace Core.Interfaces
 
         bool IsActive { get; }
 
+        int PortServerHttp { get; set; }
+
+        int PortServerHttps { get; set; }
+
+        int PortSocketHttp { get; set; }
+
+        int PortSocketHttps { get; set; }
+
         #endregion Public Properties
 
         #region Public Methods
 
         void Open(bool openHttps = false);
 
-        Task StartAsync(int portWebServer, int portWebSocket);
+        Task ReloadAsync();
+
+        Task StartAsync();
 
         Task StopAsync();
 

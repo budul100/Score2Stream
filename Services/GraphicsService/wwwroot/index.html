@@ -8,119 +8,8 @@
     <script src="//code.jquery.com/jquery-latest.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.js"></script>
+    <script src="script.js"></script>
 
-    <script>
-        $(document).ready(function () {
-            $.ajaxSetup({ cache: false });
-            var sock = null;
-            var ellog = null;
-            window.onload = function () {
-                var wsuri;
-                ellog = document.getElementById('log');
-                if (window.location.protocol === "file:") wsuri = "ws://172.16.28.132:9000";
-                else wsuri = "ws://" + window.location.hostname + ":9000";
-                log(wsuri);
-                if ("WebSocket" in window) {
-                    sock = new WebSocket(wsuri);
-                } else if ("MozWebSocket" in window) {
-                    sock = new MozWebSocket(wsuri);
-                } else {
-                    log("Browser does not support WebSocket!");
-                    window.location = "http://autobahn.ws/unsupportedbrowser";
-                }
-                if (sock) {
-                    sock.onopen = function () {
-                        log("Connected to " + wsuri);
-                    }
-                    sock.onclose = function (e) {
-                        log("Connection closed (wasClean = " + e.wasClean + ", code = " + e.code + ", reason = '" + e.reason + "')");
-                        sock = null;
-                    }
-                    sock.onmessage = function (e) {
-                        //log("Got echo: " + e.data);
-                        console.log(e.data);
-                        ko.mapping.fromJS(JSON.parse(e.data), viewModel);
-                    }
-                }
-            };
-            function broadcast() {
-                var msg = document.getElementById('message').value;
-                if (sock) {
-                    sock.send(msg);
-                    log("Sent: " + msg);
-                } else {
-                    log("Not connected.");
-                }
-            };
-            function log(m) {
-                ellog.innerHTML += m + '\n';
-                ellog.scrollTop = ellog.scrollHeight;
-            };
-
-            vm = {
-                ticker: ko.observable(""),
-                gameID: ko.observable(""),
-                game_over: ko.observable(false),
-                game: {
-                    clock: ko.observable("12:00"),
-                    shot_clock: ko.observable("24"),
-                    quarter: ko.observable("1st"),
-                    possesion: ko.observable(""),
-                },
-                guest: {
-                    score: ko.observable("0"),
-                    fouls: ko.observable(""),
-                    name: ko.observable(""),
-                    imagePath: ko.observable(""),
-                    color: ko.observable("#6C6C6C")
-                },
-                home: {
-                    score: ko.observable("0"),
-                    fouls: ko.observable(""),
-                    name: ko.observable(""),
-                    imagePath: ko.observable(""),
-                    color: ko.observable("#6C6C6C")
-                }
-            }
-
-            var viewModel = ko.mapping.fromJS(vm);
-
-            viewModel.computedQuarter = ko.computed(function () {
-                if (this.game.quarter() == "1" || this.game.quarter() == 1) return "1st";
-                if (this.game.quarter() == "2" || this.game.quarter() == 2) return "2nd";
-                if (this.game.quarter() == "3" || this.game.quarter() == 3) return "3rd";
-                if (this.game.quarter() == "4" || this.game.quarter() == 4) return "4th";
-                if (this.game.quarter() == "5" || this.game.quarter() == 5) return "ot";
-                if (this.game.quarter() == "6" || this.game.quarter() == 6) return "ot2";
-                if (this.game.quarter() == "7" || this.game.quarter() == 7) return "ot3";
-                else return this.game.quarter();
-            }, viewModel);
-
-            viewModel.guestFouls = ko.computed(function () {
-                return parseInt(this.guest.fouls());
-            }, viewModel);
-
-            viewModel.homeFouls = ko.computed(function () {
-                return parseInt(this.home.fouls());
-            }, viewModel);
-
-            ko.applyBindings(viewModel);
-
-            //$.getJSON(
-            //    "http://www.choxue.com/zh-tw/livedash/" + viewModel.gameID() + "/scoreboard.json", {},
-            //    function (model) {
-            //        ko.mapping.fromJS(model, viewModel);
-            //    });
-
-            var getUpdates = setInterval(function () {
-                $.getJSON(
-                    "", {},
-                    function (model) {
-                        ko.mapping.fromJS(model, viewModel);
-                    });
-            }, 1500);
-        });
-    </script>
     <body>
         <pre id="log" style="display:none;position:absolute;bottom:0;width:100%;height: 5em; overflow-y: hidden; background-color: #faa;"></pre>
 
@@ -141,9 +30,6 @@
 
                 <div id="scorebox_container">
                     <img id="bg_scoreboard" src='scoreboard.png'></img>
-                    <div id="logo_container">
-                        <!-- <img id="logo" src='logo.png'></img> -->
-                    </div>
 
                     <div id="shotclock_container">
                         <h3 data-bind='text: game.shot_clock()'></h3>
@@ -152,7 +38,7 @@
                         <h3 data-bind='text: game.clock()'></h3>
                     </div>
                     <div id="quarter_container">
-                        <h3 data-bind='text: computedQuarter()'></h3>
+                        <h3 data-bind='text: computedPeriod()'></h3>
                     </div>
 
                     <div id="game_over_container" data-bind='visible: game_over()'>
