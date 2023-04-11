@@ -129,6 +129,6 @@ $(document).ready(
                 function (model) {
                     ko.mapping.fromJS(model, viewModel);
                 });
-        }, 100);
+        }, 50);
     }
 );

@@ -53,9 +53,11 @@ namespace VideoService.Extensions
 
                 match.MinMaxLoc(
                     minVal: out _,
-                    maxVal: out double value);
+                    maxVal: out double max);
 
-                result = Math.Abs(value);
+                result = max != 1
+                    ? Math.Abs(max)
+                    : 0;
             }
 
             return result;
