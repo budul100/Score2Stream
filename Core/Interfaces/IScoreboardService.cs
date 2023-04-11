@@ -16,6 +16,8 @@ namespace Core.Interfaces
 
         bool PeriodNotFromClip { get; set; }
 
+        bool ScoreNotFromClip { get; set; }
+
         bool ShotNotFromClip { get; set; }
 
         #endregion Public Properties
@@ -26,9 +28,8 @@ namespace Core.Interfaces
 
         void SetClip(ClipType contentType, Clip clip);
 
-        void Update(string period, string periods, bool isGameOver,
-            string teamHome, string teamGuest, int scoreHome, int scoreGuest,
-            IEnumerable<string> tickers);
+        void Update(string period, int? periods, bool isGameOver, string teamHome, string teamGuest,
+            int scoreHome, int scoreGuest, string colorHome, string colorGuest, IEnumerable<string> tickers);
 
         #endregion Public Methods
     }

@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Globalization;
-using System.Windows.Data;
 
 namespace Core.Converters
 {
     public class ExpandedSizeConverter
-        : IMultiValueConverter
+        : OneWayMultiValueConverter
     {
         #region Public Methods
 
-        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
             if (values == null || values.Length != 3)
             {
@@ -25,11 +24,6 @@ namespace Core.Converters
                 : position;
 
             return result;
-        }
-
-        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
-        {
-            throw new NotSupportedException(GetType().Name + " can only convert one-way.");
         }
 
         #endregion Public Methods

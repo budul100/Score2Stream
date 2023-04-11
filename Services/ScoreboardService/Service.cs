@@ -25,9 +25,11 @@ namespace ScoreboardService
         private readonly IEventAggregator eventAggregator;
         private readonly JsonSerializerOptions serializeOptions;
 
+        private string colorGuest;
+        private string colorHome;
         private bool isGameOver;
         private string period;
-        private string periods;
+        private int? periods;
         private int scoreGuest;
         private int scoreHome;
         private string teamGuest;
@@ -66,6 +68,8 @@ namespace ScoreboardService
         public string Message { get; private set; }
 
         public bool PeriodNotFromClip { get; set; }
+
+        public bool ScoreNotFromClip { get; set; }
 
         public bool ShotNotFromClip { get; set; }
 
@@ -108,8 +112,8 @@ namespace ScoreboardService
             }
         }
 
-        public void Update(string period, string periods, bool isGameOver, string teamHome, string teamGuest,
-            int scoreHome, int scoreGuest, IEnumerable<string> tickers)
+        public void Update(string period, int? periods, bool isGameOver, string teamHome, string teamGuest,
+            int scoreHome, int scoreGuest, string colorHome, string colorGuest, IEnumerable<string> tickers)
         {
             this.period = period;
             this.periods = periods;
@@ -118,6 +122,8 @@ namespace ScoreboardService
             this.teamGuest = teamGuest;
             this.scoreHome = scoreHome;
             this.scoreGuest = scoreGuest;
+            this.colorHome = colorHome;
+            this.colorGuest = colorGuest;
             this.tickers = tickers;
 
             UpdateMessage();
@@ -145,32 +151,41 @@ namespace ScoreboardService
             var currentPeriod = !PeriodNotFromClip
                 ? clips[ClipType.Period]?.Value
                 : period;
+            var currentPeriods = periods?.ToString();
 
             var game = new Game
             {
                 Clock = clock,
                 Possesion = default,
                 Period = currentPeriod,
-                Periods = periods,
+                Periods = currentPeriods,
                 Shot = shot,
             };
 
+            var currentScoreHome = !ScoreNotFromClip
+                ? clips[ClipType.ScoreHome]?.Value
+                : scoreHome.ToString();
+
             var home = new Home
             {
-                Color = default,
+                Color = colorHome,
                 Fouls = default,
                 ImagePath = default,
                 Name = teamHome,
-                Score = scoreHome.ToString(),
+                Score = currentScoreHome,
             };
+
+            var currentScoreGuest = !ScoreNotFromClip
+                ? clips[ClipType.ScoreGuest]?.Value
+                : scoreGuest.ToString();
 
             var guest = new Guest
             {
-                Color = default,
+                Color = colorGuest,
                 Fouls = default,
                 ImagePath = default,
                 Name = teamGuest,
-                Score = scoreGuest.ToString(),
+                Score = currentScoreGuest,
             };
 
             var result = new Board
