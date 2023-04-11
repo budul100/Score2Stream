@@ -1,7 +1,7 @@
 ﻿using Core.Constants;
 using Core.Enums;
-using Core.Events;
 using Core.Events.Clip;
+using Core.Events.Graphics;
 using Core.Events.Input;
 using Core.Events.Sample;
 using Core.Events.Scoreboard;
@@ -124,7 +124,7 @@ namespace MenuModule.ViewModels
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
                 action: _ => OnSampleSelected());
 
-            eventAggregator.GetEvent<GraphicsUpdatedEvent>().Subscribe(
+            eventAggregator.GetEvent<ServerStartedEvent>().Subscribe(
                 action: OnGraphicsUpdated);
             eventAggregator.GetEvent<ScoreboardAnnouncedEvent>().Subscribe(
                 action: ScoreboardUpdateCommand.RaiseCanExecuteChanged);

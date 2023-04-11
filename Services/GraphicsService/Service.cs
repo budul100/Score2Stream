@@ -1,4 +1,4 @@
-﻿using Core.Events;
+﻿using Core.Events.Graphics;
 using Core.Events.Scoreboard;
 using Core.Interfaces;
 using GraphicsService.Workers;
@@ -109,7 +109,7 @@ namespace GraphicsService
                 cancellationToken: cancellationTokenSource.Token);
 
             eventAggregator
-                .GetEvent<GraphicsUpdatedEvent>()
+                .GetEvent<ServerStartedEvent>()
                 .Publish();
 
             if (webServerTask.IsFaulted)
@@ -135,7 +135,7 @@ namespace GraphicsService
             cancellationTokenSource?.Cancel();
 
             eventAggregator
-                .GetEvent<GraphicsUpdatedEvent>()
+                .GetEvent<ServerStoppedEvent>()
                 .Publish();
 
             if (webServerTask != default)

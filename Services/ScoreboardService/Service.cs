@@ -1,5 +1,6 @@
 ﻿using Core.Enums;
 using Core.Events.Clip;
+using Core.Events.Graphics;
 using Core.Events.Scoreboard;
 using Core.Events.Video;
 using Core.Interfaces;
@@ -51,6 +52,11 @@ namespace ScoreboardService
             };
 
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
+                action: UpdateMessage,
+                keepSubscriberReferenceAlive: true);
+
+            // Send first message to keep the web socket running
+            eventAggregator.GetEvent<ServerStartedEvent>().Subscribe(
                 action: UpdateMessage,
                 keepSubscriberReferenceAlive: true);
 
