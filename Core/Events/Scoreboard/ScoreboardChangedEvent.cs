@@ -2,7 +2,7 @@
 
 namespace Core.Events.Scoreboard
 {
-    public class UpdateScoreboardEvent
+    public class ScoreboardChangedEvent
         : PubSubEvent
     { }
 }

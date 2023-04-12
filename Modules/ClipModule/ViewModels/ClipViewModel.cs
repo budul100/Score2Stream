@@ -112,9 +112,9 @@ namespace ClipModule.ViewModels
             get { return Clip?.Type ?? ClipType.None; }
             set
             {
-                scoreboardService.SetClip(
-                    contentType: value,
-                    clip: Clip);
+                scoreboardService.Set(
+                    clip: Clip,
+                    clipType: value);
 
                 RaisePropertyChanged(nameof(Type));
             }

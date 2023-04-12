@@ -7,11 +7,13 @@ using Core.Interfaces;
 using Core.Models;
 using Core.Models.Sender;
 using Prism.Events;
+using ScoreboardService.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Windows.Media;
 
 namespace ScoreboardService
 {
@@ -21,21 +23,27 @@ namespace ScoreboardService
         #region Private Fields
 
         private const char GameClockSplitterDefault = ':';
+        private const int TickerFrequencyDefault = 30;
 
         private readonly IDictionary<ClipType, Clip> clips = new Dictionary<ClipType, Clip>();
         private readonly IEventAggregator eventAggregator;
         private readonly JsonSerializerOptions serializeOptions;
 
-        private string colorGuest;
-        private string colorHome;
+        private string clockGame;
+        private string clockShot;
+        private Color colorGuest;
+        private Color colorHome;
         private bool isGameOver;
         private string period;
-        private int? periods;
-        private int scoreGuest;
-        private int scoreHome;
+        private string periods;
+        private string scoreGuest;
+        private string scoreHome;
         private string teamGuest;
         private string teamHome;
-        private IEnumerable<string> tickers;
+        private string ticker;
+        private DateTime? tickerLastUpdate;
+        private HashSet<string> tickers;
+        private int tickersInd;
 
         #endregion Private Fields
 
@@ -52,47 +60,103 @@ namespace ScoreboardService
             };
 
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
-                action: UpdateMessage,
+                action: UpdateBoard,
                 keepSubscriberReferenceAlive: true);
 
             // Send first message to keep the web socket running
             eventAggregator.GetEvent<ServerStartedEvent>().Subscribe(
-                action: UpdateMessage,
+                action: UpdateBoard,
                 keepSubscriberReferenceAlive: true);
 
-            InitializeContents();
+            ColorHome = Colors.Yellow;
+            ColorGuest = Colors.Blue;
+            TickersFrequency = TickerFrequencyDefault;
+
+            InitializeClips();
+            Update();
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
+        public string ClockGame { get; private set; }
+
+        public bool ClockGameIsUpToDate => ClockGame == clockGame;
+
         public bool ClockNotFromClip { get; set; }
 
-        public bool HasUpdates { get; private set; }
+        public string ClockShot { get; private set; }
+
+        public bool ClockShotIsUpToDate => ClockShot == clockShot;
+
+        public Color ColorGuest { get; set; }
+
+        public bool ColorGuestUpToDate => ColorGuest == colorGuest;
+
+        public Color ColorHome { get; set; }
+
+        public bool ColorHomeUpToDate => ColorHome == colorHome;
+
+        public bool IsGameOver { get; set; }
+
+        public bool IsGameOverUpToDate => IsGameOver == isGameOver;
 
         public string Message { get; private set; }
 
+        public string Period { get; set; }
+
         public bool PeriodNotFromClip { get; set; }
+
+        public string Periods { get; set; }
+
+        public bool PeriodsUpToDate => Periods == periods;
+
+        public bool PeriodUpToDate => Period == period;
+
+        public string ScoreGuest { get; set; }
+
+        public bool ScoreGuestUpToDate => ScoreGuest == scoreGuest;
+
+        public string ScoreHome { get; set; }
+
+        public bool ScoreHomeUpToDate => ScoreHome == scoreHome;
 
         public bool ScoreNotFromClip { get; set; }
 
         public bool ShotNotFromClip { get; set; }
 
+        public string TeamGuest { get; set; }
+
+        public bool TeamGuestUpToDate => TeamGuest == teamGuest;
+
+        public string TeamHome { get; set; }
+
+        public bool TeamHomeUpToDate => TeamHome == teamHome;
+
+        public IEnumerable<string> Tickers { get; set; }
+
+        public int TickersFrequency { get; set; }
+
+        public bool TickersUpToDate => (tickers?.Any() != true && Tickers?.Any() != true)
+            || (tickers?.Any() == true && Tickers?.Any() == true && tickers.SetEquals(Tickers));
+
+        public bool UpToDate => ColorGuestUpToDate
+            && ColorHomeUpToDate
+            && IsGameOverUpToDate
+            && PeriodsUpToDate
+            && PeriodUpToDate
+            && ScoreGuestUpToDate
+            && ScoreHomeUpToDate
+            && TeamGuestUpToDate
+            && TeamHomeUpToDate
+            && TickersUpToDate;
+
         #endregion Public Properties
 
         #region Public Methods
 
-        public void Announce()
-        {
-            HasUpdates = true;
-
-            eventAggregator
-                .GetEvent<ScoreboardAnnouncedEvent>()
-                .Publish();
-        }
-
-        public void SetClip(ClipType clipType, Clip clip)
+        public void Set(Clip clip, ClipType clipType)
         {
             if (clipType != clip.Type)
             {
@@ -118,27 +182,33 @@ namespace ScoreboardService
             }
         }
 
-        public void Update(string period, int? periods, bool isGameOver, string teamHome, string teamGuest,
-            int scoreHome, int scoreGuest, string colorHome, string colorGuest, IEnumerable<string> tickers)
+        public void Update()
         {
-            this.period = period;
-            this.periods = periods;
-            this.isGameOver = isGameOver;
-            this.teamHome = teamHome;
-            this.teamGuest = teamGuest;
-            this.scoreHome = scoreHome;
-            this.scoreGuest = scoreGuest;
-            this.colorHome = colorHome;
-            this.colorGuest = colorGuest;
-            this.tickers = tickers;
+            this.periods = Periods;
+            this.isGameOver = IsGameOver;
+            this.teamHome = TeamHome;
+            this.teamGuest = TeamGuest;
+            this.colorHome = ColorHome;
+            this.colorGuest = ColorGuest;
 
-            UpdateMessage();
+            if (PeriodNotFromClip
+                || clips[ClipType.Period] == default)
+            {
+                period = Period;
+            }
 
-            HasUpdates = false;
+            if (ScoreNotFromClip
+                || clips[ClipType.ScoreHome] == default
+                || clips[ClipType.ScoreGuest] == default)
+            {
+                scoreHome = ScoreHome;
+                scoreGuest = ScoreGuest;
+            }
 
-            eventAggregator
-                .GetEvent<ScoreboardAnnouncedEvent>()
-                .Publish();
+            this.tickers = Tickers?.ToHashSet();
+            UpdateTicker();
+
+            UpdateBoard();
         }
 
         #endregion Public Methods
@@ -147,51 +217,31 @@ namespace ScoreboardService
 
         private Board GetBoard()
         {
-            var clock = !ClockNotFromClip
-                ? GetClockGame()
-                : default;
-            var shot = !ShotNotFromClip
-                ? GetClockShot()
-                : default;
-
-            var currentPeriod = !PeriodNotFromClip
-                ? clips[ClipType.Period]?.Value
-                : period;
-            var currentPeriods = periods?.ToString();
-
             var game = new Game
             {
-                Clock = clock,
+                Clock = clockGame,
                 Possesion = default,
-                Period = currentPeriod,
-                Periods = currentPeriods,
-                Shot = shot,
+                Period = period,
+                Periods = periods,
+                Shot = clockShot,
             };
-
-            var currentScoreHome = !ScoreNotFromClip
-                ? clips[ClipType.ScoreHome]?.Value
-                : scoreHome.ToString();
 
             var home = new Home
             {
-                Color = colorHome,
+                Color = colorHome.GetColorHex(),
                 Fouls = default,
                 ImagePath = default,
                 Name = teamHome,
-                Score = currentScoreHome,
+                Score = scoreHome,
             };
-
-            var currentScoreGuest = !ScoreNotFromClip
-                ? clips[ClipType.ScoreGuest]?.Value
-                : scoreGuest.ToString();
 
             var guest = new Guest
             {
-                Color = colorGuest,
+                Color = colorGuest.GetColorHex(),
                 Fouls = default,
                 ImagePath = default,
                 Name = teamGuest,
-                Score = currentScoreGuest,
+                Score = scoreGuest,
             };
 
             var result = new Board
@@ -201,7 +251,7 @@ namespace ScoreboardService
                 Home = home,
                 GameID = default,
                 GameOver = isGameOver,
-                Ticker = default,
+                Ticker = ticker,
             };
 
             return result;
@@ -266,7 +316,7 @@ namespace ScoreboardService
             return result.ToString();
         }
 
-        private void InitializeContents()
+        private void InitializeClips()
         {
             var relevants = Enum.GetValues(typeof(ClipType))
                 .OfType<ClipType>()
@@ -280,8 +330,48 @@ namespace ScoreboardService
             }
         }
 
-        private void UpdateMessage()
+        private void UpdateBoard()
         {
+            ClockGame = GetClockGame();
+            clockGame = !ClockNotFromClip
+                ? ClockGame
+                : default;
+
+            ClockShot = GetClockShot();
+            clockShot = !ShotNotFromClip
+                ? ClockShot
+                : default;
+
+            if (!PeriodNotFromClip
+                && clips[ClipType.Period] != default)
+            {
+                Period = clips[ClipType.Period]?.Value;
+                period = Period;
+            }
+
+            if (!ScoreNotFromClip
+                && clips[ClipType.ScoreHome] != default
+                && clips[ClipType.ScoreGuest] != default)
+            {
+                ScoreHome = clips[ClipType.ScoreHome]?.Value ?? "0";
+                scoreHome = ScoreHome;
+
+                ScoreGuest = clips[ClipType.ScoreGuest]?.Value ?? "0";
+                scoreGuest = ScoreGuest;
+            }
+
+            var frequencyTime = new TimeSpan(
+                hours: 0,
+                minutes: 0,
+                seconds: TickersFrequency);
+
+            if ((ticker == default && tickers?.Any() == true)
+                || (ticker != default && tickers?.Any() != true)
+                || !tickerLastUpdate.HasValue || tickerLastUpdate.Value.Add(frequencyTime) < DateTime.Now)
+            {
+                UpdateTicker();
+            }
+
             var board = GetBoard();
 
             Message = JsonSerializer.Serialize(
@@ -291,6 +381,28 @@ namespace ScoreboardService
             eventAggregator
                 .GetEvent<ScoreboardUpdatedEvent>()
                 .Publish(Message);
+        }
+
+        private void UpdateTicker()
+        {
+            var current = default(string);
+
+            if (tickers?.Any() == true)
+            {
+                if (string.IsNullOrEmpty(ticker) || ++tickersInd >= tickers.Count)
+                {
+                    tickersInd = 0;
+                }
+
+                current = tickers.ElementAt(tickersInd);
+            }
+
+            if (current != ticker)
+            {
+                ticker = current;
+            }
+
+            tickerLastUpdate = DateTime.Now;
         }
 
         #endregion Private Methods

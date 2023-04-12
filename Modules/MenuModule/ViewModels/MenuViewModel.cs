@@ -99,8 +99,11 @@ namespace MenuModule.ViewModels
                 canExecuteMethod: () => graphicsService.IsActive);
 
             this.ScoreboardUpdateCommand = new DelegateCommand(
-                executeMethod: () => eventAggregator.GetEvent<UpdateScoreboardEvent>().Publish(),
-                canExecuteMethod: () => scoreboardService.HasUpdates);
+                executeMethod: () => scoreboardService.Update(),
+                canExecuteMethod: () => !scoreboardService.UpToDate);
+
+            eventAggregator.GetEvent<ServerStartedEvent>().Subscribe(
+                action: OnGraphicsUpdated);
 
             eventAggregator.GetEvent<InputsChangedEvent>().Subscribe(
                 action: UpdateInputs);
@@ -124,10 +127,10 @@ namespace MenuModule.ViewModels
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
                 action: _ => OnSampleSelected());
 
-            eventAggregator.GetEvent<ServerStartedEvent>().Subscribe(
-                action: OnGraphicsUpdated);
-            eventAggregator.GetEvent<ScoreboardAnnouncedEvent>().Subscribe(
-                action: ScoreboardUpdateCommand.RaiseCanExecuteChanged);
+            eventAggregator.GetEvent<ScoreboardChangedEvent>().Subscribe(
+                action: () => ScoreboardUpdateCommand.RaiseCanExecuteChanged());
+            eventAggregator.GetEvent<ScoreboardUpdatedEvent>().Subscribe(
+                action: _ => ScoreboardUpdateCommand.RaiseCanExecuteChanged());
 
             inputService.Update();
         }
