@@ -1,0 +1,81 @@
+<UserControl
+    x:Class="Score2Stream.VideoModule.Views.SelectionView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:bv="using:Score2Stream.VideoModule.Behaviors"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Panel>
+        <Rectangle
+            Name="SelectionRectangle"
+            Width="{Binding Width, Mode=TwoWay}"
+            Height="{Binding Height, Mode=TwoWay}"
+            Fill="Transparent"
+            Stroke="Red"
+            StrokeDashArray="4,2">
+            <i:Interaction.Behaviors>
+                <bv:SizeChangedBehavior />
+                <a:DataTriggerBehavior
+                    Binding="{Binding IsActive}"
+                    ComparisonCondition="Equal"
+                    Value="True">
+                    <a:ChangePropertyAction
+                        PropertyName="StrokeThickness"
+                        TargetObject="SelectionRectangle"
+                        Value="3" />
+                </a:DataTriggerBehavior>
+                <a:DataTriggerBehavior
+                    Binding="{Binding IsActive}"
+                    ComparisonCondition="NotEqual"
+                    Value="True">
+                    <a:ChangePropertyAction
+                        PropertyName="StrokeThickness"
+                        TargetObject="SelectionRectangle"
+                        Value="1" />
+                </a:DataTriggerBehavior>
+            </i:Interaction.Behaviors>
+        </Rectangle>
+        <TextBlock
+            Name="SelectionTextBlock"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            d:Text="LoremIpsum"
+            Foreground="Red"
+            Text="{Binding Description, Mode=OneWay}">
+            <i:Interaction.Behaviors>
+                <bv:SizeChangedBehavior Width="{Binding WidthName, Mode=TwoWay}" Height="{Binding HeightName, Mode=TwoWay}" />
+                <a:DataTriggerBehavior
+                    Binding="{Binding IsActive}"
+                    ComparisonCondition="Equal"
+                    Value="True">
+                    <a:ChangePropertyAction
+                        PropertyName="FontWeight"
+                        TargetObject="SelectionTextBlock"
+                        Value="Bold" />
+                    <a:ChangePropertyAction
+                        PropertyName="FontStyle"
+                        TargetObject="SelectionTextBlock"
+                        Value="Italic" />
+                </a:DataTriggerBehavior>
+                <a:DataTriggerBehavior
+                    Binding="{Binding IsActive}"
+                    ComparisonCondition="NotEqual"
+                    Value="True">
+                    <a:ChangePropertyAction
+                        PropertyName="FontWeight"
+                        TargetObject="SelectionTextBlock"
+                        Value="Normal" />
+                    <a:ChangePropertyAction
+                        PropertyName="FontStyle"
+                        TargetObject="SelectionTextBlock"
+                        Value="Normal" />
+                </a:DataTriggerBehavior>
+            </i:Interaction.Behaviors>
+        </TextBlock>
+    </Panel>
+</UserControl>

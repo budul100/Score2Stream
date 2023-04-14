@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Avalonia.Data.Converters;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
-using System.Windows.Data;
 
-namespace Core.Converters
+namespace Score2Stream.Core.Converters
 {
     /// <summary>
     /// An abstract base class for multi-value converters that only convert one way (from source to binding).
@@ -22,7 +23,7 @@ namespace Core.Converters
         /// <param name="parameter">The converter parameter to use.</param>
         /// <param name="culture">The culture to use in the converter.</param>
         /// <returns>The converted value.</returns>
-        public abstract object Convert(object[] values, Type targetType, object parameter, CultureInfo culture);
+        public abstract object Convert(IList<object> values, Type targetType, object parameter, CultureInfo culture);
 
         /// <summary>
         /// Converts a binding value back to its source value. This implementation always throws a NotSupportedException.

@@ -1,13 +1,13 @@
-﻿using Core.Events.Sample;
-using Core.Events.Video;
-using Core.Interfaces;
-using Core.Models;
+﻿using Avalonia.Media.Imaging;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
-using System.Windows.Media.Imaging;
+using Score2Stream.Core.Events.Sample;
+using Score2Stream.Core.Events.Video;
+using Score2Stream.Core.Interfaces;
+using Score2Stream.Core.Models;
 
-namespace TemplateModule.ViewModels
+namespace Score2Stream.TemplateModule.ViewModels
 {
     public class SampleViewModel
         : BindableBase
@@ -39,7 +39,7 @@ namespace TemplateModule.ViewModels
 
         #region Public Properties
 
-        public BitmapSource Bitmap => Sample?.Bitmap;
+        public Bitmap Bitmap => Sample?.Bitmap;
 
         public string Difference => Sample?.Image != default
             ? $"Difference: {(int)(Sample.Similarity * 100)}"

@@ -1,21 +1,21 @@
-﻿using Core.Enums;
-using Core.Events.Clip;
-using Core.Events.Graphics;
-using Core.Events.Scoreboard;
-using Core.Events.Video;
-using Core.Interfaces;
-using Core.Models;
-using Core.Models.Sender;
+﻿using Avalonia.Media;
 using Prism.Events;
-using ScoreboardService.Extensions;
+using Score2Stream.Core.Enums;
+using Score2Stream.Core.Events.Clip;
+using Score2Stream.Core.Events.Graphics;
+using Score2Stream.Core.Events.Scoreboard;
+using Score2Stream.Core.Events.Video;
+using Score2Stream.Core.Interfaces;
+using Score2Stream.Core.Models;
+using Score2Stream.Core.Models.Content;
+using Score2Stream.ScoreboardService.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Windows.Media;
 
-namespace ScoreboardService
+namespace Score2Stream.ScoreboardService
 {
     public class Service
         : IScoreboardService

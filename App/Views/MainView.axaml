@@ -1,0 +1,52 @@
+<Window
+    x:Class="Score2Stream.Views.MainView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:co="clr-namespace:Score2Stream.Core.Converters;assembly=Core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:en="clr-namespace:Score2Stream.Core.Enums;assembly=Core"
+    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:prism="http://prismlibrary.com/"
+    xmlns:rb="using:AvaloniaUI.Ribbon"
+    xmlns:vm="using:Score2Stream.ViewModels"
+    Title="{Binding Title}"
+    Width="{Binding Width, Mode=TwoWay}"
+    Height="{Binding Height, Mode=TwoWay}"
+    prism:ViewModelLocator.AutoWireViewModel="True">
+    <Window.Resources>
+        <co:EnumToStringConverter x:Key="EnumToStringConverter" />
+    </Window.Resources>
+    <i:Interaction.Behaviors>
+        <a:EventTriggerBehavior EventName="Closing" SourceObject="{Binding Window}">
+            <a:InvokeCommandAction Command="{Binding OnClosingCommand}" PassEventArgsToCommand="True" />
+        </a:EventTriggerBehavior>
+    </i:Interaction.Behaviors>
+    <DockPanel LastChildFill="True">
+
+        <ContentControl DockPanel.Dock="Top">
+            <prism:RegionManager.RegionName>
+                <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.MenuRegion}" />
+            </prism:RegionManager.RegionName>
+        </ContentControl>
+        <Grid DockPanel.Dock="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="3" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+            <ContentControl Grid.Column="0">
+                <prism:RegionManager.RegionName>
+                    <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.OutputRegion}" />
+                </prism:RegionManager.RegionName>
+            </ContentControl>
+            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" />
+            <ContentControl Grid.Column="2">
+                <prism:RegionManager.RegionName>
+                    <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.EditRegion}" />
+                </prism:RegionManager.RegionName>
+            </ContentControl>
+        </Grid>
+    </DockPanel>
+</Window>

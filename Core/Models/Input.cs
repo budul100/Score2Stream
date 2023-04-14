@@ -1,6 +1,6 @@
-﻿using Core.Interfaces;
+﻿using Score2Stream.Core.Interfaces;
 
-namespace Core.Models
+namespace Score2Stream.Core.Models
 {
     public class Input
     {

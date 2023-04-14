@@ -2,7 +2,7 @@
 using Prism.Regions;
 using System;
 
-namespace Core.Prism
+namespace Score2Stream.Core.Prism
 {
     public class RegionViewModelBase
         : BindableBase, INavigationAware, IConfirmNavigationRequest

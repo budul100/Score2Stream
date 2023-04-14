@@ -1,0 +1,152 @@
+<UserControl
+    x:Class="Score2Stream.ClipModule.Views.ClipView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:co="clr-namespace:Score2Stream.Core.Converters;assembly=Core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <co:DescriptionToStringConverter x:Key="DescriptionToStringConverter" />
+    </UserControl.Resources>
+
+    <Border
+        Margin="2"
+        BorderBrush="LightGray"
+        BorderThickness="2"
+        CornerRadius="3">
+        <DockPanel Name="ClipPanel">
+
+            <i:Interaction.Behaviors>
+                <a:DataTriggerBehavior
+                    Binding="{Binding IsActive}"
+                    ComparisonCondition="Equal"
+                    Value="True">
+                    <a:ChangePropertyAction
+                        PropertyName="Background"
+                        TargetObject="ClipPanel"
+                        Value="LightBlue" />
+                </a:DataTriggerBehavior>
+                <a:DataTriggerBehavior
+                    Binding="{Binding IsActive}"
+                    ComparisonCondition="NotEqual"
+                    Value="True">
+                    <a:ChangePropertyAction
+                        PropertyName="Background"
+                        TargetObject="ClipPanel"
+                        Value="Gainsboro" />
+                </a:DataTriggerBehavior>
+
+                <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="ClipPanel">
+                    <a:InvokeCommandAction Command="{Binding OnSelectionCommand}" />
+                </a:EventTriggerBehavior>
+            </i:Interaction.Behaviors>
+
+            <Border
+                Margin="2"
+                VerticalAlignment="Center"
+                Background="LightGray"
+                BorderBrush="LightSlateGray"
+                BorderThickness="2"
+                DockPanel.Dock="Left">
+                <Image
+                    Width="40"
+                    Height="60"
+                    VerticalAlignment="Center"
+                    Source="{Binding Bitmap}"
+                    Stretch="Uniform" />
+            </Border>
+
+            <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="70" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="4" />
+                    <ColumnDefinition Width="70" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition Height="4" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Text="Type" />
+                <ComboBox
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Width="130"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    IsEnabled="{Binding HasItems, RelativeSource={RelativeSource Self}}"
+                    Items="{Binding Types}"
+                    SelectedItem="{Binding Type}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource DescriptionToStringConverter}}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <TextBlock
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Text="Contrast" />
+                <NumericUpDown
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Width="130"
+                    MaxHeight="5"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Maximum="100"
+                    Minimum="0"
+                    Value="{Binding ThresholdMonochrome, Mode=TwoWay}" />
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="3"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Text="Template" />
+                <ComboBox
+                    Name="TemplatesComboBox"
+                    Grid.Row="0"
+                    Grid.Column="4"
+                    Width="130"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    IsEnabled="{Binding #TemplatesComboBox.HasItems}"
+                    Items="{Binding Templates}"
+                    SelectedItem="{Binding Template, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Description}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <TextBlock
+                    Grid.Row="2"
+                    Grid.Column="3"
+                    Grid.ColumnSpan="2"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    d:Text="=&gt; LoremIspum"
+                    Text="{Binding Value}" />
+            </Grid>
+        </DockPanel>
+    </Border>
+</UserControl>

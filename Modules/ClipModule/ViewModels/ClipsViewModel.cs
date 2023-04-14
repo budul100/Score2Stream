@@ -1,13 +1,13 @@
-﻿using Core.Events.Clip;
-using Core.Events.Input;
-using Core.Interfaces;
-using Core.Prism;
-using Prism.Events;
+﻿using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
+using Score2Stream.Core.Events.Clip;
+using Score2Stream.Core.Events.Input;
+using Score2Stream.Core.Interfaces;
+using Score2Stream.Core.Prism;
 using System.Collections.ObjectModel;
 
-namespace ClipModule.ViewModels
+namespace Score2Stream.ClipModule.ViewModels
 {
     public class ClipsViewModel
         : RegionViewModelBase

@@ -1,6 +1,6 @@
-﻿using System.Windows.Media;
+﻿using Avalonia.Media;
 
-namespace ScoreboardService.Extensions
+namespace Score2Stream.ScoreboardService.Extensions
 {
     internal static class ColorExtensions
     {

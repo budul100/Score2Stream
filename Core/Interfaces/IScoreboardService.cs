@@ -1,9 +1,9 @@
-﻿using Core.Enums;
-using Core.Models;
+﻿using Avalonia.Media;
+using Score2Stream.Core.Enums;
+using Score2Stream.Core.Models;
 using System.Collections.Generic;
-using System.Windows.Media;
 
-namespace Core.Interfaces
+namespace Score2Stream.Core.Interfaces
 {
     public interface IScoreboardService
     {

@@ -1,9 +1,9 @@
-﻿using Core.Events.Clip;
-using Core.Models;
-using Prism.Events;
+﻿using Prism.Events;
 using Prism.Mvvm;
+using Score2Stream.Core.Events.Clip;
+using Score2Stream.Core.Models;
 
-namespace VideoModule.ViewModels
+namespace Score2Stream.VideoModule.ViewModels
 {
     public class SelectionViewModel
         : BindableBase
@@ -50,14 +50,25 @@ namespace VideoModule.ViewModels
             get { return height; }
             set
             {
-                SetProperty(ref height, value);
+                var current = !double.IsNaN(value ?? double.NaN)
+                    ? value
+                    : default;
+
+                SetProperty(ref height, current);
             }
         }
 
         public double? HeightName
         {
             get { return heightName; }
-            set { SetProperty(ref heightName, value); }
+            set
+            {
+                var current = !double.IsNaN(value ?? double.NaN)
+                    ? value
+                    : default;
+
+                SetProperty(ref heightName, current);
+            }
         }
 
         public bool IsActive
@@ -69,7 +80,14 @@ namespace VideoModule.ViewModels
         public double? Left
         {
             get { return left; }
-            set { SetProperty(ref left, value); }
+            set
+            {
+                var current = !double.IsNaN(value ?? double.NaN)
+                    ? value
+                    : default;
+
+                SetProperty(ref left, current);
+            }
         }
 
         public double? Right => HasValue
@@ -79,7 +97,14 @@ namespace VideoModule.ViewModels
         public double? Top
         {
             get { return top; }
-            set { SetProperty(ref top, value); }
+            set
+            {
+                var current = !double.IsNaN(value ?? double.NaN)
+                    ? value
+                    : default;
+
+                SetProperty(ref top, current);
+            }
         }
 
         public double? Width
@@ -87,14 +112,25 @@ namespace VideoModule.ViewModels
             get { return width; }
             set
             {
-                SetProperty(ref width, value);
+                var current = !double.IsNaN(value ?? double.NaN)
+                    ? value
+                    : default;
+
+                SetProperty(ref width, current);
             }
         }
 
         public double? WidthName
         {
             get { return widthName; }
-            set { SetProperty(ref widthName, value); }
+            set
+            {
+                var current = !double.IsNaN(value ?? double.NaN)
+                    ? value
+                    : default;
+
+                { SetProperty(ref widthName, current); }
+            }
         }
 
         #endregion Public Properties

@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Avalonia.Data.Converters;
+using System;
 using System.Globalization;
-using System.Windows.Data;
 
-namespace Core.Converters
+namespace Score2Stream.Core.Converters
 {
     /// <summary>
     /// An abstract base class for value converters that only convert one way (from source to binding).

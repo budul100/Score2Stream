@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 
-namespace Core.Extensions
+namespace Score2Stream.Core.Extensions
 {
     public static class EnumExtensions
     {

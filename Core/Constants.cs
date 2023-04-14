@@ -1,4 +1,4 @@
-﻿namespace Core.Constants
+﻿namespace Score2Stream.Core.Constants
 {
     public static class Constants
     {

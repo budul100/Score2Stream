@@ -1,51 +1,51 @@
-﻿using Core.Interfaces;
+﻿using Avalonia.Threading;
+using Score2Stream.Core.Interfaces;
 using System;
-using System.Diagnostics;
-using System.Threading;
-using System.Windows.Threading;
+using System.Threading.Tasks;
 
-namespace DispatcherService
+namespace Score2Stream.DispatcherService
 {
     public class Service
         : IDispatcherService
     {
-        #region Private Fields
-
-        private readonly Dispatcher dispatcher;
-
-        #endregion Private Fields
-
-        #region Public Constructors
-
-        public Service(Dispatcher dispatcher)
-        {
-            Debug.Assert(dispatcher != null);
-
-            this.dispatcher = dispatcher;
-        }
-
-        #endregion Public Constructors
-
-        #region Public Properties
-
-        public bool IsSynchronized => dispatcher.Thread == Thread.CurrentThread;
-
-        #endregion Public Properties
-
         #region Public Methods
 
-        public void BeginInvoke(Action action)
+        public async Task<T> InvokeAsync<T>(Func<T> function)
         {
-            Debug.Assert(action != default);
+            if (function is null)
+            {
+                throw new ArgumentNullException(nameof(function));
+            }
 
-            dispatcher.BeginInvoke(action);
+            var result = await Dispatcher.UIThread.InvokeAsync<T>(
+                function: function,
+                priority: DispatcherPriority.Background);
+
+            return result;
         }
 
-        public void Invoke(Action action)
+        public async Task InvokeAsync(Action action)
         {
-            Debug.Assert(action != default);
+            if (action is null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
 
-            dispatcher.Invoke(action);
+            await Dispatcher.UIThread.InvokeAsync(
+                action,
+                priority: DispatcherPriority.Background);
+        }
+
+        public void Post(Action action)
+        {
+            if (action is null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            Dispatcher.UIThread.Post(
+                action: action,
+                priority: DispatcherPriority.Background);
         }
 
         #endregion Public Methods

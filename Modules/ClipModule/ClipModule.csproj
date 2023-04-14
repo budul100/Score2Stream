@@ -1,13 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
 	<PropertyGroup>
-		<TargetFramework>net6.0-windows</TargetFramework>
-		<UseWPF>true</UseWPF>
+		<OutputType>Library</OutputType>
+		<TargetFrameworks>net6.0</TargetFrameworks>
+		<RootNamespace>Score2Stream.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
 	</PropertyGroup>
+
 	<ItemGroup>
-		<PackageReference Include="NumericUpDown" Version="3.0.2"/>
-		<PackageReference Include="Prism.Wpf" Version="8.1.97"/>
+		<PackageReference Include="Avalonia" Version="0.10.19" />
+		<PackageReference Include="Avalonia.Desktop" Version="0.10.19" />
+		<PackageReference Include="Avalonia.Xaml.Interactions" Version="0.10.19" />
+		<PackageReference Include="Avalonia.Xaml.Interactivity" Version="0.10.19" />
+		<PackageReference Include="XamlNameReferenceGenerator" Version="1.6.1" />
 	</ItemGroup>
+
 	<ItemGroup>
-		<ProjectReference Include="..\..\Core\Core.csproj"/>
+		<ProjectReference Include="..\..\Core\Core.csproj" />
 	</ItemGroup>
+
 </Project>

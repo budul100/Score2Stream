@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Core.Models
+namespace Score2Stream.Core.Models
 {
     public class Template
     {

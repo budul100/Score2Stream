@@ -1,8 +1,8 @@
-﻿using Core.Extensions;
+﻿using Score2Stream.Core.Extensions;
 using System;
 using System.Globalization;
 
-namespace Core.Converters
+namespace Score2Stream.Core.Converters
 {
     public class DescriptionToStringConverter
         : OneWayValueConverter

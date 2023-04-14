@@ -1,74 +1,59 @@
-﻿using Core.Enums;
-using Core.Events.Clip;
-using Core.Events.Input;
-using Core.Events.Video;
-using Core.Interfaces;
-using Core.Prism;
-using MvvmDialogs;
+﻿using Avalonia.Controls;
+using Avalonia.Media.Imaging;
+using MessageBox.Avalonia.DTO;
+using MessageBox.Avalonia.Enums;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
+using Score2Stream.Core.Enums;
+using Score2Stream.Core.Events.Clip;
+using Score2Stream.Core.Events.Input;
+using Score2Stream.Core.Events.Video;
+using Score2Stream.Core.Interfaces;
+using Score2Stream.Core.Prism;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Windows;
-using System.Windows.Media.Imaging;
 
-namespace VideoModule.ViewModels
+namespace Score2Stream.VideoModule.ViewModels
 {
     public class VideoViewModel
         : RegionViewModelBase
     {
         #region Private Fields
 
-        private const int BorderThicknessDefault = 2;
-
         private readonly IContainerProvider containerProvider;
-        private readonly IDialogService dialogService;
         private readonly IEventAggregator eventAggregator;
         private readonly IInputService inputService;
+        private readonly IMessageBoxService messageBoxService;
         private readonly IRegionManager regionManager;
 
         private SelectionViewModel activeSelection;
-
-        private int borderThickness;
-
-        private BitmapSource content;
-
-        private double contentHeight;
-
-        private double contentWidth;
-
+        private Bitmap bitmap;
+        private double bitmapHeight;
+        private double bitmapWidth;
         private double fullHeight;
-
         private double fullWidth;
-
+        private double? horizontalMax;
+        private double? horizontalMin;
         private bool isMouseActive;
-
         private bool movedToBottom;
-
         private bool movedToRight;
-
-        private double? x1;
-
-        private double? x2;
-
-        private double? y1;
-
-        private double? y2;
+        private double? verticalMax;
+        private double? verticalMin;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public VideoViewModel(IInputService inputService, IContainerProvider containerProvider,
-            IDialogService dialogService, IRegionManager regionManager, IEventAggregator eventAggregator)
+        public VideoViewModel(IInputService inputService, IMessageBoxService messageBoxService,
+            IContainerProvider containerProvider, IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
             this.inputService = inputService;
+            this.messageBoxService = messageBoxService;
             this.containerProvider = containerProvider;
-            this.dialogService = dialogService;
             this.regionManager = regionManager;
             this.eventAggregator = eventAggregator;
 
@@ -88,13 +73,11 @@ namespace VideoModule.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
-                action: () => Content = inputService.VideoService?.Bitmap,
+                action: () => Bitmap = inputService.VideoService?.Bitmap,
                 keepSubscriberReferenceAlive: true);
 
-            MouseDownCommand = new DelegateCommand(OnMouseDown);
-            MouseUpCommand = new DelegateCommand(OnMouseUp);
-
-            BorderThickness = BorderThicknessDefault;
+            MousePressedCommand = new DelegateCommand(OnMousePressed);
+            MouseReleasedCommand = new DelegateCommand(OnMouseReleasedAsync);
         }
 
         #endregion Public Constructors
@@ -107,34 +90,28 @@ namespace VideoModule.ViewModels
             set { SetProperty(ref activeSelection, value); }
         }
 
-        public int BorderThickness
+        public Bitmap Bitmap
         {
-            get { return borderThickness; }
-            set { SetProperty(ref borderThickness, value); }
+            get { return bitmap; }
+            set { SetProperty(ref bitmap, value); }
         }
 
-        public BitmapSource Content
+        public double BitmapHeight
         {
-            get { return content; }
-            set { SetProperty(ref content, value); }
-        }
-
-        public double ContentHeight
-        {
-            get { return contentHeight; }
+            get { return bitmapHeight; }
             set
             {
-                SetProperty(ref contentHeight, value);
+                SetProperty(ref bitmapHeight, value);
                 SetDimensions();
             }
         }
 
-        public double ContentWidth
+        public double BitmapWidth
         {
-            get { return contentWidth; }
+            get { return bitmapWidth; }
             set
             {
-                SetProperty(ref contentWidth, value);
+                SetProperty(ref bitmapWidth, value);
                 SetDimensions();
             }
         }
@@ -159,9 +136,9 @@ namespace VideoModule.ViewModels
             }
         }
 
-        public DelegateCommand MouseDownCommand { get; }
+        public DelegateCommand MousePressedCommand { get; }
 
-        public DelegateCommand MouseUpCommand { get; }
+        public DelegateCommand MouseReleasedCommand { get; }
 
         public double MouseX
         {
@@ -169,10 +146,17 @@ namespace VideoModule.ViewModels
             set
             {
                 if (IsMouseEditing()
-                    && x1.HasValue
-                    && value >= x1
-                    && value <= x2)
+                    && horizontalMin.HasValue)
                 {
+                    if (value < horizontalMin)
+                    {
+                        value = horizontalMin.Value;
+                    }
+                    else if (value > horizontalMax)
+                    {
+                        value = horizontalMax.Value;
+                    }
+
                     if (!activeSelection.HasValue)
                     {
                         activeSelection.Left = value;
@@ -200,10 +184,17 @@ namespace VideoModule.ViewModels
             set
             {
                 if (IsMouseEditing()
-                    && y1.HasValue
-                    && value >= y1
-                    && value <= y2)
+                    && verticalMin.HasValue)
                 {
+                    if (value < verticalMin)
+                    {
+                        value = verticalMin.Value;
+                    }
+                    else if (value > verticalMax)
+                    {
+                        value = verticalMax.Value;
+                    }
+
                     if (!activeSelection.HasValue)
                     {
                         activeSelection.Top = value;
@@ -240,8 +231,8 @@ namespace VideoModule.ViewModels
 
         private double? GetActualHeight()
         {
-            var result = y1.HasValue
-                ? y2.Value - y1.Value
+            var result = verticalMin.HasValue
+                ? verticalMax.Value - verticalMin.Value
                 : default(double?);
 
             return result;
@@ -249,8 +240,8 @@ namespace VideoModule.ViewModels
 
         private double? GetActualWidth()
         {
-            var result = x1.HasValue
-                ? x2.Value - x1.Value
+            var result = horizontalMin.HasValue
+                ? horizontalMax.Value - horizontalMin.Value
                 : default(double?);
 
             return result;
@@ -260,14 +251,14 @@ namespace VideoModule.ViewModels
         {
             var result = (isMouseActive || isActivating)
                 && activeSelection != default
-                && Content != default
+                && Bitmap != default
                 && regionManager.Regions[nameof(RegionType.EditRegion)]?.NavigationService.Journal
                     .CurrentEntry.Uri.OriginalString == nameof(ViewType.Clips);
 
             return result;
         }
 
-        private void OnMouseDown()
+        private void OnMousePressed()
         {
             if (IsMouseEditing(
                 isActivating: true))
@@ -281,37 +272,43 @@ namespace VideoModule.ViewModels
             }
         }
 
-        private void OnMouseUp()
+        private async void OnMouseReleasedAsync()
         {
             if (IsMouseEditing())
             {
-                var dimensionsCanBeSet = true;
+                var dimensionsCanBeSet = ButtonResult.Yes;
 
                 if (activeSelection.Clip.HasDimensions
                     && (activeSelection.Clip?.Template?.Clip == activeSelection.Clip)
                     && (activeSelection.Clip?.Template?.Samples?.Any() == true))
                 {
-                    dimensionsCanBeSet = dialogService.ShowMessageBox(
-                        ownerViewModel: this,
-                        messageBoxText: "Shall the dimension of the clip be changed?",
-                        caption: "Change dimension",
-                        button: MessageBoxButton.YesNo,
-                        icon: MessageBoxImage.Question,
-                        defaultResult: MessageBoxResult.No) == MessageBoxResult.Yes;
+                    var messageBoxParams = new MessageBoxStandardParams
+                    {
+                        ButtonDefinitions = ButtonEnum.YesNo,
+                        ContentMessage = "Shall the dimension of the clip be changed?",
+                        ContentTitle = "Change dimension",
+                        EnterDefaultButton = ClickEnum.Yes,
+                        EscDefaultButton = ClickEnum.No,
+                        Icon = Icon.Question,
+                        ShowInCenter = true,
+                        WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                    };
+
+                    dimensionsCanBeSet = await messageBoxService.GetMessageBoxResultAsync(messageBoxParams);
                 }
 
-                if (dimensionsCanBeSet)
+                if (dimensionsCanBeSet == ButtonResult.Yes)
                 {
                     activeSelection.Clip.HasDimensions = false;
 
                     var actualWidth = GetActualWidth();
 
                     if ((actualWidth ?? 0) > 0
-                        && (activeSelection.Left ?? 0) >= x1.Value)
+                        && (activeSelection.Left ?? 0) >= horizontalMin.Value)
                     {
-                        activeSelection.Clip.RelativeX1 = ((activeSelection.Left ?? 0) - x1.Value) / actualWidth.Value;
+                        activeSelection.Clip.RelativeX1 = ((activeSelection.Left ?? 0) - horizontalMin.Value) / actualWidth.Value;
                         activeSelection.Clip.RelativeX2 = ((activeSelection.Left ?? 0) +
-                            (activeSelection.Width ?? 0) - x1.Value) / actualWidth.Value;
+                            (activeSelection.Width ?? 0) - horizontalMin.Value) / actualWidth.Value;
 
                         activeSelection.Clip.HasDimensions = true;
                     }
@@ -319,10 +316,10 @@ namespace VideoModule.ViewModels
                     var actualHeight = GetActualHeight();
 
                     if ((actualHeight ?? 0) > 0
-                        && (activeSelection.Top ?? 0) >= y1.Value)
+                        && (activeSelection.Top ?? 0) >= verticalMin.Value)
                     {
-                        activeSelection.Clip.RelativeY1 = ((activeSelection.Top ?? 0) - y1.Value) / actualHeight.Value;
-                        activeSelection.Clip.RelativeY2 = ((activeSelection.Top ?? 0) - y1.Value +
+                        activeSelection.Clip.RelativeY1 = ((activeSelection.Top ?? 0) - verticalMin.Value) / actualHeight.Value;
+                        activeSelection.Clip.RelativeY2 = ((activeSelection.Top ?? 0) - verticalMin.Value +
                             (activeSelection.Height ?? 0)) / actualHeight.Value;
 
                         activeSelection.Clip.HasDimensions = true;
@@ -345,20 +342,20 @@ namespace VideoModule.ViewModels
 
         private void SetDimensions()
         {
-            if (ContentHeight == 0 || ContentWidth == 0)
+            if (BitmapHeight == 0 || BitmapWidth == 0)
             {
-                x1 = default;
-                x2 = default;
-                y1 = default;
-                y2 = default;
+                horizontalMin = default;
+                horizontalMax = default;
+                verticalMin = default;
+                verticalMax = default;
             }
             else
             {
-                x1 = BorderThickness + Math.Floor((FullWidth - ContentWidth) / 2);
-                x2 = x1 + Math.Floor(ContentWidth);
+                horizontalMin = Math.Floor((FullWidth - BitmapWidth) / 2);
+                horizontalMax = horizontalMin + Math.Floor(BitmapWidth);
 
-                y1 = BorderThickness + Math.Floor((FullHeight - ContentHeight) / 2);
-                y2 = y1 + Math.Floor(ContentHeight);
+                verticalMin = Math.Floor((FullHeight - BitmapHeight) / 2);
+                verticalMax = verticalMin + Math.Floor(BitmapHeight);
             }
 
             UpdateSelections();
@@ -384,8 +381,8 @@ namespace VideoModule.ViewModels
                     current.Initialize(
                         clip: clip,
                         isActive: isActive,
-                        actualLeft: x1,
-                        actualTop: y1,
+                        actualLeft: horizontalMin,
+                        actualTop: verticalMin,
                         actualWidth: actualWidth,
                         actualHeight: actualHeight);
 

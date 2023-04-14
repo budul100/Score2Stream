@@ -1,0 +1,90 @@
+<UserControl
+    x:Class="Score2Stream.VideoModule.Views.VideoView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:bv="using:Score2Stream.VideoModule.Behaviors"
+    xmlns:co="clr-namespace:Score2Stream.Core.Converters;assembly=Core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:prism="http://prismlibrary.com/"
+    xmlns:v="using:Score2Stream.VideoModule.Views"
+    xmlns:vm="using:Score2Stream.VideoModule.ViewModels"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    prism:ViewModelLocator.AutoWireViewModel="True"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <co:ExpandedSizeConverter x:Key="ExpandedSizeConverter" />
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <Style Selector="ItemsControl > ContentPresenter">
+            <Setter Property="Canvas.Left">
+                <Setter.Value>
+                    <MultiBinding Converter="{StaticResource ExpandedSizeConverter}">
+                        <Binding Path="Left" />
+                        <Binding Path="Width" />
+                        <Binding Path="WidthName" />
+                    </MultiBinding>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Canvas.Top">
+                <Setter.Value>
+                    <MultiBinding Converter="{StaticResource ExpandedSizeConverter}">
+                        <Binding Path="Top" />
+                        <Binding Path="Height" />
+                        <Binding Path="HeightName" />
+                    </MultiBinding>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid Name="VideoGrid" Margin="5">
+
+        <i:Interaction.Behaviors>
+            <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="VideoGrid">
+                <a:InvokeCommandAction Command="{Binding MousePressedCommand}" />
+            </a:EventTriggerBehavior>
+            <a:EventTriggerBehavior EventName="PointerReleased" SourceObject="VideoGrid">
+                <a:InvokeCommandAction Command="{Binding MouseReleasedCommand}" />
+            </a:EventTriggerBehavior>
+            <bv:PointerPositionBehavior PointerX="{Binding MouseX, Mode=TwoWay}" PointerY="{Binding MouseY, Mode=TwoWay}" />
+        </i:Interaction.Behaviors>
+
+        <Border
+            Background="LightGray"
+            BorderBrush="LightSlateGray"
+            BorderThickness="2">
+            <i:Interaction.Behaviors>
+                <bv:SizeChangedBehavior Width="{Binding FullWidth, Mode=TwoWay}" Height="{Binding FullHeight, Mode=TwoWay}" />
+            </i:Interaction.Behaviors>
+            <Image
+                Margin="2"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Source="{Binding Bitmap}"
+                Stretch="Uniform">
+                <i:Interaction.Behaviors>
+                    <bv:SizeChangedBehavior Width="{Binding BitmapWidth, Mode=TwoWay}" Height="{Binding BitmapHeight, Mode=TwoWay}" />
+                </i:Interaction.Behaviors>
+            </Image>
+        </Border>
+
+        <ItemsControl Items="{Binding Selections}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Canvas />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.DataTemplates>
+                <DataTemplate DataType="{x:Type vm:SelectionViewModel}">
+                    <v:SelectionView />
+                </DataTemplate>
+            </ItemsControl.DataTemplates>
+        </ItemsControl>
+    </Grid>
+</UserControl>

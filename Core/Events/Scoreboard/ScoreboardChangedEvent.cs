@@ -1,6 +1,6 @@
 ﻿using Prism.Events;
 
-namespace Core.Events.Scoreboard
+namespace Score2Stream.Core.Events.Scoreboard
 {
     public class ScoreboardChangedEvent
         : PubSubEvent

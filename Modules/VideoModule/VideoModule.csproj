@@ -1,14 +1,23 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
+
 	<PropertyGroup>
-		<TargetFramework>net6.0-windows</TargetFramework>
-		<UseWPF>true</UseWPF>
+		<OutputType>Library</OutputType>
+		<TargetFrameworks>net6.0</TargetFrameworks>
+		<RootNamespace>Score2Stream.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
 	</PropertyGroup>
+
 	<ItemGroup>
-		<PackageReference Include="Prism.Wpf" Version="8.1.97" />
-		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
-		<PackageReference Include="MvvmDialogs" Version="9.1.0" />
+		<PackageReference Include="Avalonia" Version="0.10.19" />
+		<PackageReference Include="Avalonia.Desktop" Version="0.10.19" />
+		<PackageReference Include="Avalonia.Xaml.Interactions" Version="0.10.19" />
+		<PackageReference Include="Avalonia.Xaml.Interactivity" Version="0.10.19" />
+		<PackageReference Include="AvaloniaUIRibbon" Version="1.1.0-beta" />
+		<PackageReference Include="MessageBox.Avalonia" Version="2.1.0" />
+		<PackageReference Include="XamlNameReferenceGenerator" Version="1.6.1" />
 	</ItemGroup>
+
 	<ItemGroup>
 		<ProjectReference Include="..\..\Core\Core.csproj" />
 	</ItemGroup>
+
 </Project>

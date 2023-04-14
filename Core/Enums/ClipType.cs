@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Core.Enums
+namespace Score2Stream.Core.Enums
 {
     public enum ClipType
     {

@@ -1,20 +1,17 @@
 ﻿using System;
+using System.Threading.Tasks;
 
-namespace Core.Interfaces
+namespace Score2Stream.Core.Interfaces
 {
     public interface IDispatcherService
     {
-        #region Public Properties
-
-        bool IsSynchronized { get; }
-
-        #endregion Public Properties
-
         #region Public Methods
 
-        void BeginInvoke(Action action);
+        Task InvokeAsync(Action action);
 
-        void Invoke(Action action);
+        Task<T> InvokeAsync<T>(Func<T> function);
+
+        void Post(Action action);
 
         #endregion Public Methods
     }

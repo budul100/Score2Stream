@@ -1,8 +1,8 @@
-﻿using Core.Enums;
-using Prism.Ioc;
+﻿using Prism.Ioc;
 using Prism.Modularity;
+using Score2Stream.Core.Enums;
 
-namespace TemplateModule
+namespace Score2Stream.TemplateModule
 {
     public class Module
         : IModule

@@ -1,6 +1,6 @@
 ﻿using Prism.Events;
 
-namespace Core.Events.Graphics
+namespace Score2Stream.Core.Events.Graphics
 {
     public class ServerStoppedEvent
         : PubSubEvent

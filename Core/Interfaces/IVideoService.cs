@@ -1,16 +1,16 @@
-﻿using Core.Models;
+﻿using Avalonia.Media.Imaging;
+using Score2Stream.Core.Models;
 using System;
 using System.Threading.Tasks;
-using System.Windows.Media.Imaging;
 
-namespace Core.Interfaces
+namespace Score2Stream.Core.Interfaces
 {
     public interface IVideoService
         : IDisposable
     {
         #region Public Properties
 
-        BitmapSource Bitmap { get; }
+        Bitmap Bitmap { get; }
 
         IClipService ClipService { get; }
 

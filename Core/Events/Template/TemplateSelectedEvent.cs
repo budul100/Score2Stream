@@ -1,6 +1,6 @@
 ﻿using Prism.Events;
 
-namespace Core.Events.Template
+namespace Score2Stream.Core.Events.Template
 {
     public class TemplateSelectedEvent
         : PubSubEvent<Models.Template>

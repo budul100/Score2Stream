@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Text;
 
-namespace Core.Converters
+namespace Score2Stream.Core.Converters
 {
     public class EnumToStringConverter
            : OneWayValueConverter

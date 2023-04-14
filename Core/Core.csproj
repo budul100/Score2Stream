@@ -1,11 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
 	<PropertyGroup>
-		<TargetFramework>net6.0-windows</TargetFramework>
-		<UseWPF>true</UseWPF>
+		<OutputType>Library</OutputType>
+		<TargetFramework>net6.0</TargetFramework>
+		<RootNamespace>Score2Stream.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
 	</PropertyGroup>
+
 	<ItemGroup>
-		<PackageReference Include="Prism.Wpf" Version="8.1.97" />
+		<PackageReference Include="MessageBox.Avalonia" Version="2.1.0" />
 		<PackageReference Include="OpenCVSharp4" Version="4.7.0.20230115" />
-		<PackageReference Include="System.Drawing.Common" Version="7.0.0" />
+		<PackageReference Include="Prism.Avalonia" Version="8.1.97.2" />
 	</ItemGroup>
+
 </Project>

@@ -1,10 +1,10 @@
-﻿using Core.Enums;
-using Core.Extensions;
+﻿using Avalonia.Media.Imaging;
 using OpenCvSharp;
+using Score2Stream.Core.Enums;
+using Score2Stream.Core.Extensions;
 using System;
-using System.Windows.Media.Imaging;
 
-namespace Core.Models
+namespace Score2Stream.Core.Models
 {
     public class Clip
     {
@@ -16,7 +16,7 @@ namespace Core.Models
 
         #region Public Properties
 
-        public BitmapSource Bitmap { get; set; }
+        public Bitmap Bitmap { get; set; }
 
         public string Description => Type != ClipType.None
             ? Type.GetDescription()

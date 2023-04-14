@@ -1,17 +1,17 @@
-﻿using Core.Events.Sample;
-using Core.Events.Template;
-using Core.Events.Video;
-using Core.Interfaces;
-using Core.Models;
-using Core.Prism;
+﻿using Avalonia.Media.Imaging;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
+using Score2Stream.Core.Events.Sample;
+using Score2Stream.Core.Events.Template;
+using Score2Stream.Core.Events.Video;
+using Score2Stream.Core.Interfaces;
+using Score2Stream.Core.Models;
+using Score2Stream.Core.Prism;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Windows.Media.Imaging;
 
-namespace TemplateModule.ViewModels
+namespace Score2Stream.TemplateModule.ViewModels
 {
     public class TemplateViewModel
         : RegionViewModelBase
@@ -55,7 +55,7 @@ namespace TemplateModule.ViewModels
 
         #region Public Properties
 
-        public BitmapSource Bitmap => Template?.Clip?.Bitmap;
+        public Bitmap Bitmap => Template?.Clip?.Bitmap;
 
         public string Current => GetCurrent();
 
@@ -117,18 +117,21 @@ namespace TemplateModule.ViewModels
                 Samples.Remove(toBeRemoved);
             }
 
-            var toBeAddeds = Template.Samples
-                .Where(t => !Samples.Any(s => s.Sample == t)).ToArray();
-
-            foreach (var toBeAdded in toBeAddeds)
+            if (Template?.Samples?.Any() == true)
             {
-                var current = containerProvider.Resolve<SampleViewModel>();
+                var toBeAddeds = Template.Samples
+                    .Where(t => !Samples.Any(s => s.Sample == t)).ToArray();
 
-                current.Initialize(
-                    sample: toBeAdded,
-                    sampleService: inputService.SampleService);
+                foreach (var toBeAdded in toBeAddeds)
+                {
+                    var current = containerProvider.Resolve<SampleViewModel>();
 
-                Samples.Add(current);
+                    current.Initialize(
+                        sample: toBeAdded,
+                        sampleService: inputService.SampleService);
+
+                    Samples.Add(current);
+                }
             }
         }
 

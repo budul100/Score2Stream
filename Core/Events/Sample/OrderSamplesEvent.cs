@@ -1,6 +1,6 @@
 ﻿using Prism.Events;
 
-namespace Core.Events.Sample
+namespace Score2Stream.Core.Events.Sample
 {
     public class OrderSamplesEvent
         : PubSubEvent

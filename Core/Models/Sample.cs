@@ -1,13 +1,13 @@
-﻿using OpenCvSharp;
-using System.Windows.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
+using OpenCvSharp;
 
-namespace Core.Models
+namespace Score2Stream.Core.Models
 {
     public class Sample
     {
         #region Public Properties
 
-        public BitmapSource Bitmap { get; set; }
+        public Bitmap Bitmap { get; set; }
 
         public Mat Image { get; set; }
 

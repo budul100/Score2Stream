@@ -1,26 +1,29 @@
-﻿using Core.Constants;
-using Core.Enums;
-using Core.Events.Clip;
-using Core.Events.Graphics;
-using Core.Events.Input;
-using Core.Events.Sample;
-using Core.Events.Scoreboard;
-using Core.Events.Template;
-using Core.Events.Video;
-using Core.Interfaces;
-using Core.Models;
-using Core.Prism;
-using MvvmDialogs;
-using MvvmDialogs.FrameworkDialogs.OpenFile;
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
+using AvaloniaUI.Ribbon;
+using MessageBox.Avalonia.DTO;
+using MessageBox.Avalonia.Enums;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Regions;
+using Score2Stream.Core.Constants;
+using Score2Stream.Core.Enums;
+using Score2Stream.Core.Events.Clip;
+using Score2Stream.Core.Events.Graphics;
+using Score2Stream.Core.Events.Input;
+using Score2Stream.Core.Events.Sample;
+using Score2Stream.Core.Events.Scoreboard;
+using Score2Stream.Core.Events.Template;
+using Score2Stream.Core.Events.Video;
+using Score2Stream.Core.Interfaces;
+using Score2Stream.Core.Models;
+using Score2Stream.Core.Prism;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Windows;
 
-namespace MenuModule.ViewModels
+namespace Score2Stream.MenuModule.ViewModels
 {
     public class MenuViewModel
         : RegionViewModelBase
@@ -28,13 +31,13 @@ namespace MenuModule.ViewModels
         #region Private Fields
 
         private const int DurationMax = 1000;
+        private const string TabNameBoard = "BoardTab";
+        private const string TabNameTemplate = "TemplatesTab";
+        private const string TabNameVideo = "VideoTab";
         private const int ThresholdMax = 100;
-        private const int ViewIndexBoard = 0;
-        private const int ViewIndexClip = 1;
-        private const int ViewIndexTemplate = 2;
 
-        private readonly IDialogService dialogService;
         private readonly IInputService inputService;
+        private readonly IMessageBoxService messageBoxService;
         private readonly IRegionManager regionManager;
 
         private int selectedTabIndex;
@@ -43,30 +46,33 @@ namespace MenuModule.ViewModels
 
         #region Public Constructors
 
-        public MenuViewModel(IGraphicsService graphicsService, IScoreboardService scoreboardService, IInputService inputService,
-            IDialogService dialogService, IRegionManager regionManager, IEventAggregator eventAggregator)
+        public MenuViewModel(IWebService webService, IScoreboardService scoreboardService, IInputService inputService,
+            IMessageBoxService messageBoxService, IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
             this.inputService = inputService;
-            this.dialogService = dialogService;
+            this.messageBoxService = messageBoxService;
             this.regionManager = regionManager;
+
+            this.OnTabSelectionCommand = new DelegateCommand<string>(
+                executeMethod: n => SelectRegion(n));
 
             this.InputsUpdateCommand = new DelegateCommand(
                 executeMethod: UpdateInputs);
             this.InputSelectCommand = new DelegateCommand<Input>(
-                executeMethod: i => SelectInput(i));
+                executeMethod: i => SelectInputAsync(i));
             this.InputStopAllCommand = new DelegateCommand(
-                executeMethod: () => StopAllInputs(),
+                executeMethod: () => StopAllInputsAsync(),
                 canExecuteMethod: () => inputService.IsActive);
 
             this.ClipAddCommand = new DelegateCommand(
                 executeMethod: () => inputService.ClipService?.Add(),
                 canExecuteMethod: () => inputService.IsActive);
             this.ClipRemoveCommand = new DelegateCommand(
-                executeMethod: () => RemoveClip(),
+                executeMethod: () => RemoveClipAsync(),
                 canExecuteMethod: () => inputService.ClipService?.Clip != default);
             this.ClipsRemoveAllCommand = new DelegateCommand(
-                executeMethod: () => RemoveAllClips(),
+                executeMethod: () => RemoveAllClipsAsync(),
                 canExecuteMethod: () => inputService.ClipService?.Clips?.Any() == true);
 
             this.ClipAsTemplateCommand = new DelegateCommand(
@@ -76,7 +82,7 @@ namespace MenuModule.ViewModels
             this.TemplateSelectCommand = new DelegateCommand<Template>(
                 executeMethod: t => SelectTemplate(t));
             this.TemplateRemoveCommand = new DelegateCommand(
-                executeMethod: () => RemoveTemplate(),
+                executeMethod: () => RemoveTemplateAsync(),
                 canExecuteMethod: () => inputService?.TemplateService?.Template != default);
 
             this.SampleAddCommand = new DelegateCommand(
@@ -86,17 +92,17 @@ namespace MenuModule.ViewModels
                 executeMethod: () => inputService.SampleService.Remove(),
                 canExecuteMethod: () => inputService?.SampleService?.Sample != default);
             this.SamplesRemoveAllCommand = new DelegateCommand(
-                executeMethod: () => RemoveAllSamples(),
+                executeMethod: () => RemoveAllSamplesAsync(),
                 canExecuteMethod: () => inputService?.SampleService?.Samples?.Any() == true);
             this.SamplesOrderCommand = new DelegateCommand(
                 executeMethod: () => eventAggregator.GetEvent<OrderSamplesEvent>().Publish(),
                 canExecuteMethod: () => inputService?.SampleService?.Samples?.Any() == true);
 
             this.GraphicsReloadCommand = new DelegateCommand(
-                executeMethod: async () => await graphicsService.ReloadAsync());
+                executeMethod: async () => await webService.ReloadAsync());
             this.GraphicsOpenCommand = new DelegateCommand(
-                executeMethod: () => graphicsService.Open(),
-                canExecuteMethod: () => graphicsService.IsActive);
+                executeMethod: () => webService.Open(),
+                canExecuteMethod: () => webService.IsActive);
 
             this.ScoreboardUpdateCommand = new DelegateCommand(
                 executeMethod: () => scoreboardService.Update(),
@@ -107,6 +113,11 @@ namespace MenuModule.ViewModels
 
             eventAggregator.GetEvent<InputsChangedEvent>().Subscribe(
                 action: UpdateInputs);
+            eventAggregator.GetEvent<VideoStartedEvent>().Subscribe(
+                action: UpdateInputs);
+            eventAggregator.GetEvent<VideoEndedEvent>().Subscribe(
+                action: UpdateInputs);
+
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
                 action: OnVideoUpdated);
 
@@ -153,7 +164,7 @@ namespace MenuModule.ViewModels
 
         public bool HasTemplates => inputService?.TemplateService?.Templates?.Any() == true;
 
-        public ObservableCollection<Input> Inputs { get; } = new ObservableCollection<Input>();
+        public ObservableCollection<RibbonDropDownItem> Inputs { get; } = new ObservableCollection<RibbonDropDownItem>();
 
         public DelegateCommand<Input> InputSelectCommand { get; }
 
@@ -191,6 +202,8 @@ namespace MenuModule.ViewModels
             }
         }
 
+        public DelegateCommand<string> OnTabSelectionCommand { get; }
+
         public int ProcessingDelay
         {
             get { return inputService.VideoService?.Delay ?? 0; }
@@ -226,7 +239,7 @@ namespace MenuModule.ViewModels
                 {
                     SetProperty(ref selectedTabIndex, value);
 
-                    UpdateRegions();
+                    //UpdateRegions();
                 }
             }
         }
@@ -320,12 +333,14 @@ namespace MenuModule.ViewModels
 
         private void OnTemplateSelected()
         {
-            SelectedTabIndex = inputService.TemplateService?.Template != default
-                ? ViewIndexTemplate
-                : ViewIndexClip;
-
             TemplateRemoveCommand.RaiseCanExecuteChanged();
             SampleAddCommand.RaiseCanExecuteChanged();
+
+            var tabName = inputService.TemplateService?.Template != default
+                ? TabNameTemplate
+                : TabNameVideo;
+
+            SelectRegion(tabName);
         }
 
         private void OnVideoUpdated()
@@ -343,75 +358,99 @@ namespace MenuModule.ViewModels
             RaisePropertyChanged(nameof(WaitingDuration));
         }
 
-        private void RemoveAllClips()
+        private async void RemoveAllClipsAsync()
         {
-            var result = dialogService.ShowMessageBox(
-                ownerViewModel: this,
-                messageBoxText: "Shall all clips be removed?",
-                caption: "Remove all clips",
-                button: MessageBoxButton.YesNo,
-                icon: MessageBoxImage.Question,
-                defaultResult: MessageBoxResult.No);
+            var messageBoxParams = new MessageBoxStandardParams
+            {
+                ButtonDefinitions = ButtonEnum.YesNo,
+                ContentMessage = "Shall all clips be removed?",
+                ContentTitle = "Remove all clips",
+                EnterDefaultButton = ClickEnum.Yes,
+                EscDefaultButton = ClickEnum.No,
+                Icon = Icon.Question,
+                ShowInCenter = true,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            };
 
-            if (result == MessageBoxResult.Yes)
+            var result = await messageBoxService.GetMessageBoxResultAsync(messageBoxParams);
+
+            if (result == ButtonResult.Yes)
             {
                 inputService?.ClipService?.Clear();
             }
         }
 
-        private void RemoveAllSamples()
+        private async void RemoveAllSamplesAsync()
         {
-            var result = dialogService.ShowMessageBox(
-                ownerViewModel: this,
-                messageBoxText: "Shall all samples be removed?",
-                caption: "Remove all samples",
-                button: MessageBoxButton.YesNo,
-                icon: MessageBoxImage.Question,
-                defaultResult: MessageBoxResult.No);
+            var messageBoxParams = new MessageBoxStandardParams
+            {
+                ButtonDefinitions = ButtonEnum.YesNo,
+                ContentMessage = "Shall all samples be removed?",
+                ContentTitle = "Remove all samples",
+                EnterDefaultButton = ClickEnum.Yes,
+                EscDefaultButton = ClickEnum.No,
+                Icon = Icon.Question,
+                ShowInCenter = true,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            };
 
-            if (result == MessageBoxResult.Yes)
+            var result = await messageBoxService.GetMessageBoxResultAsync(messageBoxParams);
+
+            if (result == ButtonResult.Yes)
             {
                 inputService?.SampleService?.Remove(inputService?.TemplateService?.Template);
             }
         }
 
-        private void RemoveClip()
+        private async void RemoveClipAsync()
         {
-            var result = MessageBoxResult.Yes;
+            var result = ButtonResult.Yes;
 
             if (inputService?.ClipService?.Clip?.HasDimensions == true)
             {
-                result = dialogService.ShowMessageBox(
-                    ownerViewModel: this,
-                    messageBoxText: "Shall the current clip be removed?",
-                    caption: "Remove clip",
-                    button: MessageBoxButton.YesNo,
-                    icon: MessageBoxImage.Question,
-                    defaultResult: MessageBoxResult.No);
+                var messageBoxParams = new MessageBoxStandardParams
+                {
+                    ButtonDefinitions = ButtonEnum.YesNo,
+                    ContentMessage = "Shall the selected clip be removed?",
+                    ContentTitle = "Remove clip",
+                    EnterDefaultButton = ClickEnum.Yes,
+                    EscDefaultButton = ClickEnum.No,
+                    Icon = Icon.Question,
+                    ShowInCenter = true,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                };
+
+                result = await messageBoxService.GetMessageBoxResultAsync(messageBoxParams);
             }
 
-            if (result == MessageBoxResult.Yes)
+            if (result == ButtonResult.Yes)
             {
                 inputService?.ClipService?.Remove();
             }
         }
 
-        private void RemoveTemplate()
+        private async void RemoveTemplateAsync()
         {
-            var result = MessageBoxResult.Yes;
+            var result = ButtonResult.Yes;
 
             if (inputService?.TemplateService?.Template != default)
             {
-                result = dialogService.ShowMessageBox(
-                    ownerViewModel: this,
-                    messageBoxText: "Shall the current template be removed?",
-                    caption: "Remove template",
-                    button: MessageBoxButton.YesNo,
-                    icon: MessageBoxImage.Question,
-                    defaultResult: MessageBoxResult.No);
+                var messageBoxParams = new MessageBoxStandardParams
+                {
+                    ButtonDefinitions = ButtonEnum.YesNo,
+                    ContentMessage = "Shall the selected template be removed?",
+                    ContentTitle = "Remove template",
+                    EnterDefaultButton = ClickEnum.Yes,
+                    EscDefaultButton = ClickEnum.No,
+                    Icon = Icon.Question,
+                    ShowInCenter = true,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                };
+
+                result = await messageBoxService.GetMessageBoxResultAsync(messageBoxParams);
             }
 
-            if (result == MessageBoxResult.Yes
+            if (result == ButtonResult.Yes
                 && inputService?.TemplateService?.Template != default)
             {
                 inputService.TemplateService.Remove();
@@ -422,7 +461,7 @@ namespace MenuModule.ViewModels
             }
         }
 
-        private void SelectInput(Input input)
+        private async void SelectInputAsync(Input input)
         {
             if (input.IsFile)
             {
@@ -430,21 +469,19 @@ namespace MenuModule.ViewModels
 
                 if (!File.Exists(input.FileName))
                 {
-                    var settings = new OpenFileDialogSettings
+                    var dialog = new OpenFileDialog
                     {
                         Title = Constants.InputFileText,
-                        Multiselect = false,
-                        CheckFileExists = true
+                        AllowMultiple = false
                     };
 
-                    var result = dialogService.ShowOpenFileDialog(
-                        ownerViewModel: this,
-                        settings: settings);
+                    var mainWindow = Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
+                        ? desktop.MainWindow
+                        : default;
 
-                    if (result ?? false)
-                    {
-                        fileName = settings.FileName;
-                    }
+                    var result = await dialog.ShowAsync(mainWindow);
+
+                    fileName = result?.FirstOrDefault();
                 }
 
                 if (File.Exists(fileName))
@@ -458,6 +495,34 @@ namespace MenuModule.ViewModels
             }
         }
 
+        private void SelectRegion(string name)
+        {
+            switch (name)
+            {
+                case TabNameBoard:
+
+                    regionManager.RequestNavigate(
+                        regionName: nameof(RegionType.EditRegion),
+                        source: nameof(ViewType.Board));
+                    break;
+
+                case TabNameVideo:
+
+                    regionManager.RequestNavigate(
+                        regionName: nameof(RegionType.EditRegion),
+                        source: nameof(ViewType.Clips));
+
+                    break;
+
+                case TabNameTemplate:
+
+                    regionManager.RequestNavigate(
+                        regionName: nameof(RegionType.EditRegion),
+                        source: nameof(ViewType.Templates));
+                    break;
+            }
+        }
+
         private void SelectTemplate(Template template)
         {
             if (template != default)
@@ -467,17 +532,23 @@ namespace MenuModule.ViewModels
             }
         }
 
-        private void StopAllInputs()
+        private async void StopAllInputsAsync()
         {
-            var result = dialogService.ShowMessageBox(
-                ownerViewModel: this,
-                messageBoxText: "Shall all inputs be stopped?",
-                caption: "Stop all inputs",
-                button: MessageBoxButton.YesNo,
-                icon: MessageBoxImage.Question,
-                defaultResult: MessageBoxResult.No);
+            var messageBoxParams = new MessageBoxStandardParams
+            {
+                ButtonDefinitions = ButtonEnum.YesNo,
+                ContentMessage = "Shall all inputs be stopped?",
+                ContentTitle = "Stop inputs",
+                EnterDefaultButton = ClickEnum.Yes,
+                EscDefaultButton = ClickEnum.No,
+                Icon = Icon.Question,
+                ShowInCenter = true,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            };
 
-            if (result == MessageBoxResult.Yes)
+            var result = await messageBoxService.GetMessageBoxResultAsync(messageBoxParams);
+
+            if (result == ButtonResult.Yes)
             {
                 inputService?.VideoService?.StopAll();
             }
@@ -492,36 +563,20 @@ namespace MenuModule.ViewModels
                 .ThenBy(i => i.IsFile)
                 .ThenBy(i => i.Name).ToArray();
 
-            Inputs.AddRange(ordereds);
+            foreach (var ordered in ordereds)
+            {
+                var input = new RibbonDropDownItem
+                {
+                    Command = InputSelectCommand,
+                    CommandParameter = ordered,
+                    IsChecked = ordered.IsActive,
+                    Text = ordered.Name
+                };
+
+                Inputs.Add(input);
+            }
 
             RaisePropertyChanged(nameof(Inputs));
-        }
-
-        private void UpdateRegions()
-        {
-            switch (SelectedTabIndex)
-            {
-                case ViewIndexBoard:
-
-                    regionManager.RequestNavigate(
-                        regionName: nameof(RegionType.EditRegion),
-                        source: nameof(ViewType.Board));
-                    break;
-
-                case ViewIndexClip:
-                    regionManager.RequestNavigate(
-                        regionName: nameof(RegionType.EditRegion),
-                        source: nameof(ViewType.Clips));
-
-                    break;
-
-                case ViewIndexTemplate:
-
-                    regionManager.RequestNavigate(
-                        regionName: nameof(RegionType.EditRegion),
-                        source: nameof(ViewType.Templates));
-                    break;
-            }
         }
 
         private void UpdateSamples()

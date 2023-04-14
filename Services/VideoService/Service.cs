@@ -1,22 +1,20 @@
-﻿using Core.Events.Clip;
-using Core.Events.Sample;
-using Core.Events.Video;
-using Core.Interfaces;
-using Core.Models;
+﻿using Avalonia.Media.Imaging;
 using OpenCvSharp;
-using OpenCvSharp.WpfExtensions;
 using Prism.Events;
+using Score2Stream.Core.Events.Clip;
+using Score2Stream.Core.Events.Sample;
+using Score2Stream.Core.Events.Video;
+using Score2Stream.Core.Interfaces;
+using Score2Stream.Core.Models;
+using Score2Stream.VideoService.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Media.Imaging;
-using VideoService.Extensions;
 
-namespace VideoService
+namespace Score2Stream.VideoService
 {
     public class Service
         : IVideoService
@@ -60,13 +58,13 @@ namespace VideoService
 
         #region Public Properties
 
-        public BitmapSource Bitmap { get; private set; }
+        public Bitmap Bitmap { get; private set; }
 
         public IClipService ClipService { get; }
 
         public int Delay { get; set; } = DefaultDelay;
 
-        public bool IsActive => Bitmap != default;
+        public bool IsActive { get; private set; }
 
         public string Name { get; private set; }
 
@@ -143,8 +141,7 @@ namespace VideoService
                 //// Creation and disposal of this object should be done in the same thread
                 //// because if not it throws disconnectedContext exception
 
-                await UpdateVideoAsync(
-                    isEnded: false);
+                await UpdateVideoAsync();
 
                 using var video = new VideoCapture();
 
@@ -170,6 +167,12 @@ namespace VideoService
                     }
                 }
 
+                IsActive = true;
+
+                eventAggregator
+                    .GetEvent<VideoStartedEvent>()
+                    .Publish();
+
                 using var currentFrame = new Mat();
 
                 var hasContent = false;
@@ -181,7 +184,7 @@ namespace VideoService
                     if (!currentFrame.Empty())
                     {
                         frame = currentFrame;
-                        Bitmap = currentFrame.ToBitmapSource();
+                        Bitmap = new Bitmap(frame.ToMemoryStream());
 
                         var relevants = GetRelevantClips().ToArray();
 
@@ -191,22 +194,22 @@ namespace VideoService
                         }
                     }
 
-                    await UpdateVideoAsync(
-                        isEnded: false);
+                    await UpdateVideoAsync();
                 }
                 while (hasContent
                     && !cancellationTokenSource.IsCancellationRequested);
             }
-            catch (Exception ex)
-            {
-                Debugger.Break();
-            }
+            catch
+            { }
 
+            IsActive = false;
             frame = default;
-            Bitmap = default;
 
-            await UpdateVideoAsync(
-                isEnded: true);
+            await UpdateVideoAsync();
+
+            eventAggregator
+                .GetEvent<VideoEndedEvent>()
+                .Publish();
         }
 
         private async Task StartAsync(int? deviceId, string fileName)
@@ -218,7 +221,7 @@ namespace VideoService
 
             cancellationTokenSource = new CancellationTokenSource();
 
-            async Task runTask() => dispatcherService.Invoke(() => RunAsync(
+            async Task runTask() => await dispatcherService.InvokeAsync(() => RunAsync(
                 deviceId: deviceId,
                 fileName: fileName));
 
@@ -262,11 +265,12 @@ namespace VideoService
 
             if (clip.Image != default)
             {
-                clip.Bitmap = clip.Image
+                var centredImage = clip.Image
                     .ToCentered(
                         fullWidth: maxWidth,
-                        fullHeight: maxHeight)
-                    .ToBitmapSource();
+                        fullHeight: maxHeight);
+
+                clip.Bitmap = new Bitmap(centredImage.ToMemoryStream());
 
                 clip.SetSimilarities();
 
@@ -287,8 +291,8 @@ namespace VideoService
                         waitingSpan: waitingSpan);
                 }
 
-                if ((clip.Template?.Samples.Any() != true)
-                    || ((matchingSample != default) && (matchingSample.Similarity < thresholdDetecting)))
+                if (clip.Template != default
+                    && ((clip.Template?.Samples.Any() != true) || ((matchingSample != default) && (matchingSample.Similarity < thresholdDetecting))))
                 {
                     eventAggregator
                         .GetEvent<SampleDetectedEvent>()
@@ -331,14 +335,9 @@ namespace VideoService
             }
         }
 
-        private async Task UpdateVideoAsync(bool isEnded)
+        private async Task UpdateVideoAsync()
         {
             videoUpdatedEvent.Publish();
-
-            if (isEnded)
-            {
-                eventAggregator.GetEvent<VideoEndedEvent>().Publish();
-            }
 
             await Task.Delay(Delay + DelayMin);
         }

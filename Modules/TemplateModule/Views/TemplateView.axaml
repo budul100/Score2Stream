@@ -1,0 +1,91 @@
+<UserControl
+    x:Class="Score2Stream.TemplateModule.Views.TemplateView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:prism="http://prismlibrary.com/"
+    xmlns:v="using:Score2Stream.TemplateModule.Views"
+    xmlns:vm="using:Score2Stream.TemplateModule.ViewModels"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    prism:ViewModelLocator.AutoWireViewModel="True"
+    mc:Ignorable="d">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" Margin="5">
+
+            <Border
+                Margin="5"
+                VerticalAlignment="Center"
+                Background="LightGray"
+                BorderBrush="LightSlateGray"
+                BorderThickness="2"
+                DockPanel.Dock="Left">
+                <Image
+                    Width="40"
+                    Height="60"
+                    VerticalAlignment="Center"
+                    Source="{Binding Bitmap}}"
+                    Stretch="Uniform" />
+            </Border>
+
+            <Grid Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="90" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    d:Text="LoremIpsum"
+                    Text="{Binding Current}" />
+
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Text="Empty value" />
+                <TextBox
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Width="40"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    d:Text="LoremIspum"
+                    Text="{Binding ValueEmpty, Mode=TwoWay}" />
+            </Grid>
+        </DockPanel>
+
+        <ScrollViewer
+            Grid.Row="1"
+            HorizontalScrollBarVisibility="Disabled"
+            VerticalScrollBarVisibility="Auto">
+            <ItemsControl Items="{Binding Samples}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:SampleViewModel">
+                        <v:SampleView />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

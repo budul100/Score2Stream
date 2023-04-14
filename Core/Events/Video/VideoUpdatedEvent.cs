@@ -1,6 +1,6 @@
 ﻿using Prism.Events;
 
-namespace Core.Events.Video
+namespace Score2Stream.Core.Events.Video
 {
     public class VideoUpdatedEvent
         : PubSubEvent

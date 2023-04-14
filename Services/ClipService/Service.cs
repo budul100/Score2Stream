@@ -1,11 +1,11 @@
-﻿using Core.Events.Clip;
-using Core.Interfaces;
-using Core.Models;
-using Prism.Events;
+﻿using Prism.Events;
+using Score2Stream.Core.Events.Clip;
+using Score2Stream.Core.Interfaces;
+using Score2Stream.Core.Models;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ClipService
+namespace Score2Stream.ClipService
 {
     public class Service
         : IClipService

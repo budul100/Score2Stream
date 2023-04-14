@@ -1,12 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-	  <TargetFramework>net6.0-windows</TargetFramework>
-	  <UseWPF>true</UseWPF>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>net6.0</TargetFramework>
+		<RootNamespace>Score2Stream.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+	</PropertyGroup>
 
-  <ItemGroup>
-	<ProjectReference Include="..\..\Core\Core.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\Core\Core.csproj"/>
+	</ItemGroup>
 
 </Project>

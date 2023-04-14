@@ -1,6 +1,6 @@
 ﻿using Prism.Events;
 
-namespace Core.Events.Clip
+namespace Score2Stream.Core.Events.Clip
 {
     public class ClipsChangedEvent
         : PubSubEvent

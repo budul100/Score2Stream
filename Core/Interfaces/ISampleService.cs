@@ -1,7 +1,7 @@
-﻿using Core.Models;
+﻿using Score2Stream.Core.Models;
 using System.Collections.Generic;
 
-namespace Core.Interfaces
+namespace Score2Stream.Core.Interfaces
 {
     public interface ISampleService
     {

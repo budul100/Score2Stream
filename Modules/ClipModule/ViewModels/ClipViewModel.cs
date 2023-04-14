@@ -1,18 +1,18 @@
-﻿using Core.Enums;
-using Core.Events.Clip;
-using Core.Events.Template;
-using Core.Events.Video;
-using Core.Interfaces;
-using Core.Models;
+﻿using Avalonia.Media.Imaging;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
+using Score2Stream.Core.Enums;
+using Score2Stream.Core.Events.Clip;
+using Score2Stream.Core.Events.Template;
+using Score2Stream.Core.Events.Video;
+using Score2Stream.Core.Interfaces;
+using Score2Stream.Core.Models;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Windows.Media.Imaging;
 
-namespace ClipModule.ViewModels
+namespace Score2Stream.ClipModule.ViewModels
 {
     public class ClipViewModel
         : BindableBase
@@ -34,7 +34,7 @@ namespace ClipModule.ViewModels
             this.scoreboardService = scoreboardService;
             this.eventAggregator = eventAggregator;
 
-            OnClickCommand = new DelegateCommand(
+            OnSelectionCommand = new DelegateCommand(
                 executeMethod: () => clipService?.Select(Clip));
 
             eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
@@ -62,7 +62,7 @@ namespace ClipModule.ViewModels
 
         #region Public Properties
 
-        public BitmapSource Bitmap => Clip?.Bitmap;
+        public Bitmap Bitmap => Clip?.Bitmap;
 
         public Clip Clip { get; private set; }
 
@@ -72,7 +72,7 @@ namespace ClipModule.ViewModels
             set { SetProperty(ref isActive, value); }
         }
 
-        public DelegateCommand OnClickCommand { get; }
+        public DelegateCommand OnSelectionCommand { get; }
 
         public Template Template
         {

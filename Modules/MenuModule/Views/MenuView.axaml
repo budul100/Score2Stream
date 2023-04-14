@@ -1,0 +1,293 @@
+<UserControl
+    x:Class="Score2Stream.MenuModule.Views.MenuView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+    xmlns:mat="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mo="using:Score2Stream.Core.Models"
+    xmlns:prism="http://prismlibrary.com/"
+    xmlns:rib="clr-namespace:AvaloniaUI.Ribbon;assembly=AvaloniaUI.Ribbon"
+    d:DesignHeight="80"
+    d:DesignWidth="300"
+    prism:ViewModelLocator.AutoWireViewModel="True"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <ControlTemplate x:Key="IconRestart">
+            <mat:MaterialIcon
+                Width="32"
+                Height="32"
+                Kind="BackupRestore" />
+        </ControlTemplate>
+        <ControlTemplate x:Key="IconOpen">
+            <mat:MaterialIcon
+                Width="32"
+                Height="32"
+                Kind="OpenInApp" />
+        </ControlTemplate>
+        <ControlTemplate x:Key="IconUpdate">
+            <mat:MaterialIcon
+                Width="32"
+                Height="32"
+                Kind="Update" />
+        </ControlTemplate>
+        <ControlTemplate x:Key="IconCameraOn">
+            <mat:MaterialIcon
+                Width="32"
+                Height="32"
+                Kind="VideocamOutline" />
+        </ControlTemplate>
+        <ControlTemplate x:Key="IconCameraOff">
+            <mat:MaterialIcon
+                Width="32"
+                Height="32"
+                Kind="VideocamOffOutline" />
+        </ControlTemplate>
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <StyleInclude Source="avares://AvaloniaUI.Ribbon/Styles/Fluent/AvaloniaRibbon.xaml" />
+        <StyleInclude Source="avares://Material.Icons.Avalonia/App.xaml" />
+    </UserControl.Styles>
+
+    <rib:Ribbon>
+        <rib:Ribbon.Tabs>
+
+            <rib:RibbonTab Name="BoardTab" Header="Board">
+
+                <i:Interaction.Behaviors>
+                    <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="BoardTab">
+                        <a:InvokeCommandAction Command="{Binding OnTabSelectionCommand}" CommandParameter="BoardTab" />
+                    </a:EventTriggerBehavior>
+                </i:Interaction.Behaviors>
+
+                <rib:RibbonTab.Groups>
+
+                    <rib:RibbonGroupBox Header="Web server control">
+                        <rib:RibbonButton
+                            Command="{Binding GraphicsReloadCommand}"
+                            Content="Restart server"
+                            FontSize="11"
+                            LargeIcon="{DynamicResource IconRestart}"
+                            MinSize="Large" />
+                        <rib:RibbonButton
+                            Command="{Binding GraphicsOpenCommand}"
+                            Content="Open server"
+                            FontSize="11"
+                            LargeIcon="{DynamicResource IconOpen}"
+                            MinSize="Large" />
+                    </rib:RibbonGroupBox>
+
+                    <rib:RibbonGroupBox Header="Score board control">
+                        <rib:RibbonButton
+                            Command="{Binding ScoreboardUpdateCommand}"
+                            Content="Update board"
+                            FontSize="11"
+                            LargeIcon="{DynamicResource IconUpdate}"
+                            MinSize="Large" />
+                    </rib:RibbonGroupBox>
+                </rib:RibbonTab.Groups>
+            </rib:RibbonTab>
+
+            <rib:RibbonTab Name="VideoTab" Header="Video">
+
+                <i:Interaction.Behaviors>
+                    <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="VideoTab">
+                        <a:InvokeCommandAction Command="{Binding OnTabSelectionCommand}" CommandParameter="VideoTab" />
+                    </a:EventTriggerBehavior>
+                </i:Interaction.Behaviors>
+
+                <rib:RibbonTab.Groups>
+
+                    <rib:RibbonGroupBox Header="Video control">
+                        <rib:RibbonDropDownButton
+                            Content="Source"
+                            FontSize="11"
+                            Items="{Binding Inputs}"
+                            LargeIcon="{DynamicResource IconCameraOn}"
+                            MinSize="Large" />
+                        <rib:RibbonButton
+                            Command="{Binding InputStopAllCommand}"
+                            Content="Stop sources"
+                            FontSize="11"
+                            LargeIcon="{DynamicResource IconCameraOff}"
+                            MinSize="Large" />
+                    </rib:RibbonGroupBox>
+
+                    <rib:RibbonGroupBox Header="Clips selection">
+                        <rib:RibbonButton
+                            Command="{Binding ClipAddCommand}"
+                            Content="Add new clip"
+                            FontSize="11"
+                            MinSize="Large" />
+                        <rib:RibbonButton
+                            Command="{Binding ClipRemoveCommand}"
+                            Content="Remove selected"
+                            FontSize="11"
+                            MinSize="Large" />
+                        <rib:RibbonButton
+                            Command="{Binding ClipsRemoveAllCommand}"
+                            Content="Remove all"
+                            FontSize="11"
+                            MinSize="Large" />
+                    </rib:RibbonGroupBox>
+
+                    <rib:RibbonGroupBox Header="Templates selection">
+                        <rib:RibbonButton
+                            Command="{Binding ClipAsTemplateCommand}"
+                            Content="Use as template"
+                            FontSize="11"
+                            MinSize="Large" />
+                    </rib:RibbonGroupBox>
+
+                    <rib:RibbonGroupBox Header="Video options">
+                        <StackPanel
+                            Margin="0,0,4,4"
+                            IsEnabled="{Binding IsActive}"
+                            Orientation="Horizontal">
+                            <TextBlock
+                                Width="100"
+                                Margin="0,0,4,0"
+                                VerticalAlignment="Center"
+                                FontSize="11"
+                                Text="Processing delay" />
+                            <NumericUpDown
+                                Width="130"
+                                MaxHeight="5"
+                                Increment="10"
+                                Maximum="1000"
+                                Minimum="0"
+                                Value="{Binding ProcessingDelay, Mode=TwoWay}" />
+                        </StackPanel>
+                    </rib:RibbonGroupBox>
+
+                    <rib:RibbonGroupBox Header="Clip options">
+                        <StackPanel
+                            Margin="0,0,4,4"
+                            IsEnabled="{Binding IsActive}"
+                            Orientation="Horizontal">
+                            <TextBlock
+                                Width="100"
+                                Margin="0,0,4,0"
+                                VerticalAlignment="Center"
+                                FontSize="11"
+                                Text="Matching threshold" />
+                            <NumericUpDown
+                                Width="130"
+                                MaxHeight="5"
+                                Maximum="100"
+                                Minimum="0"
+                                Value="{Binding ThresholdMatching, Mode=TwoWay}" />
+                        </StackPanel>
+                        <StackPanel
+                            Margin="0,0,4,4"
+                            IsEnabled="{Binding IsActive}"
+                            Orientation="Horizontal">
+                            <TextBlock
+                                Width="100"
+                                Margin="0,0,4,0"
+                                VerticalAlignment="Center"
+                                FontSize="11"
+                                Text="Update waiting" />
+                            <NumericUpDown
+                                Width="130"
+                                MaxHeight="5"
+                                Increment="10"
+                                Maximum="1000"
+                                Minimum="0"
+                                Value="{Binding WaitingDuration, Mode=TwoWay}" />
+                        </StackPanel>
+                        <CheckBox
+                            Margin="0,0,4,4"
+                            VerticalAlignment="Center"
+                            Content="Deactivate cropping"
+                            FontSize="11"
+                            IsChecked="{Binding NoCentering, Mode=TwoWay}"
+                            IsEnabled="{Binding IsActive}" />
+                    </rib:RibbonGroupBox>
+                </rib:RibbonTab.Groups>
+            </rib:RibbonTab>
+
+            <rib:RibbonTab
+                Name="TemplatesTab"
+                Header="Templates"
+                IsEnabled="{Binding HasTemplates}">
+
+                <i:Interaction.Behaviors>
+                    <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="TemplatesTab">
+                        <a:InvokeCommandAction Command="{Binding OnTabSelectionCommand}" CommandParameter="TemplatesTab" />
+                    </a:EventTriggerBehavior>
+                </i:Interaction.Behaviors>
+
+                <rib:RibbonTab.Groups>
+
+                    <rib:RibbonGroupBox Header="Templates selection">
+                        <rib:RibbonDropDownButton
+                            Content="Template"
+                            FontSize="11"
+                            Items="{Binding Templates}"
+                            MinSize="Large" />
+                        <rib:RibbonButton
+                            Command="{Binding TemplateRemoveCommand}"
+                            Content="Remove current"
+                            FontSize="11"
+                            MinSize="Large" />
+                    </rib:RibbonGroupBox>
+
+                    <rib:RibbonGroupBox Header="Samples detection">
+                        <rib:RibbonToggleButton
+                            Content="Detect samples"
+                            FontSize="11"
+                            IsChecked="{Binding IsSampleDetection}"
+                            MinSize="Large" />
+                        <rib:RibbonButton
+                            Command="{Binding SampleAddCommand}"
+                            Content="Add as sample"
+                            FontSize="11"
+                            MinSize="Large" />
+                        <rib:RibbonButton
+                            Command="{Binding SampleRemoveCommand}"
+                            Content="Remove selected"
+                            FontSize="11"
+                            MinSize="Large" />
+                        <rib:RibbonButton
+                            Command="{Binding SamplesRemoveAllCommand}"
+                            Content="Remove all"
+                            FontSize="11"
+                            MinSize="Large" />
+                    </rib:RibbonGroupBox>
+
+                    <rib:RibbonGroupBox Header="Samples handling">
+                        <rib:RibbonButton
+                            Command="{Binding SamplesOrderCommand}"
+                            Content="Order samples"
+                            FontSize="11"
+                            MinSize="Large" />
+                    </rib:RibbonGroupBox>
+
+                    <rib:RibbonGroupBox Header="Detection options">
+                        <StackPanel
+                            Margin="0,0,4,4"
+                            IsEnabled="{Binding IsActive}"
+                            Orientation="Horizontal">
+                            <TextBlock
+                                Width="100"
+                                Margin="0,0,4,0"
+                                VerticalAlignment="Center"
+                                FontSize="11"
+                                Text="Detection threshold" />
+                            <NumericUpDown
+                                Width="130"
+                                MaxHeight="5"
+                                Maximum="100"
+                                Minimum="0"
+                                Value="{Binding ThresholdDetecting, Mode=TwoWay}" />
+                        </StackPanel>
+                    </rib:RibbonGroupBox>
+                </rib:RibbonTab.Groups>
+            </rib:RibbonTab>
+        </rib:Ribbon.Tabs>
+    </rib:Ribbon>
+</UserControl>

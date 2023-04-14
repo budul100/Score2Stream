@@ -1,11 +1,11 @@
-﻿using Core.Events.Template;
-using Core.Interfaces;
-using Core.Models;
-using Prism.Events;
+﻿using Prism.Events;
+using Score2Stream.Core.Events.Template;
+using Score2Stream.Core.Interfaces;
+using Score2Stream.Core.Models;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace TemplateService
+namespace Score2Stream.TemplateService
 {
     public class Service
         : ITemplateService

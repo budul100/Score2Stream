@@ -1,9 +1,10 @@
-﻿using Core.Enums;
-using Prism.Ioc;
+﻿using Prism.Ioc;
 using Prism.Modularity;
 using Prism.Regions;
+using Score2Stream.Core.Enums;
+using Score2Stream.ScoreboardModule.Views;
 
-namespace ScoreboardModule
+namespace Score2Stream.ScoreboardModule
 {
     public class Module
         : IModule
@@ -34,7 +35,7 @@ namespace ScoreboardModule
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterForNavigation<Views.ContentView>(
+            containerRegistry.RegisterForNavigation<ContentView>(
                 name: nameof(ViewType.Board));
         }
 

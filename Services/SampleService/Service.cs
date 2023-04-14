@@ -1,11 +1,11 @@
-﻿using Core.Events.Sample;
-using Core.Interfaces;
-using Core.Models;
-using Prism.Events;
+﻿using Prism.Events;
+using Score2Stream.Core.Events.Sample;
+using Score2Stream.Core.Interfaces;
+using Score2Stream.Core.Models;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SampleService
+namespace Score2Stream.SampleService
 {
     public class Service
         : ISampleService
@@ -95,20 +95,25 @@ namespace SampleService
 
         private Sample GetSample(Clip clip)
         {
-            var result = new Sample
+            var result = default(Sample);
+
+            if (clip?.Template?.Samples != default)
             {
-                Image = clip.Image,
-                Bitmap = clip.Bitmap,
-                Template = clip.Template,
-            };
+                result = new Sample
+                {
+                    Image = clip.Image,
+                    Bitmap = clip.Bitmap,
+                    Template = clip.Template,
+                };
 
-            clip.Template.Samples.Add(result);
+                clip.Template.Samples.Add(result);
 
-            Samples.Add(result);
+                Samples.Add(result);
 
-            eventAggregator
-                .GetEvent<SamplesChangedEvent>()
-                .Publish();
+                eventAggregator
+                    .GetEvent<SamplesChangedEvent>()
+                    .Publish();
+            }
 
             return result;
         }

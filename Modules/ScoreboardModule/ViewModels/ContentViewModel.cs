@@ -1,14 +1,15 @@
-﻿using Core.Events.Scoreboard;
-using Core.Interfaces;
+﻿using Avalonia.Media;
 using Prism.Events;
-using Prism.Mvvm;
+using Prism.Regions;
+using Score2Stream.Core.Events.Scoreboard;
+using Score2Stream.Core.Interfaces;
+using Score2Stream.Core.Prism;
 using System.Collections.Generic;
-using System.Windows.Media;
 
-namespace ScoreboardModule.ViewModels
+namespace Score2Stream.ScoreboardModule.ViewModels
 {
     public class ContentViewModel
-        : BindableBase
+        : RegionViewModelBase
     {
         #region Private Fields
 
@@ -30,7 +31,9 @@ namespace ScoreboardModule.ViewModels
 
         #region Public Constructors
 
-        public ContentViewModel(IScoreboardService scoreboardService, IEventAggregator eventAggregator)
+        public ContentViewModel(IScoreboardService scoreboardService, IEventAggregator eventAggregator,
+            IRegionManager regionManager)
+            : base(regionManager: regionManager)
         {
             this.scoreboardService = scoreboardService;
 

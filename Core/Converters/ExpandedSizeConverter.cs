@@ -1,16 +1,21 @@
-﻿using System;
+﻿using Avalonia;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 
-namespace Core.Converters
+namespace Score2Stream.Core.Converters
 {
     public class ExpandedSizeConverter
         : OneWayMultiValueConverter
     {
         #region Public Methods
 
-        public override object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(IList<object> values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values == null || values.Length != 3)
+            if (values == null
+                || values.Count != 3
+                || values.Any(v => v is UnsetValueType))
             {
                 return null;
             }

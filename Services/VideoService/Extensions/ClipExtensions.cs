@@ -1,8 +1,8 @@
-﻿using Core.Models;
+﻿using Score2Stream.Core.Models;
 using System;
 using System.Linq;
 
-namespace VideoService.Extensions
+namespace Score2Stream.VideoService.Extensions
 {
     internal static class ClipExtensions
     {

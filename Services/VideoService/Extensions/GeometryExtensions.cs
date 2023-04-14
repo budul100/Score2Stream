@@ -1,7 +1,7 @@
 ﻿using OpenCvSharp;
 using System;
 
-namespace VideoService.Extensions
+namespace Score2Stream.VideoService.Extensions
 {
     internal static class GeometryExtensions
     {

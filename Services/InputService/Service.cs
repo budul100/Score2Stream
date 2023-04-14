@@ -1,16 +1,16 @@
-﻿using Core.Constants;
-using Core.Events.Input;
-using Core.Events.Video;
-using Core.Interfaces;
-using Core.Models;
-using Hompus.VideoInputDevices;
+﻿using Hompus.VideoInputDevices;
 using Prism.Events;
 using Prism.Ioc;
+using Score2Stream.Core.Constants;
+using Score2Stream.Core.Events.Input;
+using Score2Stream.Core.Events.Video;
+using Score2Stream.Core.Interfaces;
+using Score2Stream.Core.Models;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace InputService
+namespace Score2Stream.InputService
 {
     public class Service
         : IInputService

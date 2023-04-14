@@ -1,9 +1,9 @@
-﻿using Core.Enums;
-using Prism.Ioc;
+﻿using Prism.Ioc;
 using Prism.Modularity;
 using Prism.Regions;
+using Score2Stream.Core.Enums;
 
-namespace MenuModule
+namespace Score2Stream.MenuModule
 {
     public class Module
         : IModule

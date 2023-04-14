@@ -2,7 +2,7 @@
 using System;
 using System.Linq;
 
-namespace VideoService.Extensions
+namespace Score2Stream.VideoService.Extensions
 {
     internal static class ImageExtensions
     {
@@ -55,9 +55,7 @@ namespace VideoService.Extensions
                     minVal: out _,
                     maxVal: out double max);
 
-                result = max != 1
-                    ? Math.Abs(max)
-                    : 0;
+                result = Math.Abs(max);
             }
 
             return result;
