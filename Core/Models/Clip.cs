@@ -10,7 +10,7 @@ namespace Score2Stream.Core.Models
     {
         #region Private Fields
 
-        private const int ThresholdMonochromeDefault = 60;
+        private const int ThresholdMonochromeDefault = 50;
 
         #endregion Private Fields
 

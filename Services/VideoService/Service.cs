@@ -21,12 +21,12 @@ namespace Score2Stream.VideoService
     {
         #region Private Fields
 
-        private const int DefaultDelay = 50;
+        private const int DelayDefault = 100;
         private const int DelayMin = 10;
         private const double DividerThreshold = 100;
-        private const int ThresholdDetectingDefault = 80;
-        private const int ThresholdMatchingDefault = 70;
-        private const int WaitingDurationDefault = 10;
+        private const int ThresholdDetectingDefault = 90;
+        private const int ThresholdMatchingDefault = 40;
+        private const int WaitingDurationDefault = 100;
 
         private readonly IDispatcherService dispatcherService;
         private readonly IEventAggregator eventAggregator;
@@ -62,7 +62,7 @@ namespace Score2Stream.VideoService
 
         public IClipService ClipService { get; }
 
-        public int Delay { get; set; } = DefaultDelay;
+        public int Delay { get; set; } = DelayDefault;
 
         public bool IsActive { get; private set; }
 

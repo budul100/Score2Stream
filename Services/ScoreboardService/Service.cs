@@ -23,7 +23,7 @@ namespace Score2Stream.ScoreboardService
         #region Private Fields
 
         private const char GameClockSplitterDefault = ':';
-        private const int TickerFrequencyDefault = 30;
+        private const int TickerFrequencyDefault = 10;
 
         private readonly IDictionary<ClipType, Clip> clips = new Dictionary<ClipType, Clip>();
         private readonly IEventAggregator eventAggregator;
