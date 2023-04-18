@@ -45,6 +45,78 @@
                 Height="32"
                 Kind="VideocamOffOutline" />
         </ControlTemplate>
+        <ControlTemplate x:Key="IconClipAdd">
+            <mat:MaterialIcon
+                Width="32"
+                Height="32"
+                Kind="VectorSquarePlus" />
+        </ControlTemplate>
+        <ControlTemplate x:Key="IconClipRemoveSelected">
+            <mat:MaterialIcon
+                Width="32"
+                Height="32"
+                Kind="VectorSquareMinus" />
+        </ControlTemplate>
+        <ControlTemplate x:Key="IconClipRemoveAll">
+            <mat:MaterialIcon
+                Width="32"
+                Height="32"
+                Kind="VectorSquareRemove" />
+        </ControlTemplate>
+        <ControlTemplate x:Key="IconTemplateUse">
+            <mat:MaterialIcon
+                Width="32"
+                Height="32"
+                Kind="MoviePlay" />
+        </ControlTemplate>
+        <ControlTemplate x:Key="IconTemplate">
+            <mat:MaterialIcon
+                Width="32"
+                Height="32"
+                Kind="Movie" />
+        </ControlTemplate>
+        <ControlTemplate x:Key="IconTemplateRemove">
+            <mat:MaterialIcon
+                Width="32"
+                Height="32"
+                Kind="MovieMinus" />
+        </ControlTemplate>
+        <ControlTemplate x:Key="IconSampleDetectionNotActive">
+            <mat:MaterialIcon
+                Width="32"
+                Height="32"
+                Kind="ImageSearchOutline" />
+        </ControlTemplate>
+        <ControlTemplate x:Key="IconSampleDetectionActive">
+            <mat:MaterialIcon
+                Width="32"
+                Height="32"
+                Kind="ImageSearch" />
+        </ControlTemplate>
+        <ControlTemplate x:Key="IconSampleAdd">
+            <mat:MaterialIcon
+                Width="32"
+                Height="32"
+                Kind="ImagePlus" />
+        </ControlTemplate>
+        <ControlTemplate x:Key="IconSampleRemoveSelected">
+            <mat:MaterialIcon
+                Width="32"
+                Height="32"
+                Kind="ImageMinus" />
+        </ControlTemplate>
+        <ControlTemplate x:Key="IconSamplesRemoveAll">
+            <mat:MaterialIcon
+                Width="32"
+                Height="32"
+                Kind="ImageRemove" />
+        </ControlTemplate>
+        <ControlTemplate x:Key="IconSamplesOrder">
+            <mat:MaterialIcon
+                Width="32"
+                Height="32"
+                Kind="ImageAreaClose" />
+        </ControlTemplate>
     </UserControl.Resources>
 
     <UserControl.Styles>
@@ -121,16 +193,19 @@
                             Command="{Binding ClipAddCommand}"
                             Content="Add new clip"
                             FontSize="11"
+                            LargeIcon="{DynamicResource IconClipAdd}"
                             MinSize="Large" />
                         <rib:RibbonButton
                             Command="{Binding ClipRemoveCommand}"
                             Content="Remove selected"
                             FontSize="11"
+                            LargeIcon="{DynamicResource IconClipRemoveSelected}"
                             MinSize="Large" />
                         <rib:RibbonButton
                             Command="{Binding ClipsRemoveAllCommand}"
                             Content="Remove all"
                             FontSize="11"
+                            LargeIcon="{DynamicResource IconClipRemoveAll}"
                             MinSize="Large" />
                     </rib:RibbonGroupBox>
 
@@ -139,6 +214,7 @@
                             Command="{Binding ClipAsTemplateCommand}"
                             Content="Use as template"
                             FontSize="11"
+                            LargeIcon="{DynamicResource IconTemplateUse}"
                             MinSize="Large" />
                     </rib:RibbonGroupBox>
 
@@ -228,34 +304,55 @@
                             Content="Template"
                             FontSize="11"
                             Items="{Binding Templates}"
+                            LargeIcon="{DynamicResource IconTemplate}"
                             MinSize="Large" />
                         <rib:RibbonButton
                             Command="{Binding TemplateRemoveCommand}"
                             Content="Remove current"
                             FontSize="11"
+                            LargeIcon="{DynamicResource IconTemplateRemove}"
                             MinSize="Large" />
                     </rib:RibbonGroupBox>
 
                     <rib:RibbonGroupBox Header="Samples detection">
                         <rib:RibbonToggleButton
+                            Classes.IsActive="{Binding IsSampleDetection}"
+                            Classes.IsNotActive="{Binding !IsSampleDetection}"
                             Content="Detect samples"
                             FontSize="11"
                             IsChecked="{Binding IsSampleDetection}"
-                            MinSize="Large" />
+                            MinSize="Large">
+                            <rib:RibbonToggleButton.Styles>
+                                <Style Selector="RibbonToggleButton.IsActive">
+                                    <Style.Setters>
+                                        <Setter Property="LargeIcon" Value="{DynamicResource IconSampleDetectionActive}" />
+                                    </Style.Setters>
+                                </Style>
+                                <Style Selector="RibbonToggleButton.IsNotActive">
+                                    <Style.Setters>
+                                        <Setter Property="LargeIcon" Value="{DynamicResource IconSampleDetectionNotActive}" />
+                                    </Style.Setters>
+                                </Style>
+                            </rib:RibbonToggleButton.Styles>
+                        </rib:RibbonToggleButton>
+
                         <rib:RibbonButton
                             Command="{Binding SampleAddCommand}"
                             Content="Add as sample"
                             FontSize="11"
+                            LargeIcon="{DynamicResource IconSampleAdd}"
                             MinSize="Large" />
                         <rib:RibbonButton
                             Command="{Binding SampleRemoveCommand}"
                             Content="Remove selected"
                             FontSize="11"
+                            LargeIcon="{DynamicResource IconSampleRemoveSelected}"
                             MinSize="Large" />
                         <rib:RibbonButton
                             Command="{Binding SamplesRemoveAllCommand}"
                             Content="Remove all"
                             FontSize="11"
+                            LargeIcon="{DynamicResource IconSamplesRemoveAll}"
                             MinSize="Large" />
                     </rib:RibbonGroupBox>
 
@@ -264,6 +361,7 @@
                             Command="{Binding SamplesOrderCommand}"
                             Content="Order samples"
                             FontSize="11"
+                            LargeIcon="{DynamicResource IconSamplesOrder}"
                             MinSize="Large" />
                     </rib:RibbonGroupBox>
 
