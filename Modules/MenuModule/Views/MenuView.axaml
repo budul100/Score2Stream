@@ -124,7 +124,7 @@
         <StyleInclude Source="avares://Material.Icons.Avalonia/App.xaml" />
     </UserControl.Styles>
 
-    <rib:Ribbon>
+    <rib:Ribbon SelectedIndex="{Binding TabIndex}">
         <rib:Ribbon.Tabs>
 
             <rib:RibbonTab Name="BoardTab" Header="Board">

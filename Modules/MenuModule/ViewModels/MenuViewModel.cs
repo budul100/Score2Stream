@@ -29,24 +29,28 @@ namespace Score2Stream.MenuModule.ViewModels
     {
         #region Private Fields
 
-        private const int DurationMax = 1000;
-        private const string TabNameBoard = "BoardTab";
-        private const string TabNameTemplate = "TemplatesTab";
-        private const string TabNameVideo = "VideoTab";
-        private const int ThresholdMax = 100;
+        private const int MaxDuration = 1000;
+        private const int MaxThreshold = 100;
+
+        private const int TabBoardIndex = 0;
+        private const string TabBoardName = "BoardTab";
+        private const int TabTemplateIndex = 2;
+        private const string TabTemplateName = "TemplatesTab";
+        private const int TabVideoIndex = 1;
+        private const string TabVideoName = "VideoTab";
 
         private readonly IInputService inputService;
         private readonly IMessageBoxService messageBoxService;
         private readonly IRegionManager regionManager;
 
-        private int selectedTabIndex;
+        private int tabIndex;
 
         #endregion Private Fields
 
         #region Public Constructors
 
         public MenuViewModel(IWebService webService, IScoreboardService scoreboardService, IInputService inputService,
-            IMessageBoxService messageBoxService, IRegionManager regionManager, IEventAggregator eventAggregator)
+                   IMessageBoxService messageBoxService, IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
             this.inputService = inputService;
@@ -210,7 +214,7 @@ namespace Score2Stream.MenuModule.ViewModels
             {
                 if (IsActive
                     && value >= 0
-                    && value <= DurationMax)
+                    && value <= MaxDuration)
                 {
                     inputService.VideoService.Delay = value;
                 }
@@ -229,23 +233,21 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public DelegateCommand ScoreboardUpdateCommand { get; }
 
-        public int SelectedTabIndex
+        public int TabIndex
         {
-            get { return selectedTabIndex; }
+            get { return tabIndex; }
             set
             {
-                if (SelectedTabIndex != value)
+                if (TabIndex != value)
                 {
-                    SetProperty(ref selectedTabIndex, value);
-
-                    //UpdateRegions();
+                    SetProperty(ref tabIndex, value);
                 }
             }
         }
 
         public DelegateCommand TemplateRemoveCommand { get; }
 
-        public ObservableCollection<Template> Templates { get; } = new ObservableCollection<Template>();
+        public ObservableCollection<RibbonDropDownItem> Templates { get; } = new ObservableCollection<RibbonDropDownItem>();
 
         public DelegateCommand<Template> TemplateSelectCommand { get; }
 
@@ -256,7 +258,7 @@ namespace Score2Stream.MenuModule.ViewModels
             {
                 if (IsActive
                     && value >= 0
-                    && value <= ThresholdMax)
+                    && value <= MaxThreshold)
                 {
                     inputService.VideoService.ThresholdDetecting = value;
                 }
@@ -272,7 +274,7 @@ namespace Score2Stream.MenuModule.ViewModels
             {
                 if (IsActive
                     && value >= 0
-                    && value <= ThresholdMax)
+                    && value <= MaxThreshold)
                 {
                     inputService.VideoService.ThresholdMatching = value;
                 }
@@ -288,7 +290,7 @@ namespace Score2Stream.MenuModule.ViewModels
             {
                 if (IsActive
                     && value >= 0
-                    && value <= DurationMax)
+                    && value <= MaxDuration)
                 {
                     inputService.VideoService.WaitingDuration = value;
                 }
@@ -332,12 +334,14 @@ namespace Score2Stream.MenuModule.ViewModels
 
         private void OnTemplateSelected()
         {
+            UpdateTemplates();
+
             TemplateRemoveCommand.RaiseCanExecuteChanged();
             SampleAddCommand.RaiseCanExecuteChanged();
 
             var tabName = inputService.TemplateService?.Template != default
-                ? TabNameTemplate
-                : TabNameVideo;
+                ? TabTemplateName
+                : TabVideoName;
 
             SelectRegion(tabName);
         }
@@ -458,23 +462,26 @@ namespace Score2Stream.MenuModule.ViewModels
         {
             switch (name)
             {
-                case TabNameBoard:
+                case TabBoardName:
 
+                    TabIndex = TabBoardIndex;
                     regionManager.RequestNavigate(
                         regionName: nameof(RegionType.EditRegion),
                         source: nameof(ViewType.Board));
                     break;
 
-                case TabNameVideo:
+                case TabVideoName:
 
+                    TabIndex = TabVideoIndex;
                     regionManager.RequestNavigate(
                         regionName: nameof(RegionType.EditRegion),
                         source: nameof(ViewType.Clips));
 
                     break;
 
-                case TabNameTemplate:
+                case TabTemplateName:
 
+                    TabIndex = TabTemplateIndex;
                     regionManager.RequestNavigate(
                         regionName: nameof(RegionType.EditRegion),
                         source: nameof(ViewType.Templates));
@@ -543,7 +550,20 @@ namespace Score2Stream.MenuModule.ViewModels
                 var ordereds = inputService.TemplateService.Templates
                     .OrderBy(t => t.Description).ToArray();
 
-                Templates.AddRange(ordereds);
+                foreach (var ordered in ordereds)
+                {
+                    var isChecked = ordered == inputService.TemplateService.Template;
+
+                    var template = new RibbonDropDownItem
+                    {
+                        Command = TemplateSelectCommand,
+                        CommandParameter = ordered,
+                        IsChecked = isChecked,
+                        Text = ordered.Description,
+                    };
+
+                    Templates.Add(template);
+                }
 
                 RaisePropertyChanged(nameof(Templates));
                 RaisePropertyChanged(nameof(HasTemplates));
