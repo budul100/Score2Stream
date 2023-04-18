@@ -7,10 +7,15 @@
 		<!--<ApplicationManifest>app.manifest</ApplicationManifest>-->
 		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
 		<AssemblyName>Score2Stream</AssemblyName>
+		<ApplicationIcon>Assets\Score2Stream.ico</ApplicationIcon>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<AvaloniaResource Include="Assets\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Assets\Score2Stream.ico" />
 	</ItemGroup>
 
 	<ItemGroup>

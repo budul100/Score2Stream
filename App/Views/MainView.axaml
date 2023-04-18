@@ -14,7 +14,8 @@
     Title="{Binding Title}"
     Width="{Binding Width, Mode=TwoWay}"
     Height="{Binding Height, Mode=TwoWay}"
-    prism:ViewModelLocator.AutoWireViewModel="True">
+    prism:ViewModelLocator.AutoWireViewModel="True"
+    Icon="/Assets/Score2Stream.ico">
     <Window.Resources>
         <co:EnumToStringConverter x:Key="EnumToStringConverter" />
     </Window.Resources>
