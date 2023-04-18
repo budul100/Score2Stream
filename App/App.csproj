@@ -5,9 +5,15 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-		<AssemblyName>Score2Stream</AssemblyName>
 		<ApplicationIcon>Assets\Score2Stream.ico</ApplicationIcon>
-		<AssemblyVersion>1.0.0</AssemblyVersion>
+		<VersionMajor>1</VersionMajor>
+		<VersionMinor>0</VersionMinor>
+		<VersionBuild>0</VersionBuild>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<AssemblyVersion>$(VersionMajor).$(VersionMinor).$(VersionBuild)</AssemblyVersion>
+		<AssemblyName>Score2Stream_$(AssemblyVersion)</AssemblyName>
 	</PropertyGroup>
 
 	<ItemGroup>
