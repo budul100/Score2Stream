@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.FileProviders;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Score2Stream.WebService.Workers
@@ -11,7 +14,7 @@ namespace Score2Stream.WebService.Workers
     {
         #region Private Fields
 
-        private const string BaseNamespace = "wwwroot";
+        private const string DirNameRoot = "wwwroot";
 
         private readonly WebApplication server;
 
@@ -24,28 +27,19 @@ namespace Score2Stream.WebService.Workers
             UrlHttp = urlHttp;
             UrlHttps = urlHttps;
 
+            var urls = GetUrls().ToArray();
+            var fileProvider = GetRootDirProvider();
+
             var builder = WebApplication.CreateBuilder();
-
-            var urls = new List<string>();
-            if (urlHttps != default) urls.Add(urlHttps);
-            if (urlHttp != default) urls.Add(urlHttp);
-
-            builder.WebHost.UseUrls(urls.ToArray());
+            builder.WebHost.UseUrls(urls);
 
             server = builder.Build();
-
-            var embeddedFileProvider = new EmbeddedFileProvider(
-                assembly: typeof(WebServer).Assembly,
-                baseNamespace: BaseNamespace);
-
-            server.UseFileServer(new FileServerOptions
-            {
-                FileProvider = embeddedFileProvider,
-                RequestPath = "",
-                EnableDefaultFiles = true,
-            });
-
             server.UseHttpsRedirection();
+
+            server.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = fileProvider,
+            });
         }
 
         #endregion Public Constructors
@@ -75,5 +69,58 @@ namespace Score2Stream.WebService.Workers
         }
 
         #endregion Public Methods
+
+        #region Private Methods
+
+        private PhysicalFileProvider GetRootDirProvider()
+        {
+            var basePath = AppDomain.CurrentDomain.BaseDirectory;
+
+            var rootPath = Path.Combine(
+                path1: basePath,
+                path2: DirNameRoot);
+
+            if (!Directory.Exists(rootPath))
+            {
+                var assembly = typeof(WebServer).Assembly;
+                Directory.CreateDirectory(rootPath);
+
+                var resourceNames = assembly.GetManifestResourceNames()
+                    .Where(n => n.Contains(DirNameRoot)).ToArray();
+
+                foreach (var resourceName in resourceNames)
+                {
+                    var filePath = Path.Combine(
+                        path1: basePath,
+                        path2: resourceName);
+
+                    var fileInfo = new FileInfo(filePath);
+                    fileInfo.Directory.Create();
+
+                    using var stream = File.Create(filePath);
+                    using var resourceStream = assembly.GetManifestResourceStream(resourceName);
+                    resourceStream.CopyTo(stream);
+                }
+            }
+
+            var result = new PhysicalFileProvider(basePath);
+
+            return result;
+        }
+
+        private IEnumerable<string> GetUrls()
+        {
+            if (!string.IsNullOrWhiteSpace(UrlHttp))
+            {
+                yield return UrlHttp.Trim();
+            }
+
+            if (!string.IsNullOrWhiteSpace(UrlHttps))
+            {
+                yield return UrlHttps.Trim();
+            }
+        }
+
+        #endregion Private Methods
     }
 }

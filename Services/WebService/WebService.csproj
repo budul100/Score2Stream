@@ -11,11 +11,19 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Include="wwwroot\**" CopyToOutputDirectory="PreserveNewest" />
+		<Compile Remove="wwwroot\**" />
+		<Content Remove="wwwroot\**" />
+		<EmbeddedResource Include="wwwroot\**\*">
+			<Link>wwwroot\%(RecursiveDir)%(Filename)%(Extension)</Link>
+			<LogicalName>
+				wwwroot\%(RecursiveDir)%(Filename)%(Extension)
+			</LogicalName>
+		</EmbeddedResource>
+		<None Remove="wwwroot\**" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\Core\Core.csproj" />
+		<ProjectReference Include="..\..\Core\Core.csproj" />
 	</ItemGroup>
 
 </Project>
