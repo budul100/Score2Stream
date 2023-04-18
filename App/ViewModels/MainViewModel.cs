@@ -4,6 +4,8 @@ using Prism.Commands;
 using Prism.Mvvm;
 using Score2Stream.Core.Interfaces;
 using System.ComponentModel;
+using System.Reflection;
+using System.Text;
 
 namespace Score2Stream.ViewModels
 {
@@ -11,6 +13,8 @@ namespace Score2Stream.ViewModels
         : BindableBase
     {
         #region Private Fields
+
+        private const char SplitterVersion = '.';
 
         private readonly IInputService inputService;
         private readonly IMessageBoxService messageBoxService;
@@ -31,6 +35,7 @@ namespace Score2Stream.ViewModels
 
             Height = 800;
             Width = 1200;
+            Title = GetTitle();
 
             this.OnClosingCommand = new DelegateCommand<CancelEventArgs>(OnClosingAsync);
         }
@@ -84,6 +89,29 @@ namespace Score2Stream.ViewModels
                     desktop.Shutdown();
                 }
             }
+        }
+
+        private static string GetTitle()
+        {
+            var assembly = Assembly.GetExecutingAssembly().GetName();
+
+            var version = new StringBuilder();
+
+            version.Append(assembly.Version.Major);
+
+            version.Append(SplitterVersion);
+            version.Append(assembly.Version.Minor);
+
+            if (version.Length > 0
+                && assembly.Version.Build > 0)
+            {
+                version.Append(SplitterVersion);
+                version.Append(assembly.Version.Build);
+            }
+
+            var result = $"{assembly.Name} ({version})";
+
+            return result;
         }
     }
 
