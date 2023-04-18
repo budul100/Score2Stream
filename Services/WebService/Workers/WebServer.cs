@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.FileProviders;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace Score2Stream.WebService.Workers
@@ -11,6 +10,8 @@ namespace Score2Stream.WebService.Workers
     internal class WebServer
     {
         #region Private Fields
+
+        private const string BaseNamespace = "wwwroot";
 
         private readonly WebApplication server;
 
@@ -33,9 +34,13 @@ namespace Score2Stream.WebService.Workers
 
             server = builder.Build();
 
+            var embeddedFileProvider = new EmbeddedFileProvider(
+                assembly: typeof(WebServer).Assembly,
+                baseNamespace: BaseNamespace);
+
             server.UseFileServer(new FileServerOptions
             {
-                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
+                FileProvider = embeddedFileProvider,
                 RequestPath = "",
                 EnableDefaultFiles = true,
             });

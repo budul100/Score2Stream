@@ -18,6 +18,7 @@ namespace Score2Stream.WebService
 
         private const int PortServerHttpDefault = 5000;
         private const int PortSocketHttpDefault = 9000;
+
         private readonly IDispatcherService dispatcherService;
         private readonly IEventAggregator eventAggregator;
         private CancellationTokenSource cancellationTokenSource;
@@ -96,7 +97,7 @@ namespace Score2Stream.WebService
                 urlHttps: default);
 
             webSocketTask = Task.Run(
-                function: async () => dispatcherService.InvokeAsync(() => webSocket.RunAsync()),
+                function: async () => await dispatcherService.InvokeAsync(() => webSocket.RunAsync()),
                 cancellationToken: cancellationTokenSource.Token);
 
             var urlWebServer = $"http://{ipAddress}:{PortServerHttp}";
@@ -106,7 +107,7 @@ namespace Score2Stream.WebService
                 urlHttps: default);
 
             webServerTask = Task.Run(
-                function: async () => dispatcherService.InvokeAsync(() => webServer.RunAsync()),
+                function: async () => await dispatcherService.InvokeAsync(() => webServer.RunAsync()),
                 cancellationToken: cancellationTokenSource.Token);
 
             eventAggregator

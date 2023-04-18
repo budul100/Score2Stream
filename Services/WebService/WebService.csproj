@@ -6,10 +6,12 @@
 		<RootNamespace>Score2Stream.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<DefaultItemExcludes>wwwroot/**</DefaultItemExcludes>
+	</PropertyGroup>
+
 	<ItemGroup>
-		<None Include="wwwroot\**">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
+		<EmbeddedResource Include="wwwroot\**" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 
 	<ItemGroup>

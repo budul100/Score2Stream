@@ -5,6 +5,8 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+		<AssemblyName>Score2Stream</AssemblyName>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -13,6 +15,14 @@
 
 	<ItemGroup>
 		<TrimmerRootAssembly Include="Avalonia.Themes.Fluent" />
+	</ItemGroup>
+
+	<PropertyGroup>
+		<DefaultItemExcludes>wwwroot/**</DefaultItemExcludes>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="wwwroot\**" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 
 	<ItemGroup>
