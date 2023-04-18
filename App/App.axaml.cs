@@ -6,7 +6,6 @@ using Prism.Modularity;
 using Prism.Regions;
 using Score2Stream.Core.Enums;
 using Score2Stream.Core.Interfaces;
-using Score2Stream.ViewModels;
 using Score2Stream.Views;
 using Splat;
 using System;
@@ -91,6 +90,9 @@ namespace Score2Stream
             var dispatcherService = new DispatcherService.Service();
             containerRegistry.RegisterInstance<IDispatcherService>(dispatcherService);
 
+            var messageBoxService = new MessageBoxService.Service(App.Current);
+            containerRegistry.RegisterInstance<IMessageBoxService>(messageBoxService);
+
             containerRegistry.RegisterSingleton<IScoreboardService, ScoreboardService.Service>();
             containerRegistry.RegisterSingleton<IWebService, WebService.Service>();
 
@@ -99,8 +101,6 @@ namespace Score2Stream
             containerRegistry.Register<IClipService, ClipService.Service>();
             containerRegistry.Register<ITemplateService, TemplateService.Service>();
             containerRegistry.Register<ISampleService, SampleService.Service>();
-
-            containerRegistry.Register<IMessageBoxService, MainViewModel>();
 
             // Views - Generic
 

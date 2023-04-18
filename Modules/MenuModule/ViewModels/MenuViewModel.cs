@@ -2,7 +2,6 @@
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using AvaloniaUI.Ribbon;
-using MessageBox.Avalonia.DTO;
 using MessageBox.Avalonia.Enums;
 using Prism.Commands;
 using Prism.Events;
@@ -69,10 +68,10 @@ namespace Score2Stream.MenuModule.ViewModels
                 executeMethod: () => inputService.ClipService?.Add(),
                 canExecuteMethod: () => inputService.IsActive);
             this.ClipRemoveCommand = new DelegateCommand(
-                executeMethod: () => RemoveClipAsync(),
+                executeMethod: () => RemoveClipSelectedAsync(),
                 canExecuteMethod: () => inputService.ClipService?.Clip != default);
             this.ClipsRemoveAllCommand = new DelegateCommand(
-                executeMethod: () => RemoveAllClipsAsync(),
+                executeMethod: () => RemoveClipsAllAsync(),
                 canExecuteMethod: () => inputService.ClipService?.Clips?.Any() == true);
 
             this.ClipAsTemplateCommand = new DelegateCommand(
@@ -92,7 +91,7 @@ namespace Score2Stream.MenuModule.ViewModels
                 executeMethod: () => inputService.SampleService.Remove(),
                 canExecuteMethod: () => inputService?.SampleService?.Sample != default);
             this.SamplesRemoveAllCommand = new DelegateCommand(
-                executeMethod: () => RemoveAllSamplesAsync(),
+                executeMethod: () => RemoveSamplesAllAsync(),
                 canExecuteMethod: () => inputService?.SampleService?.Samples?.Any() == true);
             this.SamplesOrderCommand = new DelegateCommand(
                 executeMethod: () => eventAggregator.GetEvent<OrderSamplesEvent>().Publish(),
@@ -358,21 +357,11 @@ namespace Score2Stream.MenuModule.ViewModels
             RaisePropertyChanged(nameof(WaitingDuration));
         }
 
-        private async void RemoveAllClipsAsync()
+        private async void RemoveClipsAllAsync()
         {
-            var messageBoxParams = new MessageBoxStandardParams
-            {
-                ButtonDefinitions = ButtonEnum.YesNo,
-                ContentMessage = "Shall all clips be removed?",
-                ContentTitle = "Remove all clips",
-                EnterDefaultButton = ClickEnum.Yes,
-                EscDefaultButton = ClickEnum.No,
-                Icon = Icon.Question,
-                ShowInCenter = true,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner,
-            };
-
-            var result = await messageBoxService.GetMessageBoxResultAsync(messageBoxParams);
+            var result = await messageBoxService.GetMessageBoxResultAsync(
+                contentMessage: "Shall all clips be removed?",
+                contentTitle: "Remove all clips");
 
             if (result == ButtonResult.Yes)
             {
@@ -380,52 +369,32 @@ namespace Score2Stream.MenuModule.ViewModels
             }
         }
 
-        private async void RemoveAllSamplesAsync()
-        {
-            var messageBoxParams = new MessageBoxStandardParams
-            {
-                ButtonDefinitions = ButtonEnum.YesNo,
-                ContentMessage = "Shall all samples be removed?",
-                ContentTitle = "Remove all samples",
-                EnterDefaultButton = ClickEnum.Yes,
-                EscDefaultButton = ClickEnum.No,
-                Icon = Icon.Question,
-                ShowInCenter = true,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner,
-            };
-
-            var result = await messageBoxService.GetMessageBoxResultAsync(messageBoxParams);
-
-            if (result == ButtonResult.Yes)
-            {
-                inputService?.SampleService?.Remove(inputService?.TemplateService?.Template);
-            }
-        }
-
-        private async void RemoveClipAsync()
+        private async void RemoveClipSelectedAsync()
         {
             var result = ButtonResult.Yes;
 
             if (inputService?.ClipService?.Clip?.HasDimensions == true)
             {
-                var messageBoxParams = new MessageBoxStandardParams
-                {
-                    ButtonDefinitions = ButtonEnum.YesNo,
-                    ContentMessage = "Shall the selected clip be removed?",
-                    ContentTitle = "Remove clip",
-                    EnterDefaultButton = ClickEnum.Yes,
-                    EscDefaultButton = ClickEnum.No,
-                    Icon = Icon.Question,
-                    ShowInCenter = true,
-                    WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                };
-
-                result = await messageBoxService.GetMessageBoxResultAsync(messageBoxParams);
+                result = await messageBoxService.GetMessageBoxResultAsync(
+                    contentMessage: "Shall the selected clip be removed?",
+                    contentTitle: "Remove clip");
             }
 
             if (result == ButtonResult.Yes)
             {
                 inputService?.ClipService?.Remove();
+            }
+        }
+
+        private async void RemoveSamplesAllAsync()
+        {
+            var result = await messageBoxService.GetMessageBoxResultAsync(
+                contentMessage: "Shall all samples be removed?",
+                contentTitle: "Remove all samples");
+
+            if (result == ButtonResult.Yes)
+            {
+                inputService?.SampleService?.Remove(inputService?.TemplateService?.Template);
             }
         }
 
@@ -435,19 +404,9 @@ namespace Score2Stream.MenuModule.ViewModels
 
             if (inputService?.TemplateService?.Template != default)
             {
-                var messageBoxParams = new MessageBoxStandardParams
-                {
-                    ButtonDefinitions = ButtonEnum.YesNo,
-                    ContentMessage = "Shall the selected template be removed?",
-                    ContentTitle = "Remove template",
-                    EnterDefaultButton = ClickEnum.Yes,
-                    EscDefaultButton = ClickEnum.No,
-                    Icon = Icon.Question,
-                    ShowInCenter = true,
-                    WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                };
-
-                result = await messageBoxService.GetMessageBoxResultAsync(messageBoxParams);
+                result = await messageBoxService.GetMessageBoxResultAsync(
+                    contentMessage: "Shall the selected template be removed?",
+                    contentTitle: "Remove template");
             }
 
             if (result == ButtonResult.Yes
@@ -534,19 +493,9 @@ namespace Score2Stream.MenuModule.ViewModels
 
         private async void StopAllInputsAsync()
         {
-            var messageBoxParams = new MessageBoxStandardParams
-            {
-                ButtonDefinitions = ButtonEnum.YesNo,
-                ContentMessage = "Shall all inputs be stopped?",
-                ContentTitle = "Stop inputs",
-                EnterDefaultButton = ClickEnum.Yes,
-                EscDefaultButton = ClickEnum.No,
-                Icon = Icon.Question,
-                ShowInCenter = true,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner,
-            };
-
-            var result = await messageBoxService.GetMessageBoxResultAsync(messageBoxParams);
+            var result = await messageBoxService.GetMessageBoxResultAsync(
+                contentMessage: "Shall all inputs be stopped?",
+                contentTitle: "Stop inputs");
 
             if (result == ButtonResult.Yes)
             {

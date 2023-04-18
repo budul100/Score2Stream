@@ -33,9 +33,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MenuModule", "Modules\MenuM
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VideoModule", "Modules\VideoModule\VideoModule.csproj", "{219620AB-B41E-4525-88C5-896461F0ED83}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClipModule", "Modules\ClipModule\ClipModule.csproj", "{DAF03EAC-5D90-44AF-A404-20E1CA4BFCC7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClipModule", "Modules\ClipModule\ClipModule.csproj", "{DAF03EAC-5D90-44AF-A404-20E1CA4BFCC7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TemplateModule", "Modules\TemplateModule\TemplateModule.csproj", "{50312892-5F31-40C3-A4C7-339D0C0BC30E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TemplateModule", "Modules\TemplateModule\TemplateModule.csproj", "{50312892-5F31-40C3-A4C7-339D0C0BC30E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageBoxService", "Services\MessageBoxService\MessageBoxService.csproj", "{29C1632E-F751-4379-B587-3BEE8AB8F189}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -103,6 +105,10 @@ Global
 		{50312892-5F31-40C3-A4C7-339D0C0BC30E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50312892-5F31-40C3-A4C7-339D0C0BC30E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{50312892-5F31-40C3-A4C7-339D0C0BC30E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29C1632E-F751-4379-B587-3BEE8AB8F189}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29C1632E-F751-4379-B587-3BEE8AB8F189}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29C1632E-F751-4379-B587-3BEE8AB8F189}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29C1632E-F751-4379-B587-3BEE8AB8F189}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -121,6 +127,7 @@ Global
 		{219620AB-B41E-4525-88C5-896461F0ED83} = {41F7A76E-1F3E-4BA0-82FA-3FF1D8D4E9D1}
 		{DAF03EAC-5D90-44AF-A404-20E1CA4BFCC7} = {41F7A76E-1F3E-4BA0-82FA-3FF1D8D4E9D1}
 		{50312892-5F31-40C3-A4C7-339D0C0BC30E} = {41F7A76E-1F3E-4BA0-82FA-3FF1D8D4E9D1}
+		{29C1632E-F751-4379-B587-3BEE8AB8F189} = {F601B3EC-079D-49C4-9124-D96B68CF1C54}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {426EBDEF-973C-4F65-AA08-27BB71AC16B7}

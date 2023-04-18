@@ -1,6 +1,4 @@
-﻿using Avalonia.Controls;
-using Avalonia.Media.Imaging;
-using MessageBox.Avalonia.DTO;
+﻿using Avalonia.Media.Imaging;
 using MessageBox.Avalonia.Enums;
 using Prism.Commands;
 using Prism.Events;
@@ -282,19 +280,9 @@ namespace Score2Stream.VideoModule.ViewModels
                     && (activeSelection.Clip?.Template?.Clip == activeSelection.Clip)
                     && (activeSelection.Clip?.Template?.Samples?.Any() == true))
                 {
-                    var messageBoxParams = new MessageBoxStandardParams
-                    {
-                        ButtonDefinitions = ButtonEnum.YesNo,
-                        ContentMessage = "Shall the dimension of the clip be changed?",
-                        ContentTitle = "Change dimension",
-                        EnterDefaultButton = ClickEnum.Yes,
-                        EscDefaultButton = ClickEnum.No,
-                        Icon = Icon.Question,
-                        ShowInCenter = true,
-                        WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                    };
-
-                    dimensionsCanBeSet = await messageBoxService.GetMessageBoxResultAsync(messageBoxParams);
+                    dimensionsCanBeSet = await messageBoxService.GetMessageBoxResultAsync(
+                        contentMessage: "Shall the dimension of the clip be changed?",
+                        contentTitle: "Change dimension");
                 }
 
                 if (dimensionsCanBeSet == ButtonResult.Yes)
