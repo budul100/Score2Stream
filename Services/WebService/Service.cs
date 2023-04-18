@@ -39,6 +39,8 @@ namespace Score2Stream.WebService
             eventAggregator.GetEvent<ScoreboardUpdatedEvent>().Subscribe(
                 action: m => OnScoreboardUpdate(m),
                 keepSubscriberReferenceAlive: true);
+
+            Task.Run(() => StartAsync());
         }
 
         #endregion Public Constructors

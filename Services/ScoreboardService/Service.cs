@@ -350,12 +350,15 @@ namespace Score2Stream.ScoreboardService
             }
 
             if (!ScoreNotFromClip
-                && clips[ClipType.ScoreHome] != default
-                && clips[ClipType.ScoreGuest] != default)
+                && clips[ClipType.ScoreHome] != default)
             {
                 ScoreHome = clips[ClipType.ScoreHome]?.Value ?? "0";
                 scoreHome = ScoreHome;
+            }
 
+            if (!ScoreNotFromClip
+                && clips[ClipType.ScoreGuest] != default)
+            {
                 ScoreGuest = clips[ClipType.ScoreGuest]?.Value ?? "0";
                 scoreGuest = ScoreGuest;
             }
