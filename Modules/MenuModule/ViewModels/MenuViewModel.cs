@@ -34,8 +34,8 @@ namespace Score2Stream.MenuModule.ViewModels
 
         private const int TabBoardIndex = 0;
         private const string TabBoardName = "BoardTab";
-        private const int TabTemplateIndex = 2;
-        private const string TabTemplateName = "TemplatesTab";
+        private const int TabSamplesIndex = 2;
+        private const string TabSamplesName = "SamplesTab";
         private const int TabVideoIndex = 1;
         private const string TabVideoName = "VideoTab";
 
@@ -340,7 +340,7 @@ namespace Score2Stream.MenuModule.ViewModels
             SampleAddCommand.RaiseCanExecuteChanged();
 
             var tabName = inputService.TemplateService?.Template != default
-                ? TabTemplateName
+                ? TabSamplesName
                 : TabVideoName;
 
             SelectRegion(tabName);
@@ -479,9 +479,9 @@ namespace Score2Stream.MenuModule.ViewModels
 
                     break;
 
-                case TabTemplateName:
+                case TabSamplesName:
 
-                    TabIndex = TabTemplateIndex;
+                    TabIndex = TabSamplesIndex;
                     regionManager.RequestNavigate(
                         regionName: nameof(RegionType.EditRegion),
                         source: nameof(ViewType.Templates));

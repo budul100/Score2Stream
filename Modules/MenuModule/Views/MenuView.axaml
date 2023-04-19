@@ -287,13 +287,13 @@
             </rib:RibbonTab>
 
             <rib:RibbonTab
-                Name="TemplatesTab"
-                Header="Templates"
+                Name="SamplesTab"
+                Header="Samples"
                 IsEnabled="{Binding HasTemplates}">
 
                 <i:Interaction.Behaviors>
-                    <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="TemplatesTab">
-                        <a:InvokeCommandAction Command="{Binding OnTabSelectionCommand}" CommandParameter="TemplatesTab" />
+                    <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="SamplesTab">
+                        <a:InvokeCommandAction Command="{Binding OnTabSelectionCommand}" CommandParameter="SamplesTab" />
                     </a:EventTriggerBehavior>
                 </i:Interaction.Behaviors>
 
