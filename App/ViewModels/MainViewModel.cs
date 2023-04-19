@@ -19,7 +19,7 @@ namespace Score2Stream.ViewModels
         #region Private Fields
 
         private const int PeriodUpdateTitle = 500;
-        private const char SplitterProcessingTime = '/';
+        private const string SplitterTitle = " | ";
         private const char SplitterVersion = '.';
 
         private readonly string assemblyTitle;
@@ -120,7 +120,7 @@ namespace Score2Stream.ViewModels
                 {
                     if (result.Length > 0)
                     {
-                        result.Append(SplitterProcessingTime);
+                        result.Append(SplitterTitle);
                     }
 
                     result
@@ -146,7 +146,7 @@ namespace Score2Stream.ViewModels
                 var processingTime = GetProcessingTimes();
 
                 result = !string.IsNullOrWhiteSpace(processingTime)
-                    ? $"{assemblyTitle} | {processingTime}"
+                    ? $"{assemblyTitle}{SplitterTitle}{processingTime}"
                     : assemblyTitle;
 
                 lastUpdateTitle = DateTime.Now;
