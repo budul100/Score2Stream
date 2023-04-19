@@ -8,12 +8,6 @@ namespace Score2Stream.Core.Models
 {
     public class Clip
     {
-        #region Private Fields
-
-        private const int ThresholdMonochromeDefault = 50;
-
-        #endregion Private Fields
-
         #region Public Properties
 
         public Bitmap Bitmap { get; set; }
@@ -40,7 +34,7 @@ namespace Score2Stream.Core.Models
 
         public Template Template { get; set; }
 
-        public int ThresholdMonochrome { get; set; } = ThresholdMonochromeDefault;
+        public int ThresholdMonochrome { get; set; }
 
         public ClipType Type { get; set; }
 
