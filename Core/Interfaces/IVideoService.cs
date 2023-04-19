@@ -22,6 +22,8 @@ namespace Score2Stream.Core.Interfaces
 
         bool NoCentering { get; set; }
 
+        TimeSpan? ProcessingTime { get; }
+
         int ThresholdDetecting { get; set; }
 
         int ThresholdMatching { get; set; }

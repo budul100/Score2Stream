@@ -70,6 +70,8 @@ namespace Score2Stream.VideoService
 
         public bool NoCentering { get; set; }
 
+        public TimeSpan? ProcessingTime { get; private set; }
+
         public int ThresholdDetecting { get; set; } = ThresholdDetectingDefault;
 
         public int ThresholdMatching { get; set; } = ThresholdMatchingDefault;
@@ -179,6 +181,8 @@ namespace Score2Stream.VideoService
 
                 do
                 {
+                    var startTime = DateTime.Now;
+
                     hasContent = video.Read(currentFrame);
 
                     if (!currentFrame.Empty())
@@ -195,6 +199,8 @@ namespace Score2Stream.VideoService
                     }
 
                     await UpdateVideoAsync();
+
+                    ProcessingTime = DateTime.Now - startTime;
                 }
                 while (hasContent
                     && !cancellationTokenSource.IsCancellationRequested);
@@ -202,8 +208,10 @@ namespace Score2Stream.VideoService
             catch
             { }
 
-            IsActive = false;
             frame = default;
+
+            IsActive = false;
+            ProcessingTime = default;
 
             await UpdateVideoAsync();
 
