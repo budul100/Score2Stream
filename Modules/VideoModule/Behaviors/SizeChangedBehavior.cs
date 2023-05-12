@@ -10,11 +10,11 @@ namespace Score2Stream.VideoModule.Behaviors
     {
         #region Public Fields
 
+        public static readonly StyledProperty<object> HeightProperty = AvaloniaProperty.Register<ValueChangedTriggerBehavior, object>(
+            name: nameof(Height));
+
         public static readonly StyledProperty<object> WidthProperty = AvaloniaProperty.Register<ValueChangedTriggerBehavior, object>(
             name: nameof(Width));
-
-        public static StyledProperty<object> HeightProperty = AvaloniaProperty.Register<ValueChangedTriggerBehavior, object>(
-            name: nameof(Height));
 
         #endregion Public Fields
 

@@ -76,6 +76,38 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         #endregion Public Properties
 
+        #region Public Methods
+
+        public void SelectNext(bool onward)
+        {
+            if (inputService != default
+                && Samples.Count > 0)
+            {
+                var current = Samples
+                    .SingleOrDefault(s => s.Sample == inputService?.SampleService.Sample);
+
+                var index = Samples.IndexOf(current);
+                var next = default(Sample);
+
+                if (onward)
+                {
+                    next = index < Samples.Count - 1
+                        ? Samples[index + 1].Sample
+                        : Samples[0].Sample;
+                }
+                else
+                {
+                    next = index > 0
+                        ? Samples[index - 1].Sample
+                        : Samples[Samples.Count - 1].Sample;
+                }
+
+                inputService.SampleService.Select(next);
+            }
+        }
+
+        #endregion Public Methods
+
         #region Private Methods
 
         private string GetCurrent()
@@ -128,7 +160,8 @@ namespace Score2Stream.TemplateModule.ViewModels
 
                     current.Initialize(
                         sample: toBeAdded,
-                        sampleService: inputService.SampleService);
+                        sampleService: inputService.SampleService,
+                        parent: this);
 
                     Samples.Add(current);
                 }

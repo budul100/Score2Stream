@@ -15,6 +15,7 @@ namespace Score2Stream.TemplateModule.ViewModels
         #region Private Fields
 
         private bool isActive;
+        private TemplateViewModel parent;
         private ISampleService sampleService;
 
         #endregion Private Fields
@@ -25,6 +26,12 @@ namespace Score2Stream.TemplateModule.ViewModels
         {
             OnSelectionCommand = new DelegateCommand(
                 executeMethod: () => sampleService.Select(Sample));
+
+            OnSelectionNextCommand = new DelegateCommand(
+                executeMethod: () => parent.SelectNext(true));
+
+            OnSelectionPreviousCommand = new DelegateCommand(
+                executeMethod: () => parent.SelectNext(false));
 
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
                 action: s => IsActive = s == Sample,
@@ -55,6 +62,10 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         public DelegateCommand OnSelectionCommand { get; }
 
+        public DelegateCommand OnSelectionNextCommand { get; }
+
+        public DelegateCommand OnSelectionPreviousCommand { get; }
+
         public Sample Sample { get; private set; }
 
         public string Value
@@ -73,10 +84,11 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         #region Public Methods
 
-        public void Initialize(Sample sample, ISampleService sampleService)
+        public void Initialize(Sample sample, ISampleService sampleService, TemplateViewModel parent)
         {
             this.Sample = sample;
             this.sampleService = sampleService;
+            this.parent = parent;
 
             Value = sample.Value;
 

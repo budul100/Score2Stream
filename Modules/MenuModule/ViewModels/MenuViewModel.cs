@@ -50,7 +50,7 @@ namespace Score2Stream.MenuModule.ViewModels
         #region Public Constructors
 
         public MenuViewModel(IWebService webService, IScoreboardService scoreboardService, IInputService inputService,
-                   IMessageBoxService messageBoxService, IRegionManager regionManager, IEventAggregator eventAggregator)
+            IMessageBoxService messageBoxService, IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
             this.inputService = inputService;

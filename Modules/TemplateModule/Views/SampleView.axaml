@@ -3,11 +3,13 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:b="using:Score2Stream.TemplateModule.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="450"
     d:DesignWidth="800"
+    IsActive="{Binding IsActive, Mode=TwoWay}"
     mc:Ignorable="d">
     <Border
         Margin="2"
@@ -39,6 +41,7 @@
 
                 <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="SamplePanel">
                     <a:InvokeCommandAction Command="{Binding OnSelectionCommand}" />
+                    <a:CallMethodAction MethodName="Focus" TargetObject="ValueTextBox" />
                 </a:EventTriggerBehavior>
             </i:Interaction.Behaviors>
 
@@ -81,7 +84,14 @@
                             <a:EventTriggerBehavior EventName="GotFocus" SourceObject="ValueTextBox">
                                 <a:InvokeCommandAction Command="{Binding OnSelectionCommand}" />
                             </a:EventTriggerBehavior>
+
+                            <b:FocusOnActivationBehavior IsActive="{Binding IsActive, Mode=TwoWay}" />
                         </i:Interaction.Behaviors>
+
+                        <TextBox.KeyBindings>
+                            <KeyBinding Command="{Binding OnSelectionNextCommand}" Gesture="Tab" />
+                            <KeyBinding Command="{Binding OnSelectionPreviousCommand}" Gesture="Shift+Tab" />
+                        </TextBox.KeyBindings>
                     </TextBox>
                 </StackPanel>
 
