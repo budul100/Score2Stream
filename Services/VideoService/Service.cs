@@ -147,6 +147,8 @@ namespace Score2Stream.VideoService
 
                 using var video = new VideoCapture();
 
+                var frameCount = default(double?);
+
                 if (deviceId.HasValue)
                 {
                     if (!video.Open(deviceId.Value))
@@ -175,6 +177,8 @@ namespace Score2Stream.VideoService
                     .GetEvent<VideoStartedEvent>()
                     .Publish();
 
+                var frameIndex = default(double);
+
                 using var currentFrame = new Mat();
 
                 var hasContent = false;
@@ -201,6 +205,25 @@ namespace Score2Stream.VideoService
                     await UpdateVideoAsync();
 
                     ProcessingTime = DateTime.Now - startTime;
+
+                    if (!deviceId.HasValue)
+                    {
+                        if (!frameCount.HasValue)
+                        {
+                            frameCount = video.Get(VideoCaptureProperties.FrameCount);
+                        }
+
+                        frameIndex++;
+
+                        if (frameIndex >= frameCount)
+                        {
+                            video.Set(
+                                propertyId: VideoCaptureProperties.PosFrames,
+                                value: 0);
+
+                            frameIndex = 0;
+                        }
+                    }
                 }
                 while (hasContent
                     && !cancellationTokenSource.IsCancellationRequested);
