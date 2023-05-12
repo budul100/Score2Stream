@@ -29,9 +29,6 @@ namespace Score2Stream.MenuModule.ViewModels
     {
         #region Private Fields
 
-        private const int MaxDuration = 1000;
-        private const int MaxThreshold = 100;
-
         private const int TabBoardIndex = 0;
         private const string TabBoardName = "BoardTab";
         private const int TabSamplesIndex = 2;
@@ -153,6 +150,14 @@ namespace Score2Stream.MenuModule.ViewModels
 
         #region Public Properties
 
+        public static int MaxDuration => Constants.MaxDuration;
+
+        public static int MaxQueueSize => Constants.MaxQueueSize;
+
+        public static int MaxThreshold => Constants.MaxThreshold;
+
+        public static int MinQueueSize => Constants.MinQueueSize;
+
         public DelegateCommand ClipAddCommand { get; }
 
         public DelegateCommand ClipAsTemplateCommand { get; }
@@ -166,6 +171,22 @@ namespace Score2Stream.MenuModule.ViewModels
         public DelegateCommand GraphicsReloadCommand { get; }
 
         public bool HasTemplates => inputService?.TemplateService?.Templates?.Any() == true;
+
+        public int ImagesQueueSize
+        {
+            get { return inputService.ImagesQueueSize; }
+            set
+            {
+                if (inputService.ImagesQueueSize != value
+                    && value >= MinQueueSize
+                    && value <= MaxQueueSize)
+                {
+                    inputService.ImagesQueueSize = value;
+
+                    RaisePropertyChanged(nameof(ImagesQueueSize));
+                }
+            }
+        }
 
         public ObservableCollection<RibbonDropDownItem> Inputs { get; } = new ObservableCollection<RibbonDropDownItem>();
 
@@ -185,23 +206,23 @@ namespace Score2Stream.MenuModule.ViewModels
                 if (IsActive)
                 {
                     inputService.SampleService.IsDetection = value;
-                }
 
-                RaisePropertyChanged(nameof(IsSampleDetection));
+                    RaisePropertyChanged(nameof(IsSampleDetection));
+                }
             }
         }
 
         public bool NoCentering
         {
-            get { return inputService.VideoService?.NoCentering ?? false; }
+            get { return inputService.NoCentering; }
             set
             {
-                if (IsActive)
+                if (inputService.NoCentering != value)
                 {
-                    inputService.VideoService.NoCentering = value;
-                }
+                    inputService.NoCentering = value;
 
-                RaisePropertyChanged(nameof(NoCentering));
+                    RaisePropertyChanged(nameof(NoCentering));
+                }
             }
         }
 
@@ -209,17 +230,17 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public int ProcessingDelay
         {
-            get { return inputService.VideoService?.Delay ?? 0; }
+            get { return inputService.ProcessingDelay; }
             set
             {
-                if (IsActive
+                if (inputService.ProcessingDelay != value
                     && value >= 0
                     && value <= MaxDuration)
                 {
-                    inputService.VideoService.Delay = value;
-                }
+                    inputService.ProcessingDelay = value;
 
-                RaisePropertyChanged(nameof(ProcessingDelay));
+                    RaisePropertyChanged(nameof(ProcessingDelay));
+                }
             }
         }
 
@@ -253,49 +274,49 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public int ThresholdDetecting
         {
-            get { return inputService.VideoService?.ThresholdDetecting ?? 0; }
+            get { return inputService.ThresholdDetecting; }
             set
             {
-                if (IsActive
+                if (inputService.ThresholdDetecting != value
                     && value >= 0
                     && value <= MaxThreshold)
                 {
-                    inputService.VideoService.ThresholdDetecting = value;
-                }
+                    inputService.ThresholdDetecting = value;
 
-                RaisePropertyChanged(nameof(ThresholdDetecting));
+                    RaisePropertyChanged(nameof(ThresholdDetecting));
+                }
             }
         }
 
         public int ThresholdMatching
         {
-            get { return inputService.VideoService?.ThresholdMatching ?? 0; }
+            get { return inputService.ThresholdMatching; }
             set
             {
-                if (IsActive
+                if (inputService.ThresholdMatching != value
                     && value >= 0
                     && value <= MaxThreshold)
                 {
-                    inputService.VideoService.ThresholdMatching = value;
-                }
+                    inputService.ThresholdMatching = value;
 
-                RaisePropertyChanged(nameof(ThresholdMatching));
+                    RaisePropertyChanged(nameof(ThresholdMatching));
+                }
             }
         }
 
         public int WaitingDuration
         {
-            get { return inputService.VideoService?.WaitingDuration ?? 0; }
+            get { return inputService.WaitingDuration; }
             set
             {
-                if (IsActive
+                if (inputService.WaitingDuration != value
                     && value >= 0
                     && value <= MaxDuration)
                 {
-                    inputService.VideoService.WaitingDuration = value;
-                }
+                    inputService.WaitingDuration = value;
 
-                RaisePropertyChanged(nameof(WaitingDuration));
+                    RaisePropertyChanged(nameof(WaitingDuration));
+                }
             }
         }
 

@@ -15,6 +15,8 @@ namespace Score2Stream.TemplateModule.ViewModels
         #region Private Fields
 
         private bool isActive;
+        private bool isMatching;
+        private bool isRelevant;
         private TemplateViewModel parent;
         private ISampleService sampleService;
 
@@ -35,6 +37,10 @@ namespace Score2Stream.TemplateModule.ViewModels
 
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
                 action: s => IsActive = s == Sample,
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<SampleUpdatedEvent>().Subscribe(
+                action: (s) => UpdateSample(s),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
@@ -58,6 +64,18 @@ namespace Score2Stream.TemplateModule.ViewModels
         {
             get { return isActive; }
             set { SetProperty(ref isActive, value); }
+        }
+
+        public bool IsMatching
+        {
+            get { return isMatching; }
+            set { SetProperty(ref isMatching, value); }
+        }
+
+        public bool IsRelevant
+        {
+            get { return isRelevant; }
+            set { SetProperty(ref isRelevant, value); }
         }
 
         public DelegateCommand OnSelectionCommand { get; }
@@ -96,5 +114,18 @@ namespace Score2Stream.TemplateModule.ViewModels
         }
 
         #endregion Public Methods
+
+        #region Private Methods
+
+        private void UpdateSample(Sample sample)
+        {
+            if (sample == Sample)
+            {
+                IsMatching = sample.IsMatching;
+                IsRelevant = sample.IsRelevant;
+            }
+        }
+
+        #endregion Private Methods
     }
 }

@@ -12,14 +12,58 @@
     IsActive="{Binding IsActive, Mode=TwoWay}"
     mc:Ignorable="d">
     <Border
+        Name="SampleBorder"
         Margin="2"
         BorderBrush="LightGray"
-        BorderThickness="2"
+        BorderThickness="4"
         CornerRadius="3">
+
+        <i:Interaction.Behaviors>
+
+            <a:DataTriggerBehavior
+                Binding="{Binding IsMatching}"
+                ComparisonCondition="Equal"
+                Value="False">
+                <a:ChangePropertyAction
+                    PropertyName="BorderBrush"
+                    TargetObject="SampleBorder"
+                    Value="LightGray" />
+            </a:DataTriggerBehavior>
+            <a:DataTriggerBehavior
+                Binding="{Binding IsRelevant}"
+                ComparisonCondition="Equal"
+                Value="False">
+                <a:ChangePropertyAction
+                    PropertyName="BorderBrush"
+                    TargetObject="SampleBorder"
+                    Value="LightGray" />
+            </a:DataTriggerBehavior>
+
+            <a:DataTriggerBehavior
+                Binding="{Binding IsMatching}"
+                ComparisonCondition="Equal"
+                Value="True">
+                <a:ChangePropertyAction
+                    PropertyName="BorderBrush"
+                    TargetObject="SampleBorder"
+                    Value="LightPink" />
+            </a:DataTriggerBehavior>
+            <a:DataTriggerBehavior
+                Binding="{Binding IsRelevant}"
+                ComparisonCondition="Equal"
+                Value="True">
+                <a:ChangePropertyAction
+                    PropertyName="BorderBrush"
+                    TargetObject="SampleBorder"
+                    Value="GreenYellow" />
+            </a:DataTriggerBehavior>
+
+        </i:Interaction.Behaviors>
 
         <StackPanel Name="SamplePanel" Orientation="Horizontal">
 
             <i:Interaction.Behaviors>
+
                 <a:DataTriggerBehavior
                     Binding="{Binding IsActive}"
                     ComparisonCondition="Equal"
@@ -43,6 +87,7 @@
                     <a:InvokeCommandAction Command="{Binding OnSelectionCommand}" />
                     <a:CallMethodAction MethodName="Focus" TargetObject="ValueTextBox" />
                 </a:EventTriggerBehavior>
+
             </i:Interaction.Behaviors>
 
             <Border

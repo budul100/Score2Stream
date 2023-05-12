@@ -219,10 +219,7 @@
                     </rib:RibbonGroupBox>
 
                     <rib:RibbonGroupBox Header="Video options">
-                        <StackPanel
-                            Margin="0,0,4,4"
-                            IsEnabled="{Binding IsActive}"
-                            Orientation="Horizontal">
+                        <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
                             <TextBlock
                                 Width="100"
                                 Margin="0,0,4,0"
@@ -233,34 +230,28 @@
                                 Width="130"
                                 MaxHeight="5"
                                 Increment="10"
-                                Maximum="1000"
+                                Maximum="{Binding MaxDuration}"
                                 Minimum="0"
                                 Value="{Binding ProcessingDelay, Mode=TwoWay}" />
                         </StackPanel>
-                    </rib:RibbonGroupBox>
-
-                    <rib:RibbonGroupBox Header="Clip options">
-                        <StackPanel
-                            Margin="0,0,4,4"
-                            IsEnabled="{Binding IsActive}"
-                            Orientation="Horizontal">
+                        <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
                             <TextBlock
                                 Width="100"
                                 Margin="0,0,4,0"
                                 VerticalAlignment="Center"
                                 FontSize="11"
-                                Text="Matching threshold" />
+                                Text="Image queue size" />
                             <NumericUpDown
                                 Width="130"
                                 MaxHeight="5"
-                                Maximum="100"
-                                Minimum="0"
-                                Value="{Binding ThresholdMatching, Mode=TwoWay}" />
+                                Maximum="{Binding MaxQueueSize}"
+                                Minimum="1"
+                                Value="{Binding ImagesQueueSize, Mode=TwoWay}" />
                         </StackPanel>
-                        <StackPanel
-                            Margin="0,0,4,4"
-                            IsEnabled="{Binding IsActive}"
-                            Orientation="Horizontal">
+                    </rib:RibbonGroupBox>
+
+                    <rib:RibbonGroupBox Header="Clip options">
+                        <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
                             <TextBlock
                                 Width="100"
                                 Margin="0,0,4,0"
@@ -271,7 +262,7 @@
                                 Width="130"
                                 MaxHeight="5"
                                 Increment="10"
-                                Maximum="1000"
+                                Maximum="{Binding MaxDuration}"
                                 Minimum="0"
                                 Value="{Binding WaitingDuration, Mode=TwoWay}" />
                         </StackPanel>
@@ -280,8 +271,7 @@
                             VerticalAlignment="Center"
                             Content="Deactivate cropping"
                             FontSize="11"
-                            IsChecked="{Binding NoCentering, Mode=TwoWay}"
-                            IsEnabled="{Binding IsActive}" />
+                            IsChecked="{Binding NoCentering, Mode=TwoWay}" />
                     </rib:RibbonGroupBox>
                 </rib:RibbonTab.Groups>
             </rib:RibbonTab>
@@ -366,10 +356,21 @@
                     </rib:RibbonGroupBox>
 
                     <rib:RibbonGroupBox Header="Detection options">
-                        <StackPanel
-                            Margin="0,0,4,4"
-                            IsEnabled="{Binding IsActive}"
-                            Orientation="Horizontal">
+                        <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
+                            <TextBlock
+                                Width="100"
+                                Margin="0,0,4,0"
+                                VerticalAlignment="Center"
+                                FontSize="11"
+                                Text="Matching threshold" />
+                            <NumericUpDown
+                                Width="130"
+                                MaxHeight="5"
+                                Maximum="{Binding MaxThreshold}"
+                                Minimum="0"
+                                Value="{Binding ThresholdMatching, Mode=TwoWay}" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
                             <TextBlock
                                 Width="100"
                                 Margin="0,0,4,0"
@@ -379,7 +380,7 @@
                             <NumericUpDown
                                 Width="130"
                                 MaxHeight="5"
-                                Maximum="100"
+                                Maximum="{Binding MaxThreshold}"
                                 Minimum="0"
                                 Value="{Binding ThresholdDetecting, Mode=TwoWay}" />
                         </StackPanel>

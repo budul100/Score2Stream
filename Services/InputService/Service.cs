@@ -6,6 +6,7 @@ using Score2Stream.Core.Events.Input;
 using Score2Stream.Core.Events.Video;
 using Score2Stream.Core.Interfaces;
 using Score2Stream.Core.Models;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,12 +23,25 @@ namespace Score2Stream.InputService
 
         private Input currentInput;
 
+        private int imagesQueueSize;
+        private bool noCentering;
+        private int processingDelay;
+        private int thresholdDetecting;
+        private int thresholdMatching;
+        private int waitingDuration;
+
         #endregion Private Fields
 
         #region Public Constructors
 
         public Service(IContainerProvider containerProvider, IEventAggregator eventAggregator)
         {
+            ProcessingDelay = Constants.DefaultProcessingDelay;
+            ImagesQueueSize = Constants.DefaultImagesQueueSize;
+            ThresholdDetecting = Constants.DefaultThresholdDetecting;
+            ThresholdMatching = Constants.DefaultThresholdMatching;
+            WaitingDuration = Constants.DefaultWaitingDuration;
+
             this.containerProvider = containerProvider;
             this.eventAggregator = eventAggregator;
 
@@ -42,15 +56,94 @@ namespace Score2Stream.InputService
 
         public IClipService ClipService => currentInput?.ClipService;
 
+        public int ImagesQueueSize
+        {
+            get { return imagesQueueSize; }
+            set
+            {
+                if (value != imagesQueueSize
+                    && value > 0)
+                {
+                    imagesQueueSize = value;
+                    UpdateInput();
+                }
+            }
+        }
+
         public IList<Input> Inputs { get; } = new List<Input>();
 
         public bool IsActive => VideoService?.IsActive ?? false;
+
+        public bool NoCentering
+        {
+            get { return noCentering; }
+            set
+            {
+                if (noCentering != value)
+                {
+                    noCentering = value;
+                    UpdateInput();
+                }
+            }
+        }
+
+        public int ProcessingDelay
+        {
+            get { return processingDelay; }
+            set
+            {
+                if (processingDelay != value)
+                {
+                    processingDelay = value;
+                    UpdateInput();
+                }
+            }
+        }
 
         public ISampleService SampleService => currentInput?.SampleService;
 
         public ITemplateService TemplateService => currentInput?.TemplateService;
 
+        public int ThresholdDetecting
+        {
+            get { return thresholdDetecting; }
+            set
+            {
+                if (thresholdDetecting != value)
+                {
+                    thresholdDetecting = value;
+                    UpdateInput();
+                }
+            }
+        }
+
+        public int ThresholdMatching
+        {
+            get { return thresholdMatching; }
+            set
+            {
+                if (thresholdMatching != value)
+                {
+                    thresholdMatching = value;
+                    UpdateInput();
+                }
+            }
+        }
+
         public IVideoService VideoService => currentInput?.VideoService;
+
+        public int WaitingDuration
+        {
+            get { return waitingDuration; }
+            set
+            {
+                if (waitingDuration != value)
+                {
+                    waitingDuration = value;
+                    UpdateInput();
+                }
+            }
+        }
 
         #endregion Public Properties
 
@@ -122,6 +215,7 @@ namespace Score2Stream.InputService
             if (currentInput != input)
             {
                 currentInput = input;
+                UpdateInput();
 
                 eventAggregator
                     .GetEvent<InputSelectedEvent>()
@@ -170,6 +264,19 @@ namespace Score2Stream.InputService
                 eventAggregator
                     .GetEvent<InputsChangedEvent>()
                     .Publish();
+            }
+        }
+
+        private void UpdateInput()
+        {
+            if (currentInput?.VideoService != default)
+            {
+                currentInput.VideoService.ImagesQueueSize = ImagesQueueSize;
+                currentInput.VideoService.NoCentering = NoCentering;
+                currentInput.VideoService.ProcessingDelay = ProcessingDelay;
+                currentInput.VideoService.ThresholdDetecting = Math.Abs(ThresholdDetecting) / Constants.DividerThreshold;
+                currentInput.VideoService.ThresholdMatching = Math.Abs(ThresholdMatching) / Constants.DividerThreshold;
+                currentInput.VideoService.WaitingDuration = TimeSpan.FromMilliseconds(Math.Abs(WaitingDuration));
             }
         }
 

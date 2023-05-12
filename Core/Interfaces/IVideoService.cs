@@ -14,7 +14,7 @@ namespace Score2Stream.Core.Interfaces
 
         IClipService ClipService { get; }
 
-        int Delay { get; set; }
+        int ImagesQueueSize { get; set; }
 
         bool IsActive { get; }
 
@@ -22,13 +22,15 @@ namespace Score2Stream.Core.Interfaces
 
         bool NoCentering { get; set; }
 
+        int ProcessingDelay { get; set; }
+
         TimeSpan? ProcessingTime { get; }
 
-        int ThresholdDetecting { get; set; }
+        double ThresholdDetecting { get; set; }
 
-        int ThresholdMatching { get; set; }
+        double ThresholdMatching { get; set; }
 
-        int WaitingDuration { get; set; }
+        TimeSpan WaitingDuration { get; set; }
 
         #endregion Public Properties
 

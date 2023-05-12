@@ -20,7 +20,7 @@ namespace Score2Stream.VideoService.Extensions
         }
 
         public static void SetValue(this Clip clip, string value, int similarity,
-            TimeSpan waitingSpan)
+            TimeSpan waitingDuration)
         {
             if (clip.UpdateValue != value)
             {
@@ -30,7 +30,7 @@ namespace Score2Stream.VideoService.Extensions
             }
 
             if (clip.Value != clip.UpdateValue
-                && clip.UpdateTime.Add(waitingSpan) < DateTime.Now)
+                && clip.UpdateTime.Add(waitingDuration) < DateTime.Now)
             {
                 clip.Value = clip.UpdateValue;
                 clip.Similarity = clip.UpdateSimilarity;

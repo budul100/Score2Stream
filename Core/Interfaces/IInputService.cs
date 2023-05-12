@@ -9,15 +9,27 @@ namespace Score2Stream.Core.Interfaces
 
         IClipService ClipService { get; }
 
+        int ImagesQueueSize { get; set; }
+
         IList<Input> Inputs { get; }
 
         bool IsActive { get; }
+
+        bool NoCentering { get; set; }
+
+        int ProcessingDelay { get; set; }
 
         ISampleService SampleService { get; }
 
         ITemplateService TemplateService { get; }
 
+        int ThresholdDetecting { get; set; }
+
+        int ThresholdMatching { get; set; }
+
         IVideoService VideoService { get; }
+
+        int WaitingDuration { get; set; }
 
         #endregion Public Properties
 
