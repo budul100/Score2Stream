@@ -3,6 +3,7 @@ using OpenCvSharp;
 using Score2Stream.Core.Enums;
 using Score2Stream.Core.Extensions;
 using System;
+using System.Collections.Generic;
 
 namespace Score2Stream.Core.Models
 {
@@ -20,6 +21,8 @@ namespace Score2Stream.Core.Models
 
         public Mat Image { get; set; }
 
+        public Queue<Mat> Images { get; set; } = new Queue<Mat>();
+
         public string Name { get; set; }
 
         public Rect? Rect { get; set; }
@@ -32,11 +35,15 @@ namespace Score2Stream.Core.Models
 
         public double RelativeY2 { get; set; }
 
+        public int Similarity { get; set; }
+
         public Template Template { get; set; }
 
         public int ThresholdMonochrome { get; set; }
 
         public ClipType Type { get; set; }
+
+        public int UpdateSimilarity { get; set; }
 
         public DateTime UpdateTime { get; set; }
 

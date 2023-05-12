@@ -99,7 +99,7 @@ namespace Score2Stream.TemplateModule.ViewModels
                 {
                     next = index > 0
                         ? Samples[index - 1].Sample
-                        : Samples[Samples.Count - 1].Sample;
+                        : Samples[^1].Sample;
                 }
 
                 inputService.SampleService.Select(next);
@@ -113,7 +113,7 @@ namespace Score2Stream.TemplateModule.ViewModels
         private string GetCurrent()
         {
             var result = !string.IsNullOrWhiteSpace(Template?.Clip?.Value)
-                ? $"{Template.Description} => {Template.Clip.Value}"
+                ? $"{Template.Description} => {Template.Clip.Value} ({Template.Clip.Similarity})"
                 : Template?.Description;
 
             return result;

@@ -1,5 +1,6 @@
 ﻿using OpenCvSharp;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Score2Stream.VideoService.Extensions
@@ -7,6 +8,36 @@ namespace Score2Stream.VideoService.Extensions
     internal static class ImageExtensions
     {
         #region Public Methods
+
+        public static Mat AsBlended(this IEnumerable<Mat> images)
+        {
+            var result = default(Mat);
+
+            if (images.Any())
+            {
+                result = images.First();
+
+                var others = images.Skip(1)
+                    .Where(i => i.Width == result.Width
+                        && i.Height == result.Height).ToArray();
+
+                for (var index = 0; index < others.Length; index++)
+                {
+                    var alpha = 1.0 / (index + 1);
+                    var beta = 1.0 - alpha;
+
+                    Cv2.AddWeighted(
+                        src1: others[index],
+                        alpha: alpha,
+                        src2: result,
+                        beta: beta,
+                        gamma: 0.0,
+                        dst: result);
+                }
+            }
+
+            return result;
+        }
 
         public static Rect? GetContour(this Mat image)
         {
@@ -63,17 +94,16 @@ namespace Score2Stream.VideoService.Extensions
 
         public static Mat ToCentered(this Mat image, int fullWidth, int fullHeight)
         {
-            var horizontal = (int)Math.Ceiling((double)(fullWidth - image.Width) / 2);
-            var vertical = (int)Math.Ceiling((double)(fullHeight - image.Height) / 2);
+            var horizontal = (int)Math.Ceiling((double)Math.Abs(fullWidth - image.Width) / 2);
+            var vertical = (int)Math.Ceiling((double)Math.Abs(fullHeight - image.Height) / 2);
 
-            var result = image
-                .CopyMakeBorder(
-                    top: vertical,
-                    bottom: vertical,
-                    left: horizontal,
-                    right: horizontal,
-                    borderType: BorderTypes.Constant,
-                    value: 0);
+            var result = image.CopyMakeBorder(
+                top: vertical,
+                bottom: vertical,
+                left: horizontal,
+                right: horizontal,
+                borderType: BorderTypes.Constant,
+                value: 0);
 
             return result;
         }
