@@ -185,7 +185,7 @@ namespace Score2Stream.VideoService
 
                 do
                 {
-                    var startTime = DateTime.Now;
+                    var capturingStart = DateTime.Now;
 
                     hasContent = video.Read(currentFrame);
 
@@ -201,10 +201,6 @@ namespace Score2Stream.VideoService
                             UpdateClip(relevant);
                         }
                     }
-
-                    await UpdateVideoAsync();
-
-                    ProcessingTime = DateTime.Now - startTime;
 
                     if (!deviceId.HasValue)
                     {
@@ -224,6 +220,10 @@ namespace Score2Stream.VideoService
                             frameIndex = 0;
                         }
                     }
+
+                    ProcessingTime = DateTime.Now - capturingStart;
+
+                    await UpdateVideoAsync();
                 }
                 while (hasContent
                     && !cancellationTokenSource.IsCancellationRequested);
@@ -231,10 +231,10 @@ namespace Score2Stream.VideoService
             catch
             { }
 
-            frame = default;
-
-            IsActive = false;
             ProcessingTime = default;
+            IsActive = false;
+
+            frame = default;
 
             await UpdateVideoAsync();
 
@@ -254,7 +254,7 @@ namespace Score2Stream.VideoService
 
             async Task runTask() => await dispatcherService.InvokeAsync(() => RunAsync(
                 deviceId: deviceId,
-                fileName: fileName));
+                fileName: fileName)).ConfigureAwait(false);
 
             serviceTask = Task.Run(
                 function: runTask,
@@ -370,7 +370,14 @@ namespace Score2Stream.VideoService
         {
             videoUpdatedEvent.Publish();
 
-            await Task.Delay(Delay + DelayMin);
+            var currentDelay = Delay - (ProcessingTime?.Milliseconds ?? 0);
+
+            if (currentDelay < DelayMin)
+            {
+                currentDelay = DelayMin;
+            }
+
+            await Task.Delay(currentDelay);
         }
 
         #endregion Private Methods
