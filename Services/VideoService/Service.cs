@@ -256,15 +256,18 @@ namespace Score2Stream.VideoService
 
         private void UpdateDetecting(Clip clip)
         {
-            var detectingSample = clip.Template?.Samples?
-                .OrderByDescending(c => c.Similarity).FirstOrDefault();
-
-            if ((clip.Template?.Samples.Any() != true)
-                || ((detectingSample != default) && (detectingSample.Similarity < ThresholdDetecting)))
+            if (clip.Template.Clip == clip)
             {
-                eventAggregator
-                    .GetEvent<SampleDetectedEvent>()
-                    .Publish(clip);
+                var detectingSample = clip.Template?.Samples?
+                    .OrderByDescending(c => c.Similarity).FirstOrDefault();
+
+                if ((clip.Template?.Samples.Any() != true)
+                    || ((detectingSample != default) && (detectingSample.Similarity < ThresholdDetecting)))
+                {
+                    eventAggregator
+                        .GetEvent<SampleDetectedEvent>()
+                        .Publish(clip);
+                }
             }
         }
 
