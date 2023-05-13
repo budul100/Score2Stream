@@ -8,6 +8,7 @@ using Score2Stream.Core.Events.Video;
 using Score2Stream.Core.Interfaces;
 using Score2Stream.Core.Models;
 using Score2Stream.Core.Models.Content;
+using Score2Stream.Core.Settings;
 using Score2Stream.ScoreboardService.Extensions;
 using System;
 using System.Collections.Generic;
@@ -23,11 +24,12 @@ namespace Score2Stream.ScoreboardService
         #region Private Fields
 
         private const char GameClockSplitterDefault = ':';
-        private const int TickerFrequencyDefault = 10;
 
         private readonly IDictionary<ClipType, Clip> clips = new Dictionary<ClipType, Clip>();
         private readonly IEventAggregator eventAggregator;
         private readonly JsonSerializerOptions serializeOptions;
+        private readonly UserSettings settings;
+        private readonly ISettingsService<UserSettings> settingsService;
 
         private string clockGame;
         private string clockShot;
@@ -49,9 +51,12 @@ namespace Score2Stream.ScoreboardService
 
         #region Public Constructors
 
-        public Service(IEventAggregator eventAggregator)
+        public Service(ISettingsService<UserSettings> settingsService, IEventAggregator eventAggregator)
         {
+            this.settingsService = settingsService;
             this.eventAggregator = eventAggregator;
+
+            settings = settingsService.Get();
 
             serializeOptions = new JsonSerializerOptions
             {
@@ -67,10 +72,6 @@ namespace Score2Stream.ScoreboardService
             eventAggregator.GetEvent<ServerStartedEvent>().Subscribe(
                 action: UpdateBoard,
                 keepSubscriberReferenceAlive: true);
-
-            ColorHome = Colors.Yellow;
-            ColorGuest = Colors.Blue;
-            TickersFrequency = TickerFrequencyDefault;
 
             InitializeClips();
             Update();
@@ -90,11 +91,47 @@ namespace Score2Stream.ScoreboardService
 
         public bool ClockShotIsUpToDate => ClockShot == clockShot;
 
-        public Color ColorGuest { get; set; }
+        public Color ColorGuest
+        {
+            get
+            {
+                var result = Color.Parse(settings.ColorGuest);
+
+                return result;
+            }
+            set
+            {
+                var color = value.ToString();
+
+                if (color != settings.ColorGuest)
+                {
+                    settings.ColorGuest = color;
+                    settingsService.Save();
+                }
+            }
+        }
 
         public bool ColorGuestUpToDate => ColorGuest == colorGuest;
 
-        public Color ColorHome { get; set; }
+        public Color ColorHome
+        {
+            get
+            {
+                var result = Color.Parse(settings.ColorHome);
+
+                return result;
+            }
+            set
+            {
+                var color = value.ToString();
+
+                if (color != settings.ColorHome)
+                {
+                    settings.ColorHome = color;
+                    settingsService.Save();
+                }
+            }
+        }
 
         public bool ColorHomeUpToDate => ColorHome == colorHome;
 
@@ -126,17 +163,51 @@ namespace Score2Stream.ScoreboardService
 
         public bool ShotNotFromClip { get; set; }
 
-        public string TeamGuest { get; set; }
+        public string TeamGuest
+        {
+            get { return settings.TeamGuest; }
+            set
+            {
+                if (value != settings.TeamGuest)
+                {
+                    settings.TeamGuest = value;
+                    settingsService.Save();
+                }
+            }
+        }
 
         public bool TeamGuestUpToDate => TeamGuest == teamGuest;
 
-        public string TeamHome { get; set; }
+        public string TeamHome
+        {
+            get { return settings.TeamHome; }
+            set
+            {
+                if (value != settings.TeamHome)
+                {
+                    settings.TeamHome = value;
+                    settingsService.Save();
+                }
+            }
+        }
 
         public bool TeamHomeUpToDate => TeamHome == teamHome;
 
         public IEnumerable<string> Tickers { get; set; }
 
-        public int TickersFrequency { get; set; }
+        public int TickersFrequency
+        {
+            get { return settings.TickersFrequency; }
+            set
+            {
+                if (settings.TickersFrequency != value)
+                {
+                    settings.TickersFrequency = value;
+
+                    settingsService.Save();
+                }
+            }
+        }
 
         public bool TickersUpToDate => (tickers?.Any() != true && Tickers?.Any() != true)
             || (tickers?.Any() == true && Tickers?.Any() == true && tickers.SetEquals(Tickers));
