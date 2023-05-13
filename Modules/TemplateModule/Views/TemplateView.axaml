@@ -2,7 +2,9 @@
     x:Class="Score2Stream.TemplateModule.Views.TemplateView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:v="using:Score2Stream.TemplateModule.Views"
@@ -71,9 +73,33 @@
         </DockPanel>
 
         <ScrollViewer
+            Name="SamplesViewer"
             Grid.Row="1"
+            Margin="5"
             HorizontalScrollBarVisibility="Disabled"
             VerticalScrollBarVisibility="Auto">
+
+            <i:Interaction.Behaviors>
+                <a:DataTriggerBehavior
+                    Binding="{Binding IsDetection}"
+                    ComparisonCondition="Equal"
+                    Value="False">
+                    <a:ChangePropertyAction
+                        PropertyName="Background"
+                        TargetObject="SamplesViewer"
+                        Value="Transparent" />
+                </a:DataTriggerBehavior>
+                <a:DataTriggerBehavior
+                    Binding="{Binding IsDetection}"
+                    ComparisonCondition="Equal"
+                    Value="True">
+                    <a:ChangePropertyAction
+                        PropertyName="Background"
+                        TargetObject="SamplesViewer"
+                        Value="Beige" />
+                </a:DataTriggerBehavior>
+            </i:Interaction.Behaviors>
+
             <ItemsControl Items="{Binding Samples}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>

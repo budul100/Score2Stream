@@ -57,7 +57,6 @@
                     TargetObject="SampleBorder"
                     Value="GreenYellow" />
             </a:DataTriggerBehavior>
-
         </i:Interaction.Behaviors>
 
         <StackPanel Name="SamplePanel" Orientation="Horizontal">
@@ -87,7 +86,6 @@
                     <a:InvokeCommandAction Command="{Binding OnSelectionCommand}" />
                     <a:CallMethodAction MethodName="Focus" TargetObject="ValueTextBox" />
                 </a:EventTriggerBehavior>
-
             </i:Interaction.Behaviors>
 
             <Border

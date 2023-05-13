@@ -9,6 +9,7 @@ using Prism.Regions;
 using Score2Stream.Core.Constants;
 using Score2Stream.Core.Enums;
 using Score2Stream.Core.Events.Clip;
+using Score2Stream.Core.Events.Detection;
 using Score2Stream.Core.Events.Graphics;
 using Score2Stream.Core.Events.Input;
 using Score2Stream.Core.Events.Sample;
@@ -36,10 +37,10 @@ namespace Score2Stream.MenuModule.ViewModels
         private const int TabVideoIndex = 1;
         private const string TabVideoName = "VideoTab";
 
+        private readonly IEventAggregator eventAggregator;
         private readonly IInputService inputService;
         private readonly IMessageBoxService messageBoxService;
         private readonly IRegionManager regionManager;
-
         private int tabIndex;
 
         #endregion Private Fields
@@ -53,6 +54,7 @@ namespace Score2Stream.MenuModule.ViewModels
             this.inputService = inputService;
             this.messageBoxService = messageBoxService;
             this.regionManager = regionManager;
+            this.eventAggregator = eventAggregator;
 
             this.OnTabSelectionCommand = new DelegateCommand<string>(
                 executeMethod: n => SelectRegion(n));
@@ -206,6 +208,8 @@ namespace Score2Stream.MenuModule.ViewModels
                 if (IsActive)
                 {
                     inputService.SampleService.IsDetection = value;
+
+                    eventAggregator.GetEvent<DetectionChangedEvent>().Publish();
 
                     RaisePropertyChanged(nameof(IsSampleDetection));
                 }

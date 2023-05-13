@@ -2,6 +2,7 @@
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
+using Score2Stream.Core.Events.Detection;
 using Score2Stream.Core.Events.Sample;
 using Score2Stream.Core.Events.Template;
 using Score2Stream.Core.Events.Video;
@@ -21,6 +22,8 @@ namespace Score2Stream.TemplateModule.ViewModels
         private readonly IContainerProvider containerProvider;
         private readonly IInputService inputService;
 
+        private bool isDetection;
+
         #endregion Private Fields
 
         #region Public Constructors
@@ -31,6 +34,10 @@ namespace Score2Stream.TemplateModule.ViewModels
         {
             this.inputService = inputService;
             this.containerProvider = containerProvider;
+
+            eventAggregator.GetEvent<DetectionChangedEvent>().Subscribe(
+                action: () => IsDetection = inputService.SampleService.IsDetection,
+                keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<TemplateSelectedEvent>().Subscribe(
                 action: t => UpdateTemplate(t),
@@ -58,6 +65,12 @@ namespace Score2Stream.TemplateModule.ViewModels
         public Bitmap Bitmap => Template?.Clip?.Bitmap;
 
         public string Current => GetCurrent();
+
+        public bool IsDetection
+        {
+            get { return isDetection; }
+            set { SetProperty(ref isDetection, value); }
+        }
 
         public ObservableCollection<SampleViewModel> Samples { get; private set; } = new ObservableCollection<SampleViewModel>();
 
