@@ -53,6 +53,7 @@
 		<ProjectReference Include="..\Services\MessageBoxService\MessageBoxService.csproj" />
 		<ProjectReference Include="..\Services\SampleService\SampleService.csproj" />
 		<ProjectReference Include="..\Services\ScoreboardService\ScoreboardService.csproj" />
+		<ProjectReference Include="..\Services\SettingsService\SettingsService.csproj" />
 		<ProjectReference Include="..\Services\TemplateService\TemplateService.csproj" />
 		<ProjectReference Include="..\Services\VideoService\VideoService.csproj" />
 		<ProjectReference Include="..\Services\WebService\WebService.csproj" />

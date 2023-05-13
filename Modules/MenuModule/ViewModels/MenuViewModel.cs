@@ -19,6 +19,7 @@ using Score2Stream.Core.Events.Video;
 using Score2Stream.Core.Interfaces;
 using Score2Stream.Core.Models;
 using Score2Stream.Core.Prism;
+using Score2Stream.Core.Settings;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -41,20 +42,28 @@ namespace Score2Stream.MenuModule.ViewModels
         private readonly IInputService inputService;
         private readonly IMessageBoxService messageBoxService;
         private readonly IRegionManager regionManager;
+        private readonly ISettingsService<UserSettings> settingsService;
+        private readonly UserSettings userSettings;
+
+        private string inputDirectory;
         private int tabIndex;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public MenuViewModel(IWebService webService, IScoreboardService scoreboardService, IInputService inputService,
-            IMessageBoxService messageBoxService, IRegionManager regionManager, IEventAggregator eventAggregator)
+        public MenuViewModel(ISettingsService<UserSettings> settingsService, IWebService webService,
+            IScoreboardService scoreboardService, IInputService inputService, IMessageBoxService messageBoxService,
+            IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
+            this.settingsService = settingsService;
             this.inputService = inputService;
             this.messageBoxService = messageBoxService;
             this.regionManager = regionManager;
             this.eventAggregator = eventAggregator;
+
+            this.userSettings = settingsService.Get();
 
             this.OnTabSelectionCommand = new DelegateCommand<string>(
                 executeMethod: n => SelectRegion(n));
@@ -457,8 +466,14 @@ namespace Score2Stream.MenuModule.ViewModels
 
                 if (!File.Exists(input.FileName))
                 {
+                    if (!Directory.Exists(inputDirectory))
+                    {
+                        inputDirectory = Path.GetDirectoryName(userSettings.FilePathVideo);
+                    }
+
                     var dialog = new OpenFileDialog
                     {
+                        Directory = inputDirectory,
                         Title = Constants.InputFileText,
                         AllowMultiple = false
                     };
@@ -474,6 +489,9 @@ namespace Score2Stream.MenuModule.ViewModels
 
                 if (File.Exists(fileName))
                 {
+                    userSettings.FilePathVideo = fileName;
+                    settingsService.Save();
+
                     inputService.Select(fileName);
                 }
             }

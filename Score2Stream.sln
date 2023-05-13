@@ -37,7 +37,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClipModule", "Modules\ClipM
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TemplateModule", "Modules\TemplateModule\TemplateModule.csproj", "{50312892-5F31-40C3-A4C7-339D0C0BC30E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageBoxService", "Services\MessageBoxService\MessageBoxService.csproj", "{29C1632E-F751-4379-B587-3BEE8AB8F189}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessageBoxService", "Services\MessageBoxService\MessageBoxService.csproj", "{29C1632E-F751-4379-B587-3BEE8AB8F189}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SettingsService", "Services\SettingsService\SettingsService.csproj", "{E1D9727F-972E-41B4-89C0-14FAC06E3B26}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -109,6 +111,10 @@ Global
 		{29C1632E-F751-4379-B587-3BEE8AB8F189}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29C1632E-F751-4379-B587-3BEE8AB8F189}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29C1632E-F751-4379-B587-3BEE8AB8F189}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1D9727F-972E-41B4-89C0-14FAC06E3B26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1D9727F-972E-41B4-89C0-14FAC06E3B26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1D9727F-972E-41B4-89C0-14FAC06E3B26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1D9727F-972E-41B4-89C0-14FAC06E3B26}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -128,6 +134,7 @@ Global
 		{DAF03EAC-5D90-44AF-A404-20E1CA4BFCC7} = {41F7A76E-1F3E-4BA0-82FA-3FF1D8D4E9D1}
 		{50312892-5F31-40C3-A4C7-339D0C0BC30E} = {41F7A76E-1F3E-4BA0-82FA-3FF1D8D4E9D1}
 		{29C1632E-F751-4379-B587-3BEE8AB8F189} = {F601B3EC-079D-49C4-9124-D96B68CF1C54}
+		{E1D9727F-972E-41B4-89C0-14FAC06E3B26} = {F601B3EC-079D-49C4-9124-D96B68CF1C54}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {426EBDEF-973C-4F65-AA08-27BB71AC16B7}

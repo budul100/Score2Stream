@@ -6,6 +6,7 @@ using Prism.Modularity;
 using Prism.Regions;
 using Score2Stream.Core.Enums;
 using Score2Stream.Core.Interfaces;
+using Score2Stream.Core.Settings;
 using Score2Stream.Views;
 using Splat;
 using System;
@@ -93,6 +94,7 @@ namespace Score2Stream
             var messageBoxService = new MessageBoxService.Service(App.Current);
             containerRegistry.RegisterInstance<IMessageBoxService>(messageBoxService);
 
+            containerRegistry.RegisterSingleton<ISettingsService<UserSettings>, SettingsService.Service<UserSettings>>();
             containerRegistry.RegisterSingleton<IScoreboardService, ScoreboardService.Service>();
             containerRegistry.RegisterSingleton<IWebService, WebService.Service>();
 

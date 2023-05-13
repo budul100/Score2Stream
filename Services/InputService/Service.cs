@@ -6,6 +6,7 @@ using Score2Stream.Core.Events.Input;
 using Score2Stream.Core.Events.Video;
 using Score2Stream.Core.Interfaces;
 using Score2Stream.Core.Models;
+using Score2Stream.Core.Settings;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,30 +21,23 @@ namespace Score2Stream.InputService
 
         private readonly IContainerProvider containerProvider;
         private readonly IEventAggregator eventAggregator;
+        private readonly UserSettings settings;
+        private readonly ISettingsService<UserSettings> settingsService;
 
         private Input currentInput;
-
-        private int imagesQueueSize;
-        private bool noCentering;
-        private int processingDelay;
-        private int thresholdDetecting;
-        private int thresholdMatching;
-        private int waitingDuration;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public Service(IContainerProvider containerProvider, IEventAggregator eventAggregator)
+        public Service(ISettingsService<UserSettings> settingsService, IContainerProvider containerProvider,
+            IEventAggregator eventAggregator)
         {
-            ProcessingDelay = Constants.DefaultProcessingDelay;
-            ImagesQueueSize = Constants.DefaultImagesQueueSize;
-            ThresholdDetecting = Constants.DefaultThresholdDetecting;
-            ThresholdMatching = Constants.DefaultThresholdMatching;
-            WaitingDuration = Constants.DefaultWaitingDuration;
-
+            this.settingsService = settingsService;
             this.containerProvider = containerProvider;
             this.eventAggregator = eventAggregator;
+
+            this.settings = settingsService.Get();
 
             eventAggregator.GetEvent<VideoEndedEvent>().Subscribe(
                 action: UpdateDevices,
@@ -58,13 +52,15 @@ namespace Score2Stream.InputService
 
         public int ImagesQueueSize
         {
-            get { return imagesQueueSize; }
+            get { return settings.ImagesQueueSize; }
             set
             {
-                if (value != imagesQueueSize
+                if (value != settings.ImagesQueueSize
                     && value > 0)
                 {
-                    imagesQueueSize = value;
+                    settings.ImagesQueueSize = value;
+
+                    settingsService.Save();
                     UpdateInput();
                 }
             }
@@ -76,12 +72,14 @@ namespace Score2Stream.InputService
 
         public bool NoCentering
         {
-            get { return noCentering; }
+            get { return settings.NoCentering; }
             set
             {
-                if (noCentering != value)
+                if (settings.NoCentering != value)
                 {
-                    noCentering = value;
+                    settings.NoCentering = value;
+
+                    settingsService.Save();
                     UpdateInput();
                 }
             }
@@ -89,12 +87,14 @@ namespace Score2Stream.InputService
 
         public int ProcessingDelay
         {
-            get { return processingDelay; }
+            get { return settings.ProcessingDelay; }
             set
             {
-                if (processingDelay != value)
+                if (settings.ProcessingDelay != value)
                 {
-                    processingDelay = value;
+                    settings.ProcessingDelay = value;
+
+                    settingsService.Save();
                     UpdateInput();
                 }
             }
@@ -106,12 +106,14 @@ namespace Score2Stream.InputService
 
         public int ThresholdDetecting
         {
-            get { return thresholdDetecting; }
+            get { return settings.ThresholdDetecting; }
             set
             {
-                if (thresholdDetecting != value)
+                if (settings.ThresholdDetecting != value)
                 {
-                    thresholdDetecting = value;
+                    settings.ThresholdDetecting = value;
+
+                    settingsService.Save();
                     UpdateInput();
                 }
             }
@@ -119,12 +121,14 @@ namespace Score2Stream.InputService
 
         public int ThresholdMatching
         {
-            get { return thresholdMatching; }
+            get { return settings.ThresholdMatching; }
             set
             {
-                if (thresholdMatching != value)
+                if (settings.ThresholdMatching != value)
                 {
-                    thresholdMatching = value;
+                    settings.ThresholdMatching = value;
+
+                    settingsService.Save();
                     UpdateInput();
                 }
             }
@@ -134,12 +138,14 @@ namespace Score2Stream.InputService
 
         public int WaitingDuration
         {
-            get { return waitingDuration; }
+            get { return settings.WaitingDuration; }
             set
             {
-                if (waitingDuration != value)
+                if (settings.WaitingDuration != value)
                 {
-                    waitingDuration = value;
+                    settings.WaitingDuration = value;
+
+                    settingsService.Save();
                     UpdateInput();
                 }
             }
