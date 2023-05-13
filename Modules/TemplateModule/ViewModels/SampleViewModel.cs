@@ -26,6 +26,9 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         public SampleViewModel(IEventAggregator eventAggregator)
         {
+            OnRemoveCommand = new DelegateCommand(
+                executeMethod: () => sampleService.Remove());
+
             OnSelectionCommand = new DelegateCommand(
                 executeMethod: () => sampleService.Select(Sample));
 
@@ -75,6 +78,8 @@ namespace Score2Stream.TemplateModule.ViewModels
             get { return isRelevant; }
             set { SetProperty(ref isRelevant, value); }
         }
+
+        public DelegateCommand OnRemoveCommand { get; }
 
         public DelegateCommand OnSelectionCommand { get; }
 

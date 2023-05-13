@@ -134,6 +134,7 @@
                         </i:Interaction.Behaviors>
 
                         <TextBox.KeyBindings>
+                            <KeyBinding Command="{Binding OnRemoveCommand}" Gesture="Shift+Delete" />
                             <KeyBinding Command="{Binding OnSelectionNextCommand}" Gesture="Tab" />
                             <KeyBinding Command="{Binding OnSelectionPreviousCommand}" Gesture="Shift+Tab" />
                         </TextBox.KeyBindings>
