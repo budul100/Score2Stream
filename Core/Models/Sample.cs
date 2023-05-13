@@ -11,6 +11,8 @@ namespace Score2Stream.Core.Models
 
         public Mat Image { get; set; }
 
+        public int Index { get; set; }
+
         public bool IsMatching { get; set; }
 
         public bool IsRelevant { get; set; }

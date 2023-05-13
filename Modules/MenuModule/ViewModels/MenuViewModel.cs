@@ -95,7 +95,7 @@ namespace Score2Stream.MenuModule.ViewModels
                 executeMethod: () => RemoveSamplesAllAsync(),
                 canExecuteMethod: () => inputService?.SampleService?.Samples?.Any() == true);
             this.SamplesOrderCommand = new DelegateCommand(
-                executeMethod: () => eventAggregator.GetEvent<OrderSamplesEvent>().Publish(),
+                executeMethod: () => inputService.SampleService.Order(),
                 canExecuteMethod: () => inputService?.SampleService?.Samples?.Any() == true);
 
             this.GraphicsReloadCommand = new DelegateCommand(

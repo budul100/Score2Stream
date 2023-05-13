@@ -13,6 +13,7 @@ namespace Score2Stream.SampleService
         #region Private Fields
 
         private readonly IEventAggregator eventAggregator;
+        private int index;
 
         #endregion Private Fields
 
@@ -35,7 +36,7 @@ namespace Score2Stream.SampleService
 
         public Sample Sample { get; private set; }
 
-        public List<Sample> Samples { get; } = new List<Sample>();
+        public List<Sample> Samples { get; private set; } = new List<Sample>();
 
         #endregion Public Properties
 
@@ -49,6 +50,33 @@ namespace Score2Stream.SampleService
 
                 Select(sample);
             }
+        }
+
+        public void Next(bool onward)
+        {
+            var next = GetNext(onward);
+
+            if (next != default)
+            {
+                Select(next);
+            }
+        }
+
+        public void Order()
+        {
+            Samples = Samples
+                .OrderByDescending(s => string.IsNullOrWhiteSpace(s.Value))
+                .ThenBy(s => s.Value).ToList();
+
+            index = 0;
+
+            foreach (var sample in Samples)
+            {
+                sample.Index = index++;
+            }
+
+            eventAggregator.GetEvent<SamplesOrderedEvent>()
+                .Publish();
         }
 
         public void Remove(Template template)
@@ -72,12 +100,14 @@ namespace Score2Stream.SampleService
 
         public void Remove()
         {
+            var next = GetNext(true);
+
             RemoveSample(Sample);
+
+            Select(next);
 
             eventAggregator.GetEvent<SamplesChangedEvent>()
                 .Publish();
-
-            Select(default);
         }
 
         public void Select(Sample sample)
@@ -93,6 +123,31 @@ namespace Score2Stream.SampleService
 
         #region Private Methods
 
+        private Sample GetNext(bool onward)
+        {
+            var result = Sample;
+
+            if (Samples.Count > 0)
+            {
+                var index = Samples.IndexOf(Sample);
+
+                if (onward)
+                {
+                    result = index < Samples.Count - 1
+                        ? Samples[index + 1]
+                        : Samples[0];
+                }
+                else
+                {
+                    result = index > 0
+                        ? Samples[index - 1]
+                        : Samples[^1];
+                }
+            }
+
+            return result;
+        }
+
         private Sample GetSample(Clip clip)
         {
             var result = default(Sample);
@@ -101,8 +156,9 @@ namespace Score2Stream.SampleService
             {
                 result = new Sample
                 {
-                    Image = clip.Image,
                     Bitmap = clip.Bitmap,
+                    Image = clip.Image,
+                    Index = index++,
                     Template = clip.Template,
                 };
 

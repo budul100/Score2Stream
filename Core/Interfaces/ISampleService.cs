@@ -19,6 +19,10 @@ namespace Score2Stream.Core.Interfaces
 
         void Add(Clip clip);
 
+        void Next(bool onward);
+
+        void Order();
+
         void Remove(Template template);
 
         void Remove();

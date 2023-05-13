@@ -30,10 +30,10 @@ namespace Score2Stream.TemplateModule.ViewModels
                 executeMethod: () => sampleService.Select(Sample));
 
             OnSelectionNextCommand = new DelegateCommand(
-                executeMethod: () => parent.SelectNext(true));
+                executeMethod: () => sampleService.Next(true));
 
             OnSelectionPreviousCommand = new DelegateCommand(
-                executeMethod: () => parent.SelectNext(false));
+                executeMethod: () => sampleService.Next(false));
 
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
                 action: s => IsActive = s == Sample,
@@ -57,8 +57,6 @@ namespace Score2Stream.TemplateModule.ViewModels
         public string Difference => Sample?.Image != default
             ? $"Difference: {(int)(Sample.Similarity * 100)}"
             : default;
-
-        public bool HasNoValue => string.IsNullOrWhiteSpace(Value);
 
         public bool IsActive
         {
@@ -94,7 +92,6 @@ namespace Score2Stream.TemplateModule.ViewModels
                 Sample.Value = value;
 
                 RaisePropertyChanged(nameof(Value));
-                RaisePropertyChanged(nameof(HasNoValue));
             }
         }
 

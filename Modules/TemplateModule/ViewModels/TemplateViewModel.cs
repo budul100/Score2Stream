@@ -40,7 +40,7 @@ namespace Score2Stream.TemplateModule.ViewModels
                 action: () => UpdateSamples(),
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<OrderSamplesEvent>().Subscribe(
+            eventAggregator.GetEvent<SamplesOrderedEvent>().Subscribe(
                 action: () => OrderSamples(),
                 keepSubscriberReferenceAlive: true);
 
@@ -59,7 +59,7 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         public string Current => GetCurrent();
 
-        public ObservableCollection<SampleViewModel> Samples { get; } = new ObservableCollection<SampleViewModel>();
+        public ObservableCollection<SampleViewModel> Samples { get; private set; } = new ObservableCollection<SampleViewModel>();
 
         public Template Template { get; private set; }
 
@@ -76,38 +76,6 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         #endregion Public Properties
 
-        #region Public Methods
-
-        public void SelectNext(bool onward)
-        {
-            if (inputService != default
-                && Samples.Count > 0)
-            {
-                var current = Samples
-                    .SingleOrDefault(s => s.Sample == inputService?.SampleService.Sample);
-
-                var index = Samples.IndexOf(current);
-                var next = default(Sample);
-
-                if (onward)
-                {
-                    next = index < Samples.Count - 1
-                        ? Samples[index + 1].Sample
-                        : Samples[0].Sample;
-                }
-                else
-                {
-                    next = index > 0
-                        ? Samples[index - 1].Sample
-                        : Samples[^1].Sample;
-                }
-
-                inputService.SampleService.Select(next);
-            }
-        }
-
-        #endregion Public Methods
-
         #region Private Methods
 
         private string GetCurrent()
@@ -121,16 +89,9 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         private void OrderSamples()
         {
-            var ordereds = Samples
-                .OrderByDescending(s => s.HasNoValue)
-                .ThenBy(s => s.Value).ToArray();
+            Samples = new ObservableCollection<SampleViewModel>(Samples.OrderBy(s => s.Sample.Index));
 
-            Samples.Clear();
-
-            foreach (var ordered in ordereds)
-            {
-                Samples.Add(ordered);
-            }
+            RaisePropertyChanged(nameof(Samples));
         }
 
         private void UpdateImage()
@@ -166,6 +127,8 @@ namespace Score2Stream.TemplateModule.ViewModels
                     Samples.Add(current);
                 }
             }
+
+            RaisePropertyChanged(nameof(Samples));
         }
 
         private void UpdateTemplate(Template template)

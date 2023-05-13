@@ -2,7 +2,7 @@
 
 namespace Score2Stream.Core.Events.Sample
 {
-    public class OrderSamplesEvent
+    public class SamplesOrderedEvent
         : PubSubEvent
     { }
 }
