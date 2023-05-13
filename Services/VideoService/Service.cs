@@ -172,26 +172,25 @@ namespace Score2Stream.VideoService
 
                 var hasContent = false;
 
-                using var currentFrame = new Mat();
-
                 do
                 {
-                    var capturingStart = DateTime.Now;
-
+                    using var currentFrame = new Mat();
                     hasContent = video.Read(currentFrame);
+
+                    var capturingStart = DateTime.Now;
 
                     if (!currentFrame.Empty())
                     {
-                        frame = currentFrame;
+                        frame = currentFrame.Clone();
                         Bitmap = new Bitmap(frame.ToMemoryStream());
+                    }
 
-                        var clips = ClipService.Clips
-                            .Where(c => c.Rect.HasValue).ToArray();
+                    var clips = ClipService.Clips
+                        .Where(c => c.Rect.HasValue).ToArray();
 
-                        foreach (var clip in clips)
-                        {
-                            UpdateImage(clip);
-                        }
+                    foreach (var clip in clips)
+                    {
+                        UpdateImage(clip);
                     }
 
                     if (!deviceId.HasValue)
@@ -201,10 +200,10 @@ namespace Score2Stream.VideoService
                             frameCount = video.Get(VideoCaptureProperties.FrameCount);
                         }
 
-                        if (frameIndex++ >= frameCount
+                        if (frameIndex++ > frameCount
                             || !hasContent)
                         {
-                            frameIndex = 0;
+                            frameIndex = 1;
                             hasContent = true;
 
                             video.Set(
@@ -271,43 +270,46 @@ namespace Score2Stream.VideoService
 
         private void UpdateImage(Clip clip)
         {
-            var baseImage = frame
-                .Clone(clip.Rect.Value);
-
-            clip.Images.Enqueue(baseImage);
-
-            if (clip.Images.Count > ImagesQueueSize)
+            if (!frame.Empty())
             {
-                clip.Images.Dequeue();
-            }
+                var baseImage = frame
+                    .Clone(clip.Rect.Value);
 
-            if (clip.Images.Count >= ImagesQueueSize)
-            {
-                var thresholdMonochrome = clip.ThresholdMonochrome / Constants.DividerThreshold;
+                clip.Images.Enqueue(baseImage);
 
-                var monochromeImage = clip.Images.AsBlended()
-                    .ToMonochrome(thresholdMonochrome);
-
-                var contourRectangle = !NoCentering
-                    ? monochromeImage.GetContour()
-                    : default;
-
-                var currentImage = contourRectangle.HasValue
-                    ? monochromeImage.ToCropped(contourRectangle.Value)
-                    : monochromeImage;
-
-                if (currentImage != default)
+                if (clip.Images.Count > ImagesQueueSize)
                 {
-                    clip.Image = currentImage;
+                    clip.Images.Dequeue();
+                }
 
-                    var centredImage = clip.Image
-                        .ToCentered(
-                            fullWidth: maxWidth,
-                            fullHeight: maxHeight);
+                if (clip.Images.Count >= ImagesQueueSize)
+                {
+                    var thresholdMonochrome = clip.ThresholdMonochrome / Constants.DividerThreshold;
 
-                    clip.Bitmap = new Bitmap(centredImage.ToMemoryStream());
+                    var monochromeImage = clip.Images.AsBlended()
+                        .ToMonochrome(thresholdMonochrome);
 
-                    UpdateSample(clip);
+                    var contourRectangle = !NoCentering
+                        ? monochromeImage.GetContour()
+                        : default;
+
+                    var currentImage = contourRectangle.HasValue
+                        ? monochromeImage.ToCropped(contourRectangle.Value)
+                        : monochromeImage;
+
+                    if (currentImage != default)
+                    {
+                        clip.Image = currentImage;
+
+                        var centredImage = clip.Image
+                            .ToCentered(
+                                fullWidth: maxWidth,
+                                fullHeight: maxHeight);
+
+                        clip.Bitmap = new Bitmap(centredImage.ToMemoryStream());
+
+                        UpdateSample(clip);
+                    }
                 }
             }
         }
