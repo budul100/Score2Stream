@@ -12,7 +12,6 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         private readonly IEventAggregator eventAggregator;
         private readonly IScoreboardService scoreboardService;
-
         private int number;
 
         #endregion Private Fields
@@ -28,6 +27,8 @@ namespace Score2Stream.ScoreboardModule.ViewModels
         #endregion Public Constructors
 
         #region Public Properties
+
+        public static int MaxLengthTicker => 70;
 
         public bool IsActive
         {

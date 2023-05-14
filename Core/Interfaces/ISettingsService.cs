@@ -1,6 +1,7 @@
 ﻿namespace Score2Stream.Core.Interfaces
 {
-    public interface ISettingsService<T> where T : class
+    public interface ISettingsService<T>
+        where T : class
     {
         #region Public Methods
 
@@ -9,8 +10,6 @@
         void Initialize(string fileName = "userSettings.json");
 
         void Save();
-
-        void SaveAsync();
 
         #endregion Public Methods
     }

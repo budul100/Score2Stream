@@ -3,6 +3,7 @@ using Score2Stream.Core.Interfaces;
 using System;
 using System.IO;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Score2Stream.SettingsService
@@ -14,6 +15,8 @@ namespace Score2Stream.SettingsService
         #region Private Fields
 
         private const string AppName = nameof(Score2Stream);
+
+        private readonly SemaphoreSlim saveLock = new(1, 1);
 
         private string filePath;
         private string folderPath;
@@ -60,29 +63,7 @@ namespace Score2Stream.SettingsService
 
         public void Save()
         {
-            Task.Run(() => SaveAsync());
-        }
-
-        public async void SaveAsync()
-        {
-            if (!Directory.Exists(folderPath))
-            {
-                Directory.CreateDirectory(folderPath);
-            }
-
-            using var settingsFileStream = new FileStream(
-                path: filePath,
-                mode: FileMode.Create);
-
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = true
-            };
-
-            await JsonSerializer.SerializeAsync(
-                utf8Json: settingsFileStream,
-                value: settings,
-                options: options);
+            Task.Run(() => SaveSettingsAsync());
         }
 
         #endregion Public Methods
@@ -95,7 +76,7 @@ namespace Score2Stream.SettingsService
             {
                 if (disposing)
                 {
-                    Task.Run(() => SaveAsync()).Wait();
+                    SaveSettings();
                 }
 
                 isDisposed = true;
@@ -121,7 +102,7 @@ namespace Score2Stream.SettingsService
         {
             if (!File.Exists(filePath))
             {
-                Task.Run(() => SaveAsync()).Wait();
+                SaveSettings();
             }
 
             using var settingsFileStream = new FileStream(
@@ -141,6 +122,47 @@ namespace Score2Stream.SettingsService
                     options: options);
             }
             catch { }
+        }
+
+        private void SaveSettings()
+        {
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            using var settingsFileStream = new FileStream(
+                path: filePath,
+                mode: FileMode.Create);
+
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true
+            };
+
+            try
+            {
+                JsonSerializer.Serialize(
+                    utf8Json: settingsFileStream,
+                    value: settings,
+                    options: options);
+            }
+            catch
+            { }
+        }
+
+        private async void SaveSettingsAsync()
+        {
+            await saveLock.WaitAsync();
+
+            try
+            {
+                SaveSettings();
+            }
+            finally
+            {
+                saveLock.Release();
+            }
         }
 
         #endregion Private Methods

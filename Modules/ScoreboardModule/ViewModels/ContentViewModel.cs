@@ -49,6 +49,12 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         #region Public Properties
 
+        public static int MaxLengthPeriod => 10;
+
+        public static int MaxLengthScore => 10;
+
+        public static int MaxLengthTeam => 20;
+
         public string ClockGame { get; private set; }
 
         public bool ClockNotFromClip
@@ -165,6 +171,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
         }
 
         public bool PeriodsUpToDate => scoreboardService.PeriodsUpToDate;
+
         public bool PeriodUpToDate => scoreboardService.PeriodUpToDate;
 
         public string ScoreGuest

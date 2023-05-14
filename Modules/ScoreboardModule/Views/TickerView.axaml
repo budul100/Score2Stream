@@ -62,6 +62,7 @@
             Margin="5"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Center"
+            MaxLength="{Binding MaxLengthTicker}"
             Text="{Binding Text}" />
 
         <CheckBox
