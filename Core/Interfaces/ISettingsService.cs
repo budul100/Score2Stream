@@ -10,6 +10,8 @@
 
         void Save();
 
+        void SaveAsync();
+
         #endregion Public Methods
     }
 }

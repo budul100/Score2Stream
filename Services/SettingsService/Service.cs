@@ -3,11 +3,12 @@ using Score2Stream.Core.Interfaces;
 using System;
 using System.IO;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Score2Stream.SettingsService
 {
     public class Service<T>
-        : ISettingsService<T>
+        : ISettingsService<T>, IDisposable
         where T : class
     {
         #region Private Fields
@@ -16,11 +17,21 @@ namespace Score2Stream.SettingsService
 
         private string filePath;
         private string folderPath;
+        private bool isDisposed;
         private T settings;
 
         #endregion Private Fields
 
         #region Public Methods
+
+        public void Dispose()
+        {
+            Dispose(
+                disposing: true);
+
+            GC.SuppressFinalize(
+                obj: this);
+        }
 
         public T Get()
         {
@@ -49,6 +60,11 @@ namespace Score2Stream.SettingsService
 
         public void Save()
         {
+            Task.Run(() => SaveAsync());
+        }
+
+        public async void SaveAsync()
+        {
             if (!Directory.Exists(folderPath))
             {
                 Directory.CreateDirectory(folderPath);
@@ -63,13 +79,30 @@ namespace Score2Stream.SettingsService
                 WriteIndented = true
             };
 
-            JsonSerializer.Serialize(
+            await JsonSerializer.SerializeAsync(
                 utf8Json: settingsFileStream,
                 value: settings,
                 options: options);
         }
 
         #endregion Public Methods
+
+        #region Protected Methods
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!isDisposed)
+            {
+                if (disposing)
+                {
+                    Task.Run(() => SaveAsync()).Wait();
+                }
+
+                isDisposed = true;
+            }
+        }
+
+        #endregion Protected Methods
 
         #region Private Methods
 
@@ -88,7 +121,7 @@ namespace Score2Stream.SettingsService
         {
             if (!File.Exists(filePath))
             {
-                Save();
+                Task.Run(() => SaveAsync()).Wait();
             }
 
             using var settingsFileStream = new FileStream(
