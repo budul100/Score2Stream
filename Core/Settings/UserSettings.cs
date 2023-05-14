@@ -1,4 +1,7 @@
 ﻿using Avalonia.Media;
+using System;
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Score2Stream.Core.Settings
 {
@@ -11,9 +14,21 @@ namespace Score2Stream.Core.Settings
         private const int ThresholdDetectingDefault = 90;
         private const int ThresholdMatchingDefault = 40;
         private const int TickersFrequencyDefault = 10;
+        private const int TickersSize = 6;
         private const int WaitingDurationDefault = 100;
 
+        private (string, bool)[] tickers = Array.Empty<(string, bool)>();
+
         #endregion Private Fields
+
+        #region Public Constructors
+
+        public UserSettings()
+        {
+            InitializeTickers();
+        }
+
+        #endregion Public Constructors
 
         #region Public Properties
 
@@ -37,10 +52,62 @@ namespace Score2Stream.Core.Settings
 
         public int ThresholdMatching { get; set; } = ThresholdMatchingDefault;
 
+        [JsonIgnore]
+        public (string, bool)[] Tickers
+        {
+            get
+            {
+                return tickers;
+            }
+            set
+            {
+                tickers = value;
+                InitializeTickers();
+            }
+        }
+
         public int TickersFrequency { get; set; } = TickersFrequencyDefault;
+
+        public List<Tuple<string, bool>> TickersList
+        {
+            get
+            {
+                var result = new List<Tuple<string, bool>>();
+                foreach (var ticker in tickers)
+                {
+                    result.Add(new Tuple<string, bool>(ticker.Item1, ticker.Item2));
+                }
+
+                return result;
+            }
+            set
+            {
+                var result = new List<(string, bool)>();
+                foreach (var ticker in value)
+                {
+                    result.Add((ticker.Item1, ticker.Item2));
+                }
+
+                Tickers = result.ToArray();
+            }
+        }
 
         public int WaitingDuration { get; set; } = WaitingDurationDefault;
 
         #endregion Public Properties
+
+        #region Private Methods
+
+        private void InitializeTickers()
+        {
+            if (Tickers.Length != TickersSize)
+            {
+                Array.Resize(
+                    ref tickers,
+                    TickersSize);
+            }
+        }
+
+        #endregion Private Methods
     }
 }

@@ -18,4 +18,10 @@
 	  <ProjectReference Include="..\..\Core\Core.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Compile Update="Views\TickerView.axaml.cs">
+	    <DependentUpon>TickerView.axaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
 </Project>

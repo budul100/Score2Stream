@@ -8,6 +8,8 @@
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
+    xmlns:v="using:Score2Stream.ScoreboardModule.Views"
+    xmlns:vm="using:Score2Stream.ScoreboardModule.ViewModels"
     d:DesignWidth="600"
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
@@ -19,7 +21,7 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="80" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="120" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
@@ -546,7 +548,7 @@
                     Grid.ColumnSpan="4"
                     Margin="5"
                     VerticalAlignment="Center"
-                    Content="Is game over"
+                    Content="Game is over"
                     IsChecked="{Binding IsGameOver}" />
 
                 <Grid
@@ -602,87 +604,22 @@
                     Maximum="60"
                     Minimum="5"
                     Value="{Binding TickersFrequency, Mode=TwoWay}" />
-
-                <TextBox
-                    Grid.Row="12"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="4"
-                    Margin="5"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Center"
-                    Text="{Binding Ticker1}" />
-                <CheckBox
-                    Grid.Row="12"
-                    Grid.Column="4"
-                    Margin="5"
-                    VerticalAlignment="Center"
-                    Content="Active"
-                    IsChecked="{Binding Ticker1Active}" />
-
-                <TextBox
-                    Grid.Row="13"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="4"
-                    Margin="5"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Center"
-                    Text="{Binding Ticker2}" />
-                <CheckBox
-                    Grid.Row="13"
-                    Grid.Column="4"
-                    Margin="5"
-                    VerticalAlignment="Center"
-                    Content="Active"
-                    IsChecked="{Binding Ticker2Active}" />
-
-                <TextBox
-                    Grid.Row="14"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="4"
-                    Margin="5"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Center"
-                    Text="{Binding Ticker3}" />
-                <CheckBox
-                    Grid.Row="14"
-                    Grid.Column="4"
-                    Margin="5"
-                    VerticalAlignment="Center"
-                    Content="Active"
-                    IsChecked="{Binding Ticker3Active}" />
-
-                <TextBox
-                    Grid.Row="15"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="4"
-                    Margin="5"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Center"
-                    Text="{Binding Ticker4}" />
-                <CheckBox
-                    Grid.Row="15"
-                    Grid.Column="4"
-                    Margin="5"
-                    VerticalAlignment="Center"
-                    Content="Active"
-                    IsChecked="{Binding Ticker4Active}" />
-
-                <TextBox
-                    Grid.Row="16"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="4"
-                    Margin="5"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Center"
-                    Text="{Binding Ticker5}" />
-                <CheckBox
-                    Grid.Row="16"
-                    Grid.Column="4"
-                    Margin="5"
-                    VerticalAlignment="Center"
-                    Content="Active"
-                    IsChecked="{Binding Ticker5Active}" />
             </Grid>
+
+            <Panel Margin="5">
+                <ItemsControl Items="{Binding Tickers}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="vm:TickerViewModel">
+                            <v:TickerView />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Panel>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

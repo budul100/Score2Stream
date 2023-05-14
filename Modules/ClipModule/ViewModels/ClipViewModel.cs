@@ -112,7 +112,7 @@ namespace Score2Stream.ClipModule.ViewModels
             get { return Clip?.Type ?? ClipType.None; }
             set
             {
-                scoreboardService.Set(
+                scoreboardService.SetClip(
                     clip: Clip,
                     clipType: value);
 

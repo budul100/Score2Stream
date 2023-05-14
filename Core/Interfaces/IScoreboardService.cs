@@ -1,7 +1,6 @@
 ﻿using Avalonia.Media;
 using Score2Stream.Core.Enums;
 using Score2Stream.Core.Models;
-using System.Collections.Generic;
 
 namespace Score2Stream.Core.Interfaces
 {
@@ -63,7 +62,7 @@ namespace Score2Stream.Core.Interfaces
 
         bool TeamHomeUpToDate { get; }
 
-        IEnumerable<string> Tickers { get; set; }
+        (string, bool)[] Tickers { get; }
 
         int TickersFrequency { get; set; }
 
@@ -75,7 +74,11 @@ namespace Score2Stream.Core.Interfaces
 
         #region Public Methods
 
-        void Set(Clip clip, ClipType clipType);
+        void SetClip(Clip clip, ClipType clipType);
+
+        void SetTicker(int number, string text);
+
+        void SetTicker(int number, bool isActive);
 
         void Update();
 

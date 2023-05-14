@@ -1,0 +1,75 @@
+<UserControl
+    x:Class="Score2Stream.ScoreboardModule.Views.TickerView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="50"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Grid Margin="5">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="120" />
+        </Grid.ColumnDefinitions>
+
+        <i:Interaction.Behaviors>
+
+            <a:DataTriggerBehavior
+                Binding="{Binding IsActive}"
+                ComparisonCondition="Equal"
+                Value="True">
+                <a:ChangePropertyAction
+                    PropertyName="IsEnabled"
+                    TargetObject="TickerTextBox"
+                    Value="False" />
+            </a:DataTriggerBehavior>
+            <a:DataTriggerBehavior
+                Binding="{Binding IsActive}"
+                ComparisonCondition="Equal"
+                Value="False">
+                <a:ChangePropertyAction
+                    PropertyName="IsEnabled"
+                    TargetObject="TickerTextBox"
+                    Value="True" />
+            </a:DataTriggerBehavior>
+
+            <a:DataTriggerBehavior
+                Binding="{Binding Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                ComparisonCondition="Equal"
+                Value="True">
+                <a:ChangePropertyAction
+                    PropertyName="IsEnabled"
+                    TargetObject="IsActiveCheckBox"
+                    Value="True" />
+            </a:DataTriggerBehavior>
+            <a:DataTriggerBehavior
+                Binding="{Binding Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                ComparisonCondition="Equal"
+                Value="False">
+                <a:ChangePropertyAction
+                    PropertyName="IsEnabled"
+                    TargetObject="IsActiveCheckBox"
+                    Value="False" />
+            </a:DataTriggerBehavior>
+        </i:Interaction.Behaviors>
+
+        <TextBox
+            Name="TickerTextBox"
+            Grid.Column="0"
+            Margin="5"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Center"
+            Text="{Binding Text}" />
+
+        <CheckBox
+            Name="IsActiveCheckBox"
+            Grid.Column="1"
+            Margin="5"
+            VerticalAlignment="Center"
+            Content="Active"
+            IsChecked="{Binding IsActive}" />
+    </Grid>
+</UserControl>

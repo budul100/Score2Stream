@@ -1,10 +1,12 @@
 ﻿using Avalonia.Media;
 using Prism.Events;
+using Prism.Ioc;
 using Prism.Regions;
 using Score2Stream.Core.Events.Scoreboard;
 using Score2Stream.Core.Interfaces;
 using Score2Stream.Core.Prism;
-using System.Collections.Generic;
+using Score2Stream.Core.Settings;
+using System.Collections.ObjectModel;
 
 namespace Score2Stream.ScoreboardModule.ViewModels
 {
@@ -14,34 +16,33 @@ namespace Score2Stream.ScoreboardModule.ViewModels
         #region Private Fields
 
         private readonly ScoreboardChangedEvent changedEvent;
+        private readonly IContainerProvider containerProvider;
         private readonly IScoreboardService scoreboardService;
-
-        private string ticker1;
-        private bool ticker1Active;
-        private string ticker2;
-        private bool ticker2Active;
-        private string ticker3;
-        private bool ticker3Active;
-        private string ticker4;
-        private bool ticker4Active;
-        private string ticker5;
-        private bool ticker5Active;
+        private readonly ISettingsService<UserSettings> settingsService;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public ContentViewModel(IScoreboardService scoreboardService, IEventAggregator eventAggregator,
-            IRegionManager regionManager)
+        public ContentViewModel(ISettingsService<UserSettings> settingsService, IScoreboardService scoreboardService,
+            IContainerProvider containerProvider, IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager: regionManager)
         {
+            this.settingsService = settingsService;
             this.scoreboardService = scoreboardService;
+            this.containerProvider = containerProvider;
 
             changedEvent = eventAggregator.GetEvent<ScoreboardChangedEvent>();
+
+            changedEvent.Subscribe(
+                action: () => RaisePropertyChanged(nameof(TickersUpToDate)),
+                keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<ScoreboardUpdatedEvent>().Subscribe(
                 action: _ => UpdateValues(),
                 keepSubscriberReferenceAlive: true);
+
+            InitializeTickers();
         }
 
         #endregion Public Constructors
@@ -164,7 +165,6 @@ namespace Score2Stream.ScoreboardModule.ViewModels
         }
 
         public bool PeriodsUpToDate => scoreboardService.PeriodsUpToDate;
-
         public bool PeriodUpToDate => scoreboardService.PeriodUpToDate;
 
         public string ScoreGuest
@@ -264,106 +264,6 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         public bool TeamHomeUpToDate => scoreboardService.TeamHomeUpToDate;
 
-        public string Ticker1
-        {
-            get { return ticker1; }
-            set
-            {
-                SetProperty(ref ticker1, value);
-                UpdateTickers();
-            }
-        }
-
-        public bool Ticker1Active
-        {
-            get { return ticker1Active; }
-            set
-            {
-                SetProperty(ref ticker1Active, value);
-                UpdateTickers();
-            }
-        }
-
-        public string Ticker2
-        {
-            get { return ticker2; }
-            set
-            {
-                SetProperty(ref ticker2, value);
-                UpdateTickers();
-            }
-        }
-
-        public bool Ticker2Active
-        {
-            get { return ticker2Active; }
-            set
-            {
-                SetProperty(ref ticker2Active, value);
-                UpdateTickers();
-            }
-        }
-
-        public string Ticker3
-        {
-            get { return ticker3; }
-            set
-            {
-                SetProperty(ref ticker3, value);
-                UpdateTickers();
-            }
-        }
-
-        public bool Ticker3Active
-        {
-            get { return ticker3Active; }
-            set
-            {
-                SetProperty(ref ticker3Active, value);
-                UpdateTickers();
-            }
-        }
-
-        public string Ticker4
-        {
-            get { return ticker4; }
-            set
-            {
-                SetProperty(ref ticker4, value);
-                UpdateTickers();
-            }
-        }
-
-        public bool Ticker4Active
-        {
-            get { return ticker4Active; }
-            set
-            {
-                SetProperty(ref ticker4Active, value);
-                UpdateTickers();
-            }
-        }
-
-        public string Ticker5
-        {
-            get { return ticker5; }
-            set
-            {
-                SetProperty(ref ticker5, value);
-                UpdateTickers();
-            }
-        }
-
-        public bool Ticker5Active
-        {
-            get { return ticker5Active; }
-            set
-            {
-                SetProperty(ref ticker5Active, value);
-                UpdateTickers();
-            }
-        }
-
         public int TickersFrequency
         {
             get { return scoreboardService.TickersFrequency; }
@@ -382,46 +282,26 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         #endregion Public Properties
 
+        #region Private Properties
+
+        private ObservableCollection<TickerViewModel> Tickers { get; } = new ObservableCollection<TickerViewModel>();
+
+        #endregion Private Properties
+
         #region Private Methods
 
-        private void UpdateTickers()
+        private void InitializeTickers()
         {
-            var tickers = new HashSet<string>();
+            var settings = settingsService.Get();
 
-            if (Ticker1Active
-                && !string.IsNullOrWhiteSpace(ticker1))
+            for (var index = 0; index < settings.Tickers.Length; index++)
             {
-                tickers.Add(ticker1.Trim());
+                var current = containerProvider.Resolve<TickerViewModel>();
+
+                current.Initialize(index);
+
+                Tickers.Add(current);
             }
-
-            if (Ticker2Active
-                && !string.IsNullOrWhiteSpace(ticker2))
-            {
-                tickers.Add(ticker2.Trim());
-            }
-
-            if (Ticker3Active
-                && !string.IsNullOrWhiteSpace(ticker3))
-            {
-                tickers.Add(ticker3.Trim());
-            }
-
-            if (Ticker4Active
-                && !string.IsNullOrWhiteSpace(ticker4))
-            {
-                tickers.Add(ticker4.Trim());
-            }
-
-            if (Ticker5Active
-                && !string.IsNullOrWhiteSpace(ticker5))
-            {
-                tickers.Add(ticker5.Trim());
-            }
-
-            scoreboardService.Tickers = tickers;
-            changedEvent.Publish();
-
-            RaisePropertyChanged(nameof(TickersUpToDate));
         }
 
         private void UpdateValues()

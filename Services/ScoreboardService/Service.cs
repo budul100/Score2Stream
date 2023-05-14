@@ -44,7 +44,7 @@ namespace Score2Stream.ScoreboardService
         private string teamHome;
         private string ticker;
         private DateTime? tickerLastUpdate;
-        private HashSet<string> tickers;
+        private IEnumerable<(string, bool)> tickers;
         private int tickersInd;
 
         #endregion Private Fields
@@ -193,7 +193,7 @@ namespace Score2Stream.ScoreboardService
 
         public bool TeamHomeUpToDate => TeamHome == teamHome;
 
-        public IEnumerable<string> Tickers { get; set; }
+        public (string, bool)[] Tickers => settings.Tickers;
 
         public int TickersFrequency
         {
@@ -210,7 +210,7 @@ namespace Score2Stream.ScoreboardService
         }
 
         public bool TickersUpToDate => (tickers?.Any() != true && Tickers?.Any() != true)
-            || (tickers?.Any() == true && Tickers?.Any() == true && tickers.SetEquals(Tickers));
+            || (tickers?.Any() == true && Tickers?.Any() == true && Tickers.Select(t => t.Item2).SequenceEqual(tickers.Select(t => t.Item2)));
 
         public bool UpToDate => ColorGuestUpToDate
             && ColorHomeUpToDate
@@ -227,7 +227,7 @@ namespace Score2Stream.ScoreboardService
 
         #region Public Methods
 
-        public void Set(Clip clip, ClipType clipType)
+        public void SetClip(Clip clip, ClipType clipType)
         {
             if (clipType != clip.Type)
             {
@@ -250,6 +250,24 @@ namespace Score2Stream.ScoreboardService
                 eventAggregator
                     .GetEvent<ClipUpdatedEvent>()
                     .Publish(clip);
+            }
+        }
+
+        public void SetTicker(int number, string text)
+        {
+            if (settings.Tickers.Length > number)
+            {
+                settings.Tickers[number].Item1 = text;
+                settingsService.Save();
+            }
+        }
+
+        public void SetTicker(int number, bool isActive)
+        {
+            if (settings.Tickers.Length > number)
+            {
+                settings.Tickers[number].Item2 = isActive;
+                settingsService.Save();
             }
         }
 
@@ -276,9 +294,9 @@ namespace Score2Stream.ScoreboardService
                 scoreGuest = ScoreGuest;
             }
 
-            this.tickers = Tickers?.ToHashSet();
-            UpdateTicker();
+            tickers = Tickers.ToArray();
 
+            UpdateTicker();
             UpdateBoard();
         }
 
@@ -441,7 +459,8 @@ namespace Score2Stream.ScoreboardService
 
             if ((ticker == default && tickers?.Any() == true)
                 || (ticker != default && tickers?.Any() != true)
-                || !tickerLastUpdate.HasValue || tickerLastUpdate.Value.Add(frequencyTime) < DateTime.Now)
+                || !tickerLastUpdate.HasValue
+                || tickerLastUpdate.Value.Add(frequencyTime) < DateTime.Now)
             {
                 UpdateTicker();
             }
@@ -461,14 +480,17 @@ namespace Score2Stream.ScoreboardService
         {
             var current = default(string);
 
-            if (tickers?.Any() == true)
+            var relevants = Tickers
+                .Where(t => t.Item2).ToArray();
+
+            if (relevants?.Any() == true)
             {
-                if (string.IsNullOrEmpty(ticker) || ++tickersInd >= tickers.Count)
+                if (string.IsNullOrEmpty(ticker) || ++tickersInd >= relevants.Length)
                 {
                     tickersInd = 0;
                 }
 
-                current = tickers.ElementAt(tickersInd);
+                current = relevants[tickersInd].Item1;
             }
 
             if (current != ticker)
