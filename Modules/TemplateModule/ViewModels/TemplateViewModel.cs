@@ -134,8 +134,7 @@ namespace Score2Stream.TemplateModule.ViewModels
 
                     current.Initialize(
                         sample: toBeAdded,
-                        sampleService: inputService.SampleService,
-                        parent: this);
+                        sampleService: inputService.SampleService);
 
                     Samples.Add(current);
                 }

@@ -17,7 +17,6 @@ namespace Score2Stream.TemplateModule.ViewModels
         private bool isActive;
         private bool isMatching;
         private bool isRelevant;
-        private TemplateViewModel parent;
         private ISampleService sampleService;
 
         #endregion Private Fields
@@ -58,7 +57,7 @@ namespace Score2Stream.TemplateModule.ViewModels
         public Bitmap Bitmap => Sample?.Bitmap;
 
         public string Difference => Sample?.Image != default
-            ? $"Difference: {(int)(Sample.Similarity * 100)}"
+            ? $"Similarity: {(int)(Sample.Similarity * 100)}"
             : default;
 
         public bool IsActive
@@ -104,11 +103,10 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         #region Public Methods
 
-        public void Initialize(Sample sample, ISampleService sampleService, TemplateViewModel parent)
+        public void Initialize(Sample sample, ISampleService sampleService)
         {
             this.Sample = sample;
             this.sampleService = sampleService;
-            this.parent = parent;
 
             Value = sample.Value;
 
