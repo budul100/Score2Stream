@@ -1,10 +1,13 @@
-﻿using Avalonia.Controls.ApplicationLifetimes;
+﻿using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using MessageBox.Avalonia.Enums;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
+using Score2Stream.Core.Constants;
 using Score2Stream.Core.Events.Video;
 using Score2Stream.Core.Interfaces;
+using Score2Stream.Core.Settings;
 using System;
 using System.ComponentModel;
 using System.Linq;
@@ -18,34 +21,29 @@ namespace Score2Stream.ViewModels
     {
         #region Private Fields
 
-        private const int PeriodUpdateTitle = 500;
-        private const string SplitterTitle = " | ";
-        private const char SplitterVersion = '.';
-
         private readonly string assemblyTitle;
         private readonly IInputService inputService;
         private readonly IMessageBoxService messageBoxService;
+        private readonly UserSettings settings;
+        private readonly ISettingsService<UserSettings> settingsService;
 
-        private int height;
         private DateTime? lastUpdateTitle;
         private string title = "Score2Stream";
         private bool userWantsToQuit;
-        private int width;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public MainViewModel(IInputService inputService, IMessageBoxService messageBoxService,
-            IEventAggregator eventAggregator)
+        public MainViewModel(ISettingsService<UserSettings> settingsService, IInputService inputService,
+            IMessageBoxService messageBoxService, IEventAggregator eventAggregator)
         {
+            this.settingsService = settingsService;
             this.inputService = inputService;
             this.messageBoxService = messageBoxService;
 
+            settings = settingsService.Get();
             assemblyTitle = GetAssemblyTitle();
-
-            Height = 800;
-            Width = 1200;
 
             this.OnClosingCommand = new DelegateCommand<CancelEventArgs>(OnClosingAsync);
 
@@ -61,8 +59,21 @@ namespace Score2Stream.ViewModels
 
         public int Height
         {
-            get { return height; }
-            set { SetProperty(ref height, value); }
+            get
+            {
+                return settings.App.Height;
+            }
+            set
+            {
+                if (settings.App.Height != value)
+                {
+                    settings.App.Height = value;
+
+                    settingsService.Save();
+
+                    RaisePropertyChanged(nameof(Height));
+                }
+            }
         }
 
         public DelegateCommand<CancelEventArgs> OnClosingCommand { get; }
@@ -75,8 +86,40 @@ namespace Score2Stream.ViewModels
 
         public int Width
         {
-            get { return width; }
-            set { SetProperty(ref width, value); }
+            get
+            {
+                return settings.App.Width;
+            }
+            set
+            {
+                if (settings.App.Width != value)
+                {
+                    settings.App.Width = value;
+
+                    settingsService.Save();
+
+                    RaisePropertyChanged(nameof(Width));
+                }
+            }
+        }
+
+        public WindowState WindowState
+        {
+            get
+            {
+                return Enum.Parse<WindowState>(settings.App.WindowState);
+            }
+            set
+            {
+                if (settings.App.WindowState != value.ToString())
+                {
+                    settings.App.WindowState = value.ToString();
+
+                    settingsService.Save();
+
+                    RaisePropertyChanged(nameof(WindowState));
+                }
+            }
         }
 
         #endregion Public Properties
@@ -91,13 +134,13 @@ namespace Score2Stream.ViewModels
 
             version.Append(assembly.Version.Major);
 
-            version.Append(SplitterVersion);
+            version.Append(Constants.SplitterVersion);
             version.Append(assembly.Version.Minor);
 
             if (version.Length > 0
                 && assembly.Version.Build > 0)
             {
-                version.Append(SplitterVersion);
+                version.Append(Constants.SplitterVersion);
                 version.Append(assembly.Version.Build);
             }
 
@@ -120,7 +163,7 @@ namespace Score2Stream.ViewModels
                 {
                     if (result.Length > 0)
                     {
-                        result.Append(SplitterTitle);
+                        result.Append(Constants.SplitterTitle);
                     }
 
                     result
@@ -141,12 +184,12 @@ namespace Score2Stream.ViewModels
             var result = Title;
 
             if (!lastUpdateTitle.HasValue
-                || lastUpdateTitle.Value.AddMilliseconds(PeriodUpdateTitle) < DateTime.Now)
+                || lastUpdateTitle.Value.AddMilliseconds(Constants.DurationUpdateTitle) < DateTime.Now)
             {
                 var processingTime = GetProcessingTimes();
 
                 result = !string.IsNullOrWhiteSpace(processingTime)
-                    ? $"{assemblyTitle}{SplitterTitle}{processingTime}"
+                    ? $"{assemblyTitle}{Constants.SplitterTitle}{processingTime}"
                     : assemblyTitle;
 
                 lastUpdateTitle = DateTime.Now;
