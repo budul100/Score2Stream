@@ -95,7 +95,7 @@ namespace Score2Stream.ScoreboardService
         {
             get
             {
-                var result = Color.Parse(settings.ColorGuest);
+                var result = Color.Parse(settings.Scoreboard.ColorGuest);
 
                 return result;
             }
@@ -103,9 +103,9 @@ namespace Score2Stream.ScoreboardService
             {
                 var color = value.ToString();
 
-                if (color != settings.ColorGuest)
+                if (color != settings.Scoreboard.ColorGuest)
                 {
-                    settings.ColorGuest = color;
+                    settings.Scoreboard.ColorGuest = color;
                     settingsService.Save();
                 }
             }
@@ -117,7 +117,7 @@ namespace Score2Stream.ScoreboardService
         {
             get
             {
-                var result = Color.Parse(settings.ColorHome);
+                var result = Color.Parse(settings.Scoreboard.ColorHome);
 
                 return result;
             }
@@ -125,9 +125,9 @@ namespace Score2Stream.ScoreboardService
             {
                 var color = value.ToString();
 
-                if (color != settings.ColorHome)
+                if (color != settings.Scoreboard.ColorHome)
                 {
-                    settings.ColorHome = color;
+                    settings.Scoreboard.ColorHome = color;
                     settingsService.Save();
                 }
             }
@@ -165,12 +165,12 @@ namespace Score2Stream.ScoreboardService
 
         public string TeamGuest
         {
-            get { return settings.TeamGuest; }
+            get { return settings.Scoreboard.TeamGuest; }
             set
             {
-                if (value != settings.TeamGuest)
+                if (value != settings.Scoreboard.TeamGuest)
                 {
-                    settings.TeamGuest = value;
+                    settings.Scoreboard.TeamGuest = value;
                     settingsService.Save();
                 }
             }
@@ -180,12 +180,12 @@ namespace Score2Stream.ScoreboardService
 
         public string TeamHome
         {
-            get { return settings.TeamHome; }
+            get { return settings.Scoreboard.TeamHome; }
             set
             {
-                if (value != settings.TeamHome)
+                if (value != settings.Scoreboard.TeamHome)
                 {
-                    settings.TeamHome = value;
+                    settings.Scoreboard.TeamHome = value;
                     settingsService.Save();
                 }
             }
@@ -193,16 +193,16 @@ namespace Score2Stream.ScoreboardService
 
         public bool TeamHomeUpToDate => TeamHome == teamHome;
 
-        public (string, bool)[] Tickers => settings.Tickers;
+        public (string, bool)[] Tickers => settings.Scoreboard.Tickers;
 
         public int TickersFrequency
         {
-            get { return settings.TickersFrequency; }
+            get { return settings.Scoreboard.TickersFrequency; }
             set
             {
-                if (settings.TickersFrequency != value)
+                if (settings.Scoreboard.TickersFrequency != value)
                 {
-                    settings.TickersFrequency = value;
+                    settings.Scoreboard.TickersFrequency = value;
 
                     settingsService.Save();
                 }
@@ -255,18 +255,18 @@ namespace Score2Stream.ScoreboardService
 
         public void SetTicker(int number, string text)
         {
-            if (settings.Tickers.Length > number)
+            if (settings.Scoreboard.Tickers.Length > number)
             {
-                settings.Tickers[number].Item1 = text;
+                settings.Scoreboard.Tickers[number].Item1 = text;
                 settingsService.Save();
             }
         }
 
         public void SetTicker(int number, bool isActive)
         {
-            if (settings.Tickers.Length > number)
+            if (settings.Scoreboard.Tickers.Length > number)
             {
-                settings.Tickers[number].Item2 = isActive;
+                settings.Scoreboard.Tickers[number].Item2 = isActive;
                 settingsService.Save();
             }
         }

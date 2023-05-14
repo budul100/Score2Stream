@@ -52,13 +52,13 @@ namespace Score2Stream.InputService
 
         public int ImagesQueueSize
         {
-            get { return settings.ImagesQueueSize; }
+            get { return settings.Video.ImagesQueueSize; }
             set
             {
-                if (value != settings.ImagesQueueSize
+                if (value != settings.Video.ImagesQueueSize
                     && value > 0)
                 {
-                    settings.ImagesQueueSize = value;
+                    settings.Video.ImagesQueueSize = value;
 
                     settingsService.Save();
                     UpdateInput();
@@ -72,12 +72,12 @@ namespace Score2Stream.InputService
 
         public bool NoCentering
         {
-            get { return settings.NoCentering; }
+            get { return settings.Video.NoCentering; }
             set
             {
-                if (settings.NoCentering != value)
+                if (settings.Video.NoCentering != value)
                 {
-                    settings.NoCentering = value;
+                    settings.Video.NoCentering = value;
 
                     settingsService.Save();
                     UpdateInput();
@@ -87,12 +87,12 @@ namespace Score2Stream.InputService
 
         public int ProcessingDelay
         {
-            get { return settings.ProcessingDelay; }
+            get { return settings.Video.ProcessingDelay; }
             set
             {
-                if (settings.ProcessingDelay != value)
+                if (settings.Video.ProcessingDelay != value)
                 {
-                    settings.ProcessingDelay = value;
+                    settings.Video.ProcessingDelay = value;
 
                     settingsService.Save();
                     UpdateInput();
@@ -106,12 +106,12 @@ namespace Score2Stream.InputService
 
         public int ThresholdDetecting
         {
-            get { return settings.ThresholdDetecting; }
+            get { return settings.Detection.ThresholdDetecting; }
             set
             {
-                if (settings.ThresholdDetecting != value)
+                if (settings.Detection.ThresholdDetecting != value)
                 {
-                    settings.ThresholdDetecting = value;
+                    settings.Detection.ThresholdDetecting = value;
 
                     settingsService.Save();
                     UpdateInput();
@@ -121,12 +121,12 @@ namespace Score2Stream.InputService
 
         public int ThresholdMatching
         {
-            get { return settings.ThresholdMatching; }
+            get { return settings.Detection.ThresholdMatching; }
             set
             {
-                if (settings.ThresholdMatching != value)
+                if (settings.Detection.ThresholdMatching != value)
                 {
-                    settings.ThresholdMatching = value;
+                    settings.Detection.ThresholdMatching = value;
 
                     settingsService.Save();
                     UpdateInput();
@@ -138,12 +138,12 @@ namespace Score2Stream.InputService
 
         public int WaitingDuration
         {
-            get { return settings.WaitingDuration; }
+            get { return settings.Detection.WaitingDuration; }
             set
             {
-                if (settings.WaitingDuration != value)
+                if (settings.Detection.WaitingDuration != value)
                 {
-                    settings.WaitingDuration = value;
+                    settings.Detection.WaitingDuration = value;
 
                     settingsService.Save();
                     UpdateInput();

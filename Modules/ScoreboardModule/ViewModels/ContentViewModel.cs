@@ -294,7 +294,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
         {
             var settings = settingsService.Get();
 
-            for (var index = 0; index < settings.Tickers.Length; index++)
+            for (var index = 0; index < settings.Scoreboard.Tickers.Length; index++)
             {
                 var current = containerProvider.Resolve<TickerViewModel>();
 
