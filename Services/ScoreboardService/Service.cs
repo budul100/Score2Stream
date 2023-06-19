@@ -287,8 +287,12 @@ namespace Score2Stream.ScoreboardService
             }
 
             if (ScoreNotFromClip
-                || clips[ClipType.ScoreHome] == default
-                || clips[ClipType.ScoreGuest] == default)
+                || clips[ClipType.ScoreHome1] == default
+                || clips[ClipType.ScoreHome2] == default
+                || clips[ClipType.ScoreHome3] == default
+                || clips[ClipType.ScoreGuest1] == default
+                || clips[ClipType.ScoreGuest2] == default
+                || clips[ClipType.ScoreGuest3] == default)
             {
                 scoreHome = ScoreHome;
                 scoreGuest = ScoreGuest;
@@ -392,14 +396,53 @@ namespace Score2Stream.ScoreboardService
                 result.Append(clips[ClipType.ClockShot1].Value);
             }
 
-            if (clips[ClipType.ClockGameSplit] != default)
-            {
-                result.Append(clips[ClipType.ClockShotSplit].Value);
-            }
-
             if (clips[ClipType.ClockShot2] != default)
             {
                 result.Append(clips[ClipType.ClockShot2].Value);
+            }
+
+            return result.ToString();
+        }
+
+        private string GetScoreGuest()
+        {
+            var result = new StringBuilder();
+
+            if (clips[ClipType.ScoreGuest1] != default)
+            {
+                result.Append(clips[ClipType.ScoreGuest1].Value);
+            }
+
+            if (clips[ClipType.ScoreGuest2] != default)
+            {
+                result.Append(clips[ClipType.ScoreGuest2].Value);
+            }
+
+            if (clips[ClipType.ScoreGuest3] != default)
+            {
+                result.Append(clips[ClipType.ScoreGuest3].Value);
+            }
+
+            return result.ToString();
+        }
+
+        private string GetScoreHome()
+        {
+            var result = new StringBuilder();
+
+            if (clips[ClipType.ScoreHome1] != default)
+            {
+                result.Append(clips[ClipType.ScoreHome1].Value);
+            }
+
+            if (clips[ClipType.ScoreHome2] != default)
+            {
+                result.Append(clips[ClipType.ScoreHome2].Value);
+            }
+
+            if (clips[ClipType.ScoreHome3] != default)
+            {
+                result.Append(clips[ClipType.ScoreHome3].Value);
             }
 
             return result.ToString();
@@ -438,17 +481,12 @@ namespace Score2Stream.ScoreboardService
                 period = Period;
             }
 
-            if (!ScoreNotFromClip
-                && clips[ClipType.ScoreHome] != default)
+            if (!ScoreNotFromClip)
             {
-                ScoreHome = clips[ClipType.ScoreHome]?.Value ?? "0";
+                ScoreHome = GetScoreHome();
                 scoreHome = ScoreHome;
-            }
 
-            if (!ScoreNotFromClip
-                && clips[ClipType.ScoreGuest] != default)
-            {
-                ScoreGuest = clips[ClipType.ScoreGuest]?.Value ?? "0";
+                ScoreGuest = GetScoreGuest();
                 scoreGuest = ScoreGuest;
             }
 
