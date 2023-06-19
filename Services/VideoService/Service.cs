@@ -254,20 +254,49 @@ namespace Score2Stream.VideoService
             }
         }
 
-        private void UpdateDetecting(Clip clip)
+        private void UpdateClip(Clip clip)
         {
-            if (clip.Template.Clip == clip)
+            if (clip.Image == default)
             {
-                var detectingSample = clip.Template?.Samples?
-                    .OrderByDescending(c => c.Similarity).FirstOrDefault();
+                clip.SetValue(
+                    value: clip.Template?.ValueEmpty,
+                    similarity: 0,
+                    waitingDuration: WaitingDuration);
+            }
+            else if (clip.Template != default)
+            {
+                var similarSamples = clip.GetSimilarSamples(
+                    thresholdMatching: ThresholdMatching).ToArray();
 
-                if ((clip.Template?.Samples.Any() != true)
-                    || ((detectingSample != default) && (detectingSample.Similarity < ThresholdDetecting)))
+                var matchingSample = default(Sample);
+
+                if (similarSamples.Any())
                 {
-                    eventAggregator
-                        .GetEvent<SampleDetectedEvent>()
-                        .Publish(clip);
+                    matchingSample = similarSamples.Any(s => s.Key != 1)
+                        ? similarSamples.OrderByDescending(c => c.Key).FirstOrDefault().Value
+                        : default;
+
+                    if (matchingSample != default)
+                    {
+                        var similarity = Convert.ToInt32(matchingSample.Similarity * Constants.DividerThreshold);
+
+                        clip.SetValue(
+                            value: matchingSample.Value,
+                            similarity: similarity,
+                            waitingDuration: WaitingDuration);
+                    }
+                    else
+                    {
+                        clip.SetValue(
+                            value: clip.Template?.ValueEmpty,
+                            similarity: 0,
+                            waitingDuration: WaitingDuration);
+                    }
                 }
+
+                UpdateSamples(
+                    clip: clip,
+                    matchingSample: matchingSample);
             }
         }
 
@@ -311,7 +340,7 @@ namespace Score2Stream.VideoService
 
                         clip.Bitmap = new Bitmap(centredImage.ToMemoryStream());
 
-                        UpdateSample(clip);
+                        UpdateClip(clip);
                     }
                 }
             }
@@ -348,61 +377,43 @@ namespace Score2Stream.VideoService
             }
         }
 
-        private void UpdateSample(Clip clip)
+        private void UpdateSamples(Clip clip, Sample matchingSample)
         {
-            if (clip.Image == default)
+            if (clip.Template?.Clip == clip)
             {
-                clip.SetValue(
-                    value: clip.Template?.ValueEmpty,
-                    similarity: 0,
-                    waitingDuration: WaitingDuration);
-            }
-            else if (clip.Template != default)
-            {
-                clip.SetSimilarities();
-
-                UpdateDetecting(clip);
+                var similarSample = default(Sample);
 
                 if (clip.Template?.Samples?.Any() == true)
                 {
-                    var matchingSample = clip.Template.Samples
-                        .OrderByDescending(c => c.Similarity).FirstOrDefault();
-
-                    var relevantSample = clip.Template?.Samples?
-                        .Where(s => !string.IsNullOrWhiteSpace(s.Value))
-                        .OrderByDescending(c => c.Similarity).FirstOrDefault();
-
-                    if (relevantSample != default)
+                    foreach (var sample in clip.Template.Samples)
                     {
-                        var similarity = Convert.ToInt32(relevantSample.Similarity * Constants.DividerThreshold);
+                        sample.Similarity = sample.Image.GetSimilarityTo(clip.Image);
+                    }
 
-                        clip.SetValue(
-                            value: relevantSample.Value,
-                            similarity: similarity,
-                            waitingDuration: WaitingDuration);
-                    }
-                    else
-                    {
-                        clip.SetValue(
-                            value: clip.Template?.ValueEmpty,
-                            similarity: 0,
-                            waitingDuration: WaitingDuration);
-                    }
+                    similarSample = clip.Template.Samples
+                        .OrderByDescending(c => c.Similarity).FirstOrDefault();
 
                     foreach (var sample in clip.Template.Samples)
                     {
-                        if (sample.IsMatching != (sample == matchingSample))
+                        if (sample.IsMatching != (sample == similarSample))
                         {
-                            sample.IsMatching = sample == matchingSample;
+                            sample.IsMatching = sample == similarSample;
                             sampleUpdatedEvent.Publish(sample);
                         }
 
-                        if (sample.IsRelevant != (sample == relevantSample))
+                        if (sample.IsRelevant != (sample == matchingSample))
                         {
-                            sample.IsRelevant = sample == relevantSample;
+                            sample.IsRelevant = sample == matchingSample;
                             sampleUpdatedEvent.Publish(sample);
                         }
                     }
+                }
+
+                if (similarSample == default || similarSample.Similarity < ThresholdDetecting)
+                {
+                    eventAggregator
+                        .GetEvent<SampleDetectedEvent>()
+                        .Publish(clip);
                 }
             }
         }

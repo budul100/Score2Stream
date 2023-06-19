@@ -1,5 +1,6 @@
 ﻿using Score2Stream.Core.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Score2Stream.VideoService.Extensions
@@ -8,13 +9,25 @@ namespace Score2Stream.VideoService.Extensions
     {
         #region Public Methods
 
-        public static void SetSimilarities(this Clip clip)
+        public static IEnumerable<KeyValuePair<double, Sample>> GetSimilarSamples(this Clip clip, double thresholdMatching)
         {
-            if (clip?.Template?.Samples?.Any() == true)
+            var relevants = clip?.Template?.Samples?
+                .Where(s => !string.IsNullOrWhiteSpace(s.Value)).ToArray();
+
+            if (relevants?.Any() == true)
             {
-                foreach (var sample in clip.Template.Samples)
+                foreach (var relevant in relevants)
                 {
-                    sample.Similarity = sample.Image.GetSimilarityTo(clip.Image);
+                    var similarity = relevant.Image.GetSimilarityTo(clip.Image);
+
+                    if (similarity > thresholdMatching)
+                    {
+                        var result = new KeyValuePair<double, Sample>(
+                            key: similarity,
+                            value: relevant);
+
+                        yield return result;
+                    }
                 }
             }
         }
