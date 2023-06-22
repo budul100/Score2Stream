@@ -56,6 +56,32 @@
             </a:DataTriggerBehavior>
         </i:Interaction.Behaviors>
 
+        <Grid
+            Name="TickerGrid"
+            Grid.Column="0"
+            Grid.ColumnSpan="1">
+            <i:Interaction.Behaviors>
+                <a:DataTriggerBehavior
+                    Binding="{Binding UpToDate}"
+                    ComparisonCondition="Equal"
+                    Value="True">
+                    <a:ChangePropertyAction
+                        PropertyName="Background"
+                        TargetObject="TickerGrid"
+                        Value="Transparent" />
+                </a:DataTriggerBehavior>
+                <a:DataTriggerBehavior
+                    Binding="{Binding UpToDate}"
+                    ComparisonCondition="NotEqual"
+                    Value="True">
+                    <a:ChangePropertyAction
+                        PropertyName="Background"
+                        TargetObject="TickerGrid"
+                        Value="Orange" />
+                </a:DataTriggerBehavior>
+            </i:Interaction.Behaviors>
+        </Grid>
+
         <TextBox
             Name="TickerTextBox"
             Grid.Column="0"

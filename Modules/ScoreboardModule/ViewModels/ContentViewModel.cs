@@ -7,6 +7,7 @@ using Score2Stream.Core.Interfaces;
 using Score2Stream.Core.Prism;
 using Score2Stream.Core.Settings;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Score2Stream.ScoreboardModule.ViewModels
 {
@@ -285,7 +286,8 @@ namespace Score2Stream.ScoreboardModule.ViewModels
             }
         }
 
-        public bool TickersUpToDate => scoreboardService.TickersUpToDate;
+        public bool TickersUpToDate => scoreboardService
+            .TickersUpToDate.All(t => t);
 
         #endregion Public Properties
 

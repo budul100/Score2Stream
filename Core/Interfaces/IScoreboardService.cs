@@ -66,7 +66,7 @@ namespace Score2Stream.Core.Interfaces
 
         int TickersFrequency { get; set; }
 
-        bool TickersUpToDate { get; }
+        bool[] TickersUpToDate { get; }
 
         bool UpToDate { get; }
 

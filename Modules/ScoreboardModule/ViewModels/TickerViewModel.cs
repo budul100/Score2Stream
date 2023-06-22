@@ -22,6 +22,10 @@ namespace Score2Stream.ScoreboardModule.ViewModels
         {
             this.scoreboardService = scoreboardService;
             this.eventAggregator = eventAggregator;
+
+            eventAggregator.GetEvent<ScoreboardUpdatedEvent>().Subscribe(
+                action: _ => RaisePropertyChanged(nameof(UpToDate)),
+                keepSubscriberReferenceAlive: true);
         }
 
         #endregion Public Constructors
@@ -50,6 +54,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
                         .Publish();
 
                     RaisePropertyChanged(nameof(IsActive));
+                    RaisePropertyChanged(nameof(UpToDate));
                 }
             }
         }
@@ -73,9 +78,12 @@ namespace Score2Stream.ScoreboardModule.ViewModels
                         .Publish();
 
                     RaisePropertyChanged(nameof(Text));
+                    RaisePropertyChanged(nameof(UpToDate));
                 }
             }
         }
+
+        public bool UpToDate => scoreboardService.TickersUpToDate[number];
 
         #endregion Public Properties
 

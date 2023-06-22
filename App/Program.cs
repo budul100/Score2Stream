@@ -12,19 +12,22 @@ namespace Score2Stream
     {
         #region Public Methods
 
-        public static AppBuilder BuildAvaloniaApp() =>
-            AppBuilder.Configure<App>()
-                .UsePlatformDetect()
-                .With(new X11PlatformOptions
-                {
-                    EnableMultiTouch = true,
-                    UseDBusMenu = true
-                })
-                .With(new Win32PlatformOptions { AllowEglInitialization = true })
-                .UseSkia()
-                .UseReactiveUI()
-                .UseManagedSystemDialogs()
-                .LogToTrace();
+        public static AppBuilder BuildAvaloniaApp() => AppBuilder
+            .Configure<App>()
+            .UsePlatformDetect()
+            .With(new X11PlatformOptions
+            {
+                EnableMultiTouch = true,
+                UseDBusMenu = true
+            })
+            .With(new Win32PlatformOptions
+            {
+                AllowEglInitialization = true
+            })
+            .UseSkia()
+            .UseReactiveUI()
+            .UseManagedSystemDialogs()
+            .LogToTrace();
 
         #endregion Public Methods
 
@@ -68,8 +71,8 @@ namespace Score2Stream
             new Thread(() =>
             {
                 Console.CursorVisible = false;
-                while (true)
-                    Console.ReadKey(true);
+
+                while (true) Console.ReadKey(true);
             })
             { IsBackground = true }.Start();
         }

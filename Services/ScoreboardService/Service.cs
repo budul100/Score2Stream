@@ -209,8 +209,7 @@ namespace Score2Stream.ScoreboardService
             }
         }
 
-        public bool TickersUpToDate => (tickers?.Any() != true && Tickers?.Any() != true)
-            || (tickers?.Any() == true && Tickers?.Any() == true && Tickers.Select(t => t.Item2).SequenceEqual(tickers.Select(t => t.Item2)));
+        public bool[] TickersUpToDate { get; private set; }
 
         public bool UpToDate => ColorGuestUpToDate
             && ColorHomeUpToDate
@@ -221,7 +220,7 @@ namespace Score2Stream.ScoreboardService
             && ScoreHomeUpToDate
             && TeamGuestUpToDate
             && TeamHomeUpToDate
-            && TickersUpToDate;
+            && TickersUpToDate.All(t => t);
 
         #endregion Public Properties
 
@@ -259,6 +258,8 @@ namespace Score2Stream.ScoreboardService
             {
                 settings.Scoreboard.Tickers[number].Item1 = text;
                 settingsService.Save();
+
+                TickersUpToDate = GetTickersUpToDate().ToArray();
             }
         }
 
@@ -268,6 +269,8 @@ namespace Score2Stream.ScoreboardService
             {
                 settings.Scoreboard.Tickers[number].Item2 = isActive;
                 settingsService.Save();
+
+                TickersUpToDate = GetTickersUpToDate().ToArray();
             }
         }
 
@@ -299,6 +302,7 @@ namespace Score2Stream.ScoreboardService
             }
 
             tickers = Tickers.ToArray();
+            TickersUpToDate = GetTickersUpToDate().ToArray();
 
             UpdateTicker();
             UpdateBoard();
@@ -446,6 +450,17 @@ namespace Score2Stream.ScoreboardService
             }
 
             return result.ToString();
+        }
+
+        private IEnumerable<bool> GetTickersUpToDate()
+        {
+            for (var index = 0; index < tickers.Count(); index++)
+            {
+                var result = settings.Scoreboard.Tickers[index].Item1 == tickers.ElementAt(index).Item1
+                    && settings.Scoreboard.Tickers[index].Item2 == tickers.ElementAt(index).Item2;
+
+                yield return result;
+            }
         }
 
         private void InitializeClips()

@@ -19,18 +19,17 @@ namespace Score2Stream
     {
         #region Public Properties
 
-        public static bool IsSingleViewLifetime =>
-            Environment.GetCommandLineArgs()
-                .Any(a => a == "--fbdev" || a == "--drm");
+        public static bool IsSingleViewLifetime => Environment
+            .GetCommandLineArgs()
+            .Any(a => a == "--fbdev" || a == "--drm");
 
         #endregion Public Properties
 
         #region Public Methods
 
-        public static AppBuilder BuildAvaloniaApp() =>
-            AppBuilder
-                .Configure<App>()
-                .UsePlatformDetect();
+        public static AppBuilder BuildAvaloniaApp() => AppBuilder
+            .Configure<App>()
+            .UsePlatformDetect();
 
         public override void Initialize()
         {
