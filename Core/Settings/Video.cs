@@ -1,4 +1,6 @@
-﻿namespace Score2Stream.Core.Settings
+﻿using System.Collections.Generic;
+
+namespace Score2Stream.Core.Settings
 {
     public class Video
     {
@@ -14,6 +16,8 @@
         public string FilePathVideo { get; set; }
 
         public int ImagesQueueSize { get; set; } = ImagesQueueSizeDefault;
+
+        public List<Input> Inputs { get; set; } = new List<Input>();
 
         public bool NoCentering { get; set; }
 

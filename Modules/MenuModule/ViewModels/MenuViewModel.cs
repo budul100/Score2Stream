@@ -20,6 +20,7 @@ using Score2Stream.Core.Interfaces;
 using Score2Stream.Core.Models;
 using Score2Stream.Core.Prism;
 using Score2Stream.Core.Settings;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -70,7 +71,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
             this.InputsUpdateCommand = new DelegateCommand(
                 executeMethod: UpdateInputs);
-            this.InputSelectCommand = new DelegateCommand<Input>(
+            this.InputSelectCommand = new DelegateCommand<Core.Models.Input>(
                 executeMethod: i => SelectInputAsync(i));
             this.InputStopAllCommand = new DelegateCommand(
                 executeMethod: () => StopAllInputsAsync(),
@@ -155,6 +156,9 @@ namespace Score2Stream.MenuModule.ViewModels
                 action: _ => ScoreboardUpdateCommand.RaiseCanExecuteChanged());
 
             inputService.Update();
+
+            userSettings.Video.Inputs = GetInputSettings().ToList();
+            settingsService.Save();
         }
 
         #endregion Public Constructors
@@ -201,7 +205,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public ObservableCollection<RibbonDropDownItem> Inputs { get; } = new ObservableCollection<RibbonDropDownItem>();
 
-        public DelegateCommand<Input> InputSelectCommand { get; }
+        public DelegateCommand<Core.Models.Input> InputSelectCommand { get; }
 
         public DelegateCommand InputStopAllCommand { get; }
 
@@ -344,6 +348,39 @@ namespace Score2Stream.MenuModule.ViewModels
 
         #region Private Methods
 
+        private IEnumerable<Core.Settings.Input> GetInputSettings()
+        {
+            var inputSettings = userSettings.Video.Inputs.ToArray();
+
+            foreach (var inputSetting in inputSettings)
+            {
+                if (!string.IsNullOrWhiteSpace(inputSetting.FileName)
+                    && File.Exists(inputSetting.FileName))
+                {
+                    var input = new Core.Models.Input(true)
+                    {
+                        FileName = inputSetting.FileName,
+                    };
+
+                    SelectInput(input);
+
+                    yield return inputSetting;
+                }
+                else
+                {
+                    var input = inputService.Inputs
+                        .SingleOrDefault(i => i.Name == inputSetting.DeviceName);
+
+                    if (input != default)
+                    {
+                        SelectInput(input);
+
+                        yield return inputSetting;
+                    }
+                }
+            }
+        }
+
         private void OnClipsChanged()
         {
             ClipAddCommand.RaiseCanExecuteChanged();
@@ -458,47 +495,69 @@ namespace Score2Stream.MenuModule.ViewModels
             }
         }
 
-        private async void SelectInputAsync(Input input)
+        private void SelectInput(Core.Models.Input input)
         {
-            if (input.IsFile)
+            if (!input.IsFile)
             {
-                var fileName = input.FileName;
-
-                if (!File.Exists(input.FileName))
+                var inputSettings = new Core.Settings.Input
                 {
-                    if (!Directory.Exists(inputDirectory))
-                    {
-                        inputDirectory = Path.GetDirectoryName(userSettings.Video.FilePathVideo);
-                    }
+                    DeviceName = input.Name,
+                };
 
-                    var dialog = new OpenFileDialog
-                    {
-                        Directory = inputDirectory,
-                        Title = Constants.InputFileText,
-                        AllowMultiple = false
-                    };
+                userSettings.Video.Inputs.RemoveAll(i => i.DeviceName == input.Name);
+                userSettings.Video.Inputs.Add(inputSettings);
 
-                    var mainWindow = Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
-                        ? desktop.MainWindow
-                        : default;
+                settingsService.Save();
 
-                    var result = await dialog.ShowAsync(mainWindow);
+                inputService.Select(
+                    deviceId: input.DeviceId.Value);
+            }
+            else if (File.Exists(input.FileName))
+            {
+                userSettings.Video.FilePathVideo = input.FileName;
 
-                    fileName = result?.FirstOrDefault();
+                var inputSettings = new Core.Settings.Input
+                {
+                    FileName = input.FileName,
+                };
+
+                userSettings.Video.Inputs.RemoveAll(i => i.FileName == input.FileName);
+                userSettings.Video.Inputs.Add(inputSettings);
+
+                settingsService.Save();
+
+                inputService.Select(
+                    fileName: input.FileName);
+            }
+        }
+
+        private async void SelectInputAsync(Core.Models.Input input)
+        {
+            if (input.IsFile
+                && !File.Exists(input.FileName))
+            {
+                if (!Directory.Exists(inputDirectory))
+                {
+                    inputDirectory = Path.GetDirectoryName(userSettings.Video.FilePathVideo);
                 }
 
-                if (File.Exists(fileName))
+                var dialog = new OpenFileDialog
                 {
-                    userSettings.Video.FilePathVideo = fileName;
-                    settingsService.Save();
+                    Directory = inputDirectory,
+                    Title = Constants.InputFileText,
+                    AllowMultiple = false
+                };
 
-                    inputService.Select(fileName);
-                }
+                var mainWindow = Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
+                    ? desktop.MainWindow
+                    : default;
+
+                var result = await dialog.ShowAsync(mainWindow);
+
+                input.FileName = result?.FirstOrDefault();
             }
-            else
-            {
-                inputService.Select(input.DeviceId.Value);
-            }
+
+            SelectInput(input);
         }
 
         private void SelectRegion(string name)
@@ -550,6 +609,9 @@ namespace Score2Stream.MenuModule.ViewModels
             if (result == ButtonResult.Yes)
             {
                 inputService?.VideoService?.StopAll();
+
+                userSettings.Video.Inputs.Clear();
+                settingsService.Save();
             }
         }
 

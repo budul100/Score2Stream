@@ -1,7 +1,7 @@
-﻿using Avalonia.Media;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using Avalonia.Media;
 
 namespace Score2Stream.Core.Settings
 {

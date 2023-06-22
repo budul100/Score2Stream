@@ -1,4 +1,8 @@
-﻿using Hompus.VideoInputDevices;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Hompus.VideoInputDevices;
 using Prism.Events;
 using Prism.Ioc;
 using Score2Stream.Core.Constants;
@@ -7,10 +11,6 @@ using Score2Stream.Core.Events.Video;
 using Score2Stream.Core.Interfaces;
 using Score2Stream.Core.Models;
 using Score2Stream.Core.Settings;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 
 namespace Score2Stream.InputService
 {
@@ -24,7 +24,7 @@ namespace Score2Stream.InputService
         private readonly UserSettings settings;
         private readonly ISettingsService<UserSettings> settingsService;
 
-        private Input currentInput;
+        private Core.Models.Input currentInput;
 
         #endregion Private Fields
 
@@ -66,7 +66,7 @@ namespace Score2Stream.InputService
             }
         }
 
-        public IList<Input> Inputs { get; } = new List<Input>();
+        public IList<Core.Models.Input> Inputs { get; } = new List<Core.Models.Input>();
 
         public bool IsActive => VideoService?.IsActive ?? false;
 
@@ -170,7 +170,7 @@ namespace Score2Stream.InputService
 
             if (input == default)
             {
-                input = new Input(true)
+                input = new Core.Models.Input(true)
                 {
                     FileName = fileName,
                     Name = Path.GetFileName(fileName),
@@ -196,7 +196,7 @@ namespace Score2Stream.InputService
             if (!Inputs.Any(i => i.IsFile
                 && string.IsNullOrWhiteSpace(i.FileName)))
             {
-                var input = new Input(true)
+                var input = new Core.Models.Input(true)
                 {
                     Name = Constants.InputFileText,
                 };
@@ -209,7 +209,7 @@ namespace Score2Stream.InputService
             }
         }
 
-        private void SelectInput(Input input)
+        private void SelectInput(Core.Models.Input input)
         {
             if (input.VideoService == default)
             {
@@ -253,7 +253,7 @@ namespace Score2Stream.InputService
 
             foreach (var toBeAdded in toBeAddeds)
             {
-                var current = new Input(false)
+                var current = new Core.Models.Input(false)
                 {
                     DeviceId = toBeAdded.Key,
                     Name = toBeAdded.Value,
