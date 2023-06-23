@@ -222,6 +222,8 @@ namespace Score2Stream.VideoService
             { }
 
             frame = default;
+            Bitmap = default;
+
             IsActive = false;
 
             await UpdateVideoAsync();
