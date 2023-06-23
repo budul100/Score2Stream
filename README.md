@@ -1,4 +1,4 @@
-#Score2Stream
+# Score2Stream
 
 Score2Stream is a freeware to read and capture scoreboards of sports events and show its content as tv graphics in video live streams. The idea was inspired by [Scoreboard-webcam-OCR](https://xy-kao.com/projects/scoreboard-ocr-with-python-webcam/) by Xiaoyang Kao.
 
