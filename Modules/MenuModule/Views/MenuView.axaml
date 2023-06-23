@@ -139,16 +139,16 @@
 
                     <rib:RibbonGroupBox Header="Web server control">
                         <rib:RibbonButton
-                            Command="{Binding GraphicsReloadCommand}"
-                            Content="Restart server"
-                            FontSize="11"
-                            LargeIcon="{DynamicResource IconRestart}"
-                            MinSize="Large" />
-                        <rib:RibbonButton
                             Command="{Binding GraphicsOpenCommand}"
                             Content="Open server"
                             FontSize="11"
                             LargeIcon="{DynamicResource IconOpen}"
+                            MinSize="Large" />
+                        <rib:RibbonButton
+                            Command="{Binding GraphicsReloadCommand}"
+                            Content="Restart server"
+                            FontSize="11"
+                            LargeIcon="{DynamicResource IconRestart}"
                             MinSize="Large" />
                     </rib:RibbonGroupBox>
 
