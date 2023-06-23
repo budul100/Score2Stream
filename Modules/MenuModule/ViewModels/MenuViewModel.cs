@@ -467,7 +467,7 @@ namespace Score2Stream.MenuModule.ViewModels
                 {
                     if (!Directory.Exists(inputDirectory))
                     {
-                        inputDirectory = Path.GetDirectoryName(settings.Video.FilePathVideo);
+                        inputDirectory = Path.GetDirectoryName(settings.Session.FilePathVideo);
                     }
 
                     var dialog = new OpenFileDialog
@@ -488,7 +488,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
                 if (File.Exists(fileName))
                 {
-                    settings.Video.FilePathVideo = fileName;
+                    settings.Session.FilePathVideo = fileName;
                     settingsService.Save();
                 }
 

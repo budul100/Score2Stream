@@ -1,4 +1,7 @@
-﻿namespace Score2Stream.Core.Settings
+﻿using Score2Stream.Core.Models;
+using System.Collections.Generic;
+
+namespace Score2Stream.Core.Settings
 {
     public class UserSettings
     {
@@ -8,9 +11,11 @@
 
         public Detection Detection { get; set; } = new Detection();
 
+        public List<Input> Inputs { get; set; } = new List<Input>();
+
         public Scoreboard Scoreboard { get; set; } = new Scoreboard();
 
-        public Video Video { get; set; } = new Video();
+        public Session Session { get; set; } = new Session();
 
         #endregion Public Properties
     }

@@ -55,13 +55,13 @@ namespace Score2Stream.InputService
 
         public int ImagesQueueSize
         {
-            get { return settings.Video.ImagesQueueSize; }
+            get { return settings.Session.ImagesQueueSize; }
             set
             {
-                if (value != settings.Video.ImagesQueueSize
+                if (value != settings.Session.ImagesQueueSize
                     && value > 0)
                 {
-                    settings.Video.ImagesQueueSize = value;
+                    settings.Session.ImagesQueueSize = value;
 
                     settingsService.Save();
                     UpdateInput();
@@ -75,12 +75,12 @@ namespace Score2Stream.InputService
 
         public bool NoCentering
         {
-            get { return settings.Video.NoCentering; }
+            get { return settings.Session.NoCentering; }
             set
             {
-                if (settings.Video.NoCentering != value)
+                if (settings.Session.NoCentering != value)
                 {
-                    settings.Video.NoCentering = value;
+                    settings.Session.NoCentering = value;
 
                     settingsService.Save();
                     UpdateInput();
@@ -90,12 +90,12 @@ namespace Score2Stream.InputService
 
         public int ProcessingDelay
         {
-            get { return settings.Video.ProcessingDelay; }
+            get { return settings.Session.ProcessingDelay; }
             set
             {
-                if (settings.Video.ProcessingDelay != value)
+                if (settings.Session.ProcessingDelay != value)
                 {
-                    settings.Video.ProcessingDelay = value;
+                    settings.Session.ProcessingDelay = value;
 
                     settingsService.Save();
                     UpdateInput();
@@ -162,7 +162,7 @@ namespace Score2Stream.InputService
         {
             UpdateDevices();
 
-            foreach (var input in settings.Video.Inputs)
+            foreach (var input in settings.Inputs)
             {
                 if (input.IsFile)
                 {
@@ -235,6 +235,8 @@ namespace Score2Stream.InputService
             {
                 relevant.VideoService.Stop();
             }
+
+            UpdateSettings();
         }
 
         public void Update()
@@ -333,7 +335,7 @@ namespace Score2Stream.InputService
 
         private void UpdateSettings()
         {
-            settings.Video.Inputs = Inputs
+            settings.Inputs = Inputs
                 .Where(i => i.IsActive).ToList();
 
             settingsService.Save();
