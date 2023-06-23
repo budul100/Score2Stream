@@ -25,10 +25,10 @@ namespace Score2Stream.Core.Enums
         [Description("Clock splitter")]
         ClockGameSplit,
 
-        [Description("Shot 1")]
+        [Description("Shot X_")]
         ClockShot1,
 
-        [Description("Shot 2")]
+        [Description("Shot _X")]
         ClockShot2,
 
         [Description("Score home X__")]
