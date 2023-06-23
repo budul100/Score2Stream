@@ -38,7 +38,7 @@ namespace Score2Stream.Core.Interfaces
 
         Task RunAsync(Input input);
 
-        void StopAll();
+        void Stop();
 
         #endregion Public Methods
     }

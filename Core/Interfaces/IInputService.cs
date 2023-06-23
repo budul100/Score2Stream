@@ -41,6 +41,8 @@ namespace Score2Stream.Core.Interfaces
 
         void Select(string fileName);
 
+        void StopAll();
+
         void Update();
 
         #endregion Public Methods

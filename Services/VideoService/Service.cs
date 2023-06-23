@@ -108,7 +108,7 @@ namespace Score2Stream.VideoService
                 fileName: input.FileName);
         }
 
-        public void StopAll()
+        public void Stop()
         {
             cancellationTokenSource.Cancel();
 

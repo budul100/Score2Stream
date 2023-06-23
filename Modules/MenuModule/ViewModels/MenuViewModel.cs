@@ -550,7 +550,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
             if (result == ButtonResult.Yes)
             {
-                inputService?.VideoService?.StopAll();
+                inputService?.StopAll();
             }
         }
 

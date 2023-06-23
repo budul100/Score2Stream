@@ -184,7 +184,10 @@ namespace Score2Stream.InputService
             {
                 input.VideoService = containerProvider
                     .Resolve<IVideoService>();
+            }
 
+            if (!input.IsActive)
+            {
                 input.VideoService.RunAsync(input);
             }
 
@@ -203,21 +206,35 @@ namespace Score2Stream.InputService
 
         public void Select(string fileName)
         {
-            var input = Inputs
-                .SingleOrDefault(i => i.FileName == fileName);
-
-            if (input == default)
+            if (File.Exists(fileName))
             {
-                input = new Core.Models.Input(true)
+                var input = Inputs
+                    .SingleOrDefault(i => i.FileName == fileName);
+
+                if (input == default)
                 {
-                    FileName = fileName,
-                    Name = Path.GetFileName(fileName),
-                };
+                    input = new Core.Models.Input(true)
+                    {
+                        FileName = fileName,
+                        Name = Path.GetFileName(fileName),
+                    };
 
-                Inputs.Add(input);
+                    Inputs.Add(input);
+                }
+
+                Select(input);
             }
+        }
 
-            Select(input);
+        public void StopAll()
+        {
+            var relevants = Inputs
+                .Where(i => i.IsActive).ToArray();
+
+            foreach (var relevant in relevants)
+            {
+                relevant.VideoService.Stop();
+            }
         }
 
         public void Update()
