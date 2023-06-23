@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Hompus.VideoInputDevices;
+﻿using Hompus.VideoInputDevices;
 using Prism.Events;
 using Prism.Ioc;
 using Score2Stream.Core.Constants;
 using Score2Stream.Core.Events.Input;
 using Score2Stream.Core.Events.Video;
 using Score2Stream.Core.Interfaces;
-using Score2Stream.Core.Models;
 using Score2Stream.Core.Settings;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace Score2Stream.InputService
 {
@@ -155,10 +154,46 @@ namespace Score2Stream.InputService
 
         #region Public Methods
 
+        public void Initialize()
+        {
+            Update();
+
+            var inputSettings = settings.Video.Inputs.ToArray();
+
+            foreach (var inputSetting in inputSettings)
+            {
+                if (!string.IsNullOrWhiteSpace(inputSetting.FileName)
+                    && File.Exists(inputSetting.FileName))
+                {
+                    Select(inputSetting.FileName);
+                }
+                else
+                {
+                    var input = Inputs
+                        .SingleOrDefault(i => i.Name == inputSetting.DeviceName);
+
+                    if (input?.DeviceId.HasValue == true)
+                    {
+                        Select(input.DeviceId.Value);
+                    }
+                }
+            }
+        }
+
         public void Select(int deviceId)
         {
             var input = Inputs
                 .SingleOrDefault(i => i.DeviceId == deviceId);
+
+            var inputSettings = new Core.Settings.Input
+            {
+                DeviceName = input.Name,
+            };
+
+            settings.Video.Inputs.RemoveAll(i => i.DeviceName == input.Name);
+            settings.Video.Inputs.Add(inputSettings);
+
+            settingsService.Save();
 
             SelectInput(input);
         }
@@ -178,6 +213,16 @@ namespace Score2Stream.InputService
 
                 Inputs.Add(input);
             }
+
+            var inputSettings = new Core.Settings.Input
+            {
+                FileName = input.FileName,
+            };
+
+            settings.Video.Inputs.RemoveAll(i => i.FileName == input.FileName);
+            settings.Video.Inputs.Add(inputSettings);
+
+            settingsService.Save();
 
             SelectInput(input);
         }

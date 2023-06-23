@@ -7,6 +7,7 @@ using Score2Stream.Core.Events.Sample;
 using Score2Stream.Core.Events.Video;
 using Score2Stream.Core.Interfaces;
 using Score2Stream.Core.Models;
+using Score2Stream.Core.Settings;
 using Score2Stream.VideoService.Extensions;
 using System;
 using System.IO;
@@ -26,6 +27,8 @@ namespace Score2Stream.VideoService
         private readonly IDispatcherService dispatcherService;
         private readonly IEventAggregator eventAggregator;
         private readonly SampleUpdatedEvent sampleUpdatedEvent;
+        private readonly UserSettings settings;
+        private readonly ISettingsService<UserSettings> settingsService;
         private readonly VideoUpdatedEvent videoUpdatedEvent;
 
         private CancellationTokenSource cancellationTokenSource;
@@ -39,12 +42,16 @@ namespace Score2Stream.VideoService
 
         #region Public Constructors
 
-        public Service(IClipService clipService, IDispatcherService dispatcherService, IEventAggregator eventAggregator)
+        public Service(ISettingsService<UserSettings> settingsService, IClipService clipService,
+            IDispatcherService dispatcherService, IEventAggregator eventAggregator)
         {
-            ClipService = clipService;
-
+            this.settingsService = settingsService;
             this.dispatcherService = dispatcherService;
             this.eventAggregator = eventAggregator;
+
+            ClipService = clipService;
+
+            this.settings = settingsService.Get();
 
             videoUpdatedEvent = eventAggregator
                 .GetEvent<VideoUpdatedEvent>();
@@ -88,7 +95,7 @@ namespace Score2Stream.VideoService
             GC.SuppressFinalize(this);
         }
 
-        public async Task RunAsync(Input input)
+        public async Task RunAsync(Core.Models.Input input)
         {
             input.VideoService = this;
             this.Name = input.Name;
@@ -105,6 +112,9 @@ namespace Score2Stream.VideoService
         public void StopAll()
         {
             cancellationTokenSource.Cancel();
+
+            settings.Video.Inputs.Clear();
+            settingsService.Save();
         }
 
         #endregion Public Methods

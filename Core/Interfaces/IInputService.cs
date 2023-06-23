@@ -35,6 +35,8 @@ namespace Score2Stream.Core.Interfaces
 
         #region Public Methods
 
+        void Initialize();
+
         void Select(int deviceId);
 
         void Select(string fileName);
