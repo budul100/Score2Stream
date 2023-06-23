@@ -457,53 +457,49 @@ namespace Score2Stream.MenuModule.ViewModels
             }
         }
 
-        private void SelectInput(Core.Models.Input input)
-        {
-            if (!input.IsFile)
-            {
-                inputService.Select(
-                    deviceId: input.DeviceId.Value);
-            }
-            else if (File.Exists(input.FileName))
-            {
-                inputService.Select(
-                    fileName: input.FileName);
-            }
-        }
-
         private async void SelectInputAsync(Core.Models.Input input)
         {
-            if (input.IsFile
-                && !File.Exists(input.FileName))
+            if (input.IsFile)
             {
-                if (!Directory.Exists(inputDirectory))
+                var fileName = input.FileName;
+
+                if (!input.IsActive || !File.Exists(fileName))
                 {
-                    inputDirectory = Path.GetDirectoryName(settings.Video.FilePathVideo);
+                    if (!Directory.Exists(inputDirectory))
+                    {
+                        inputDirectory = Path.GetDirectoryName(settings.Video.FilePathVideo);
+                    }
+
+                    var dialog = new OpenFileDialog
+                    {
+                        Directory = inputDirectory,
+                        Title = Constants.InputFileText,
+                        AllowMultiple = false
+                    };
+
+                    var mainWindow = Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
+                        ? desktop.MainWindow
+                        : default;
+
+                    var result = await dialog.ShowAsync(mainWindow);
+
+                    fileName = result?.FirstOrDefault();
                 }
 
-                var dialog = new OpenFileDialog
+                if (File.Exists(fileName))
                 {
-                    Directory = inputDirectory,
-                    Title = Constants.InputFileText,
-                    AllowMultiple = false
-                };
-
-                var mainWindow = Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
-                    ? desktop.MainWindow
-                    : default;
-
-                var result = await dialog.ShowAsync(mainWindow);
-
-                input.FileName = result?.FirstOrDefault();
-
-                if (File.Exists(input.FileName))
-                {
-                    settings.Video.FilePathVideo = input.FileName;
+                    settings.Video.FilePathVideo = fileName;
                     settingsService.Save();
                 }
-            }
 
-            SelectInput(input);
+                inputService.Select(
+                    fileName: fileName);
+            }
+            else
+            {
+                inputService.Select(
+                    input: input);
+            }
         }
 
         private void SelectRegion(string name)

@@ -97,7 +97,6 @@ namespace Score2Stream.VideoService
 
         public async Task RunAsync(Core.Models.Input input)
         {
-            input.VideoService = this;
             this.Name = input.Name;
 
             eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(

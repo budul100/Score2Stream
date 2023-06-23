@@ -38,8 +38,12 @@ namespace Score2Stream.InputService
 
             this.settings = settingsService.Get();
 
+            eventAggregator.GetEvent<VideoStartedEvent>().Subscribe(
+                action: OnVideoChanged,
+                keepSubscriberReferenceAlive: true);
+
             eventAggregator.GetEvent<VideoEndedEvent>().Subscribe(
-                action: UpdateDevices,
+                action: OnVideoChanged,
                 keepSubscriberReferenceAlive: true);
         }
 
@@ -156,46 +160,45 @@ namespace Score2Stream.InputService
 
         public void Initialize()
         {
-            Update();
+            UpdateDevices();
 
-            var inputSettings = settings.Video.Inputs.ToArray();
-
-            foreach (var inputSetting in inputSettings)
+            foreach (var input in settings.Video.Inputs)
             {
-                if (!string.IsNullOrWhiteSpace(inputSetting.FileName)
-                    && File.Exists(inputSetting.FileName))
+                if (input.IsFile)
                 {
-                    Select(inputSetting.FileName);
+                    Select(input.FileName);
                 }
                 else
                 {
-                    var input = Inputs
-                        .SingleOrDefault(i => i.Name == inputSetting.DeviceName);
+                    var current = Inputs
+                        .SingleOrDefault(i => i.Name == input.Name);
 
-                    if (input?.DeviceId.HasValue == true)
-                    {
-                        Select(input.DeviceId.Value);
-                    }
+                    Select(current);
                 }
             }
         }
 
-        public void Select(int deviceId)
+        public void Select(Core.Models.Input input)
         {
-            var input = Inputs
-                .SingleOrDefault(i => i.DeviceId == deviceId);
-
-            var inputSettings = new Core.Settings.Input
+            if (input.VideoService == default)
             {
-                DeviceName = input.Name,
-            };
+                input.VideoService = containerProvider
+                    .Resolve<IVideoService>();
 
-            settings.Video.Inputs.RemoveAll(i => i.DeviceName == input.Name);
-            settings.Video.Inputs.Add(inputSettings);
+                input.VideoService.RunAsync(input);
+            }
 
-            settingsService.Save();
+            if (currentInput != input)
+            {
+                currentInput = input;
+                UpdateInput();
 
-            SelectInput(input);
+                eventAggregator
+                    .GetEvent<InputSelectedEvent>()
+                    .Publish(currentInput);
+            }
+
+            UpdateSettings();
         }
 
         public void Select(string fileName)
@@ -214,17 +217,7 @@ namespace Score2Stream.InputService
                 Inputs.Add(input);
             }
 
-            var inputSettings = new Core.Settings.Input
-            {
-                FileName = input.FileName,
-            };
-
-            settings.Video.Inputs.RemoveAll(i => i.FileName == input.FileName);
-            settings.Video.Inputs.Add(inputSettings);
-
-            settingsService.Save();
-
-            SelectInput(input);
+            Select(input);
         }
 
         public void Update()
@@ -254,24 +247,14 @@ namespace Score2Stream.InputService
             }
         }
 
-        private void SelectInput(Core.Models.Input input)
+        private void OnVideoChanged()
         {
-            if (input.VideoService == default)
-            {
-                containerProvider
-                    .Resolve<IVideoService>()
-                    .RunAsync(input);
-            }
+            UpdateDevices();
+            UpdateSettings();
 
-            if (currentInput != input)
-            {
-                currentInput = input;
-                UpdateInput();
-
-                eventAggregator
-                    .GetEvent<InputSelectedEvent>()
-                    .Publish(currentInput);
-            }
+            eventAggregator
+                .GetEvent<InputsChangedEvent>()
+                .Publish();
         }
 
         private void UpdateDevices()
@@ -329,6 +312,14 @@ namespace Score2Stream.InputService
                 currentInput.VideoService.ThresholdMatching = Math.Abs(ThresholdMatching) / Constants.DividerThreshold;
                 currentInput.VideoService.WaitingDuration = TimeSpan.FromMilliseconds(Math.Abs(WaitingDuration));
             }
+        }
+
+        private void UpdateSettings()
+        {
+            settings.Video.Inputs = Inputs
+                .Where(i => i.IsActive).ToList();
+
+            settingsService.Save();
         }
 
         #endregion Private Methods

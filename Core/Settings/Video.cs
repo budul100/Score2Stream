@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Score2Stream.Core.Models;
+using System.Collections.Generic;
 
 namespace Score2Stream.Core.Settings
 {

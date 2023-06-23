@@ -37,7 +37,7 @@ namespace Score2Stream.Core.Interfaces
 
         void Initialize();
 
-        void Select(int deviceId);
+        void Select(Input input);
 
         void Select(string fileName);
 
