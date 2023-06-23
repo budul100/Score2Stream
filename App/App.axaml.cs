@@ -1,4 +1,6 @@
 using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Prism.DryIoc;
 using Prism.Ioc;
@@ -36,6 +38,16 @@ namespace Score2Stream
             AvaloniaXamlLoader.Load(this);
 
             base.Initialize();
+        }
+
+        public override void OnFrameworkInitializationCompleted()
+        {
+            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                desktop.Startup += OnStartup;
+            }
+
+            base.OnFrameworkInitializationCompleted();
         }
 
         #endregion Public Methods
@@ -109,5 +121,15 @@ namespace Score2Stream
         }
 
         #endregion Protected Methods
+
+        #region Private Methods
+
+        private void OnStartup(object s, ControlledApplicationLifetimeStartupEventArgs e)
+        {
+            Control.GotFocusEvent.AddClassHandler<TextBox>((s, _) => s.SelectAll());
+            Control.DoubleTappedEvent.AddClassHandler<TextBox>((s, _) => s.SelectAll());
+        }
+
+        #endregion Private Methods
     }
 }
