@@ -10,7 +10,7 @@
 
         public Scoreboard Scoreboard { get; set; } = new Scoreboard();
 
-        public Session Video { get; set; } = new Session();
+        public Video Video { get; set; } = new Video();
 
         #endregion Public Properties
     }

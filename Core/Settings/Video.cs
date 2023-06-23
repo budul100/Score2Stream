@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Score2Stream.Core.Settings
 {
-    public class Session
+    public class Video
     {
         #region Private Fields
 
