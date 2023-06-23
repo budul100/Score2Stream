@@ -7,7 +7,7 @@
 		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
 		<ApplicationIcon>Assets\Score2Stream.ico</ApplicationIcon>
 		<VersionMajor>1</VersionMajor>
-		<VersionMinor>2</VersionMinor>
+		<VersionMinor>3</VersionMinor>
 		<VersionBuild>0</VersionBuild>
 	</PropertyGroup>
 
