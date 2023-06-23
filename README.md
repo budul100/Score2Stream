@@ -13,6 +13,9 @@ Clips view:
 Samples view:
 ![Samples view](./Additionals/Images/Screenshot_SamplesView.png)
 
+Graphics output:
+![Samples view](./Additionals/Images/Screenshot_Graphics.png)
+
 ## Usage
 
 The configuration of Score2Stream consists of the following steps:
