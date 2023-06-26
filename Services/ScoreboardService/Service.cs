@@ -26,6 +26,7 @@ namespace Score2Stream.ScoreboardService
         private const char GameClockSplitterDefault = ':';
 
         private readonly IDictionary<ClipType, Clip> clips = new Dictionary<ClipType, Clip>();
+        private readonly IEnumerable<ClipType> clipTypes;
         private readonly IEventAggregator eventAggregator;
         private readonly JsonSerializerOptions serializeOptions;
         private readonly UserSettings settings;
@@ -73,13 +74,17 @@ namespace Score2Stream.ScoreboardService
                 action: UpdateBoard,
                 keepSubscriberReferenceAlive: true);
 
-            InitializeClips();
+            clipTypes = GetClipTypes().ToArray();
+
             Update();
         }
 
         #endregion Public Constructors
 
         #region Public Properties
+
+        public IEnumerable<ClipType> ClipTypes => clipTypes
+            .Where(t => t == default || (clips.ContainsKey(t) && clips[t] == default)).ToArray();
 
         public string ClockGame { get; private set; }
 
@@ -228,7 +233,8 @@ namespace Score2Stream.ScoreboardService
 
         public void SetClip(Clip clip, ClipType clipType)
         {
-            if (clipType != clip.Type)
+            if (clip != default
+                && clip.Type != clipType)
             {
                 if (clip.Type != ClipType.None
                     && clips[clip.Type].Type != ClipType.None)
@@ -354,6 +360,24 @@ namespace Score2Stream.ScoreboardService
             return result;
         }
 
+        private IEnumerable<ClipType> GetClipTypes()
+        {
+            var types = Core.Extensions.EnumExtensions
+                .GetValues<ClipType>().ToArray();
+
+            foreach (var type in types)
+            {
+                if (type != ClipType.None)
+                {
+                    clips.Add(
+                        key: type,
+                        value: default);
+                }
+
+                yield return type;
+            }
+        }
+
         private string GetClockGame()
         {
             var result = new StringBuilder();
@@ -460,20 +484,6 @@ namespace Score2Stream.ScoreboardService
                     && settings.Scoreboard.Tickers[index].Item2 == tickers.ElementAt(index).Item2;
 
                 yield return result;
-            }
-        }
-
-        private void InitializeClips()
-        {
-            var relevants = Enum.GetValues(typeof(ClipType))
-                .OfType<ClipType>()
-                .Where(t => t != ClipType.None).ToArray();
-
-            foreach (var relevant in relevants)
-            {
-                clips.Add(
-                    key: relevant,
-                    value: default);
             }
         }
 

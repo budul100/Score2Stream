@@ -41,7 +41,7 @@ namespace Score2Stream.Core.Models
 
         public int ThresholdMonochrome { get; set; }
 
-        public ClipType Type { get; set; }
+        public ClipType Type { get; set; } = ClipType.None;
 
         public int UpdateSimilarity { get; set; }
 

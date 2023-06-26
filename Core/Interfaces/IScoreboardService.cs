@@ -1,12 +1,15 @@
 ﻿using Avalonia.Media;
 using Score2Stream.Core.Enums;
 using Score2Stream.Core.Models;
+using System.Collections.Generic;
 
 namespace Score2Stream.Core.Interfaces
 {
     public interface IScoreboardService
     {
         #region Public Properties
+
+        IEnumerable<ClipType> ClipTypes { get; }
 
         string ClockGame { get; }
 

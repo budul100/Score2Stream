@@ -8,7 +8,7 @@ using Score2Stream.Core.Events.Template;
 using Score2Stream.Core.Events.Video;
 using Score2Stream.Core.Interfaces;
 using Score2Stream.Core.Models;
-using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -24,6 +24,8 @@ namespace Score2Stream.ClipModule.ViewModels
 
         private IClipService clipService;
         private bool isActive;
+        private bool isUpdatingType;
+        private IEnumerable<ClipType> types;
 
         #endregion Private Fields
 
@@ -41,7 +43,7 @@ namespace Score2Stream.ClipModule.ViewModels
                 action: c => IsActive = c == Clip,
                 keepSubscriberReferenceAlive: true);
             eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
-                action: _ => UpdateTemplates(),
+                action: _ => UpdateClip(),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<TemplateSelectedEvent>().Subscribe(
@@ -55,7 +57,8 @@ namespace Score2Stream.ClipModule.ViewModels
                 action: () => UpdateImage(),
                 keepSubscriberReferenceAlive: true);
 
-            InitializeTypes();
+            types = Core.Extensions.EnumExtensions
+                .GetValues<ClipType>().ToArray();
         }
 
         #endregion Public Constructors
@@ -112,11 +115,16 @@ namespace Score2Stream.ClipModule.ViewModels
             get { return Clip?.Type ?? ClipType.None; }
             set
             {
-                scoreboardService.SetClip(
-                    clip: Clip,
-                    clipType: value);
+                if (!isUpdatingType)
+                {
+                    isUpdatingType = true;
 
-                RaisePropertyChanged(nameof(Type));
+                    scoreboardService.SetClip(
+                        clip: Clip,
+                        clipType: value);
+
+                    isUpdatingType = false;
+                }
             }
         }
 
@@ -135,22 +143,12 @@ namespace Score2Stream.ClipModule.ViewModels
             this.Clip = clip;
             this.clipService = clipService;
 
-            UpdateTemplates();
+            UpdateClip();
         }
 
         #endregion Public Methods
 
         #region Private Methods
-
-        private void InitializeTypes()
-        {
-            foreach (ClipType clipType in Enum.GetValues(typeof(ClipType)))
-            {
-                Types.Add(clipType);
-            }
-
-            RaisePropertyChanged(nameof(Types));
-        }
 
         private void SelectTemplate()
         {
@@ -158,6 +156,12 @@ namespace Score2Stream.ClipModule.ViewModels
 
             RaisePropertyChanged(nameof(Template));
             RaisePropertyChanged(nameof(Templates));
+        }
+
+        private void UpdateClip()
+        {
+            UpdateTypes();
+            UpdateTemplates();
         }
 
         private void UpdateImage()
@@ -168,28 +172,57 @@ namespace Score2Stream.ClipModule.ViewModels
 
         private void UpdateTemplates()
         {
-            var template = Clip?.Template;
-            var templates = clipService?.TemplateService?.Templates;
+            var template = Clip.Template;
 
             Template = default;
 
             var toBeRemoveds = Templates
-                .Where(t => templates?.Contains(t) != true).ToArray();
+                .Where(t => clipService?.TemplateService?.Templates?.Contains(t) != true).ToArray();
 
             foreach (var toBeRemoved in toBeRemoveds)
             {
                 Templates.Remove(toBeRemoved);
             }
 
-            var toBeAddeds = templates
-                .Where(t => !Templates.Contains(t)).ToArray();
+            if (clipService.TemplateService?.Templates != default)
+            {
+                var toBeAddeds = clipService?.TemplateService?.Templates
+                    .Where(t => !Templates.Contains(t)).ToArray();
 
-            Templates.AddRange(toBeAddeds);
+                Templates.AddRange(toBeAddeds);
+            }
 
             Template = template;
 
             RaisePropertyChanged(nameof(Template));
             RaisePropertyChanged(nameof(Templates));
+        }
+
+        private void UpdateTypes()
+        {
+            var index = 0;
+
+            foreach (var type in types)
+            {
+                if (type == Clip.Type || scoreboardService.ClipTypes.Contains(type))
+                {
+                    if (!Types.Contains(type))
+                    {
+                        Types.Insert(
+                            index: index,
+                            item: type);
+                    }
+
+                    index++;
+                }
+                else if (Types.Contains(type))
+                {
+                    Types.Remove(type);
+                }
+            }
+
+            RaisePropertyChanged(nameof(Types));
+            RaisePropertyChanged(nameof(Type));
         }
 
         #endregion Private Methods

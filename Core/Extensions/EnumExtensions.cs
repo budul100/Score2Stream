@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 
 namespace Score2Stream.Core.Extensions
 {
@@ -24,6 +26,15 @@ namespace Score2Stream.Core.Extensions
 
                 return attrib.Description;
             }
+        }
+
+        public static IEnumerable<T> GetValues<T>()
+            where T : Enum
+        {
+            var result = Enum.GetValues(typeof(T))
+                .OfType<T>();
+
+            return result;
         }
 
         #endregion Public Methods
