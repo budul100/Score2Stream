@@ -92,9 +92,7 @@ The text boxes at the bottom are ticker entries in the graphic. The changing per
 
 ### Using the output
 
-The resulting graphic can be started. To open the output, click *Board -> Open server*. It opens a website containing the graphic, which can be integrated into a web stream.
-
-**Please note that you must be connected to the internet to receive the website.** There are currently some libraries that are loaded from the internet when the website is opened.
+The resulting graphic can be started. To open the output, click *Board -> Open server*. It opens a website containing the graphic, which can be integrated into a web stream. With version 1.3 you must not be connected to the internet anymore to receive the website.
 
 The website address and the used ports are currently hard-coded and cannot be changed.
 

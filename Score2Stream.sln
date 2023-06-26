@@ -39,7 +39,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TemplateModule", "Modules\T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessageBoxService", "Services\MessageBoxService\MessageBoxService.csproj", "{29C1632E-F751-4379-B587-3BEE8AB8F189}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SettingsService", "Services\SettingsService\SettingsService.csproj", "{E1D9727F-972E-41B4-89C0-14FAC06E3B26}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SettingsService", "Services\SettingsService\SettingsService.csproj", "{E1D9727F-972E-41B4-89C0-14FAC06E3B26}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Additionals", "Additionals", "{09E7315B-A607-411D-8A0C-BE0CBF4107F3}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
