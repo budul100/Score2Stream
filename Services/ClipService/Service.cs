@@ -128,7 +128,10 @@ namespace Score2Stream.ClipService
         {
             if (clip != default)
             {
-                TemplateService.Remove(clip.Template);
+                if (clip.Template.Clip == clip)
+                {
+                    TemplateService.Remove(clip.Template);
+                }
 
                 Clips.Remove(clip);
             }
