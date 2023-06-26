@@ -183,6 +183,11 @@ namespace Score2Stream.VideoService
                     {
                         frame = currentFrame.Clone();
                         Bitmap = new Bitmap(frame.ToMemoryStream());
+
+                        foreach (var clip in ClipService.Clips)
+                        {
+                            UpdateRectangle(clip);
+                        }
                     }
 
                     var clips = ClipService.Clips

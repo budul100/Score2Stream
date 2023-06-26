@@ -233,10 +233,10 @@ namespace Score2Stream.ScoreboardService
 
         public void SetClip(Clip clip, ClipType clipType)
         {
-            if (clip != default
-                && clip.Type != clipType)
+            if (clip != default)
             {
                 if (clip.Type != ClipType.None
+                    && clips[clip.Type] != default
                     && clips[clip.Type].Type != ClipType.None)
                 {
                     var current = clips[clip.Type];

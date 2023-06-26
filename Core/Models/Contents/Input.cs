@@ -1,4 +1,5 @@
 ﻿using Score2Stream.Core.Interfaces;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Score2Stream.Core.Models.Contents
@@ -15,6 +16,8 @@ namespace Score2Stream.Core.Models.Contents
         #endregion Public Constructors
 
         #region Public Properties
+
+        public List<Clip> Clips { get; set; }
 
         [JsonIgnore]
         public IClipService ClipService => VideoService?.ClipService;

@@ -140,8 +140,10 @@ namespace Score2Stream.ClipModule.ViewModels
 
         public void Initialize(Clip clip, IClipService clipService)
         {
-            this.Clip = clip;
             this.clipService = clipService;
+
+            this.Clip = clip;
+            this.Type = clip.Type;
 
             UpdateClip();
         }

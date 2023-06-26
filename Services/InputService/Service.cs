@@ -2,6 +2,7 @@
 using Prism.Events;
 using Prism.Ioc;
 using Score2Stream.Core.Constants;
+using Score2Stream.Core.Events.Clip;
 using Score2Stream.Core.Events.Input;
 using Score2Stream.Core.Events.Video;
 using Score2Stream.Core.Interfaces;
@@ -45,6 +46,14 @@ namespace Score2Stream.InputService
 
             eventAggregator.GetEvent<VideoEndedEvent>().Subscribe(
                 action: OnVideoChanged,
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<ClipsChangedEvent>().Subscribe(
+                action: UpdateClips,
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
+                action: _ => UpdateClips(),
                 keepSubscriberReferenceAlive: true);
         }
 
@@ -163,7 +172,9 @@ namespace Score2Stream.InputService
         {
             UpdateDevices();
 
-            foreach (var input in settings.Inputs)
+            var inputs = settings.Inputs.ToArray();
+
+            foreach (var input in inputs)
             {
                 if (input.IsFile)
                 {
@@ -175,6 +186,16 @@ namespace Score2Stream.InputService
                         .SingleOrDefault(i => i.Name == input.Name);
 
                     Select(current);
+                }
+
+                if (input.Clips?.Any() == true)
+                {
+                    var clips = input.Clips.ToArray();
+
+                    foreach (var clip in clips)
+                    {
+                        currentInput.ClipService.Add(clip);
+                    }
                 }
             }
         }
@@ -214,7 +235,7 @@ namespace Score2Stream.InputService
 
                 if (input == default)
                 {
-                    input = new Core.Models.Input(true)
+                    input = new Input(true)
                     {
                         FileName = fileName,
                         Name = Path.GetFileName(fileName),
@@ -254,7 +275,7 @@ namespace Score2Stream.InputService
             if (!Inputs.Any(i => i.IsFile
                 && string.IsNullOrWhiteSpace(i.FileName)))
             {
-                var input = new Core.Models.Input(true)
+                var input = new Input(true)
                 {
                     Name = Constants.InputFileText,
                 };
@@ -275,6 +296,12 @@ namespace Score2Stream.InputService
             eventAggregator
                 .GetEvent<InputsChangedEvent>()
                 .Publish();
+        }
+
+        private void UpdateClips()
+        {
+            currentInput.Clips = ClipService?.Clips;
+            settingsService.Save();
         }
 
         private void UpdateDevices()
@@ -301,7 +328,7 @@ namespace Score2Stream.InputService
 
             foreach (var toBeAdded in toBeAddeds)
             {
-                var current = new Core.Models.Input(false)
+                var current = new Input(false)
                 {
                     DeviceId = toBeAdded.Key,
                     Name = toBeAdded.Value,

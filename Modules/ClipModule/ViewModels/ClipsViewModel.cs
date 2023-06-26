@@ -6,6 +6,7 @@ using Score2Stream.Core.Events.Input;
 using Score2Stream.Core.Interfaces;
 using Score2Stream.Core.Prism;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Score2Stream.ClipModule.ViewModels
 {
@@ -39,6 +40,8 @@ namespace Score2Stream.ClipModule.ViewModels
             eventAggregator
                 .GetEvent<ClipsChangedEvent>()
                 .Subscribe(UpdateClips);
+
+            UpdateClips();
         }
 
         #endregion Public Constructors
@@ -62,15 +65,18 @@ namespace Score2Stream.ClipModule.ViewModels
         {
             Clips.Clear();
 
-            foreach (var clip in inputService.ClipService.Clips)
+            if (inputService.ClipService?.Clips?.Any() == true)
             {
-                var current = containerProvider.Resolve<ClipViewModel>();
+                foreach (var clip in inputService.ClipService.Clips)
+                {
+                    var current = containerProvider.Resolve<ClipViewModel>();
 
-                current.Initialize(
-                    clip: clip,
-                    clipService: inputService.ClipService);
+                    current.Initialize(
+                        clip: clip,
+                        clipService: inputService.ClipService);
 
-                Clips.Add(current);
+                    Clips.Add(current);
+                }
             }
         }
 

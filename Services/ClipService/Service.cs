@@ -53,6 +53,11 @@ namespace Score2Stream.ClipService
                 Template = Clip?.Template
             };
 
+            Add(clip);
+        }
+
+        public void Add(Clip clip)
+        {
             Clips.Add(clip);
 
             eventAggregator
@@ -128,7 +133,7 @@ namespace Score2Stream.ClipService
         {
             if (clip != default)
             {
-                if (clip.Template.Clip == clip)
+                if (clip.Template?.Clip == clip)
                 {
                     TemplateService.Remove(clip.Template);
                 }
