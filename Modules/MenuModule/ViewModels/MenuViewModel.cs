@@ -17,9 +17,9 @@ using Score2Stream.Core.Events.Scoreboard;
 using Score2Stream.Core.Events.Template;
 using Score2Stream.Core.Events.Video;
 using Score2Stream.Core.Interfaces;
-using Score2Stream.Core.Models;
+using Score2Stream.Core.Models.Contents;
+using Score2Stream.Core.Models.Settings;
 using Score2Stream.Core.Prism;
-using Score2Stream.Core.Settings;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -69,7 +69,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
             this.InputsUpdateCommand = new DelegateCommand(
                 executeMethod: UpdateInputs);
-            this.InputSelectCommand = new DelegateCommand<Core.Models.Input>(
+            this.InputSelectCommand = new DelegateCommand<Input>(
                 executeMethod: i => SelectInputAsync(i));
             this.InputStopAllCommand = new DelegateCommand(
                 executeMethod: () => StopAllInputsAsync(),
@@ -200,7 +200,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public ObservableCollection<RibbonDropDownItem> Inputs { get; } = new ObservableCollection<RibbonDropDownItem>();
 
-        public DelegateCommand<Core.Models.Input> InputSelectCommand { get; }
+        public DelegateCommand<Input> InputSelectCommand { get; }
 
         public DelegateCommand InputStopAllCommand { get; }
 
@@ -457,7 +457,7 @@ namespace Score2Stream.MenuModule.ViewModels
             }
         }
 
-        private async void SelectInputAsync(Core.Models.Input input)
+        private async void SelectInputAsync(Input input)
         {
             if (input.IsFile)
             {

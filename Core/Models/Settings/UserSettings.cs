@@ -1,7 +1,7 @@
-﻿using Score2Stream.Core.Models;
+﻿using Score2Stream.Core.Models.Contents;
 using System.Collections.Generic;
 
-namespace Score2Stream.Core.Settings
+namespace Score2Stream.Core.Models.Settings
 {
     public class UserSettings
     {

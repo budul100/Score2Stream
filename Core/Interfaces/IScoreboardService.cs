@@ -1,6 +1,6 @@
 ﻿using Avalonia.Media;
 using Score2Stream.Core.Enums;
-using Score2Stream.Core.Models;
+using Score2Stream.Core.Models.Contents;
 using System.Collections.Generic;
 
 namespace Score2Stream.Core.Interfaces

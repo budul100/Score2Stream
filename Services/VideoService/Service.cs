@@ -6,7 +6,7 @@ using Score2Stream.Core.Events.Clip;
 using Score2Stream.Core.Events.Sample;
 using Score2Stream.Core.Events.Video;
 using Score2Stream.Core.Interfaces;
-using Score2Stream.Core.Models;
+using Score2Stream.Core.Models.Contents;
 using Score2Stream.VideoService.Extensions;
 using System;
 using System.IO;
@@ -89,7 +89,7 @@ namespace Score2Stream.VideoService
             GC.SuppressFinalize(this);
         }
 
-        public async Task RunAsync(Core.Models.Input input)
+        public async Task RunAsync(Input input)
         {
             this.Name = input.Name;
 

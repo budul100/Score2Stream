@@ -1,7 +1,7 @@
 ﻿using Score2Stream.Core.Interfaces;
 using System.Text.Json.Serialization;
 
-namespace Score2Stream.Core.Models
+namespace Score2Stream.Core.Models.Contents
 {
     public class Input
     {

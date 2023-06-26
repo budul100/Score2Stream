@@ -1,7 +1,7 @@
 ﻿using Prism.Events;
 using Prism.Mvvm;
 using Score2Stream.Core.Events.Clip;
-using Score2Stream.Core.Models;
+using Score2Stream.Core.Models.Contents;
 
 namespace Score2Stream.VideoModule.ViewModels
 {

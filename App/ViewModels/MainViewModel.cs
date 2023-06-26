@@ -7,7 +7,7 @@ using Prism.Mvvm;
 using Score2Stream.Core.Constants;
 using Score2Stream.Core.Events.Video;
 using Score2Stream.Core.Interfaces;
-using Score2Stream.Core.Settings;
+using Score2Stream.Core.Models.Settings;
 using System;
 using System.ComponentModel;
 using System.Linq;

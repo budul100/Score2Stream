@@ -1,5 +1,5 @@
 ﻿using Avalonia.Media.Imaging;
-using Score2Stream.Core.Models;
+using Score2Stream.Core.Models.Contents;
 using System;
 using System.Threading.Tasks;
 

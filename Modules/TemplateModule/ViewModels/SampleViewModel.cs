@@ -5,7 +5,7 @@ using Prism.Mvvm;
 using Score2Stream.Core.Events.Sample;
 using Score2Stream.Core.Events.Video;
 using Score2Stream.Core.Interfaces;
-using Score2Stream.Core.Models;
+using Score2Stream.Core.Models.Contents;
 
 namespace Score2Stream.TemplateModule.ViewModels
 {

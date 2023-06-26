@@ -1,7 +1,7 @@
 ﻿using Avalonia.Media.Imaging;
 using OpenCvSharp;
 
-namespace Score2Stream.Core.Models
+namespace Score2Stream.Core.Models.Contents
 {
     public class Sample
     {

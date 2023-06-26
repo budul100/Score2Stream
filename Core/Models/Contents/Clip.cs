@@ -5,7 +5,7 @@ using Score2Stream.Core.Extensions;
 using System;
 using System.Collections.Generic;
 
-namespace Score2Stream.Core.Models
+namespace Score2Stream.Core.Models.Contents
 {
     public class Clip
     {

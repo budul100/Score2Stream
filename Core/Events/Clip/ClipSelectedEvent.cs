@@ -3,6 +3,6 @@
 namespace Score2Stream.Core.Events.Clip
 {
     public class ClipSelectedEvent
-        : PubSubEvent<Models.Clip>
+        : PubSubEvent<Models.Contents.Clip>
     { }
 }

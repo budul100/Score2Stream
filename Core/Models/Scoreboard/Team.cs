@@ -1,4 +1,4 @@
-﻿namespace Score2Stream.Core.Models.Content
+﻿namespace Score2Stream.Core.Models.Scoreboard
 {
     public abstract class Team
     {

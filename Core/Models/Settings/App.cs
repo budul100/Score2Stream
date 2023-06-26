@@ -1,4 +1,4 @@
-﻿namespace Score2Stream.Core.Settings
+﻿namespace Score2Stream.Core.Models.Settings
 {
     public class App
     {

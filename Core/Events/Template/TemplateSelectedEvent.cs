@@ -3,6 +3,6 @@
 namespace Score2Stream.Core.Events.Template
 {
     public class TemplateSelectedEvent
-        : PubSubEvent<Models.Template>
+        : PubSubEvent<Models.Contents.Template>
     { }
 }

@@ -1,4 +1,4 @@
-﻿using Score2Stream.Core.Models;
+﻿using Score2Stream.Core.Models.Contents;
 using System;
 using System.Collections.Generic;
 using System.Linq;

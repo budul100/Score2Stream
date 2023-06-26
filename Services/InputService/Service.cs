@@ -5,7 +5,8 @@ using Score2Stream.Core.Constants;
 using Score2Stream.Core.Events.Input;
 using Score2Stream.Core.Events.Video;
 using Score2Stream.Core.Interfaces;
-using Score2Stream.Core.Settings;
+using Score2Stream.Core.Models.Contents;
+using Score2Stream.Core.Models.Settings;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,7 +24,7 @@ namespace Score2Stream.InputService
         private readonly UserSettings settings;
         private readonly ISettingsService<UserSettings> settingsService;
 
-        private Core.Models.Input currentInput;
+        private Input currentInput;
 
         #endregion Private Fields
 
@@ -69,7 +70,7 @@ namespace Score2Stream.InputService
             }
         }
 
-        public IList<Core.Models.Input> Inputs { get; } = new List<Core.Models.Input>();
+        public IList<Input> Inputs { get; } = new List<Input>();
 
         public bool IsActive => VideoService?.IsActive ?? false;
 
@@ -178,7 +179,7 @@ namespace Score2Stream.InputService
             }
         }
 
-        public void Select(Core.Models.Input input)
+        public void Select(Input input)
         {
             if (input.VideoService == default)
             {

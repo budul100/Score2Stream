@@ -7,7 +7,7 @@ using Score2Stream.Core.Events.Clip;
 using Score2Stream.Core.Events.Template;
 using Score2Stream.Core.Events.Video;
 using Score2Stream.Core.Interfaces;
-using Score2Stream.Core.Models;
+using Score2Stream.Core.Models.Contents;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;

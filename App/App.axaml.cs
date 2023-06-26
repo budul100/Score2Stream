@@ -8,7 +8,7 @@ using Prism.Modularity;
 using Prism.Regions;
 using Score2Stream.Core.Enums;
 using Score2Stream.Core.Interfaces;
-using Score2Stream.Core.Settings;
+using Score2Stream.Core.Models.Settings;
 using Score2Stream.Views;
 using Splat;
 using System;
