@@ -96,7 +96,7 @@
                     <a:ChangePropertyAction
                         PropertyName="Background"
                         TargetObject="SamplesViewer"
-                        Value="Beige" />
+                        Value="Orange" />
                 </a:DataTriggerBehavior>
             </i:Interaction.Behaviors>
 
