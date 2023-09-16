@@ -210,7 +210,10 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public bool IsSampleDetection
         {
-            get { return inputService?.SampleService?.IsDetection ?? false; }
+            get
+            {
+                return inputService?.SampleService?.IsDetection ?? false;
+            }
             set
             {
                 if (IsActive)
@@ -502,9 +505,14 @@ namespace Score2Stream.MenuModule.ViewModels
             }
         }
 
-        private void SelectRegion(string name)
+        private void SelectRegion(string tabName)
         {
-            switch (name)
+            if (tabName != TabSamplesName)
+            {
+                IsSampleDetection = false;
+            }
+
+            switch (tabName)
             {
                 case TabBoardName:
 
