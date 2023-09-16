@@ -43,6 +43,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SettingsService", "Services
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Additionals", "Additionals", "{09E7315B-A607-411D-8A0C-BE0CBF4107F3}"
 	ProjectSection(SolutionItems) = preProject
+		Additionals\ChangeLog.md = Additionals\ChangeLog.md
 		README.md = README.md
 	EndProjectSection
 EndProject
