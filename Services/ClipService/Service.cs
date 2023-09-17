@@ -13,15 +13,19 @@ namespace Score2Stream.ClipService
         #region Private Fields
 
         private const int ThresholdMonochromeDefault = 50;
+
         private readonly IEventAggregator eventAggregator;
+        private readonly IScoreboardService scoreboardService;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public Service(ITemplateService templateService, IEventAggregator eventAggregator)
+        public Service(ITemplateService templateService, IScoreboardService scoreboardService,
+            IEventAggregator eventAggregator)
         {
             TemplateService = templateService;
+            this.scoreboardService = scoreboardService;
             this.eventAggregator = eventAggregator;
         }
 
@@ -139,6 +143,8 @@ namespace Score2Stream.ClipService
                 }
 
                 Clips.Remove(clip);
+
+                scoreboardService.RemoveClip(clip);
             }
         }
 

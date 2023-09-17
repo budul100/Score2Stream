@@ -77,6 +77,8 @@ namespace Score2Stream.Core.Interfaces
 
         #region Public Methods
 
+        void RemoveClip(Clip clip);
+
         void SetClip(Clip clip, ClipType clipType);
 
         void SetTicker(int number, string text);

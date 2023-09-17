@@ -231,6 +231,15 @@ namespace Score2Stream.ScoreboardService
 
         #region Public Methods
 
+        public void RemoveClip(Clip clip)
+        {
+            if (clip != default)
+            {
+                clips[clip.Type] = default;
+                clip.Type = default;
+            }
+        }
+
         public void SetClip(Clip clip, ClipType clipType)
         {
             if (clip != default)
