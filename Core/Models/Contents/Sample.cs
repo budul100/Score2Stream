@@ -11,11 +11,9 @@ namespace Score2Stream.Core.Models.Contents
         [JsonIgnore]
         public Bitmap Bitmap { get; set; }
 
-        [JsonIgnore]
-        public Mat Centred { get; set; }
+        public int Height { get; set; }
 
-        [JsonIgnore]
-        public Mat Full { get; set; }
+        public byte[] Image { get; set; }
 
         public int Index { get; set; }
 
@@ -26,12 +24,17 @@ namespace Score2Stream.Core.Models.Contents
         public bool IsRelevant { get; set; }
 
         [JsonIgnore]
+        public Mat Mat { get; set; }
+
+        [JsonIgnore]
         public double Similarity { get; set; }
 
         [JsonIgnore]
         public Template Template { get; set; }
 
         public string Value { get; set; }
+
+        public int Width { get; set; }
 
         #endregion Public Properties
     }

@@ -1,4 +1,5 @@
 ﻿using Hompus.VideoInputDevices;
+using OpenCvSharp;
 using Prism.Events;
 using Prism.Ioc;
 using Score2Stream.Core.Constants;
@@ -235,13 +236,14 @@ namespace Score2Stream.InputService
                             {
                                 if (clip.Template.Samples?.Any() == true)
                                 {
-                                    clip.Template.Samples = clip.Template.Samples
-                                        .Where(s => s.Full != default).ToList();
-
                                     var samples = clip.Template.Samples.ToArray();
 
                                     foreach (var sample in samples)
                                     {
+                                        sample.Mat = Mat.FromImageData(
+                                            imageBytes: sample.Image,
+                                            mode: ImreadModes.Unchanged);
+
                                         currentInput.SampleService.Add(sample);
                                     }
                                 }
@@ -364,9 +366,26 @@ namespace Score2Stream.InputService
 
         private void UpdateClips()
         {
-            if (!isInitializing)
+            if (!isInitializing
+                && currentInput != default)
             {
                 currentInput.Clips = ClipService?.Clips;
+
+                if (currentInput.Clips?.Any() == true)
+                {
+                    foreach (var clip in currentInput.Clips)
+                    {
+                        if (clip.Template?.Samples?.Any() == true)
+                        {
+                            foreach (var sample in clip.Template.Samples)
+                            {
+                                sample.Image = !string.IsNullOrWhiteSpace(sample.Value)
+                                    ? sample.Mat.ToBytes()
+                                    : default;
+                            }
+                        }
+                    }
+                }
 
                 settingsService.Save();
             }

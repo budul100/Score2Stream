@@ -1,6 +1,7 @@
 ﻿using Avalonia.Media.Imaging;
 using Prism.Events;
 using Score2Stream.Core.Events.Sample;
+using Score2Stream.Core.Extensions;
 using Score2Stream.Core.Interfaces;
 using Score2Stream.Core.Models.Contents;
 using System.Collections.Generic;
@@ -55,16 +56,15 @@ namespace Score2Stream.SampleService
 
         public void Add(Sample sample)
         {
-            if (sample?.Full != default
-                && sample?.Centred != default)
+            if (sample?.Mat != default)
             {
-                sample.Bitmap = new Bitmap(sample.Centred.ToMemoryStream());
+                var bitmapStream = sample.Mat.ToCentered(
+                    fullWidth: sample.Width,
+                    fullHeight: sample.Height);
+
+                sample.Bitmap = new Bitmap(bitmapStream.ToMemoryStream());
 
                 Samples.Add(sample);
-
-                eventAggregator
-                    .GetEvent<SamplesChangedEvent>()
-                    .Publish();
             }
         }
 
@@ -172,8 +172,9 @@ namespace Score2Stream.SampleService
             {
                 result = new Sample
                 {
-                    Centred = clip.Centred,
-                    Full = clip.Full,
+                    Height = clip.Height,
+                    Width = clip.Width,
+                    Mat = clip.Mat,
                     Index = index++,
                     Template = clip.Template,
                 };
@@ -181,6 +182,10 @@ namespace Score2Stream.SampleService
                 clip.Template.Samples.Add(result);
 
                 Add(result);
+
+                eventAggregator
+                    .GetEvent<SamplesChangedEvent>()
+                    .Publish();
             }
 
             return result;

@@ -1,4 +1,5 @@
-﻿using Score2Stream.Core.Models.Contents;
+﻿using Score2Stream.Core.Extensions;
+using Score2Stream.Core.Models.Contents;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +19,7 @@ namespace Score2Stream.VideoService.Extensions
             {
                 foreach (var relevant in relevants)
                 {
-                    var similarity = relevant.Full.GetSimilarityTo(clip.Full);
+                    var similarity = relevant.Mat.GetSimilarityTo(clip.Mat);
 
                     if (similarity > thresholdMatching)
                     {

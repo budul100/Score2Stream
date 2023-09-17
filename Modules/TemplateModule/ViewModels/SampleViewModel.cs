@@ -56,7 +56,7 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         public Bitmap Bitmap => Sample?.Bitmap;
 
-        public string Difference => Sample?.Full != default
+        public string Difference => Sample?.Mat != default
             ? $"Similarity: {(int)(Sample.Similarity * 100)}"
             : default;
 

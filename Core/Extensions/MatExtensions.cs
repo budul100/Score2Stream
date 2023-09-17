@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Score2Stream.VideoService.Extensions
+namespace Score2Stream.Core.Extensions
 {
-    internal static class ImageExtensions
+    public static class MatExtensions
     {
         #region Public Methods
 
