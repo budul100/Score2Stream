@@ -16,14 +16,17 @@ namespace Score2Stream.Core.Models.Contents
         public Bitmap Bitmap { get; set; }
 
         [JsonIgnore]
+        public Mat Centred { get; set; }
+
+        [JsonIgnore]
         public string Description => Type != ClipType.None
             ? Type.GetDescription()
             : Name;
 
-        public bool HasDimensions { get; set; }
-
         [JsonIgnore]
-        public Mat Image { get; set; }
+        public Mat Full { get; set; }
+
+        public bool HasDimensions { get; set; }
 
         [JsonIgnore]
         public Queue<Mat> Images { get; set; } = new Queue<Mat>();
@@ -44,7 +47,6 @@ namespace Score2Stream.Core.Models.Contents
         [JsonIgnore]
         public int Similarity { get; set; }
 
-        [JsonIgnore]
         public Template Template { get; set; }
 
         public int ThresholdMonochrome { get; set; }

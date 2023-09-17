@@ -263,7 +263,7 @@ namespace Score2Stream.VideoService
 
         private void UpdateClip(Clip clip)
         {
-            if (clip.Image == default)
+            if (clip.Full == default)
             {
                 clip.SetValue(
                     value: clip.Template?.ValueEmpty,
@@ -338,14 +338,12 @@ namespace Score2Stream.VideoService
 
                     if (currentImage != default)
                     {
-                        clip.Image = currentImage;
+                        clip.Full = currentImage;
+                        clip.Centred = currentImage.ToCentered(
+                            fullWidth: maxWidth,
+                            fullHeight: maxHeight);
 
-                        var centredImage = clip.Image
-                            .ToCentered(
-                                fullWidth: maxWidth,
-                                fullHeight: maxHeight);
-
-                        clip.Bitmap = new Bitmap(centredImage.ToMemoryStream());
+                        clip.Bitmap = new Bitmap(clip.Centred.ToMemoryStream());
 
                         UpdateClip(clip);
                     }
@@ -394,7 +392,7 @@ namespace Score2Stream.VideoService
                 {
                     foreach (var sample in clip.Template.Samples)
                     {
-                        sample.Similarity = sample.Image.GetSimilarityTo(clip.Image);
+                        sample.Similarity = sample.Full.GetSimilarityTo(clip.Full);
                     }
 
                     similarSample = clip.Template.Samples

@@ -4,6 +4,8 @@ using Prism.Ioc;
 using Score2Stream.Core.Constants;
 using Score2Stream.Core.Events.Clip;
 using Score2Stream.Core.Events.Input;
+using Score2Stream.Core.Events.Sample;
+using Score2Stream.Core.Events.Template;
 using Score2Stream.Core.Events.Video;
 using Score2Stream.Core.Interfaces;
 using Score2Stream.Core.Models.Contents;
@@ -26,6 +28,7 @@ namespace Score2Stream.InputService
         private readonly ISettingsService<UserSettings> settingsService;
 
         private Input currentInput;
+        private bool isInitializing;
 
         #endregion Private Fields
 
@@ -55,6 +58,18 @@ namespace Score2Stream.InputService
             eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
                 action: _ => UpdateClips(),
                 keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<TemplatesChangedEvent>().Subscribe(
+                action: UpdateClips,
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<SamplesChangedEvent>().Subscribe(
+                action: UpdateClips,
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<SampleUpdatedEvent>().Subscribe(
+                action: _ => UpdateClips(),
+                keepSubscriberReferenceAlive: true);
         }
 
         #endregion Public Constructors
@@ -73,8 +88,11 @@ namespace Score2Stream.InputService
                 {
                     settings.Session.ImagesQueueSize = value;
 
-                    settingsService.Save();
-                    UpdateInput();
+                    if (!isInitializing)
+                    {
+                        settingsService.Save();
+                        UpdateInput();
+                    }
                 }
             }
         }
@@ -92,8 +110,11 @@ namespace Score2Stream.InputService
                 {
                     settings.Session.NoCentering = value;
 
-                    settingsService.Save();
-                    UpdateInput();
+                    if (!isInitializing)
+                    {
+                        settingsService.Save();
+                        UpdateInput();
+                    }
                 }
             }
         }
@@ -107,8 +128,11 @@ namespace Score2Stream.InputService
                 {
                     settings.Session.ProcessingDelay = value;
 
-                    settingsService.Save();
-                    UpdateInput();
+                    if (!isInitializing)
+                    {
+                        settingsService.Save();
+                        UpdateInput();
+                    }
                 }
             }
         }
@@ -126,8 +150,11 @@ namespace Score2Stream.InputService
                 {
                     settings.Detection.ThresholdDetecting = value;
 
-                    settingsService.Save();
-                    UpdateInput();
+                    if (!isInitializing)
+                    {
+                        settingsService.Save();
+                        UpdateInput();
+                    }
                 }
             }
         }
@@ -141,8 +168,11 @@ namespace Score2Stream.InputService
                 {
                     settings.Detection.ThresholdMatching = value;
 
-                    settingsService.Save();
-                    UpdateInput();
+                    if (!isInitializing)
+                    {
+                        settingsService.Save();
+                        UpdateInput();
+                    }
                 }
             }
         }
@@ -158,8 +188,11 @@ namespace Score2Stream.InputService
                 {
                     settings.Detection.WaitingDuration = value;
 
-                    settingsService.Save();
-                    UpdateInput();
+                    if (!isInitializing)
+                    {
+                        settingsService.Save();
+                        UpdateInput();
+                    }
                 }
             }
         }
@@ -172,32 +205,63 @@ namespace Score2Stream.InputService
         {
             UpdateDevices();
 
-            var inputs = settings.Inputs.ToArray();
+            isInitializing = true;
 
-            foreach (var input in inputs)
+            if (settings.Inputs?.Any() == true)
             {
-                if (input.IsFile)
-                {
-                    Select(input.FileName);
-                }
-                else
-                {
-                    var current = Inputs
-                        .SingleOrDefault(i => i.Name == input.Name);
+                var inputs = settings.Inputs.ToArray();
 
-                    Select(current);
-                }
-
-                if (input.Clips?.Any() == true)
+                foreach (var input in inputs)
                 {
-                    var clips = input.Clips.ToArray();
-
-                    foreach (var clip in clips)
+                    if (input.IsFile)
                     {
-                        currentInput.ClipService.Add(clip);
+                        Select(input.FileName);
+                    }
+                    else
+                    {
+                        var current = Inputs
+                            .SingleOrDefault(i => i.Name == input.Name);
+
+                        Select(current);
+                    }
+
+                    if (input.Clips?.Any() == true)
+                    {
+                        var clips = input.Clips.ToArray();
+
+                        foreach (var clip in clips)
+                        {
+                            if (clip.Template != default)
+                            {
+                                if (clip.Template.Samples?.Any() == true)
+                                {
+                                    clip.Template.Samples = clip.Template.Samples
+                                        .Where(s => s.Full != default).ToList();
+
+                                    var samples = clip.Template.Samples.ToArray();
+
+                                    foreach (var sample in samples)
+                                    {
+                                        currentInput.SampleService.Add(sample);
+                                    }
+                                }
+
+                                clip.Template.Clip = clip;
+
+                                currentInput.TemplateService.Add(clip.Template);
+                            }
+
+                            currentInput.ClipService.Add(clip);
+                        }
                     }
                 }
             }
+
+            isInitializing = false;
+
+            UpdateInput();
+            UpdateClips();
+            UpdateSettings();
         }
 
         public void Select(Input input)
@@ -300,8 +364,12 @@ namespace Score2Stream.InputService
 
         private void UpdateClips()
         {
-            currentInput.Clips = ClipService?.Clips;
-            settingsService.Save();
+            if (!isInitializing)
+            {
+                currentInput.Clips = ClipService?.Clips;
+
+                settingsService.Save();
+            }
         }
 
         private void UpdateDevices()
@@ -363,10 +431,13 @@ namespace Score2Stream.InputService
 
         private void UpdateSettings()
         {
-            settings.Inputs = Inputs
-                .Where(i => i.IsActive).ToList();
+            if (!isInitializing)
+            {
+                settings.Inputs = Inputs
+                    .Where(i => i.IsActive).ToList();
 
-            settingsService.Save();
+                settingsService.Save();
+            }
         }
 
         #endregion Private Methods

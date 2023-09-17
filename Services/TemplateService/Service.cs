@@ -38,27 +38,41 @@ namespace Score2Stream.TemplateService
 
         #region Public Methods
 
+        public void Add(Template template)
+        {
+            if (template != default)
+            {
+                Templates.Add(template);
+
+                eventAggregator
+                    .GetEvent<TemplatesChangedEvent>()
+                    .Publish();
+
+                Select(template);
+            }
+        }
+
         public void Add(Clip clip)
         {
-            var template = Templates.SingleOrDefault(t => t.Clip == clip);
+            var template = Templates
+                .SingleOrDefault(t => t.Clip == clip);
 
             if (template == default)
             {
                 template = new Template
                 {
                     Clip = clip,
+                    Samples = new List<Sample>(),
                 };
 
                 clip.Template = template;
 
-                Templates.Add(template);
-
-                eventAggregator
-                    .GetEvent<TemplatesChangedEvent>()
-                    .Publish();
+                Add(template);
             }
-
-            Select(template);
+            else
+            {
+                Select(template);
+            }
         }
 
         public void Clear()

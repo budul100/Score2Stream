@@ -86,7 +86,7 @@ namespace Score2Stream.MenuModule.ViewModels
                 canExecuteMethod: () => inputService.ClipService?.Clips?.Any() == true);
 
             this.ClipAsTemplateCommand = new DelegateCommand(
-                executeMethod: () => inputService.TemplateService.Add(inputService.ClipService.Clip),
+                executeMethod: () => AddTemplate(),
                 canExecuteMethod: () => inputService.ClipService?.Clip != default);
 
             this.TemplateSelectCommand = new DelegateCommand<Template>(
@@ -345,6 +345,14 @@ namespace Score2Stream.MenuModule.ViewModels
         #endregion Public Methods
 
         #region Private Methods
+
+        private void AddTemplate()
+        {
+            if (inputService.ClipService.Clip != default)
+            {
+                inputService.TemplateService.Add(inputService.ClipService.Clip);
+            }
+        }
 
         private void OnClipsChanged()
         {

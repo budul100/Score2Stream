@@ -18,7 +18,7 @@ namespace Score2Stream.VideoService.Extensions
             {
                 foreach (var relevant in relevants)
                 {
-                    var similarity = relevant.Image.GetSimilarityTo(clip.Image);
+                    var similarity = relevant.Full.GetSimilarityTo(clip.Full);
 
                     if (similarity > thresholdMatching)
                     {

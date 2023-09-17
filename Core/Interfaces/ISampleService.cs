@@ -19,6 +19,8 @@ namespace Score2Stream.Core.Interfaces
 
         void Add(Clip clip);
 
+        void Add(Sample sample);
+
         void Next(bool onward);
 
         void Order();

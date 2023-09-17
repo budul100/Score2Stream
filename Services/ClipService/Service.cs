@@ -58,17 +58,20 @@ namespace Score2Stream.ClipService
             };
 
             Add(clip);
+
+            Select(clip);
         }
 
         public void Add(Clip clip)
         {
-            Clips.Add(clip);
+            if (clip != default)
+            {
+                Clips.Add(clip);
 
-            eventAggregator
-                .GetEvent<ClipsChangedEvent>()
-                .Publish();
-
-            Select(clip);
+                eventAggregator
+                    .GetEvent<ClipsChangedEvent>()
+                    .Publish();
+            }
         }
 
         public void Clear()
