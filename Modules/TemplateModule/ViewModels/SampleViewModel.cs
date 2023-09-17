@@ -14,6 +14,7 @@ namespace Score2Stream.TemplateModule.ViewModels
     {
         #region Private Fields
 
+        private readonly SampleUpdatedValueEvent sampleUpdatedValueEvent;
         private bool isActive;
         private bool isMatching;
         private bool isRelevant;
@@ -41,13 +42,16 @@ namespace Score2Stream.TemplateModule.ViewModels
                 action: s => IsActive = s == Sample,
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<SampleUpdatedEvent>().Subscribe(
+            eventAggregator.GetEvent<SampleUpdatedRelevanceEvent>().Subscribe(
                 action: (s) => UpdateSample(s),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
                 action: () => RaisePropertyChanged(nameof(Difference)),
                 keepSubscriberReferenceAlive: true);
+
+            sampleUpdatedValueEvent = eventAggregator
+                .GetEvent<SampleUpdatedValueEvent>();
         }
 
         #endregion Public Constructors
@@ -96,6 +100,8 @@ namespace Score2Stream.TemplateModule.ViewModels
                 Sample.Value = value;
 
                 RaisePropertyChanged(nameof(Value));
+
+                sampleUpdatedValueEvent.Publish(Sample);
             }
         }
 

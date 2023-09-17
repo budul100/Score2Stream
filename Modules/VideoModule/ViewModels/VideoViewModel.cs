@@ -364,7 +364,7 @@ namespace Score2Stream.VideoModule.ViewModels
                 {
                     var current = containerProvider.Resolve<SelectionViewModel>();
 
-                    var isActive = inputService.ClipService.Clip == clip;
+                    var isActive = inputService.ClipService.Active == clip;
 
                     current.Initialize(
                         clip: clip,

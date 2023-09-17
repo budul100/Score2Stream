@@ -26,7 +26,7 @@ namespace Score2Stream.VideoService
 
         private readonly IDispatcherService dispatcherService;
         private readonly IEventAggregator eventAggregator;
-        private readonly SampleUpdatedEvent sampleUpdatedEvent;
+        private readonly SampleUpdatedRelevanceEvent sampleUpdatedRelevanceEvent;
         private readonly VideoUpdatedEvent videoUpdatedEvent;
 
         private CancellationTokenSource cancellationTokenSource;
@@ -50,8 +50,9 @@ namespace Score2Stream.VideoService
 
             videoUpdatedEvent = eventAggregator
                 .GetEvent<VideoUpdatedEvent>();
-            sampleUpdatedEvent = eventAggregator
-                .GetEvent<SampleUpdatedEvent>();
+
+            sampleUpdatedRelevanceEvent = eventAggregator
+                .GetEvent<SampleUpdatedRelevanceEvent>();
         }
 
         #endregion Public Constructors
@@ -408,13 +409,13 @@ namespace Score2Stream.VideoService
                         if (sample.IsMatching != (sample == similarSample))
                         {
                             sample.IsMatching = sample == similarSample;
-                            sampleUpdatedEvent.Publish(sample);
+                            sampleUpdatedRelevanceEvent.Publish(sample);
                         }
 
                         if (sample.IsRelevant != (sample == matchingSample))
                         {
                             sample.IsRelevant = sample == matchingSample;
-                            sampleUpdatedEvent.Publish(sample);
+                            sampleUpdatedRelevanceEvent.Publish(sample);
                         }
                     }
                 }

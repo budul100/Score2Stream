@@ -46,7 +46,10 @@ namespace Score2Stream.Core.Models.Contents
         [JsonIgnore]
         public int Similarity { get; set; }
 
+        [JsonIgnore]
         public Template Template { get; set; }
+
+        public string TemplateDescription { get; set; }
 
         public int ThresholdMonochrome { get; set; }
 

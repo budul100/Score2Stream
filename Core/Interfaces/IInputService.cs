@@ -11,7 +11,7 @@ namespace Score2Stream.Core.Interfaces
 
         int ImagesQueueSize { get; set; }
 
-        IList<Input> Inputs { get; }
+        HashSet<Input> Inputs { get; }
 
         bool IsActive { get; }
 

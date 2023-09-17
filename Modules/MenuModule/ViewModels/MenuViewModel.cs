@@ -31,6 +31,7 @@ namespace Score2Stream.MenuModule.ViewModels
     {
         #region Private Fields
 
+        private const string InputFileText = "Select file ...";
         private const int TabBoardIndex = 0;
         private const string TabBoardName = "BoardTab";
         private const int TabSamplesIndex = 2;
@@ -80,27 +81,27 @@ namespace Score2Stream.MenuModule.ViewModels
                 canExecuteMethod: () => inputService.IsActive);
             this.ClipRemoveCommand = new DelegateCommand(
                 executeMethod: () => RemoveClipSelectedAsync(),
-                canExecuteMethod: () => inputService.ClipService?.Clip != default);
+                canExecuteMethod: () => inputService.ClipService?.Active != default);
             this.ClipsRemoveAllCommand = new DelegateCommand(
                 executeMethod: () => RemoveClipsAllAsync(),
                 canExecuteMethod: () => inputService.ClipService?.Clips?.Any() == true);
 
             this.ClipAsTemplateCommand = new DelegateCommand(
                 executeMethod: () => AddTemplate(),
-                canExecuteMethod: () => inputService.ClipService?.Clip != default);
+                canExecuteMethod: () => inputService.ClipService?.Active != default);
 
             this.TemplateSelectCommand = new DelegateCommand<Template>(
                 executeMethod: t => SelectTemplate(t));
             this.TemplateRemoveCommand = new DelegateCommand(
                 executeMethod: () => RemoveTemplateAsync(),
-                canExecuteMethod: () => inputService?.TemplateService?.Template != default);
+                canExecuteMethod: () => inputService?.TemplateService?.Active != default);
 
             this.SampleAddCommand = new DelegateCommand(
-                executeMethod: () => inputService.SampleService.Add(inputService.ClipService.Clip),
-                canExecuteMethod: () => inputService?.ClipService?.Clip != default);
+                executeMethod: () => inputService.SampleService.Add(inputService.ClipService.Active),
+                canExecuteMethod: () => inputService?.ClipService?.Active != default);
             this.SampleRemoveCommand = new DelegateCommand(
                 executeMethod: () => inputService.SampleService.Remove(),
-                canExecuteMethod: () => inputService?.SampleService?.Sample != default);
+                canExecuteMethod: () => inputService?.SampleService?.Active != default);
             this.SamplesRemoveAllCommand = new DelegateCommand(
                 executeMethod: () => RemoveSamplesAllAsync(),
                 canExecuteMethod: () => inputService?.SampleService?.Samples?.Any() == true);
@@ -348,9 +349,9 @@ namespace Score2Stream.MenuModule.ViewModels
 
         private void AddTemplate()
         {
-            if (inputService.ClipService.Clip != default)
+            if (inputService.ClipService.Active != default)
             {
-                inputService.TemplateService.Add(inputService.ClipService.Clip);
+                inputService.TemplateService.Add(inputService.ClipService.Active);
             }
         }
 
@@ -383,7 +384,7 @@ namespace Score2Stream.MenuModule.ViewModels
             TemplateRemoveCommand.RaiseCanExecuteChanged();
             SampleAddCommand.RaiseCanExecuteChanged();
 
-            var tabName = inputService.TemplateService?.Template != default
+            var tabName = inputService.TemplateService?.Active != default
                 ? TabSamplesName
                 : TabVideoName;
 
@@ -421,7 +422,7 @@ namespace Score2Stream.MenuModule.ViewModels
         {
             var result = ButtonResult.Yes;
 
-            if (inputService?.ClipService?.Clip?.HasDimensions == true)
+            if (inputService?.ClipService?.Active?.HasDimensions == true)
             {
                 result = await messageBoxService.GetMessageBoxResultAsync(
                     contentMessage: "Shall the selected clip be removed?",
@@ -442,7 +443,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
             if (result == ButtonResult.Yes)
             {
-                inputService?.SampleService?.Remove(inputService?.TemplateService?.Template);
+                inputService?.SampleService?.Remove(inputService?.TemplateService?.Active);
             }
         }
 
@@ -450,7 +451,7 @@ namespace Score2Stream.MenuModule.ViewModels
         {
             var result = ButtonResult.Yes;
 
-            if (inputService?.TemplateService?.Template != default)
+            if (inputService?.TemplateService?.Active != default)
             {
                 result = await messageBoxService.GetMessageBoxResultAsync(
                     contentMessage: "Shall the selected template be removed?",
@@ -458,11 +459,11 @@ namespace Score2Stream.MenuModule.ViewModels
             }
 
             if (result == ButtonResult.Yes
-                && inputService?.TemplateService?.Template != default)
+                && inputService?.TemplateService?.Active != default)
             {
                 inputService.TemplateService.Remove();
 
-                var template = inputService.ClipService?.Clip?.Template
+                var template = inputService.ClipService?.Active?.Template
                     ?? inputService.TemplateService.Templates.FirstOrDefault();
                 inputService.TemplateService.Select(template);
             }
@@ -470,11 +471,16 @@ namespace Score2Stream.MenuModule.ViewModels
 
         private async void SelectInputAsync(Input input)
         {
-            if (input.IsFile)
+            if (input?.IsDevice == true)
             {
-                var fileName = input.FileName;
+                inputService.Select(
+                    input: input);
+            }
+            else
+            {
+                var fileName = input?.FileName;
 
-                if (!input.IsActive || !File.Exists(fileName))
+                if (input?.IsActive != true || !File.Exists(fileName))
                 {
                     if (!Directory.Exists(inputDirectory))
                     {
@@ -484,7 +490,7 @@ namespace Score2Stream.MenuModule.ViewModels
                     var dialog = new OpenFileDialog
                     {
                         Directory = inputDirectory,
-                        Title = Constants.InputFileText,
+                        Title = InputFileText,
                         AllowMultiple = false
                     };
 
@@ -505,11 +511,6 @@ namespace Score2Stream.MenuModule.ViewModels
 
                 inputService.Select(
                     fileName: fileName);
-            }
-            else
-            {
-                inputService.Select(
-                    input: input);
             }
         }
 
@@ -575,8 +576,7 @@ namespace Score2Stream.MenuModule.ViewModels
             Inputs.Clear();
 
             var ordereds = inputService.Inputs
-                .OrderByDescending(i => i.Name != Constants.InputFileText)
-                .ThenBy(i => i.IsFile)
+                .OrderByDescending(i => i.IsDevice)
                 .ThenBy(i => i.Name).ToArray();
 
             foreach (var ordered in ordereds)
@@ -591,6 +591,14 @@ namespace Score2Stream.MenuModule.ViewModels
 
                 Inputs.Add(input);
             }
+
+            var selectFileInput = new RibbonDropDownItem
+            {
+                Command = InputSelectCommand,
+                Text = InputFileText,
+            };
+
+            Inputs.Add(selectFileInput);
 
             RaisePropertyChanged(nameof(Inputs));
         }
@@ -608,18 +616,18 @@ namespace Score2Stream.MenuModule.ViewModels
             if (inputService.TemplateService != default)
             {
                 var ordereds = inputService.TemplateService.Templates
-                    .OrderBy(t => t.Description).ToArray();
+                    .OrderBy(t => t.Clip?.Description).ToArray();
 
                 foreach (var ordered in ordereds)
                 {
-                    var isChecked = ordered == inputService.TemplateService.Template;
+                    var isChecked = ordered == inputService.TemplateService.Active;
 
                     var template = new RibbonDropDownItem
                     {
                         Command = TemplateSelectCommand,
                         CommandParameter = ordered,
                         IsChecked = isChecked,
-                        Text = ordered.Description,
+                        Text = ordered.Clip?.Description,
                     };
 
                     Templates.Add(template);

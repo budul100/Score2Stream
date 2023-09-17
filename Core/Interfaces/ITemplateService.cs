@@ -9,7 +9,7 @@ namespace Score2Stream.Core.Interfaces
 
         ISampleService SampleService { get; }
 
-        Template Template { get; }
+        Template Active { get; }
 
         List<Template> Templates { get; }
 

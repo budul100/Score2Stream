@@ -8,9 +8,9 @@ namespace Score2Stream.Core.Models.Contents
     {
         #region Public Constructors
 
-        public Input(bool isFile)
+        public Input(bool isDevice)
         {
-            IsFile = isFile;
+            IsDevice = isDevice;
         }
 
         #endregion Public Constructors
@@ -29,12 +29,14 @@ namespace Score2Stream.Core.Models.Contents
         [JsonIgnore]
         public bool IsActive => VideoService?.IsActive ?? false;
 
-        public bool IsFile { get; }
+        public bool IsDevice { get; }
 
         public string Name { get; set; }
 
         [JsonIgnore]
         public ISampleService SampleService => TemplateService?.SampleService;
+
+        public List<Template> Templates { get; set; }
 
         [JsonIgnore]
         public ITemplateService TemplateService => ClipService?.TemplateService;

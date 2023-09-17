@@ -33,7 +33,7 @@ namespace Score2Stream.ClipService
 
         #region Public Properties
 
-        public Clip Clip { get; private set; }
+        public Clip Active { get; private set; }
 
         public List<Clip> Clips { get; } = new List<Clip>();
 
@@ -47,14 +47,14 @@ namespace Score2Stream.ClipService
         {
             var name = GetName();
 
-            var thresholdMonochrome = Clip?.ThresholdMonochrome
+            var thresholdMonochrome = Active?.ThresholdMonochrome
                 ?? ThresholdMonochromeDefault;
 
             var clip = new Clip()
             {
                 Name = name,
                 ThresholdMonochrome = thresholdMonochrome,
-                Template = Clip?.Template
+                Template = Active?.Template
             };
 
             Add(clip);
@@ -93,7 +93,7 @@ namespace Score2Stream.ClipService
 
         public void Remove()
         {
-            Remove(Clip);
+            Remove(Active);
         }
 
         public void Remove(Clip clip)
@@ -111,11 +111,13 @@ namespace Score2Stream.ClipService
 
         public void Select(Clip clip)
         {
-            Clip = clip;
+            Active = Active != clip
+                ? clip
+                : default;
 
             eventAggregator
                 .GetEvent<ClipSelectedEvent>()
-                .Publish(Clip);
+                .Publish(Active);
         }
 
         #endregion Public Methods

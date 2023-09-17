@@ -10,6 +10,9 @@ namespace Score2Stream.Core.Models.Contents
         [JsonIgnore]
         public Clip Clip { get; set; }
 
+        public string ClipDescription { get; set; }
+
+        [JsonIgnore]
         public string Description => Clip?.Description;
 
         public List<Sample> Samples { get; set; }

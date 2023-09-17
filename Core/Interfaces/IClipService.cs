@@ -7,7 +7,7 @@ namespace Score2Stream.Core.Interfaces
     {
         #region Public Properties
 
-        Clip Clip { get; }
+        Clip Active { get; }
 
         List<Clip> Clips { get; }
 

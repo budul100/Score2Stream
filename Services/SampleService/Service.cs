@@ -15,6 +15,7 @@ namespace Score2Stream.SampleService
         #region Private Fields
 
         private readonly IEventAggregator eventAggregator;
+
         private int index;
 
         #endregion Private Fields
@@ -34,9 +35,9 @@ namespace Score2Stream.SampleService
 
         #region Public Properties
 
-        public bool IsDetection { get; set; }
+        public Sample Active { get; private set; }
 
-        public Sample Sample { get; private set; }
+        public bool IsDetection { get; set; }
 
         public List<Sample> Samples { get; private set; } = new List<Sample>();
 
@@ -118,7 +119,7 @@ namespace Score2Stream.SampleService
         {
             var next = GetNext(true);
 
-            RemoveSample(Sample);
+            RemoveSample(Active);
 
             Select(next);
 
@@ -128,7 +129,7 @@ namespace Score2Stream.SampleService
 
         public void Select(Sample sample)
         {
-            Sample = sample;
+            Active = sample;
 
             eventAggregator
                 .GetEvent<SampleSelectedEvent>()
@@ -141,11 +142,11 @@ namespace Score2Stream.SampleService
 
         private Sample GetNext(bool onward)
         {
-            var result = Sample;
+            var result = Active;
 
             if (Samples.Count > 0)
             {
-                var index = Samples.IndexOf(Sample);
+                var index = Samples.IndexOf(Active);
 
                 if (onward)
                 {

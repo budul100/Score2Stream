@@ -8,8 +8,6 @@
 
         public const int DurationUpdateTitle = 500;
 
-        public const string InputFileText = "Select file ...";
-
         public const int MaxDuration = 1000;
         public const int MaxQueueSize = 20;
         public const int MaxThreshold = 100;

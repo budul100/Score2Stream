@@ -28,7 +28,7 @@ namespace Score2Stream.InputService
         private readonly UserSettings settings;
         private readonly ISettingsService<UserSettings> settingsService;
 
-        private Input currentInput;
+        private Input active;
         private bool isInitializing;
 
         #endregion Private Fields
@@ -61,15 +61,15 @@ namespace Score2Stream.InputService
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<TemplatesChangedEvent>().Subscribe(
-                action: UpdateClips,
+                action: UpdateTemplates,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<SamplesChangedEvent>().Subscribe(
-                action: UpdateClips,
+                action: UpdateTemplates,
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<SampleUpdatedEvent>().Subscribe(
-                action: _ => UpdateClips(),
+            eventAggregator.GetEvent<SampleUpdatedValueEvent>().Subscribe(
+                action: _ => UpdateTemplates(),
                 keepSubscriberReferenceAlive: true);
         }
 
@@ -77,7 +77,7 @@ namespace Score2Stream.InputService
 
         #region Public Properties
 
-        public IClipService ClipService => currentInput?.ClipService;
+        public IClipService ClipService => active?.ClipService;
 
         public int ImagesQueueSize
         {
@@ -98,7 +98,7 @@ namespace Score2Stream.InputService
             }
         }
 
-        public IList<Input> Inputs { get; } = new List<Input>();
+        public HashSet<Input> Inputs { get; } = new HashSet<Input>();
 
         public bool IsActive => VideoService?.IsActive ?? false;
 
@@ -138,9 +138,9 @@ namespace Score2Stream.InputService
             }
         }
 
-        public ISampleService SampleService => currentInput?.SampleService;
+        public ISampleService SampleService => active?.SampleService;
 
-        public ITemplateService TemplateService => currentInput?.TemplateService;
+        public ITemplateService TemplateService => active?.TemplateService;
 
         public int ThresholdDetecting
         {
@@ -178,7 +178,7 @@ namespace Score2Stream.InputService
             }
         }
 
-        public IVideoService VideoService => currentInput?.VideoService;
+        public IVideoService VideoService => active?.VideoService;
 
         public int WaitingDuration
         {
@@ -204,60 +204,59 @@ namespace Score2Stream.InputService
 
         public void Initialize()
         {
-            UpdateDevices();
-
             isInitializing = true;
 
-            if (settings.Inputs?.Any() == true)
+            var inputs = GetInputs().ToArray();
+
+            foreach (var input in inputs)
             {
-                var inputs = settings.Inputs.ToArray();
+                var current = input.IsDevice
+                    ? settings?.Inputs?.SingleOrDefault(i => i.DeviceId == input.DeviceId)
+                    : settings?.Inputs?.SingleOrDefault(i => i.FileName == input.FileName);
 
-                foreach (var input in inputs)
+                if (current?.Templates?.Any() == true)
                 {
-                    if (input.IsFile)
-                    {
-                        Select(input.FileName);
-                    }
-                    else
-                    {
-                        var current = Inputs
-                            .SingleOrDefault(i => i.Name == input.Name);
+                    var templates = current.Templates.ToArray();
 
-                        Select(current);
-                    }
-
-                    if (input.Clips?.Any() == true)
+                    foreach (var template in templates)
                     {
-                        var clips = input.Clips.ToArray();
+                        input.TemplateService.Add(template);
 
-                        foreach (var clip in clips)
+                        if (template.Samples?.Any() == true)
                         {
-                            if (clip.Template != default)
+                            template.Samples = template.Samples
+                                .Where(s => s.Image != default).ToList();
+
+                            foreach (var sample in template.Samples)
                             {
-                                if (clip.Template.Samples?.Any() == true)
-                                {
-                                    var samples = clip.Template.Samples
-                                        .Where(s => s.Image != default).ToArray();
+                                sample.Mat = Mat.FromImageData(
+                                    imageBytes: sample.Image,
+                                    mode: ImreadModes.Unchanged);
+                                sample.Template = template;
 
-                                    foreach (var sample in samples)
-                                    {
-                                        sample.Mat = Mat.FromImageData(
-                                            imageBytes: sample.Image,
-                                            mode: ImreadModes.Unchanged);
-                                        sample.Template = clip.Template;
-
-                                        currentInput.SampleService.Add(sample);
-                                    }
-
-                                    clip.Template.Samples = samples.ToList();
-                                }
-
-                                clip.Template.Clip = clip;
-
-                                currentInput.TemplateService.Add(clip.Template);
+                                input.SampleService.Add(sample);
                             }
+                        }
+                    }
+                }
 
-                            currentInput.ClipService.Add(clip);
+                if (current?.Clips?.Any() == true)
+                {
+                    var clips = current.Clips.ToArray();
+
+                    foreach (var clip in clips)
+                    {
+                        clip.Template = input.TemplateService?.Templates?
+                            .SingleOrDefault(t => t.ClipDescription == clip.TemplateDescription);
+
+                        input.ClipService.Add(clip);
+
+                        var clipTemplate = input.TemplateService?.Templates?
+                            .SingleOrDefault(t => t.ClipDescription == clip.Description);
+
+                        if (clipTemplate != default)
+                        {
+                            clipTemplate.Clip = clip;
                         }
                     }
                 }
@@ -265,57 +264,41 @@ namespace Score2Stream.InputService
 
             isInitializing = false;
 
-            UpdateInput();
+            var relevant = Inputs.FirstOrDefault(i => !i.IsDevice
+                || settings?.Inputs?.Any(s => s.DeviceId == i.DeviceId) == true);
+
+            Select(relevant);
+            TemplateService?.Select(TemplateService?.Templates?.FirstOrDefault());
+
             UpdateClips();
-            UpdateSettings();
+            UpdateTemplates();
         }
 
         public void Select(Input input)
         {
-            if (input.VideoService == default)
+            if (input != default)
             {
-                input.VideoService = containerProvider
-                    .Resolve<IVideoService>();
+                StartInput(input);
+
+                if (active != input)
+                {
+                    active = input;
+                    UpdateInput();
+
+                    eventAggregator
+                        .GetEvent<InputSelectedEvent>()
+                        .Publish(active);
+                }
+
+                UpdateSettings();
             }
-
-            if (!input.IsActive)
-            {
-                input.VideoService.RunAsync(input);
-            }
-
-            if (currentInput != input)
-            {
-                currentInput = input;
-                UpdateInput();
-
-                eventAggregator
-                    .GetEvent<InputSelectedEvent>()
-                    .Publish(currentInput);
-            }
-
-            UpdateSettings();
         }
 
         public void Select(string fileName)
         {
-            if (File.Exists(fileName))
-            {
-                var input = Inputs
-                    .SingleOrDefault(i => i.FileName == fileName);
+            var input = GetInput(fileName);
 
-                if (input == default)
-                {
-                    input = new Input(true)
-                    {
-                        FileName = fileName,
-                        Name = Path.GetFileName(fileName),
-                    };
-
-                    Inputs.Add(input);
-                }
-
-                Select(input);
-            }
+            Select(input);
         }
 
         public void StopAll()
@@ -340,21 +323,62 @@ namespace Score2Stream.InputService
 
         #region Private Methods
 
-        private void AddFileSelection()
+        private Input GetInput(string fileName)
         {
-            if (!Inputs.Any(i => i.IsFile
-                && string.IsNullOrWhiteSpace(i.FileName)))
+            var result = default(Input);
+
+            if (File.Exists(fileName))
             {
-                var input = new Input(true)
+                result = Inputs
+                    .SingleOrDefault(i => i.FileName == fileName);
+
+                if (result == default)
                 {
-                    Name = Constants.InputFileText,
-                };
+                    result = new Input(false)
+                    {
+                        FileName = fileName,
+                        Name = Path.GetFileName(fileName),
+                    };
+                }
+            }
 
-                Inputs.Add(input);
+            return result;
+        }
 
-                eventAggregator
-                    .GetEvent<InputsChangedEvent>()
-                    .Publish();
+        private IEnumerable<Input> GetInputs()
+        {
+            UpdateDevices();
+
+            var devices = Inputs
+                .Where(i => i.IsDevice).ToArray();
+
+            foreach (var device in devices)
+            {
+                if (settings?.Inputs?.Any(i => i.DeviceId == device.DeviceId) == true)
+                {
+                    StartInput(device);
+                }
+
+                yield return device;
+            }
+
+            if (settings.Inputs?.Any() == true)
+            {
+                var fileNames = settings.Inputs
+                    .Where(i => !i.IsDevice)
+                    .Select(i => i.FileName).ToArray();
+
+                foreach (var fileName in fileNames)
+                {
+                    var file = GetInput(fileName);
+
+                    if (file != default)
+                    {
+                        StartInput(file);
+
+                        yield return file;
+                    }
+                }
             }
         }
 
@@ -368,26 +392,37 @@ namespace Score2Stream.InputService
                 .Publish();
         }
 
+        private void StartInput(Input input)
+        {
+            if (input != default)
+            {
+                if (input.VideoService == default)
+                {
+                    input.VideoService = containerProvider
+                        .Resolve<IVideoService>();
+                }
+
+                if (!input.IsActive)
+                {
+                    input.VideoService.RunAsync(input);
+                }
+
+                Inputs.Add(input);
+            }
+        }
+
         private void UpdateClips()
         {
             if (!isInitializing
-                && currentInput != default)
+                && active != default)
             {
-                currentInput.Clips = ClipService?.Clips;
+                active.Clips = ClipService?.Clips;
 
-                if (currentInput.Clips?.Any() == true)
+                if (active.Clips?.Any() == true)
                 {
-                    foreach (var clip in currentInput.Clips)
+                    foreach (var clip in active.Clips)
                     {
-                        if (clip.Template?.Samples?.Any() == true)
-                        {
-                            foreach (var sample in clip.Template.Samples)
-                            {
-                                sample.Image = !string.IsNullOrWhiteSpace(sample.Value)
-                                    ? sample.Mat.ToBytes()
-                                    : default;
-                            }
-                        }
+                        clip.TemplateDescription = clip.Template?.Clip?.Description;
                     }
                 }
 
@@ -404,7 +439,6 @@ namespace Score2Stream.InputService
 
             var toBeRemoveds = Inputs
                 .Where(i => !i.IsActive
-                    && i.Name != Constants.InputFileText
                     && !devices.Any(d => d.Key == i.DeviceId)).ToArray();
 
             foreach (var toBeRemoved in toBeRemoveds)
@@ -419,7 +453,7 @@ namespace Score2Stream.InputService
 
             foreach (var toBeAdded in toBeAddeds)
             {
-                var current = new Input(false)
+                var current = new Input(true)
                 {
                     DeviceId = toBeAdded.Key,
                     Name = toBeAdded.Value,
@@ -428,11 +462,8 @@ namespace Score2Stream.InputService
                 Inputs.Add(current);
             }
 
-            if (toBeRemoveds.Any()
-                || toBeAddeds.Any())
+            if (toBeRemoveds.Any() || toBeAddeds.Any())
             {
-                AddFileSelection();
-
                 eventAggregator
                     .GetEvent<InputsChangedEvent>()
                     .Publish();
@@ -441,14 +472,14 @@ namespace Score2Stream.InputService
 
         private void UpdateInput()
         {
-            if (currentInput?.VideoService != default)
+            if (active?.VideoService != default)
             {
-                currentInput.VideoService.ImagesQueueSize = ImagesQueueSize;
-                currentInput.VideoService.NoCentering = NoCentering;
-                currentInput.VideoService.ProcessingDelay = ProcessingDelay;
-                currentInput.VideoService.ThresholdDetecting = Math.Abs(ThresholdDetecting) / Constants.DividerThreshold;
-                currentInput.VideoService.ThresholdMatching = Math.Abs(ThresholdMatching) / Constants.DividerThreshold;
-                currentInput.VideoService.WaitingDuration = TimeSpan.FromMilliseconds(Math.Abs(WaitingDuration));
+                active.VideoService.ImagesQueueSize = ImagesQueueSize;
+                active.VideoService.NoCentering = NoCentering;
+                active.VideoService.ProcessingDelay = ProcessingDelay;
+                active.VideoService.ThresholdDetecting = Math.Abs(ThresholdDetecting) / Constants.DividerThreshold;
+                active.VideoService.ThresholdMatching = Math.Abs(ThresholdMatching) / Constants.DividerThreshold;
+                active.VideoService.WaitingDuration = TimeSpan.FromMilliseconds(Math.Abs(WaitingDuration));
             }
         }
 
@@ -458,6 +489,33 @@ namespace Score2Stream.InputService
             {
                 settings.Inputs = Inputs
                     .Where(i => i.IsActive).ToList();
+
+                settingsService.Save();
+            }
+        }
+
+        private void UpdateTemplates()
+        {
+            if (!isInitializing
+                && active != default)
+            {
+                active.Templates = TemplateService?.Templates;
+
+                if (active.Templates?.Any() == true)
+                {
+                    foreach (var template in active.Templates)
+                    {
+                        template.ClipDescription = template.Description;
+
+                        if (template.Samples?.Any() == true)
+                        {
+                            foreach (var sample in template.Samples)
+                            {
+                                sample.Image = sample.Mat.ToBytes();
+                            }
+                        }
+                    }
+                }
 
                 settingsService.Save();
             }

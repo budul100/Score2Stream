@@ -28,9 +28,9 @@ namespace Score2Stream.TemplateService
 
         #region Public Properties
 
-        public ISampleService SampleService { get; }
+        public Template Active { get; private set; }
 
-        public Template Template { get; private set; }
+        public ISampleService SampleService { get; }
 
         public List<Template> Templates { get; } = new List<Template>();
 
@@ -93,7 +93,7 @@ namespace Score2Stream.TemplateService
 
         public void Remove()
         {
-            Remove(Template);
+            Remove(Active);
         }
 
         public void Remove(Template template)
@@ -111,7 +111,7 @@ namespace Score2Stream.TemplateService
 
         public void Select(Template template)
         {
-            Template = template;
+            Active = template;
 
             eventAggregator
                 .GetEvent<TemplateSelectedEvent>()
@@ -126,10 +126,12 @@ namespace Score2Stream.TemplateService
         {
             if (template != default)
             {
+                if (template.Clip != default)
+                {
+                    template.Clip.Template = default;
+                }
+
                 SampleService.Remove(template);
-
-                template.Clip.Template = default;
-
                 Templates.Remove(template);
             }
         }

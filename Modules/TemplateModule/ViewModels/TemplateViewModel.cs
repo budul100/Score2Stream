@@ -55,7 +55,7 @@ namespace Score2Stream.TemplateModule.ViewModels
                 action: () => UpdateImage(),
                 keepSubscriberReferenceAlive: true);
 
-            UpdateTemplate(inputService?.TemplateService?.Template);
+            UpdateTemplate(inputService?.TemplateService?.Active);
         }
 
         #endregion Public Constructors
@@ -94,8 +94,8 @@ namespace Score2Stream.TemplateModule.ViewModels
         private string GetCurrent()
         {
             var result = !string.IsNullOrWhiteSpace(Template?.Clip?.Value)
-                ? $"{Template.Description} => {Template.Clip.Value} ({Template.Clip.Similarity})"
-                : Template?.Description;
+                ? $"{Template.Clip.Description} => {Template.Clip.Value} ({Template.Clip.Similarity})"
+                : Template?.Clip?.Description;
 
             return result;
         }
