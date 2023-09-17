@@ -21,7 +21,8 @@ namespace Score2Stream.VideoService.Extensions
                 {
                     var similarity = relevant.Mat.GetSimilarityTo(clip.Mat);
 
-                    if (similarity > thresholdMatching)
+                    if (similarity > thresholdMatching
+                        && similarity != 1)
                     {
                         var result = new KeyValuePair<double, Sample>(
                             key: similarity,
@@ -43,10 +44,13 @@ namespace Score2Stream.VideoService.Extensions
                 clip.UpdateSimilarity = similarity;
             }
 
-            if (clip.Value != clip.UpdateValue
-                && clip.UpdateTime.Add(waitingDuration) < DateTime.Now)
+            if (DateTime.Now > clip.UpdateTime.Add(waitingDuration))
             {
-                clip.Value = clip.UpdateValue;
+                if (clip.Value != clip.UpdateValue)
+                {
+                    clip.Value = clip.UpdateValue;
+                }
+
                 clip.Similarity = clip.UpdateSimilarity;
             }
         }

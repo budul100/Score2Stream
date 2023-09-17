@@ -7,10 +7,8 @@ namespace Score2Stream.Core.Interfaces
     {
         #region Public Properties
 
-        bool IsDetection { get; set; }
-
         Sample Active { get; }
-
+        bool IsDetection { get; set; }
         List<Sample> Samples { get; }
 
         #endregion Public Properties

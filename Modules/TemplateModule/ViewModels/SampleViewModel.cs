@@ -127,8 +127,8 @@ namespace Score2Stream.TemplateModule.ViewModels
         {
             if (sample == Sample)
             {
-                IsMatching = sample.IsMatching;
-                IsRelevant = sample.IsRelevant;
+                IsMatching = sample.IsSimilar;
+                IsRelevant = sample.IsMatching;
             }
         }
 

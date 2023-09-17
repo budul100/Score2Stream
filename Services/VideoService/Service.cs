@@ -277,35 +277,29 @@ namespace Score2Stream.VideoService
                 var similarSamples = clip.GetSimilarSamples(
                     thresholdMatching: ThresholdMatching).ToArray();
 
-                var matchingSample = default(Sample);
-
-                if (similarSamples.Any())
-                {
-                    matchingSample = similarSamples.Any(s => s.Key != 1)
-                        ? similarSamples.OrderByDescending(c => c.Key).FirstOrDefault().Value
-                        : default;
-
-                    if (matchingSample != default)
-                    {
-                        var similarity = Convert.ToInt32(matchingSample.Similarity * Constants.DividerThreshold);
-
-                        clip.SetValue(
-                            value: matchingSample.Value,
-                            similarity: similarity,
-                            waitingDuration: WaitingDuration);
-                    }
-                    else
-                    {
-                        clip.SetValue(
-                            value: clip.Template?.ValueEmpty,
-                            similarity: 0,
-                            waitingDuration: WaitingDuration);
-                    }
-                }
+                var matchingSample = similarSamples
+                    .OrderByDescending(c => c.Key).FirstOrDefault();
 
                 UpdateSamples(
                     clip: clip,
-                    matchingSample: matchingSample);
+                    matchingSample: matchingSample.Value);
+
+                if (matchingSample.Value != default)
+                {
+                    var similarity = Convert.ToInt32(matchingSample.Key * Constants.DividerThreshold);
+
+                    clip.SetValue(
+                        value: matchingSample.Value.Value,
+                        similarity: similarity,
+                        waitingDuration: WaitingDuration);
+                }
+                else
+                {
+                    clip.SetValue(
+                        value: clip.Template?.ValueEmpty,
+                        similarity: 0,
+                        waitingDuration: WaitingDuration);
+                }
             }
         }
 
@@ -406,15 +400,15 @@ namespace Score2Stream.VideoService
 
                     foreach (var sample in clip.Template.Samples)
                     {
-                        if (sample.IsMatching != (sample == similarSample))
+                        if (sample.IsSimilar != (sample == similarSample))
                         {
-                            sample.IsMatching = sample == similarSample;
+                            sample.IsSimilar = sample == similarSample;
                             sampleUpdatedRelevanceEvent.Publish(sample);
                         }
 
-                        if (sample.IsRelevant != (sample == matchingSample))
+                        if (sample.IsMatching != (sample == matchingSample))
                         {
-                            sample.IsRelevant = sample == matchingSample;
+                            sample.IsMatching = sample == matchingSample;
                             sampleUpdatedRelevanceEvent.Publish(sample);
                         }
                     }

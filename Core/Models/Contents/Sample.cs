@@ -21,7 +21,7 @@ namespace Score2Stream.Core.Models.Contents
         public bool IsMatching { get; set; }
 
         [JsonIgnore]
-        public bool IsRelevant { get; set; }
+        public bool IsSimilar { get; set; }
 
         [JsonIgnore]
         public Mat Mat { get; set; }

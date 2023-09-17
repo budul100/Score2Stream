@@ -97,8 +97,8 @@ namespace Score2Stream.MenuModule.ViewModels
                 canExecuteMethod: () => inputService?.TemplateService?.Active != default);
 
             this.SampleAddCommand = new DelegateCommand(
-                executeMethod: () => inputService.SampleService.Add(inputService.ClipService.Active),
-                canExecuteMethod: () => inputService?.ClipService?.Active != default);
+                executeMethod: () => inputService.SampleService.Add(inputService.TemplateService.Active.Clip),
+                canExecuteMethod: () => inputService?.TemplateService?.Active?.Clip != default);
             this.SampleRemoveCommand = new DelegateCommand(
                 executeMethod: () => inputService.SampleService.Remove(),
                 canExecuteMethod: () => inputService?.SampleService?.Active != default);

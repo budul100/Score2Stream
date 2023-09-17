@@ -251,21 +251,6 @@
                     </rib:RibbonGroupBox>
 
                     <rib:RibbonGroupBox Header="Clip options">
-                        <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
-                            <TextBlock
-                                Width="100"
-                                Margin="0,0,4,0"
-                                VerticalAlignment="Center"
-                                FontSize="11"
-                                Text="Update waiting" />
-                            <NumericUpDown
-                                Width="130"
-                                MaxHeight="5"
-                                Increment="10"
-                                Maximum="{Binding MaxDuration}"
-                                Minimum="0"
-                                Value="{Binding WaitingDuration, Mode=TwoWay}" />
-                        </StackPanel>
                         <CheckBox
                             Margin="0,0,4,4"
                             VerticalAlignment="Center"
@@ -383,6 +368,21 @@
                                 Maximum="{Binding MaxThreshold}"
                                 Minimum="0"
                                 Value="{Binding ThresholdDetecting, Mode=TwoWay}" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
+                            <TextBlock
+                                Width="100"
+                                Margin="0,0,4,0"
+                                VerticalAlignment="Center"
+                                FontSize="11"
+                                Text="Update waiting" />
+                            <NumericUpDown
+                                Width="130"
+                                MaxHeight="5"
+                                Increment="10"
+                                Maximum="{Binding MaxDuration}"
+                                Minimum="0"
+                                Value="{Binding WaitingDuration, Mode=TwoWay}" />
                         </StackPanel>
                     </rib:RibbonGroupBox>
                 </rib:RibbonTab.Groups>
