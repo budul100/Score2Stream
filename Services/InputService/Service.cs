@@ -268,6 +268,7 @@ namespace Score2Stream.InputService
                 || settings?.Inputs?.Any(s => s.DeviceId == i.DeviceId) == true);
 
             Select(relevant);
+            ClipService?.Select(ClipService?.Clips?.FirstOrDefault());
             TemplateService?.Select(TemplateService?.Templates?.FirstOrDefault());
 
             UpdateClips();

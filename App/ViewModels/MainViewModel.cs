@@ -24,6 +24,7 @@ namespace Score2Stream.ViewModels
         private readonly string assemblyTitle;
         private readonly IInputService inputService;
         private readonly IMessageBoxService messageBoxService;
+        private readonly IScoreboardService scoreboardService;
         private readonly UserSettings settings;
         private readonly ISettingsService<UserSettings> settingsService;
 
@@ -36,10 +37,11 @@ namespace Score2Stream.ViewModels
         #region Public Constructors
 
         public MainViewModel(ISettingsService<UserSettings> settingsService, IInputService inputService,
-            IMessageBoxService messageBoxService, IEventAggregator eventAggregator)
+            IScoreboardService scoreboardService, IMessageBoxService messageBoxService, IEventAggregator eventAggregator)
         {
             this.settingsService = settingsService;
             this.inputService = inputService;
+            this.scoreboardService = scoreboardService;
             this.messageBoxService = messageBoxService;
 
             settings = settingsService.Get();
@@ -47,8 +49,9 @@ namespace Score2Stream.ViewModels
 
             this.OnClosingCommand = new DelegateCommand<CancelEventArgs>(OnClosingAsync);
 
-            eventAggregator.GetEvent<VideoUpdatedEvent>()
-                .Subscribe(() => UpdateTitle());
+            eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
+                action: () => UpdateTitle(),
+                keepSubscriberReferenceAlive: true);
 
             UpdateTitle();
         }
@@ -181,21 +184,73 @@ namespace Score2Stream.ViewModels
 
         private string GetTitle()
         {
-            var result = Title;
+            var result = new StringBuilder();
 
-            if (!lastUpdateTitle.HasValue
-                || lastUpdateTitle.Value.AddMilliseconds(Constants.DurationUpdateTitle) < DateTime.Now)
+            result.Append(assemblyTitle);
+
+            var processingTime = GetProcessingTimes();
+
+            if (!string.IsNullOrWhiteSpace(processingTime))
             {
-                var processingTime = GetProcessingTimes();
+                if (result.Length > 0)
+                {
+                    result.Append(Constants.SplitterTitle);
+                }
 
-                result = !string.IsNullOrWhiteSpace(processingTime)
-                    ? $"{assemblyTitle}{Constants.SplitterTitle}{processingTime}"
-                    : assemblyTitle;
-
-                lastUpdateTitle = DateTime.Now;
+                result.Append(processingTime);
             }
 
-            return result;
+            if (!string.IsNullOrWhiteSpace(scoreboardService.ClockGame))
+            {
+                if (result.Length > 0)
+                {
+                    result.Append(Constants.SplitterTitle);
+                }
+
+                result.Append("Game: ").Append(scoreboardService.ClockGame);
+            }
+
+            if (!string.IsNullOrWhiteSpace(scoreboardService.ClockShot))
+            {
+                if (result.Length > 0)
+                {
+                    result.Append(Constants.SplitterTitle);
+                }
+
+                result.Append("Shot: ").Append(scoreboardService.ClockShot);
+            }
+
+            if (!string.IsNullOrWhiteSpace(scoreboardService.Period))
+            {
+                if (result.Length > 0)
+                {
+                    result.Append(Constants.SplitterTitle);
+                }
+
+                result.Append("Period: ").Append(scoreboardService.Period);
+            }
+
+            if (!string.IsNullOrWhiteSpace(scoreboardService.ScoreHome))
+            {
+                if (result.Length > 0)
+                {
+                    result.Append(Constants.SplitterTitle);
+                }
+
+                result.Append("Home: ").Append(scoreboardService.ScoreHome);
+            }
+
+            if (!string.IsNullOrWhiteSpace(scoreboardService.ScoreGuest))
+            {
+                if (result.Length > 0)
+                {
+                    result.Append(Constants.SplitterTitle);
+                }
+
+                result.Append("Guest: ").Append(scoreboardService.ScoreGuest);
+            }
+
+            return result.ToString();
         }
 
         private async void OnClosingAsync(CancelEventArgs eventArgs)
@@ -223,7 +278,12 @@ namespace Score2Stream.ViewModels
 
         private void UpdateTitle()
         {
-            Title = GetTitle();
+            if (!lastUpdateTitle.HasValue
+                || lastUpdateTitle.Value.AddMilliseconds(Constants.DurationUpdateTitle) < DateTime.Now)
+            {
+                Title = GetTitle();
+                lastUpdateTitle = DateTime.Now;
+            }
         }
 
         #endregion Private Methods

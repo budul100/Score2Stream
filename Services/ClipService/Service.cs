@@ -68,6 +68,10 @@ namespace Score2Stream.ClipService
             {
                 Clips.Add(clip);
 
+                scoreboardService.SetClip(
+                    clip: clip,
+                    clipType: clip.Type);
+
                 eventAggregator
                     .GetEvent<ClipsChangedEvent>()
                     .Publish();
