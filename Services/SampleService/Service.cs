@@ -203,7 +203,7 @@ namespace Score2Stream.SampleService
         {
             if (sample != default)
             {
-                sample.Template.Samples.Remove(sample);
+                sample.Template?.Samples.Remove(sample);
 
                 Samples.Remove(sample);
             }

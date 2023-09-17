@@ -236,16 +236,20 @@ namespace Score2Stream.InputService
                             {
                                 if (clip.Template.Samples?.Any() == true)
                                 {
-                                    var samples = clip.Template.Samples.ToArray();
+                                    var samples = clip.Template.Samples
+                                        .Where(s => s.Image != default).ToArray();
 
                                     foreach (var sample in samples)
                                     {
                                         sample.Mat = Mat.FromImageData(
                                             imageBytes: sample.Image,
                                             mode: ImreadModes.Unchanged);
+                                        sample.Template = clip.Template;
 
                                         currentInput.SampleService.Add(sample);
                                     }
+
+                                    clip.Template.Samples = samples.ToList();
                                 }
 
                                 clip.Template.Clip = clip;
