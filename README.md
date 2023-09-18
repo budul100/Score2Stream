@@ -107,4 +107,4 @@ The following optional settings can be set:
 | *Video -> Deactivate cropping*	| If this value is activated, then the clips are used as defined by the selection. By default the content of the clips is centered and only main objects are detected. |
 | *Template -> Matching threshold*	| The similarity value must be reached that a sample is considered as value. Otherwise, the value is used, which is defined in *Empty value* |
 | *Template -> Detection threshold*	| The value of similarity under which a new sample is created in the detection mode (see above). |
-| *Template -> Update waitíng*		| The number of milliseconds waited until a changed value is considered. Sometimes the input is flickering. Using this value, you can ensure that changes must exist for a minimum time until they are considered. |
+| *Template -> Wait for update*		| The number of milliseconds waited until a changed value is considered. Sometimes the input is flickering. Using this value, you can ensure that changes must exist for a minimum time until they are considered. |
