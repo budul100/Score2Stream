@@ -1,5 +1,9 @@
 # Change log
 
+## Version 1.3.1
+
+...
+
 ## Version 1.3.0
 
 * Templates and samples saved in settings

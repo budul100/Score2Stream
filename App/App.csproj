@@ -8,7 +8,7 @@
 		<ApplicationIcon>Assets\Score2Stream.ico</ApplicationIcon>
 		<VersionMajor>1</VersionMajor>
 		<VersionMinor>3</VersionMinor>
-		<VersionBuild>0</VersionBuild>
+		<VersionBuild>1</VersionBuild>
 	</PropertyGroup>
 
 	<PropertyGroup>
