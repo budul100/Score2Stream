@@ -105,6 +105,6 @@ The following optional settings can be set:
 | *Video -> Processing delay*		| The delay between capturing two images in milliseconds. By adjusting this value, you can minimize the computational load of the app. |
 | *Video -> Image queue size*		| The number of the last X images merged into the resulting output image. Sometimes the input is flickering. By merging the images, the resulting output minimizes the impact of this effect. |
 | *Video -> Deactivate cropping*	| If this value is activated, then the clips are used as defined by the selection. By default the content of the clips is centered and only main objects are detected. |
-| *Template -> Matching threshold*	| The similarity value must be reached that a sample is considered as value. Otherwise, the value is used, which is defined in *Empty value* |
-| *Template -> Detection threshold*	| The value of similarity under which a new sample is created in the detection mode (see above). |
-| *Template -> Wait for update*		| The number of milliseconds waited until a changed value is considered. Sometimes the input is flickering. Using this value, you can ensure that changes must exist for a minimum time until they are considered. |
+| *Samples -> Detection threshold*	| The value of similarity under which a new sample is created in the detection mode (see above). |
+| *Samples -> Matching threshold*	| The similarity value must be reached that a sample is considered as value. Otherwise, the value is used, which is defined in *Empty value* |
+| *Samples -> Wait for update*		| The number of milliseconds waited until a changed value is considered. Sometimes the input is flickering. Using this value, you can ensure that changes must exist for a minimum time until they are considered. |
