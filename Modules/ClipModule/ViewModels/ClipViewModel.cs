@@ -154,8 +154,8 @@ namespace Score2Stream.ClipModule.ViewModels
         public ObservableCollection<ClipType> Types { get; } = new ObservableCollection<ClipType>();
 
         public string Value => !string.IsNullOrWhiteSpace(Clip?.Value)
-            ? $"=> {Clip.Value}"
-            : default;
+            ? $"=> {Clip.Value} (Similarity: {Clip.Similarity}%)"
+            : $"=> -/- (Similarity: {Clip.Similarity}%)";
 
         #endregion Public Properties
 

@@ -94,8 +94,8 @@ namespace Score2Stream.TemplateModule.ViewModels
         private string GetCurrent()
         {
             var result = !string.IsNullOrWhiteSpace(Template?.Clip?.Value)
-                ? $"{Template.Clip.Description} => {Template.Clip.Value} ({Template.Clip.Similarity})"
-                : Template?.Clip?.Description;
+                ? $"{Template.Clip.Description} => {Template.Clip.Value} (Similarity: {Template.Clip.Similarity}%)"
+                : $"{Template.Clip.Description} => -/- (Similarity: {Template.Clip.Similarity}%)";
 
             return result;
         }

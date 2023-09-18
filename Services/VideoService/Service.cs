@@ -284,10 +284,10 @@ namespace Score2Stream.VideoService
                     clip: clip,
                     matchingSample: matchingSample.Value);
 
+                var similarity = Convert.ToInt32(matchingSample.Key * Constants.DividerThreshold);
+
                 if (matchingSample.Value != default)
                 {
-                    var similarity = Convert.ToInt32(matchingSample.Key * Constants.DividerThreshold);
-
                     clip.SetValue(
                         value: matchingSample.Value.Value,
                         similarity: similarity,
@@ -297,7 +297,7 @@ namespace Score2Stream.VideoService
                 {
                     clip.SetValue(
                         value: clip.Template?.ValueEmpty,
-                        similarity: 0,
+                        similarity: similarity,
                         waitingDuration: WaitingDuration);
                 }
             }

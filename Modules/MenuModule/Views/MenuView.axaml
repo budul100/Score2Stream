@@ -209,7 +209,7 @@
                             MinSize="Large" />
                     </rib:RibbonGroupBox>
 
-                    <rib:RibbonGroupBox Header="Templates selection">
+                    <rib:RibbonGroupBox Header="Samples selection">
                         <rib:RibbonButton
                             Command="{Binding ClipAsTemplateCommand}"
                             Content="Use as template"
