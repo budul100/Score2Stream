@@ -24,6 +24,7 @@ namespace Score2Stream.ClipModule.ViewModels
 
         private IClipService clipService;
         private bool isActive;
+        private bool isInitializing;
         private bool isUpdatingType;
         private IEnumerable<ClipType> types;
 
@@ -31,7 +32,8 @@ namespace Score2Stream.ClipModule.ViewModels
 
         #region Public Constructors
 
-        public ClipViewModel(IScoreboardService scoreboardService, IEventAggregator eventAggregator)
+        public ClipViewModel(IScoreboardService scoreboardService,
+            IEventAggregator eventAggregator)
         {
             this.scoreboardService = scoreboardService;
             this.eventAggregator = eventAggregator;
@@ -82,9 +84,19 @@ namespace Score2Stream.ClipModule.ViewModels
             get { return Clip?.Template; }
             set
             {
-                Clip.Template = value;
+                if (value != default
+                    && Clip.Template != value)
+                {
+                    if (!isInitializing
+                        && clipService?.Active != Clip)
+                    {
+                        clipService?.Select(Clip);
+                    }
 
-                RaisePropertyChanged(nameof(Template));
+                    Clip.Template = value;
+
+                    RaisePropertyChanged(nameof(Template));
+                }
             }
         }
 
@@ -99,11 +111,16 @@ namespace Score2Stream.ClipModule.ViewModels
                     && value <= 100
                     && Clip?.ThresholdMonochrome != value)
                 {
+                    if (!isInitializing
+                        && clipService?.Active != Clip)
+                    {
+                        clipService?.Select(Clip);
+                    }
+
                     Clip.ThresholdMonochrome = value;
 
-                    eventAggregator
-                        .GetEvent<ClipUpdatedEvent>()
-                        .Publish(Clip);
+                    eventAggregator.GetEvent<ClipUpdatedEvent>().Publish(
+                        payload: Clip);
                 }
 
                 RaisePropertyChanged(nameof(ThresholdMonochrome));
@@ -117,6 +134,12 @@ namespace Score2Stream.ClipModule.ViewModels
             {
                 if (!isUpdatingType)
                 {
+                    if (!isInitializing
+                        && clipService?.Active != Clip)
+                    {
+                        clipService?.Select(Clip);
+                    }
+
                     isUpdatingType = true;
 
                     scoreboardService.SetClip(
@@ -140,12 +163,16 @@ namespace Score2Stream.ClipModule.ViewModels
 
         public void Initialize(Clip clip, IClipService clipService)
         {
+            isInitializing = true;
+
             this.clipService = clipService;
 
             this.Clip = clip;
             this.Type = clip.Type;
 
             UpdateClip();
+
+            isInitializing = false;
         }
 
         #endregion Public Methods

@@ -21,12 +21,13 @@ namespace Score2Stream.ClipService
 
         #region Public Constructors
 
-        public Service(ITemplateService templateService, IScoreboardService scoreboardService,
+        public Service(IScoreboardService scoreboardService, ITemplateService templateService,
             IEventAggregator eventAggregator)
         {
-            TemplateService = templateService;
             this.scoreboardService = scoreboardService;
             this.eventAggregator = eventAggregator;
+
+            TemplateService = templateService;
         }
 
         #endregion Public Constructors
@@ -72,9 +73,7 @@ namespace Score2Stream.ClipService
                     clip: clip,
                     clipType: clip.Type);
 
-                eventAggregator
-                    .GetEvent<ClipsChangedEvent>()
-                    .Publish();
+                eventAggregator.GetEvent<ClipsChangedEvent>().Publish();
             }
         }
 

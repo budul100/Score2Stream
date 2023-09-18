@@ -315,8 +315,8 @@ namespace Score2Stream.VideoModule.ViewModels
 
                     if (activeSelection.Clip.HasDimensions)
                     {
-                        eventAggregator.GetEvent<ClipUpdatedEvent>()
-                            .Publish(activeSelection.Clip);
+                        eventAggregator.GetEvent<ClipUpdatedEvent>().Publish(
+                            payload: activeSelection.Clip);
                     }
                 }
                 else

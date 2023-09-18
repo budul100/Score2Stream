@@ -261,9 +261,8 @@ namespace Score2Stream.ScoreboardService
 
                 clip.Type = clipType;
 
-                eventAggregator
-                    .GetEvent<ClipUpdatedEvent>()
-                    .Publish(clip);
+                eventAggregator.GetEvent<ClipUpdatedEvent>().Publish(
+                    payload: clip);
             }
         }
 
