@@ -2,7 +2,7 @@
 
 ## Version 1.3.1
 
-...
+* Menu entries reordered
 
 ## Version 1.3.0
 

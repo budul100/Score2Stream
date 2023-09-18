@@ -311,6 +311,25 @@
                             </rib:RibbonToggleButton.Styles>
                         </rib:RibbonToggleButton>
 
+                        <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
+                            <TextBlock
+                                Width="100"
+                                Margin="0,0,4,0"
+                                VerticalAlignment="Center"
+                                FontSize="11"
+                                Text="Detection threshold" />
+                            <NumericUpDown
+                                Width="130"
+                                MaxHeight="5"
+                                Maximum="{Binding MaxThreshold}"
+                                Minimum="0"
+                                Value="{Binding ThresholdDetecting, Mode=TwoWay}" />
+                        </StackPanel>
+
+                    </rib:RibbonGroupBox>
+
+                    <rib:RibbonGroupBox Header="Samples handling">
+
                         <rib:RibbonButton
                             Command="{Binding SampleAddCommand}"
                             Content="Add as sample"
@@ -329,18 +348,18 @@
                             FontSize="11"
                             LargeIcon="{DynamicResource IconSamplesRemoveAll}"
                             MinSize="Large" />
-                    </rib:RibbonGroupBox>
 
-                    <rib:RibbonGroupBox Header="Samples handling">
                         <rib:RibbonButton
                             Command="{Binding SamplesOrderCommand}"
                             Content="Order samples"
                             FontSize="11"
                             LargeIcon="{DynamicResource IconSamplesOrder}"
                             MinSize="Large" />
+
                     </rib:RibbonGroupBox>
 
-                    <rib:RibbonGroupBox Header="Detection options">
+                    <rib:RibbonGroupBox Header="Samples matching">
+
                         <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
                             <TextBlock
                                 Width="100"
@@ -355,27 +374,14 @@
                                 Minimum="0"
                                 Value="{Binding ThresholdMatching, Mode=TwoWay}" />
                         </StackPanel>
+
                         <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
                             <TextBlock
                                 Width="100"
                                 Margin="0,0,4,0"
                                 VerticalAlignment="Center"
                                 FontSize="11"
-                                Text="Detection threshold" />
-                            <NumericUpDown
-                                Width="130"
-                                MaxHeight="5"
-                                Maximum="{Binding MaxThreshold}"
-                                Minimum="0"
-                                Value="{Binding ThresholdDetecting, Mode=TwoWay}" />
-                        </StackPanel>
-                        <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
-                            <TextBlock
-                                Width="100"
-                                Margin="0,0,4,0"
-                                VerticalAlignment="Center"
-                                FontSize="11"
-                                Text="Update waiting" />
+                                Text="Wait for update" />
                             <NumericUpDown
                                 Width="130"
                                 MaxHeight="5"
@@ -384,6 +390,7 @@
                                 Minimum="0"
                                 Value="{Binding WaitingDuration, Mode=TwoWay}" />
                         </StackPanel>
+
                     </rib:RibbonGroupBox>
                 </rib:RibbonTab.Groups>
             </rib:RibbonTab>
