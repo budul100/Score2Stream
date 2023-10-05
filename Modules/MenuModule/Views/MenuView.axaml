@@ -317,7 +317,7 @@
                                 Margin="0,0,4,0"
                                 VerticalAlignment="Center"
                                 FontSize="11"
-                                Text="Detection threshold" />
+                                Text="New sample till" />
                             <NumericUpDown
                                 Width="130"
                                 MaxHeight="5"
@@ -366,7 +366,7 @@
                                 Margin="0,0,4,0"
                                 VerticalAlignment="Center"
                                 FontSize="11"
-                                Text="Matching threshold" />
+                                Text="Empty value till" />
                             <NumericUpDown
                                 Width="130"
                                 MaxHeight="5"
