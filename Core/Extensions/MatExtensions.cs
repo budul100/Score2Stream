@@ -116,6 +116,26 @@ namespace Score2Stream.Core.Extensions
             return result;
         }
 
+        public static Mat ToInverted(this Mat image)
+        {
+            var result = default(Mat);
+
+            if (image?.Step(0) > 0
+                && image.Rows > 0)
+            {
+                result = new Mat(
+                    rows: image.Rows,
+                    cols: image.Cols,
+                    type: image.Type());
+
+                Cv2.BitwiseNot(
+                    src: image,
+                    dst: result);
+            }
+
+            return result;
+        }
+
         public static Mat ToMonochrome(this Mat image, double threshold)
         {
             var result = default(Mat);
@@ -133,6 +153,31 @@ namespace Score2Stream.Core.Extensions
                     thresh: thresh,
                     maxval: 255,
                     type: ThresholdTypes.Binary);
+            }
+
+            return result;
+        }
+
+        public static Mat WithoutNoise(this Mat image, int erodeIterations, int dilateIterations)
+        {
+            var result = default(Mat);
+
+            if (image?.Step(0) > 0
+                && image.Rows > 0)
+            {
+                var eroded = image.Erode(
+                    element: default,
+                    anchor: new Point(-1, -1),
+                    iterations: erodeIterations,
+                    borderType: BorderTypes.Default,
+                    borderValue: new Scalar(1));
+
+                result = eroded.Dilate(
+                    element: default,
+                    anchor: new Point(-1, -1),
+                    iterations: dilateIterations,
+                    borderType: BorderTypes.Default,
+                    borderValue: new Scalar(1));
             }
 
             return result;

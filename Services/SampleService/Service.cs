@@ -15,6 +15,7 @@ namespace Score2Stream.SampleService
         #region Private Fields
 
         private readonly IEventAggregator eventAggregator;
+        private readonly IRecognitionService recognitionService;
 
         private int index;
 
@@ -22,8 +23,9 @@ namespace Score2Stream.SampleService
 
         #region Public Constructors
 
-        public Service(IEventAggregator eventAggregator)
+        public Service(IRecognitionService recognitionService, IEventAggregator eventAggregator)
         {
+            this.recognitionService = recognitionService;
             this.eventAggregator = eventAggregator;
 
             eventAggregator.GetEvent<SampleDetectedEvent>().Subscribe(
@@ -64,6 +66,12 @@ namespace Score2Stream.SampleService
                     fullHeight: sample.Height);
 
                 sample.Bitmap = new Bitmap(bitmapStream.ToMemoryStream());
+
+                if (sample.Value == default
+                    && recognitionService != default)
+                {
+                    sample.Value = recognitionService.Recognize(bitmapStream.ToBytes());
+                }
 
                 Samples.Add(sample);
             }

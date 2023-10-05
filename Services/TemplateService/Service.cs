@@ -21,6 +21,7 @@ namespace Score2Stream.TemplateService
         public Service(ISampleService sampleService, IEventAggregator eventAggregator)
         {
             SampleService = sampleService;
+
             this.eventAggregator = eventAggregator;
         }
 

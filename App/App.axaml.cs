@@ -105,6 +105,9 @@ namespace Score2Stream
             var messageBoxService = new MessageBoxService.Service(App.Current);
             containerRegistry.RegisterInstance<IMessageBoxService>(messageBoxService);
 
+            var recognitionService = new RecognitionService.Service();
+            containerRegistry.RegisterInstance<IRecognitionService>(recognitionService);
+
             containerRegistry.RegisterSingleton<ISettingsService<UserSettings>, SettingsService.Service<UserSettings>>();
             containerRegistry.RegisterSingleton<IScoreboardService, ScoreboardService.Service>();
             containerRegistry.RegisterSingleton<IWebService, WebService.Service>();

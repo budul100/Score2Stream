@@ -1,7 +1,7 @@
 ﻿using Avalonia.Media.Imaging;
 using OpenCvSharp;
 using Prism.Events;
-using Score2Stream.Core.Constants;
+using Score2Stream.Core;
 using Score2Stream.Core.Events.Clip;
 using Score2Stream.Core.Events.Sample;
 using Score2Stream.Core.Events.Video;

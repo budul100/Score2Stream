@@ -2,7 +2,7 @@
 using OpenCvSharp;
 using Prism.Events;
 using Prism.Ioc;
-using Score2Stream.Core.Constants;
+using Score2Stream.Core;
 using Score2Stream.Core.Events.Clip;
 using Score2Stream.Core.Events.Input;
 using Score2Stream.Core.Events.Sample;

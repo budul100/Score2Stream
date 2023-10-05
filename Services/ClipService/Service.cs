@@ -12,8 +12,6 @@ namespace Score2Stream.ClipService
     {
         #region Private Fields
 
-        private const int ThresholdMonochromeDefault = 50;
-
         private readonly IEventAggregator eventAggregator;
         private readonly IScoreboardService scoreboardService;
 
@@ -49,7 +47,7 @@ namespace Score2Stream.ClipService
             var name = GetName();
 
             var thresholdMonochrome = Active?.ThresholdMonochrome
-                ?? ThresholdMonochromeDefault;
+                ?? Core.Constants.ThresholdMonochromeDefault;
 
             var clip = new Clip()
             {

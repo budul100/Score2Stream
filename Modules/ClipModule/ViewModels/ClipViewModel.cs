@@ -21,12 +21,12 @@ namespace Score2Stream.ClipModule.ViewModels
 
         private readonly IEventAggregator eventAggregator;
         private readonly IScoreboardService scoreboardService;
+        private readonly IEnumerable<ClipType> types;
 
         private IClipService clipService;
         private bool isActive;
         private bool isInitializing;
         private bool isUpdatingType;
-        private IEnumerable<ClipType> types;
 
         #endregion Private Fields
 

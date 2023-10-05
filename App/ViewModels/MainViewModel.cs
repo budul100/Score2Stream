@@ -4,7 +4,7 @@ using MessageBox.Avalonia.Enums;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
-using Score2Stream.Core.Constants;
+using Score2Stream.Core;
 using Score2Stream.Core.Events.Video;
 using Score2Stream.Core.Interfaces;
 using Score2Stream.Core.Models.Settings;

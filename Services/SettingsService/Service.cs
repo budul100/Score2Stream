@@ -1,4 +1,4 @@
-﻿using Score2Stream.Core.Constants;
+﻿using Score2Stream.Core;
 using Score2Stream.Core.Interfaces;
 using System;
 using System.IO;

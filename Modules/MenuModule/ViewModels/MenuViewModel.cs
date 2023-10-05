@@ -6,7 +6,7 @@ using MessageBox.Avalonia.Enums;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Regions;
-using Score2Stream.Core.Constants;
+using Score2Stream.Core;
 using Score2Stream.Core.Enums;
 using Score2Stream.Core.Events.Clip;
 using Score2Stream.Core.Events.Detection;

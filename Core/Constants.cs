@@ -1,4 +1,4 @@
-﻿namespace Score2Stream.Core.Constants
+﻿namespace Score2Stream.Core
 {
     public static class Constants
     {
@@ -16,10 +16,14 @@
         public const int PortHttpWebServer = 5003;
         public const int PortHttpWebSocket = 9000;
 
+        public const int RecognitionMilliSecondsMax = 1000 * 60 * 10;
+
         public const string SettingsFileNameDefault = "userSettings.json";
 
         public const string SplitterTitle = " | ";
         public const char SplitterVersion = '.';
+
+        public const int ThresholdMonochromeDefault = 50;
 
         #endregion Public Fields
     }
