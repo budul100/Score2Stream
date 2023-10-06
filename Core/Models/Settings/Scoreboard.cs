@@ -31,6 +31,8 @@ namespace Score2Stream.Core.Models.Settings
 
         public string ColorHome { get; set; } = Colors.Blue.ToString();
 
+        public string Periods { get; set; }
+
         public string TeamGuest { get; set; }
 
         public string TeamHome { get; set; }

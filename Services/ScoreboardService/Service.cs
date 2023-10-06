@@ -150,7 +150,18 @@ namespace Score2Stream.ScoreboardService
 
         public bool PeriodNotFromClip { get; set; }
 
-        public string Periods { get; set; }
+        public string Periods
+        {
+            get { return settings.Scoreboard.Periods; }
+            set
+            {
+                if (value != settings.Scoreboard.Periods)
+                {
+                    settings.Scoreboard.Periods = value;
+                    settingsService.Save();
+                }
+            }
+        }
 
         public bool PeriodsUpToDate => Periods == periods;
 
