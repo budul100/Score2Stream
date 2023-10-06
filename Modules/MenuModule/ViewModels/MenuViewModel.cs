@@ -100,7 +100,7 @@ namespace Score2Stream.MenuModule.ViewModels
                 executeMethod: () => inputService.SampleService.Add(inputService.TemplateService.Active.Clip),
                 canExecuteMethod: () => inputService?.TemplateService?.Active?.Clip != default);
             this.SampleRemoveCommand = new DelegateCommand(
-                executeMethod: () => inputService.SampleService.Remove(),
+                executeMethod: () => RemoveSampleSelectedAsync(),
                 canExecuteMethod: () => inputService?.SampleService?.Active != default);
             this.SamplesRemoveAllCommand = new DelegateCommand(
                 executeMethod: () => RemoveSamplesAllAsync(),
@@ -458,6 +458,23 @@ namespace Score2Stream.MenuModule.ViewModels
             if (result == ButtonResult.Yes)
             {
                 inputService?.SampleService?.Remove(inputService?.TemplateService?.Active);
+            }
+        }
+
+        private async void RemoveSampleSelectedAsync()
+        {
+            var result = ButtonResult.Yes;
+
+            if (!string.IsNullOrWhiteSpace(inputService?.SampleService?.Active?.Value))
+            {
+                result = await messageBoxService.GetMessageBoxResultAsync(
+                    contentMessage: "Shall the selected sample be removed?",
+                    contentTitle: "Remove sample");
+            }
+
+            if (result == ButtonResult.Yes)
+            {
+                inputService?.SampleService?.Remove();
             }
         }
 
