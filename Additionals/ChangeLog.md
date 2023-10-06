@@ -1,6 +1,6 @@
 # Change log
 
-## Version 1.3.1
+## Version 1.4.0
 
 * Recognition service added for automatic detection of sample values
 * Request is shown if a sample with value shall be removed
