@@ -317,7 +317,7 @@
                                 Margin="0,0,4,0"
                                 VerticalAlignment="Center"
                                 FontSize="11"
-                                Text="New sample till" />
+                                Text="New sample to [%]" />
                             <NumericUpDown
                                 Width="130"
                                 MaxHeight="5"
@@ -325,11 +325,9 @@
                                 Minimum="0"
                                 Value="{Binding ThresholdDetecting, Mode=TwoWay}" />
                         </StackPanel>
-
                     </rib:RibbonGroupBox>
 
                     <rib:RibbonGroupBox Header="Samples handling">
-
                         <rib:RibbonButton
                             Command="{Binding SampleAddCommand}"
                             Content="Add as sample"
@@ -348,25 +346,22 @@
                             FontSize="11"
                             LargeIcon="{DynamicResource IconSamplesRemoveAll}"
                             MinSize="Large" />
-
                         <rib:RibbonButton
                             Command="{Binding SamplesOrderCommand}"
                             Content="Order samples"
                             FontSize="11"
                             LargeIcon="{DynamicResource IconSamplesOrder}"
                             MinSize="Large" />
-
                     </rib:RibbonGroupBox>
 
-                    <rib:RibbonGroupBox Header="Samples matching">
-
+                    <rib:RibbonGroupBox Header="Sample options">
                         <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
                             <TextBlock
                                 Width="100"
                                 Margin="0,0,4,0"
                                 VerticalAlignment="Center"
                                 FontSize="11"
-                                Text="Empty value till" />
+                                Text="Empty value to [%]" />
                             <NumericUpDown
                                 Width="130"
                                 MaxHeight="5"
@@ -374,14 +369,13 @@
                                 Minimum="0"
                                 Value="{Binding ThresholdMatching, Mode=TwoWay}" />
                         </StackPanel>
-
                         <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
                             <TextBlock
                                 Width="100"
                                 Margin="0,0,4,0"
                                 VerticalAlignment="Center"
                                 FontSize="11"
-                                Text="Wait for update" />
+                                Text="Wait to match [ms]" />
                             <NumericUpDown
                                 Width="130"
                                 MaxHeight="5"
@@ -390,7 +384,12 @@
                                 Minimum="0"
                                 Value="{Binding WaitingDuration, Mode=TwoWay}" />
                         </StackPanel>
-
+                        <CheckBox
+                            Margin="0,0,4,4"
+                            VerticalAlignment="Center"
+                            Content="Deactivate auto recognition"
+                            FontSize="11"
+                            IsChecked="{Binding NoRecognition, Mode=TwoWay}" />
                     </rib:RibbonGroupBox>
                 </rib:RibbonTab.Groups>
             </rib:RibbonTab>

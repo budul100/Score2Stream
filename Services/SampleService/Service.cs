@@ -41,6 +41,8 @@ namespace Score2Stream.SampleService
 
         public bool IsDetection { get; set; }
 
+        public bool NoRecognition { get; set; }
+
         public List<Sample> Samples { get; private set; } = new List<Sample>();
 
         #endregion Public Properties
@@ -61,16 +63,17 @@ namespace Score2Stream.SampleService
         {
             if (sample?.Mat != default)
             {
-                var bitmapStream = sample.Mat.ToCentered(
+                var centeredImage = sample.Mat.ToCentered(
                     fullWidth: sample.Width,
                     fullHeight: sample.Height);
 
-                sample.Bitmap = new Bitmap(bitmapStream.ToMemoryStream());
+                sample.Bitmap = new Bitmap(centeredImage.ToMemoryStream());
 
                 if (sample.Value == default
-                    && recognitionService != default)
+                    && recognitionService != default
+                    && !NoRecognition)
                 {
-                    sample.Value = recognitionService.Recognize(bitmapStream.ToBytes());
+                    sample.Value = recognitionService.Recognize(centeredImage);
                 }
 
                 Samples.Add(sample);

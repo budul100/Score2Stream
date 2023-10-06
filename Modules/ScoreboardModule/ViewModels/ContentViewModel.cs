@@ -19,13 +19,13 @@ namespace Score2Stream.ScoreboardModule.ViewModels
         private readonly ScoreboardChangedEvent changedEvent;
         private readonly IContainerProvider containerProvider;
         private readonly IScoreboardService scoreboardService;
-        private readonly ISettingsService<UserSettings> settingsService;
+        private readonly ISettingsService<Session> settingsService;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public ContentViewModel(ISettingsService<UserSettings> settingsService, IScoreboardService scoreboardService,
+        public ContentViewModel(ISettingsService<Session> settingsService, IScoreboardService scoreboardService,
             IContainerProvider containerProvider, IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager: regionManager)
         {

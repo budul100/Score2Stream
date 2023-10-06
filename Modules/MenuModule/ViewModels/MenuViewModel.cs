@@ -43,8 +43,8 @@ namespace Score2Stream.MenuModule.ViewModels
         private readonly IInputService inputService;
         private readonly IMessageBoxService messageBoxService;
         private readonly IRegionManager regionManager;
-        private readonly UserSettings settings;
-        private readonly ISettingsService<UserSettings> settingsService;
+        private readonly Session settings;
+        private readonly ISettingsService<Session> settingsService;
         private string inputDirectory;
         private int tabIndex;
 
@@ -52,7 +52,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
         #region Public Constructors
 
-        public MenuViewModel(ISettingsService<UserSettings> settingsService, IWebService webService,
+        public MenuViewModel(ISettingsService<Session> settingsService, IWebService webService,
             IScoreboardService scoreboardService, IInputService inputService, IMessageBoxService messageBoxService,
             IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
@@ -70,7 +70,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
             this.InputsUpdateCommand = new DelegateCommand(
                 executeMethod: UpdateInputs);
-            this.InputSelectCommand = new DelegateCommand<Input>(
+            this.InputSelectCommand = new DelegateCommand<Core.Models.Contents.Input>(
                 executeMethod: i => SelectInputAsync(i));
             this.InputStopAllCommand = new DelegateCommand(
                 executeMethod: () => StopAllInputsAsync(),
@@ -201,7 +201,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public ObservableCollection<RibbonDropDownItem> Inputs { get; } = new ObservableCollection<RibbonDropDownItem>();
 
-        public DelegateCommand<Input> InputSelectCommand { get; }
+        public DelegateCommand<Core.Models.Contents.Input> InputSelectCommand { get; }
 
         public DelegateCommand InputStopAllCommand { get; }
 
@@ -238,6 +238,20 @@ namespace Score2Stream.MenuModule.ViewModels
                     inputService.NoCentering = value;
 
                     RaisePropertyChanged(nameof(NoCentering));
+                }
+            }
+        }
+
+        public bool NoRecognition
+        {
+            get { return inputService.NoRecognition; }
+            set
+            {
+                if (inputService.NoRecognition != value)
+                {
+                    inputService.NoRecognition = value;
+
+                    RaisePropertyChanged(nameof(NoRecognition));
                 }
             }
         }
@@ -469,7 +483,7 @@ namespace Score2Stream.MenuModule.ViewModels
             }
         }
 
-        private async void SelectInputAsync(Input input)
+        private async void SelectInputAsync(Core.Models.Contents.Input input)
         {
             if (input?.IsDevice == true)
             {
@@ -484,7 +498,7 @@ namespace Score2Stream.MenuModule.ViewModels
                 {
                     if (!Directory.Exists(inputDirectory))
                     {
-                        inputDirectory = Path.GetDirectoryName(settings.Session.FilePathVideo);
+                        inputDirectory = Path.GetDirectoryName(settings.Video.FilePathVideo);
                     }
 
                     var dialog = new OpenFileDialog
@@ -505,7 +519,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
                 if (File.Exists(fileName))
                 {
-                    settings.Session.FilePathVideo = fileName;
+                    settings.Video.FilePathVideo = fileName;
                     settingsService.Save();
                 }
 

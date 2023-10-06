@@ -17,6 +17,8 @@ namespace Score2Stream.Core.Interfaces
 
         bool NoCentering { get; set; }
 
+        bool NoRecognition { get; set; }
+
         int ProcessingDelay { get; set; }
 
         ISampleService SampleService { get; }

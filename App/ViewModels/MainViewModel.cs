@@ -25,8 +25,8 @@ namespace Score2Stream.ViewModels
         private readonly IInputService inputService;
         private readonly IMessageBoxService messageBoxService;
         private readonly IScoreboardService scoreboardService;
-        private readonly UserSettings settings;
-        private readonly ISettingsService<UserSettings> settingsService;
+        private readonly Session settings;
+        private readonly ISettingsService<Session> settingsService;
 
         private DateTime? lastUpdateTitle;
         private string title = "Score2Stream";
@@ -36,7 +36,7 @@ namespace Score2Stream.ViewModels
 
         #region Public Constructors
 
-        public MainViewModel(ISettingsService<UserSettings> settingsService, IInputService inputService,
+        public MainViewModel(ISettingsService<Session> settingsService, IInputService inputService,
             IScoreboardService scoreboardService, IMessageBoxService messageBoxService, IEventAggregator eventAggregator)
         {
             this.settingsService = settingsService;

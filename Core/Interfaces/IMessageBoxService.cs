@@ -13,6 +13,9 @@ namespace Score2Stream.Core.Interfaces
             ClickEnum escDefaultButton = ClickEnum.No, Icon icon = Icon.Question, bool ShowInCenter = true,
             WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterOwner);
 
+        Task ShowMessageBoxAsync(string contentMessage, string contentTitle, Icon icon = Icon.Question,
+            bool showInCenter = true, WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterOwner);
+
         #endregion Public Methods
     }
 }

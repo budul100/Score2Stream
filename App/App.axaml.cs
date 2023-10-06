@@ -108,7 +108,7 @@ namespace Score2Stream
             var recognitionService = new RecognitionService.Service();
             containerRegistry.RegisterInstance<IRecognitionService>(recognitionService);
 
-            containerRegistry.RegisterSingleton<ISettingsService<UserSettings>, SettingsService.Service<UserSettings>>();
+            containerRegistry.RegisterSingleton<ISettingsService<Session>, SettingsService.Service<Session>>();
             containerRegistry.RegisterSingleton<IScoreboardService, ScoreboardService.Service>();
             containerRegistry.RegisterSingleton<IWebService, WebService.Service>();
 

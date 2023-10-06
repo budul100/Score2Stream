@@ -1,4 +1,5 @@
-﻿using Score2Stream.Core.Interfaces;
+﻿using OpenCvSharp;
+using Score2Stream.Core.Interfaces;
 using System;
 using System.IO;
 using TesseractOCR;
@@ -34,16 +35,11 @@ namespace Score2Stream.RecognitionService
 
         #region Public Methods
 
-        public string Recognize(byte[] bytes)
+        public string Recognize(Mat image)
         {
-            var image = TesseractOCR.Pix.Image.LoadFromMemory(bytes);
+            var text = GetText(image);
 
-            using var page = engine.Process(
-                image: image,
-                pageSegMode: TesseractOCR.Enums.PageSegMode.SingleLine);
-
-            var result = page.Text?
-                .Trim()
+            var result = text?.Trim()
                 .Replace(
                     oldValue: "\r",
                     newValue: string.Empty)
@@ -55,5 +51,30 @@ namespace Score2Stream.RecognitionService
         }
 
         #endregion Public Methods
+
+        #region Private Methods
+
+        private string GetText(Mat image)
+        {
+            var result = default(string);
+
+            try
+            {
+                var memoryStream = image.ToMemoryStream().ToArray();
+                var pixImage = TesseractOCR.Pix.Image.LoadFromMemory(memoryStream);
+
+                using var page = engine.Process(
+                    image: pixImage,
+                    pageSegMode: TesseractOCR.Enums.PageSegMode.SingleLine);
+
+                result = page?.Text;
+            }
+            catch
+            { }
+
+            return result;
+        }
+
+        #endregion Private Methods
     }
 }

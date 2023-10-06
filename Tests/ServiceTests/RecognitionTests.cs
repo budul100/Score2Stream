@@ -57,7 +57,7 @@ namespace RecognitionTests
 
         #region Private Methods
 
-        private static byte[] GetBytes(string path)
+        private static Mat GetBytes(string path)
         {
             using var video = new VideoCapture();
             video.Open(path);
@@ -69,14 +69,11 @@ namespace RecognitionTests
             var noiselessFrame = monochromeFrame.WithoutNoise(
                 erodeIterations: 2,
                 dilateIterations: 2);
-            var centredFrame = noiselessFrame.ToCentered(
+            var centeredFrame = noiselessFrame.ToCentered(
                 fullWidth: noiselessFrame.Width + 10,
                 fullHeight: noiselessFrame.Height + 10);
 
-            var memoryStream = centredFrame.ToMemoryStream();
-
-            var result = memoryStream.ToArray();
-            return result;
+            return centeredFrame;
         }
 
         #endregion Private Methods

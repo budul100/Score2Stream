@@ -29,8 +29,8 @@ namespace Score2Stream.ScoreboardService
         private readonly IEnumerable<ClipType> clipTypes;
         private readonly IEventAggregator eventAggregator;
         private readonly JsonSerializerOptions serializeOptions;
-        private readonly UserSettings settings;
-        private readonly ISettingsService<UserSettings> settingsService;
+        private readonly Session settings;
+        private readonly ISettingsService<Session> settingsService;
 
         private string clockGame;
         private string clockShot;
@@ -52,7 +52,7 @@ namespace Score2Stream.ScoreboardService
 
         #region Public Constructors
 
-        public Service(ISettingsService<UserSettings> settingsService, IEventAggregator eventAggregator)
+        public Service(ISettingsService<Session> settingsService, IEventAggregator eventAggregator)
         {
             this.settingsService = settingsService;
             this.eventAggregator = eventAggregator;

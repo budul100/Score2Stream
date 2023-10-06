@@ -58,6 +58,26 @@ namespace Score2Stream.MessageBoxService
             return result;
         }
 
+        public async Task ShowMessageBoxAsync(string contentMessage, string contentTitle, Icon icon = Icon.Question,
+            bool showInCenter = true, WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterOwner)
+        {
+            var messageBoxParams = new MessageBoxStandardParams
+            {
+                ButtonDefinitions = ButtonEnum.Ok,
+                ContentMessage = contentMessage,
+                ContentTitle = contentTitle,
+                EnterDefaultButton = ClickEnum.Ok,
+                EscDefaultButton = ClickEnum.Ok,
+                Icon = icon,
+                ShowInCenter = showInCenter,
+                WindowStartupLocation = windowStartupLocation,
+            };
+
+            var dialog = MessageBoxManager.GetMessageBoxStandardWindow(messageBoxParams);
+
+            await dialog.ShowDialog(desktop.MainWindow);
+        }
+
         #endregion Public Methods
     }
 }

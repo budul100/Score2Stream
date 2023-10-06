@@ -8,7 +8,11 @@ namespace Score2Stream.Core.Interfaces
         #region Public Properties
 
         Sample Active { get; }
+
         bool IsDetection { get; set; }
+
+        bool NoRecognition { get; set; }
+
         List<Sample> Samples { get; }
 
         #endregion Public Properties

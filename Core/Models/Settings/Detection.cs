@@ -12,6 +12,8 @@
 
         #region Public Properties
 
+        public bool NoRecognition { get; set; }
+
         public int ThresholdDetecting { get; set; } = ThresholdDetectingDefault;
 
         public int ThresholdMatching { get; set; } = ThresholdMatchingDefault;

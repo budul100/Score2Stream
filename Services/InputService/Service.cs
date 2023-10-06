@@ -9,7 +9,6 @@ using Score2Stream.Core.Events.Sample;
 using Score2Stream.Core.Events.Template;
 using Score2Stream.Core.Events.Video;
 using Score2Stream.Core.Interfaces;
-using Score2Stream.Core.Models.Contents;
 using Score2Stream.Core.Models.Settings;
 using System;
 using System.Collections.Generic;
@@ -25,17 +24,17 @@ namespace Score2Stream.InputService
 
         private readonly IContainerProvider containerProvider;
         private readonly IEventAggregator eventAggregator;
-        private readonly UserSettings settings;
-        private readonly ISettingsService<UserSettings> settingsService;
+        private readonly Session settings;
+        private readonly ISettingsService<Session> settingsService;
 
-        private Input active;
+        private Core.Models.Contents.Input active;
         private bool isInitializing;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public Service(ISettingsService<UserSettings> settingsService, IContainerProvider containerProvider,
+        public Service(ISettingsService<Session> settingsService, IContainerProvider containerProvider,
             IEventAggregator eventAggregator)
         {
             this.settingsService = settingsService;
@@ -81,40 +80,58 @@ namespace Score2Stream.InputService
 
         public int ImagesQueueSize
         {
-            get { return settings.Session.ImagesQueueSize; }
+            get { return settings.Video.ImagesQueueSize; }
             set
             {
-                if (value != settings.Session.ImagesQueueSize
+                if (value != settings.Video.ImagesQueueSize
                     && value > 0)
                 {
-                    settings.Session.ImagesQueueSize = value;
+                    settings.Video.ImagesQueueSize = value;
 
                     if (!isInitializing)
                     {
                         settingsService.Save();
-                        UpdateInput();
+                        UpdateSettings();
                     }
                 }
             }
         }
 
-        public HashSet<Input> Inputs { get; } = new HashSet<Input>();
+        public HashSet<Core.Models.Contents.Input> Inputs { get; } = new HashSet<Core.Models.Contents.Input>();
 
         public bool IsActive => VideoService?.IsActive ?? false;
 
         public bool NoCentering
         {
-            get { return settings.Session.NoCentering; }
+            get { return settings.Video.NoCentering; }
             set
             {
-                if (settings.Session.NoCentering != value)
+                if (settings.Video.NoCentering != value)
                 {
-                    settings.Session.NoCentering = value;
+                    settings.Video.NoCentering = value;
 
                     if (!isInitializing)
                     {
                         settingsService.Save();
-                        UpdateInput();
+                        UpdateSettings();
+                    }
+                }
+            }
+        }
+
+        public bool NoRecognition
+        {
+            get { return settings.Detection.NoRecognition; }
+            set
+            {
+                if (settings.Detection.NoRecognition != value)
+                {
+                    settings.Detection.NoRecognition = value;
+
+                    if (!isInitializing)
+                    {
+                        settingsService.Save();
+                        UpdateSettings();
                     }
                 }
             }
@@ -122,17 +139,17 @@ namespace Score2Stream.InputService
 
         public int ProcessingDelay
         {
-            get { return settings.Session.ProcessingDelay; }
+            get { return settings.Video.ProcessingDelay; }
             set
             {
-                if (settings.Session.ProcessingDelay != value)
+                if (settings.Video.ProcessingDelay != value)
                 {
-                    settings.Session.ProcessingDelay = value;
+                    settings.Video.ProcessingDelay = value;
 
                     if (!isInitializing)
                     {
                         settingsService.Save();
-                        UpdateInput();
+                        UpdateSettings();
                     }
                 }
             }
@@ -154,7 +171,7 @@ namespace Score2Stream.InputService
                     if (!isInitializing)
                     {
                         settingsService.Save();
-                        UpdateInput();
+                        UpdateSettings();
                     }
                 }
             }
@@ -172,7 +189,7 @@ namespace Score2Stream.InputService
                     if (!isInitializing)
                     {
                         settingsService.Save();
-                        UpdateInput();
+                        UpdateSettings();
                     }
                 }
             }
@@ -192,7 +209,7 @@ namespace Score2Stream.InputService
                     if (!isInitializing)
                     {
                         settingsService.Save();
-                        UpdateInput();
+                        UpdateSettings();
                     }
                 }
             }
@@ -274,7 +291,7 @@ namespace Score2Stream.InputService
             UpdateTemplates();
         }
 
-        public void Select(Input input)
+        public void Select(Core.Models.Contents.Input input)
         {
             if (input != default)
             {
@@ -283,14 +300,14 @@ namespace Score2Stream.InputService
                 if (active != input)
                 {
                     active = input;
-                    UpdateInput();
+                    UpdateSettings();
 
                     eventAggregator
                         .GetEvent<InputSelectedEvent>()
                         .Publish(active);
                 }
 
-                UpdateSettings();
+                SaveSettings();
             }
         }
 
@@ -311,7 +328,7 @@ namespace Score2Stream.InputService
                 relevant.VideoService.Stop();
             }
 
-            UpdateSettings();
+            SaveSettings();
         }
 
         public void Update()
@@ -323,9 +340,9 @@ namespace Score2Stream.InputService
 
         #region Private Methods
 
-        private Input GetInput(string fileName)
+        private Core.Models.Contents.Input GetInput(string fileName)
         {
-            var result = default(Input);
+            var result = default(Core.Models.Contents.Input);
 
             if (File.Exists(fileName))
             {
@@ -334,7 +351,7 @@ namespace Score2Stream.InputService
 
                 if (result == default)
                 {
-                    result = new Input(false)
+                    result = new Core.Models.Contents.Input(false)
                     {
                         FileName = fileName,
                         Name = Path.GetFileName(fileName),
@@ -345,7 +362,7 @@ namespace Score2Stream.InputService
             return result;
         }
 
-        private IEnumerable<Input> GetInputs()
+        private IEnumerable<Core.Models.Contents.Input> GetInputs()
         {
             UpdateDevices();
 
@@ -385,14 +402,25 @@ namespace Score2Stream.InputService
         private void OnVideoChanged()
         {
             UpdateDevices();
-            UpdateSettings();
+            SaveSettings();
 
             eventAggregator
                 .GetEvent<InputsChangedEvent>()
                 .Publish();
         }
 
-        private void StartInput(Input input)
+        private void SaveSettings()
+        {
+            if (!isInitializing)
+            {
+                settings.Inputs = Inputs
+                    .Where(i => i.IsActive).ToList();
+
+                settingsService.Save();
+            }
+        }
+
+        private void StartInput(Core.Models.Contents.Input input)
         {
             if (input != default)
             {
@@ -453,7 +481,7 @@ namespace Score2Stream.InputService
 
             foreach (var toBeAdded in toBeAddeds)
             {
-                var current = new Input(true)
+                var current = new Core.Models.Contents.Input(true)
                 {
                     DeviceId = toBeAdded.Key,
                     Name = toBeAdded.Value,
@@ -470,7 +498,7 @@ namespace Score2Stream.InputService
             }
         }
 
-        private void UpdateInput()
+        private void UpdateSettings()
         {
             if (active?.VideoService != default)
             {
@@ -481,16 +509,10 @@ namespace Score2Stream.InputService
                 active.VideoService.ThresholdMatching = Math.Abs(ThresholdMatching) / Constants.DividerThreshold;
                 active.VideoService.WaitingDuration = TimeSpan.FromMilliseconds(Math.Abs(WaitingDuration));
             }
-        }
 
-        private void UpdateSettings()
-        {
-            if (!isInitializing)
+            if (active?.SampleService != default)
             {
-                settings.Inputs = Inputs
-                    .Where(i => i.IsActive).ToList();
-
-                settingsService.Save();
+                active.SampleService.NoRecognition = NoRecognition;
             }
         }
 
