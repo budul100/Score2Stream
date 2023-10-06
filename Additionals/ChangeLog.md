@@ -2,6 +2,7 @@
 
 ## Version 1.3.1
 
+* Recognition service added for automatic detection of sample values
 * Menu entries reordered
 
 ## Version 1.3.0
