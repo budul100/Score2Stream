@@ -6,6 +6,7 @@
 * Request is shown if a sample with value shall be removed
 * Number of periods is saved in settings
 * Menu entries reordered
+* Ticker handling corrected
 
 ## Version 1.3.0
 

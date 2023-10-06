@@ -59,7 +59,7 @@
         <Grid
             Name="TickerGrid"
             Grid.Column="0"
-            Grid.ColumnSpan="1">
+            Grid.ColumnSpan="2">
             <i:Interaction.Behaviors>
                 <a:DataTriggerBehavior
                     Binding="{Binding UpToDate}"

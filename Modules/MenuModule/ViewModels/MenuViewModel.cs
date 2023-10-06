@@ -111,7 +111,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
             this.GraphicsReloadCommand = new DelegateCommand(
                 executeMethod: async () => await webService.ReloadAsync());
-            this.GraphicsOpenCommand = new DelegateCommand(
+            this.ScoreboardOpenCommand = new DelegateCommand(
                 executeMethod: () => webService.Open(),
                 canExecuteMethod: () => webService.IsActive);
 
@@ -151,8 +151,6 @@ namespace Score2Stream.MenuModule.ViewModels
 
             eventAggregator.GetEvent<ScoreboardChangedEvent>().Subscribe(
                 action: () => ScoreboardUpdateCommand.RaiseCanExecuteChanged());
-            eventAggregator.GetEvent<ScoreboardUpdatedEvent>().Subscribe(
-                action: _ => ScoreboardUpdateCommand.RaiseCanExecuteChanged());
 
             inputService.Initialize();
         }
@@ -177,10 +175,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public DelegateCommand ClipsRemoveAllCommand { get; }
 
-        public DelegateCommand GraphicsOpenCommand { get; }
-
         public DelegateCommand GraphicsReloadCommand { get; }
-
         public bool HasTemplates => inputService?.TemplateService?.Templates?.Any() == true;
 
         public int ImagesQueueSize
@@ -200,13 +195,9 @@ namespace Score2Stream.MenuModule.ViewModels
         }
 
         public ObservableCollection<RibbonDropDownItem> Inputs { get; } = new ObservableCollection<RibbonDropDownItem>();
-
         public DelegateCommand<Core.Models.Contents.Input> InputSelectCommand { get; }
-
         public DelegateCommand InputStopAllCommand { get; }
-
         public DelegateCommand InputsUpdateCommand { get; }
-
         public bool IsActive => inputService.IsActive;
 
         public bool IsSampleDetection
@@ -281,6 +272,8 @@ namespace Score2Stream.MenuModule.ViewModels
         public DelegateCommand SamplesOrderCommand { get; }
 
         public DelegateCommand SamplesRemoveAllCommand { get; }
+
+        public DelegateCommand ScoreboardOpenCommand { get; }
 
         public DelegateCommand ScoreboardUpdateCommand { get; }
 
@@ -381,8 +374,8 @@ namespace Score2Stream.MenuModule.ViewModels
         private void OnGraphicsUpdated()
         {
             GraphicsReloadCommand.RaiseCanExecuteChanged();
-            GraphicsOpenCommand.RaiseCanExecuteChanged();
 
+            ScoreboardOpenCommand.RaiseCanExecuteChanged();
             ScoreboardUpdateCommand.RaiseCanExecuteChanged();
         }
 

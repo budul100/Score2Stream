@@ -137,13 +137,7 @@
 
                 <rib:RibbonTab.Groups>
 
-                    <rib:RibbonGroupBox Header="Web server control">
-                        <rib:RibbonButton
-                            Command="{Binding GraphicsOpenCommand}"
-                            Content="Open server"
-                            FontSize="11"
-                            LargeIcon="{DynamicResource IconOpen}"
-                            MinSize="Large" />
+                    <rib:RibbonGroupBox Header="Server control">
                         <rib:RibbonButton
                             Command="{Binding GraphicsReloadCommand}"
                             Content="Restart server"
@@ -152,7 +146,13 @@
                             MinSize="Large" />
                     </rib:RibbonGroupBox>
 
-                    <rib:RibbonGroupBox Header="Score board control">
+                    <rib:RibbonGroupBox Header="Scoreboard control">
+                        <rib:RibbonButton
+                            Command="{Binding ScoreboardOpenCommand}"
+                            Content="Open board"
+                            FontSize="11"
+                            LargeIcon="{DynamicResource IconOpen}"
+                            MinSize="Large" />
                         <rib:RibbonButton
                             Command="{Binding ScoreboardUpdateCommand}"
                             Content="Update board"

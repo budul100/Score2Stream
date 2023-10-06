@@ -499,8 +499,8 @@ namespace Score2Stream.ScoreboardService
         {
             for (var index = 0; index < tickers.Count(); index++)
             {
-                var result = settings.Scoreboard.Tickers[index].Item1 == tickers.ElementAt(index).Item1
-                    && settings.Scoreboard.Tickers[index].Item2 == tickers.ElementAt(index).Item2;
+                var result = settings.Scoreboard.Tickers[index].Item2 == tickers.ElementAt(index).Item2
+                    && (!settings.Scoreboard.Tickers[index].Item2 || settings.Scoreboard.Tickers[index].Item1 == tickers.ElementAt(index).Item1);
 
                 yield return result;
             }
@@ -562,7 +562,7 @@ namespace Score2Stream.ScoreboardService
         {
             var current = default(string);
 
-            var relevants = Tickers
+            var relevants = tickers
                 .Where(t => t.Item2).ToArray();
 
             if (relevants?.Any() == true)
