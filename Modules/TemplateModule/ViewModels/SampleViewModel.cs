@@ -27,7 +27,7 @@ namespace Score2Stream.TemplateModule.ViewModels
         public SampleViewModel(IEventAggregator eventAggregator)
         {
             OnRemoveCommand = new DelegateCommand(
-                executeMethod: () => sampleService.Remove());
+                executeMethod: () => sampleService.RemoveAsync());
 
             OnSelectionCommand = new DelegateCommand(
                 executeMethod: () => sampleService.Select(Sample));

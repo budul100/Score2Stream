@@ -1,4 +1,5 @@
 ﻿using Avalonia.Media.Imaging;
+using MessageBox.Avalonia.Enums;
 using Prism.Events;
 using Score2Stream.Core.Events.Sample;
 using Score2Stream.Core.Extensions;
@@ -15,17 +16,19 @@ namespace Score2Stream.SampleService
         #region Private Fields
 
         private readonly IEventAggregator eventAggregator;
+        private readonly IMessageBoxService messageBoxService;
         private readonly IRecognitionService recognitionService;
-
         private int index;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public Service(IRecognitionService recognitionService, IEventAggregator eventAggregator)
+        public Service(IRecognitionService recognitionService, IMessageBoxService messageBoxService,
+            IEventAggregator eventAggregator)
         {
             this.recognitionService = recognitionService;
+            this.messageBoxService = messageBoxService;
             this.eventAggregator = eventAggregator;
 
             eventAggregator.GetEvent<SampleDetectedEvent>().Subscribe(
@@ -126,16 +129,31 @@ namespace Score2Stream.SampleService
             }
         }
 
-        public void Remove()
+        public async void RemoveAsync()
         {
-            var next = GetNext(true);
+            if (Active != default)
+            {
+                var result = ButtonResult.Yes;
 
-            RemoveSample(Active);
+                if (!string.IsNullOrWhiteSpace(Active.Value))
+                {
+                    result = await messageBoxService.GetMessageBoxResultAsync(
+                        contentMessage: "Shall the selected sample be removed?",
+                        contentTitle: "Remove sample");
+                }
 
-            Select(next);
+                if (result == ButtonResult.Yes)
+                {
+                    var next = GetNext(true);
 
-            eventAggregator.GetEvent<SamplesChangedEvent>()
-                .Publish();
+                    RemoveSample(Active);
+
+                    Select(next);
+
+                    eventAggregator.GetEvent<SamplesChangedEvent>()
+                        .Publish();
+                }
+            }
         }
 
         public void Select(Sample sample)

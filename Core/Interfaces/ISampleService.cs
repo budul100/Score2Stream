@@ -29,7 +29,7 @@ namespace Score2Stream.Core.Interfaces
 
         void Remove(Template template);
 
-        void Remove();
+        void RemoveAsync();
 
         void Select(Sample sample);
 
