@@ -328,14 +328,19 @@ namespace Score2Stream.VideoService
                         ? monochromeImage.GetContour()
                         : default;
 
-                    var currentImage = contourRectangle.HasValue
+                    var croppedImage = contourRectangle.HasValue
                         ? monochromeImage.ToCropped(contourRectangle.Value)
                         : monochromeImage;
+
+                    var currentImage = clip.NoiseRemoval == 0
+                        ? croppedImage
+                        : croppedImage.WithoutNoise(
+                            erodeIterations: clip.NoiseRemoval,
+                            dilateIterations: clip.NoiseRemoval);
 
                     if (currentImage != default)
                     {
                         clip.Mat = currentImage;
-
                         clip.Width = maxWidth;
                         clip.Height = maxHeight;
 

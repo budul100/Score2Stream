@@ -7,12 +7,15 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="using:System"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
 
     <UserControl.Resources>
         <co:DescriptionToStringConverter x:Key="DescriptionToStringConverter" />
+        <sys:Double x:Key="LabelWidth">100</sys:Double>
+        <sys:Double x:Key="ValueWidth">150</sys:Double>
     </UserControl.Resources>
 
     <Border
@@ -64,10 +67,10 @@
 
             <Grid Margin="5">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="70" />
                     <ColumnDefinition />
                     <ColumnDefinition Width="4" />
-                    <ColumnDefinition Width="70" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="4" />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
@@ -76,72 +79,97 @@
                     <RowDefinition />
                 </Grid.RowDefinitions>
 
-                <TextBlock
+                <StackPanel
                     Grid.Row="0"
                     Grid.Column="0"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    Text="Type" />
-                <ComboBox
-                    Grid.Row="0"
-                    Grid.Column="1"
-                    Width="130"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    IsEnabled="{Binding HasItems, RelativeSource={RelativeSource Self}}"
-                    Items="{Binding Types}"
-                    SelectedItem="{Binding Type}">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Converter={StaticResource DescriptionToStringConverter}}" />
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
+                    Orientation="Horizontal">
+                    <TextBlock
+                        Width="{StaticResource LabelWidth}"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Text="Type" />
+                    <ComboBox
+                        Width="{StaticResource ValueWidth}"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        IsEnabled="{Binding HasItems, RelativeSource={RelativeSource Self}}"
+                        Items="{Binding Types}"
+                        SelectedItem="{Binding Type}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource DescriptionToStringConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
 
-                <TextBlock
+                <StackPanel
                     Grid.Row="2"
                     Grid.Column="0"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    Text="Contrast" />
-                <NumericUpDown
+                    Orientation="Horizontal">
+                    <TextBlock
+                        Width="{StaticResource LabelWidth}"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Text="Template" />
+                    <ComboBox
+                        Name="TemplatesComboBox"
+                        Width="{StaticResource ValueWidth}"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        IsEnabled="{Binding #TemplatesComboBox.HasItems}"
+                        Items="{Binding Templates}"
+                        SelectedItem="{Binding Template, Mode=TwoWay}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Description}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+
+                <StackPanel
+                    Grid.Row="0"
+                    Grid.Column="2"
+                    Orientation="Horizontal">
+                    <TextBlock
+                        Width="{StaticResource LabelWidth}"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Text="Contrast" />
+                    <NumericUpDown
+                        Width="{StaticResource ValueWidth}"
+                        MaxHeight="5"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Maximum="100"
+                        Minimum="0"
+                        Value="{Binding ThresholdMonochrome, Mode=TwoWay}" />
+                </StackPanel>
+
+                <StackPanel
                     Grid.Row="2"
-                    Grid.Column="1"
-                    Width="130"
-                    MaxHeight="5"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    Maximum="100"
-                    Minimum="0"
-                    Value="{Binding ThresholdMonochrome, Mode=TwoWay}" />
+                    Grid.Column="2"
+                    Orientation="Horizontal">
+                    <TextBlock
+                        Width="{StaticResource LabelWidth}"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Text="Noise removal" />
+                    <NumericUpDown
+                        Width="{StaticResource ValueWidth}"
+                        MaxHeight="5"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Maximum="10"
+                        Minimum="0"
+                        Value="{Binding NoiseRemoval, Mode=TwoWay}" />
+                </StackPanel>
 
                 <TextBlock
                     Grid.Row="0"
-                    Grid.Column="3"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    Text="Template" />
-                <ComboBox
-                    Name="TemplatesComboBox"
-                    Grid.Row="0"
+                    Grid.RowSpan="3"
                     Grid.Column="4"
-                    Width="130"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    IsEnabled="{Binding #TemplatesComboBox.HasItems}"
-                    Items="{Binding Templates}"
-                    SelectedItem="{Binding Template, Mode=TwoWay}">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Description}" />
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
-
-                <TextBlock
-                    Grid.Row="2"
-                    Grid.Column="3"
-                    Grid.ColumnSpan="2"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     d:Text="=&gt; LoremIspum"

@@ -46,15 +46,17 @@ namespace Score2Stream.ClipService
         {
             var name = GetName();
 
-            var thresholdMonochrome = Active?.ThresholdMonochrome
-                ?? Core.Constants.ThresholdMonochromeDefault;
-
             var clip = new Clip()
             {
                 Name = name,
-                ThresholdMonochrome = thresholdMonochrome,
                 Template = Active?.Template
             };
+
+            if (Active != default)
+            {
+                clip.NoiseRemoval = Active.NoiseRemoval;
+                clip.ThresholdMonochrome = Active.ThresholdMonochrome;
+            }
 
             Add(clip);
 

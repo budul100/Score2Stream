@@ -23,8 +23,6 @@
         public const string SplitterTitle = " | ";
         public const char SplitterVersion = '.';
 
-        public const int ThresholdMonochromeDefault = 50;
-
         #endregion Public Fields
     }
 }

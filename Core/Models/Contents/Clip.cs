@@ -10,6 +10,13 @@ namespace Score2Stream.Core.Models.Contents
 {
     public class Clip
     {
+        #region Private Fields
+
+        private const int NoiseRemovalDefault = 0;
+        private const int ThresholdMonochromeDefault = 50;
+
+        #endregion Private Fields
+
         #region Public Properties
 
         [JsonIgnore]
@@ -32,6 +39,8 @@ namespace Score2Stream.Core.Models.Contents
 
         public string Name { get; set; }
 
+        public int NoiseRemoval { get; set; } = NoiseRemovalDefault;
+
         [JsonIgnore]
         public Rect? Rect { get; set; }
 
@@ -51,8 +60,7 @@ namespace Score2Stream.Core.Models.Contents
 
         public string TemplateDescription { get; set; }
 
-        public int ThresholdMonochrome { get; set; }
-
+        public int ThresholdMonochrome { get; set; } = ThresholdMonochromeDefault;
         public ClipType Type { get; set; } = ClipType.None;
 
         [JsonIgnore]

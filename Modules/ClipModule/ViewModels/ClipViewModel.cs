@@ -77,6 +77,31 @@ namespace Score2Stream.ClipModule.ViewModels
             set { SetProperty(ref isActive, value); }
         }
 
+        public int NoiseRemoval
+        {
+            get { return Clip?.NoiseRemoval ?? 0; }
+            set
+            {
+                if (value >= 0
+                    && value <= 10
+                    && Clip?.NoiseRemoval != value)
+                {
+                    if (!isInitializing
+                        && clipService?.Active != Clip)
+                    {
+                        clipService?.Select(Clip);
+                    }
+
+                    Clip.NoiseRemoval = value;
+
+                    eventAggregator.GetEvent<ClipUpdatedEvent>().Publish(
+                        payload: Clip);
+                }
+
+                RaisePropertyChanged(nameof(NoiseRemoval));
+            }
+        }
+
         public DelegateCommand OnSelectionCommand { get; }
 
         public Template Template
