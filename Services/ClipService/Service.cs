@@ -1,9 +1,12 @@
-﻿using Prism.Events;
+﻿using MessageBox.Avalonia.Enums;
+using Prism.Events;
 using Score2Stream.Core.Events.Clip;
+using Score2Stream.Core.Extensions;
 using Score2Stream.Core.Interfaces;
 using Score2Stream.Core.Models.Contents;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Score2Stream.ClipService
 {
@@ -13,6 +16,7 @@ namespace Score2Stream.ClipService
         #region Private Fields
 
         private readonly IEventAggregator eventAggregator;
+        private readonly IMessageBoxService messageBoxService;
         private readonly IScoreboardService scoreboardService;
 
         #endregion Private Fields
@@ -20,10 +24,11 @@ namespace Score2Stream.ClipService
         #region Public Constructors
 
         public Service(IScoreboardService scoreboardService, ITemplateService templateService,
-            IEventAggregator eventAggregator)
+            IMessageBoxService messageBoxService, IEventAggregator eventAggregator)
         {
             this.scoreboardService = scoreboardService;
             this.eventAggregator = eventAggregator;
+            this.messageBoxService = messageBoxService;
 
             TemplateService = templateService;
         }
@@ -42,27 +47,6 @@ namespace Score2Stream.ClipService
 
         #region Public Methods
 
-        public void Add()
-        {
-            var name = GetName();
-
-            var clip = new Clip()
-            {
-                Name = name,
-                Template = Active?.Template
-            };
-
-            if (Active != default)
-            {
-                clip.NoiseRemoval = Active.NoiseRemoval;
-                clip.ThresholdMonochrome = Active.ThresholdMonochrome;
-            }
-
-            Add(clip);
-
-            Select(clip);
-        }
-
         public void Add(Clip clip)
         {
             if (clip != default)
@@ -72,8 +56,6 @@ namespace Score2Stream.ClipService
                 scoreboardService.SetClip(
                     clip: clip,
                     clipType: clip.Type);
-
-                eventAggregator.GetEvent<ClipsChangedEvent>().Publish();
             }
         }
 
@@ -94,21 +76,67 @@ namespace Score2Stream.ClipService
             }
         }
 
-        public void Remove()
+        public async Task ClearAsync()
         {
-            Remove(Active);
+            var result = await messageBoxService.GetMessageBoxResultAsync(
+                contentMessage: "Shall all clips be removed?",
+                contentTitle: "Remove all clips");
+
+            if (result == ButtonResult.Yes)
+            {
+                Clear();
+            }
         }
 
-        public void Remove(Clip clip)
+        public void Create()
         {
-            if (clip != default)
+            var clip = GetClip();
+
+            Add(clip);
+
+            eventAggregator
+                .GetEvent<ClipsChangedEvent>()
+                .Publish();
+
+            Select(clip);
+        }
+
+        public void Next(bool backward)
+        {
+            var next = Clips.GetNext(
+                active: Active,
+                backward: backward);
+
+            if (next != default)
             {
-                RemoveClip(clip);
+                Select(next);
+            }
+        }
 
-                eventAggregator.GetEvent<ClipsChangedEvent>()
-                    .Publish();
+        public async Task RemoveAsync()
+        {
+            if (Active != default)
+            {
+                var result = ButtonResult.Yes;
 
-                Select(default);
+                if (Active.HasDimensions)
+                {
+                    result = await messageBoxService.GetMessageBoxResultAsync(
+                        contentMessage: "Shall the selected clip be removed?",
+                        contentTitle: "Remove clip");
+                }
+
+                if (result == ButtonResult.Yes)
+                {
+                    var next = Clips.GetNext(Active);
+
+                    RemoveClip(Active);
+
+                    eventAggregator.GetEvent<ClipsChangedEvent>()
+                        .Publish();
+
+                    Select(next);
+                }
             }
         }
 
@@ -127,16 +155,21 @@ namespace Score2Stream.ClipService
 
         #region Private Methods
 
-        private string GetName()
+        private Clip GetClip()
         {
-            var index = 0;
+            var name = Clips.GetNextName();
 
-            string result;
-
-            do
+            var result = new Clip()
             {
-                result = $"Clip{++index}";
-            } while (Clips.Any(c => c.Name == result));
+                Name = name,
+            };
+
+            if (Active != default)
+            {
+                result.Template = Active.Template;
+                result.NoiseRemoval = Active.NoiseRemoval;
+                result.ThresholdMonochrome = Active.ThresholdMonochrome;
+            }
 
             return result;
         }
@@ -145,14 +178,9 @@ namespace Score2Stream.ClipService
         {
             if (clip != default)
             {
-                if (clip.Template?.Clip == clip)
-                {
-                    TemplateService.Remove(clip.Template);
-                }
+                scoreboardService.RemoveClip(clip);
 
                 Clips.Remove(clip);
-
-                scoreboardService.RemoveClip(clip);
             }
         }
 

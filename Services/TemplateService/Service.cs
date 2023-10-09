@@ -1,9 +1,14 @@
-﻿using Prism.Events;
+﻿using MessageBox.Avalonia.Enums;
+using OpenCvSharp;
+using Prism.Events;
+using Prism.Ioc;
 using Score2Stream.Core.Events.Template;
+using Score2Stream.Core.Extensions;
 using Score2Stream.Core.Interfaces;
 using Score2Stream.Core.Models.Contents;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Score2Stream.TemplateService
 {
@@ -12,16 +17,19 @@ namespace Score2Stream.TemplateService
     {
         #region Private Fields
 
+        private readonly IContainerProvider containerProvider;
         private readonly IEventAggregator eventAggregator;
+        private readonly IMessageBoxService messageBoxService;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public Service(ISampleService sampleService, IEventAggregator eventAggregator)
+        public Service(IMessageBoxService messageBoxService, IContainerProvider containerProvider,
+            IEventAggregator eventAggregator)
         {
-            SampleService = sampleService;
-
+            this.messageBoxService = messageBoxService;
+            this.containerProvider = containerProvider;
             this.eventAggregator = eventAggregator;
         }
 
@@ -31,7 +39,7 @@ namespace Score2Stream.TemplateService
 
         public Template Active { get; private set; }
 
-        public ISampleService SampleService { get; }
+        public ISampleService SampleService => Active?.SampleService;
 
         public List<Template> Templates { get; } = new List<Template>();
 
@@ -43,98 +51,115 @@ namespace Score2Stream.TemplateService
         {
             if (template != default)
             {
-                Templates.Add(template);
+                AddTemplate(template);
 
-                eventAggregator
-                    .GetEvent<TemplatesChangedEvent>()
-                    .Publish();
-
-                Select(template);
-            }
-        }
-
-        public void Add(Clip clip)
-        {
-            var template = Templates
-                .SingleOrDefault(t => t.Clip == clip);
-
-            if (template == default)
-            {
-                template = new Template
+                if (template.Samples?.Any() == true)
                 {
-                    Clip = clip,
-                    Samples = new List<Sample>(),
-                };
+                    template.Samples = template.Samples
+                        .Where(s => s.Image != default).ToList();
 
-                clip.Template = template;
+                    foreach (var sample in template.Samples)
+                    {
+                        sample.Mat = Mat.FromImageData(
+                            imageBytes: sample.Image,
+                            mode: ImreadModes.Unchanged);
+                        sample.Template = template;
 
-                Add(template);
-            }
-            else
-            {
-                Select(template);
-            }
-        }
+                        template.SampleService.Add(sample);
+                    }
 
-        public void Clear()
-        {
-            if (Templates.Any())
-            {
-                foreach (var template in Templates)
-                {
-                    RemoveTemplate(template);
+                    template.SampleService.Order();
                 }
-
-                eventAggregator.GetEvent<TemplatesChangedEvent>()
-                    .Publish();
-
-                Select(default);
             }
         }
 
-        public void Remove()
+        public void Create()
         {
-            Remove(Active);
+            var template = GetTemplate();
+
+            AddTemplate(template);
+
+            eventAggregator
+                .GetEvent<TemplatesChangedEvent>()
+                .Publish();
+
+            Select(template);
         }
 
-        public void Remove(Template template)
+        public async Task RemoveAsync()
         {
-            if (template != default)
+            if (Active != default)
             {
-                RemoveTemplate(template);
+                var result = await messageBoxService.GetMessageBoxResultAsync(
+                    contentMessage: "Shall the selected template be removed?",
+                    contentTitle: "Remove template");
 
-                eventAggregator.GetEvent<TemplatesChangedEvent>()
-                    .Publish();
+                if (result == ButtonResult.Yes)
+                {
+                    var next = Templates.GetNext(Active);
 
-                Select(default);
+                    Active.SampleService.Clear();
+                    Templates.Remove(Active);
+
+                    if (Templates.Any())
+                    {
+                        eventAggregator.GetEvent<TemplatesChangedEvent>()
+                            .Publish();
+
+                        Select(next);
+                    }
+                    else
+                    {
+                        Create();
+                    }
+                }
             }
         }
 
         public void Select(Template template)
         {
-            Active = template;
+            if (template != Active || template == default)
+            {
+                Active = template
+                    ?? Templates.FirstOrDefault();
 
-            eventAggregator
-                .GetEvent<TemplateSelectedEvent>()
-                .Publish(template);
+                eventAggregator
+                    .GetEvent<TemplateSelectedEvent>()
+                    .Publish(Active);
+            }
         }
 
         #endregion Public Methods
 
         #region Private Methods
 
-        private void RemoveTemplate(Template template)
+        private void AddTemplate(Template template)
         {
             if (template != default)
             {
-                if (template.Clip != default)
+                if (template.SampleService == default)
                 {
-                    template.Clip.Template = default;
+                    template.SampleService = containerProvider
+                        .Resolve<ISampleService>();
+
+                    template.SampleService.Initialize(
+                        template: template);
                 }
 
-                SampleService.Remove(template);
-                Templates.Remove(template);
+                Templates.Add(template);
             }
+        }
+
+        private Template GetTemplate()
+        {
+            var name = Templates.GetNextName();
+
+            var result = new Template()
+            {
+                Name = name,
+            };
+
+            return result;
         }
 
         #endregion Private Methods

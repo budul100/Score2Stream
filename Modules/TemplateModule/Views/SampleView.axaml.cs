@@ -19,11 +19,10 @@ public partial class SampleView
     {
         InitializeComponent();
 
-        this.PropertyChanged += (s, e) => OnPropertyChanged(e);
-
         if (ValueTextBox != default)
         {
-            ValueTextBox.AttachedToVisualTree += (s, e) => SetFocusOnTextBox();
+            ValueTextBox.AttachedToVisualTree += (s, e) => OnAttachedToVisualTree();
+            ValueTextBox.DetachedFromVisualTree += (s, e) => OnDetachedFromVisualTree();
         }
     }
 
@@ -41,10 +40,22 @@ public partial class SampleView
 
     #region Private Methods
 
+    private void OnAttachedToVisualTree()
+    {
+        this.PropertyChanged += (s, e) => OnPropertyChanged(e);
+
+        SetFocusOnTextBox();
+    }
+
+    private void OnDetachedFromVisualTree()
+    {
+        this.PropertyChanged -= (s, e) => OnPropertyChanged(e);
+    }
+
     private void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
     {
-        if (e.Property.Name == nameof(IsActive)
-            && IsActive)
+        if (IsActive
+            && e.Property.Name == nameof(IsActive))
         {
             SetFocusOnTextBox();
         }
@@ -52,8 +63,8 @@ public partial class SampleView
 
     private void SetFocusOnTextBox()
     {
-        if (ValueTextBox != default
-            && IsActive)
+        if (IsActive
+            && ValueTextBox != default)
         {
             ValueTextBox.Focus();
         }

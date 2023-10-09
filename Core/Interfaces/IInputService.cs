@@ -1,5 +1,6 @@
 ﻿using Score2Stream.Core.Models.Contents;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Score2Stream.Core.Interfaces
 {
@@ -7,31 +8,19 @@ namespace Score2Stream.Core.Interfaces
     {
         #region Public Properties
 
-        IClipService ClipService { get; }
+        Input Active { get; }
 
-        int ImagesQueueSize { get; set; }
+        IClipService ClipService { get; }
 
         HashSet<Input> Inputs { get; }
 
         bool IsActive { get; }
 
-        bool NoCentering { get; set; }
-
-        bool NoRecognition { get; set; }
-
-        int ProcessingDelay { get; set; }
-
         ISampleService SampleService { get; }
 
         ITemplateService TemplateService { get; }
 
-        int ThresholdDetecting { get; set; }
-
-        int ThresholdMatching { get; set; }
-
         IVideoService VideoService { get; }
-
-        int WaitingDuration { get; set; }
 
         #endregion Public Properties
 
@@ -43,7 +32,7 @@ namespace Score2Stream.Core.Interfaces
 
         void Select(string fileName);
 
-        void StopAll();
+        Task StopAsync();
 
         void Update();
 

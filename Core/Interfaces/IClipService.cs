@@ -1,5 +1,6 @@
 ﻿using Score2Stream.Core.Models.Contents;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Score2Stream.Core.Interfaces
 {
@@ -17,15 +18,17 @@ namespace Score2Stream.Core.Interfaces
 
         #region Public Methods
 
-        void Add();
-
         void Add(Clip clip);
 
         void Clear();
 
-        void Remove();
+        Task ClearAsync();
 
-        void Remove(Clip clip);
+        void Create();
+
+        void Next(bool backward);
+
+        Task RemoveAsync();
 
         void Select(Clip clip);
 

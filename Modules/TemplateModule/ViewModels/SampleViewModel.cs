@@ -2,6 +2,7 @@
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
+using Score2Stream.Core.Enums;
 using Score2Stream.Core.Events.Sample;
 using Score2Stream.Core.Events.Video;
 using Score2Stream.Core.Interfaces;
@@ -14,10 +15,9 @@ namespace Score2Stream.TemplateModule.ViewModels
     {
         #region Private Fields
 
-        private readonly SampleUpdatedValueEvent sampleUpdatedValueEvent;
+        private readonly SampleUpdatedEvent sampleUpdatedEvent;
+
         private bool isActive;
-        private bool isMatching;
-        private bool isRelevant;
         private ISampleService sampleService;
 
         #endregion Private Fields
@@ -29,29 +29,32 @@ namespace Score2Stream.TemplateModule.ViewModels
             OnRemoveCommand = new DelegateCommand(
                 executeMethod: () => sampleService.RemoveAsync());
 
-            OnSelectionCommand = new DelegateCommand(
+            OnFocusGotCommand = new DelegateCommand(
                 executeMethod: () => sampleService.Select(Sample));
 
+            OnFocusLostCommand = new DelegateCommand(
+                executeMethod: () => Sample.IsVerified = true);
+
             OnSelectionNextCommand = new DelegateCommand(
-                executeMethod: () => sampleService.Next(true));
+                executeMethod: () => sampleService.Next(false));
 
             OnSelectionPreviousCommand = new DelegateCommand(
-                executeMethod: () => sampleService.Next(false));
+                executeMethod: () => sampleService.Next(true));
 
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
                 action: s => IsActive = s == Sample,
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<SampleUpdatedRelevanceEvent>().Subscribe(
-                action: (s) => UpdateSample(s),
+            eventAggregator.GetEvent<SamplesUpdatedEvent>().Subscribe(
+                action: () => RaisePropertyChanged(nameof(Type)),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
                 action: () => RaisePropertyChanged(nameof(Difference)),
                 keepSubscriberReferenceAlive: true);
 
-            sampleUpdatedValueEvent = eventAggregator
-                .GetEvent<SampleUpdatedValueEvent>();
+            sampleUpdatedEvent = eventAggregator
+                .GetEvent<SampleUpdatedEvent>();
         }
 
         #endregion Public Constructors
@@ -70,27 +73,19 @@ namespace Score2Stream.TemplateModule.ViewModels
             set { SetProperty(ref isActive, value); }
         }
 
-        public bool IsMatching
-        {
-            get { return isMatching; }
-            set { SetProperty(ref isMatching, value); }
-        }
+        public DelegateCommand OnFocusGotCommand { get; }
 
-        public bool IsRelevant
-        {
-            get { return isRelevant; }
-            set { SetProperty(ref isRelevant, value); }
-        }
+        public DelegateCommand OnFocusLostCommand { get; }
 
         public DelegateCommand OnRemoveCommand { get; }
-
-        public DelegateCommand OnSelectionCommand { get; }
 
         public DelegateCommand OnSelectionNextCommand { get; }
 
         public DelegateCommand OnSelectionPreviousCommand { get; }
 
         public Sample Sample { get; private set; }
+
+        public SampleType Type => Sample.Type;
 
         public string Value
         {
@@ -101,7 +96,7 @@ namespace Score2Stream.TemplateModule.ViewModels
 
                 RaisePropertyChanged(nameof(Value));
 
-                sampleUpdatedValueEvent.Publish(Sample);
+                sampleUpdatedEvent.Publish(Sample);
             }
         }
 
@@ -120,18 +115,5 @@ namespace Score2Stream.TemplateModule.ViewModels
         }
 
         #endregion Public Methods
-
-        #region Private Methods
-
-        private void UpdateSample(Sample sample)
-        {
-            if (sample == Sample)
-            {
-                IsMatching = sample.IsSimilar;
-                IsRelevant = sample.IsMatching;
-            }
-        }
-
-        #endregion Private Methods
     }
 }

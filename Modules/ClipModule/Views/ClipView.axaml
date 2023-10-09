@@ -23,6 +23,7 @@
         BorderBrush="LightGray"
         BorderThickness="2"
         CornerRadius="3">
+
         <DockPanel Name="ClipPanel">
 
             <i:Interaction.Behaviors>
@@ -122,7 +123,7 @@
                         SelectedItem="{Binding Template, Mode=TwoWay}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Description}" />
+                                <TextBlock Text="{Binding Name}" />
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>

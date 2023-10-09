@@ -18,7 +18,7 @@ namespace Score2Stream.Core.Prism
 
         #region Protected Properties
 
-        protected IRegionManager RegionManager { get; private set; }
+        protected IRegionManager RegionManager { get; }
 
         #endregion Protected Properties
 

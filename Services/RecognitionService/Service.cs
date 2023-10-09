@@ -3,6 +3,8 @@ using Score2Stream.Core.Interfaces;
 using System;
 using System.IO;
 using TesseractOCR;
+using TesseractOCR.Enums;
+using TesseractOCR.Pix;
 
 namespace Score2Stream.RecognitionService
 {
@@ -11,6 +13,7 @@ namespace Score2Stream.RecognitionService
     {
         #region Private Fields
 
+        private const PageSegMode PageModeDefault = PageSegMode.SingleChar;
         private const string TesseractLanguages = "letsgodigital";
         private const string TesseractTrainedData = "TrainedData";
 
@@ -61,11 +64,11 @@ namespace Score2Stream.RecognitionService
             try
             {
                 var memoryStream = image.ToMemoryStream().ToArray();
-                var pixImage = TesseractOCR.Pix.Image.LoadFromMemory(memoryStream);
+                var pixImage = Image.LoadFromMemory(memoryStream);
 
                 using var page = engine.Process(
                     image: pixImage,
-                    pageSegMode: TesseractOCR.Enums.PageSegMode.SingleLine);
+                    pageSegMode: PageModeDefault);
 
                 result = page?.Text;
             }

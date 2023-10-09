@@ -4,13 +4,20 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
     xmlns:b="using:Score2Stream.TemplateModule.Behaviors"
+    xmlns:co="clr-namespace:Score2Stream.Core.Converters;assembly=Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:en="clr-namespace:Score2Stream.Core.Enums;assembly=Core"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="450"
     d:DesignWidth="800"
     IsActive="{Binding IsActive, Mode=TwoWay}"
     mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <co:EnumToStringConverter x:Key="EnumToStringConverter" />
+    </UserControl.Resources>
+
     <Border
         Name="SampleBorder"
         Margin="2"
@@ -19,43 +26,32 @@
         CornerRadius="3">
 
         <i:Interaction.Behaviors>
-
             <a:DataTriggerBehavior
-                Binding="{Binding IsMatching}"
+                Binding="{Binding Type, Converter={StaticResource EnumToStringConverter}}"
                 ComparisonCondition="Equal"
-                Value="False">
+                Value="{x:Static en:SampleType.Similar}">
                 <a:ChangePropertyAction
                     PropertyName="BorderBrush"
                     TargetObject="SampleBorder"
-                    Value="LightGray" />
+                    Value="GreenYellow" />
             </a:DataTriggerBehavior>
             <a:DataTriggerBehavior
-                Binding="{Binding IsRelevant}"
+                Binding="{Binding Type, Converter={StaticResource EnumToStringConverter}}"
                 ComparisonCondition="Equal"
-                Value="False">
-                <a:ChangePropertyAction
-                    PropertyName="BorderBrush"
-                    TargetObject="SampleBorder"
-                    Value="LightGray" />
-            </a:DataTriggerBehavior>
-
-            <a:DataTriggerBehavior
-                Binding="{Binding IsMatching}"
-                ComparisonCondition="Equal"
-                Value="True">
+                Value="{x:Static en:SampleType.Match}">
                 <a:ChangePropertyAction
                     PropertyName="BorderBrush"
                     TargetObject="SampleBorder"
                     Value="LightPink" />
             </a:DataTriggerBehavior>
             <a:DataTriggerBehavior
-                Binding="{Binding IsRelevant}"
+                Binding="{Binding Type, Converter={StaticResource EnumToStringConverter}}"
                 ComparisonCondition="Equal"
-                Value="True">
+                Value="{x:Static en:SampleType.None}">
                 <a:ChangePropertyAction
                     PropertyName="BorderBrush"
                     TargetObject="SampleBorder"
-                    Value="GreenYellow" />
+                    Value="LightGray" />
             </a:DataTriggerBehavior>
         </i:Interaction.Behaviors>
 
@@ -125,7 +121,10 @@
 
                         <i:Interaction.Behaviors>
                             <a:EventTriggerBehavior EventName="GotFocus" SourceObject="ValueTextBox">
-                                <a:InvokeCommandAction Command="{Binding OnSelectionCommand}" />
+                                <a:InvokeCommandAction Command="{Binding OnFocusGotCommand}" />
+                            </a:EventTriggerBehavior>
+                            <a:EventTriggerBehavior EventName="LostFocus" SourceObject="ValueTextBox">
+                                <a:InvokeCommandAction Command="{Binding OnFocusLostCommand}" />
                             </a:EventTriggerBehavior>
 
                             <b:FocusOnActivationBehavior IsActive="{Binding IsActive, Mode=TwoWay}" />

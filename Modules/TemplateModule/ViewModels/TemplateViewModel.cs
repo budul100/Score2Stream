@@ -62,7 +62,7 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         #region Public Properties
 
-        public Bitmap Bitmap => Template?.Clip?.Bitmap;
+        public Bitmap Bitmap => inputService.ClipService.Active?.Bitmap;
 
         public string Current => GetCurrent();
 
@@ -78,10 +78,10 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         public string ValueEmpty
         {
-            get { return Template?.ValueEmpty; }
+            get { return Template?.Empty; }
             set
             {
-                Template.ValueEmpty = value;
+                Template.Empty = value;
 
                 RaisePropertyChanged(nameof(ValueEmpty));
             }
@@ -93,9 +93,16 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         private string GetCurrent()
         {
-            var result = !string.IsNullOrWhiteSpace(Template?.Clip?.Value)
-                ? $"{Template.Clip.Description} => {Template.Clip.Value} (Similarity: {Template.Clip.Similarity}%)"
-                : $"{Template.Clip.Description} => -/- (Similarity: {Template.Clip.Similarity}%)";
+            var result = default(string);
+
+            var clip = inputService.ClipService.Active;
+
+            if (clip != default)
+            {
+                result = !string.IsNullOrWhiteSpace(clip?.Value)
+                    ? $"{clip.Description} => {clip.Value} (Similarity: {clip.Similarity}%)"
+                    : $"{clip.Description} => -/- (Similarity: {clip.Similarity}%)";
+            }
 
             return result;
         }

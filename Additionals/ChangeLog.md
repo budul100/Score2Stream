@@ -4,6 +4,7 @@
 
 * Recognition service added for automatic detection of sample values
 * Noise removal has been added (https://github.com/budul100/Score2Stream/issues/9)
+* Templates are independent of samples
 * Request is shown if a sample with value shall be removed
 * Number of periods is saved in settings
 * Menu entries reordered

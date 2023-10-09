@@ -33,9 +33,6 @@ namespace Score2Stream.Core.Models.Contents
 
         public string Name { get; set; }
 
-        [JsonIgnore]
-        public ISampleService SampleService => TemplateService?.SampleService;
-
         public List<Template> Templates { get; set; }
 
         [JsonIgnore]

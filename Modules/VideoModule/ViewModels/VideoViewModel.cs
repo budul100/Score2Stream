@@ -277,7 +277,6 @@ namespace Score2Stream.VideoModule.ViewModels
                 var dimensionsCanBeSet = ButtonResult.Yes;
 
                 if (activeSelection.Clip.HasDimensions
-                    && (activeSelection.Clip?.Template?.Clip == activeSelection.Clip)
                     && (activeSelection.Clip?.Template?.Samples?.Any() == true))
                 {
                     dimensionsCanBeSet = await messageBoxService.GetMessageBoxResultAsync(

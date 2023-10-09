@@ -131,7 +131,7 @@
 
                 <i:Interaction.Behaviors>
                     <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="BoardTab">
-                        <a:InvokeCommandAction Command="{Binding OnTabSelectionCommand}" CommandParameter="BoardTab" />
+                        <a:InvokeCommandAction Command="{Binding OnTabSelectionCommand}" CommandParameter="{Binding TabBoard}" />
                     </a:EventTriggerBehavior>
                 </i:Interaction.Behaviors>
 
@@ -163,11 +163,11 @@
                 </rib:RibbonTab.Groups>
             </rib:RibbonTab>
 
-            <rib:RibbonTab Name="VideoTab" Header="Video">
+            <rib:RibbonTab Name="ClipsTab" Header="Clips">
 
                 <i:Interaction.Behaviors>
-                    <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="VideoTab">
-                        <a:InvokeCommandAction Command="{Binding OnTabSelectionCommand}" CommandParameter="VideoTab" />
+                    <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="ClipsTab">
+                        <a:InvokeCommandAction Command="{Binding OnTabSelectionCommand}" CommandParameter="{Binding TabClips}" />
                     </a:EventTriggerBehavior>
                 </i:Interaction.Behaviors>
 
@@ -209,15 +209,6 @@
                             MinSize="Large" />
                     </rib:RibbonGroupBox>
 
-                    <rib:RibbonGroupBox Header="Samples selection">
-                        <rib:RibbonButton
-                            Command="{Binding ClipAsTemplateCommand}"
-                            Content="Use as template"
-                            FontSize="11"
-                            LargeIcon="{DynamicResource IconTemplateUse}"
-                            MinSize="Large" />
-                    </rib:RibbonGroupBox>
-
                     <rib:RibbonGroupBox Header="Video options">
                         <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
                             <TextBlock
@@ -231,7 +222,7 @@
                                 MaxHeight="5"
                                 Increment="10"
                                 Maximum="{Binding MaxDuration}"
-                                Minimum="0"
+                                Minimum="{Binding MinDelay}"
                                 Value="{Binding ProcessingDelay, Mode=TwoWay}" />
                         </StackPanel>
                         <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
@@ -261,14 +252,11 @@
                 </rib:RibbonTab.Groups>
             </rib:RibbonTab>
 
-            <rib:RibbonTab
-                Name="SamplesTab"
-                Header="Samples"
-                IsEnabled="{Binding HasTemplates}">
+            <rib:RibbonTab Name="SamplesTab" Header="Samples">
 
                 <i:Interaction.Behaviors>
                     <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="SamplesTab">
-                        <a:InvokeCommandAction Command="{Binding OnTabSelectionCommand}" CommandParameter="SamplesTab" />
+                        <a:InvokeCommandAction Command="{Binding OnTabSelectionCommand}" CommandParameter="{Binding TabSamples}" />
                     </a:EventTriggerBehavior>
                 </i:Interaction.Behaviors>
 
@@ -321,6 +309,7 @@
                             <NumericUpDown
                                 Width="130"
                                 MaxHeight="5"
+                                Increment="5"
                                 Maximum="{Binding MaxThreshold}"
                                 Minimum="0"
                                 Value="{Binding ThresholdDetecting, Mode=TwoWay}" />
@@ -365,6 +354,7 @@
                             <NumericUpDown
                                 Width="130"
                                 MaxHeight="5"
+                                Increment="5"
                                 Maximum="{Binding MaxThreshold}"
                                 Minimum="0"
                                 Value="{Binding ThresholdMatching, Mode=TwoWay}" />

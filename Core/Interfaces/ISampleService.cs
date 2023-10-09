@@ -1,5 +1,6 @@
 ﻿using Score2Stream.Core.Models.Contents;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Score2Stream.Core.Interfaces
 {
@@ -15,23 +16,31 @@ namespace Score2Stream.Core.Interfaces
 
         List<Sample> Samples { get; }
 
+        int ThresholdDetecting { get; set; }
+
         #endregion Public Properties
 
         #region Public Methods
 
-        void Add(Clip clip);
-
         void Add(Sample sample);
 
-        void Next(bool onward);
+        void Clear();
+
+        Task ClearAsync();
+
+        void Create(Clip clip);
+
+        void Initialize(Template template);
+
+        void Next(bool backward);
 
         void Order();
 
-        void Remove(Template template);
-
-        void RemoveAsync();
+        Task RemoveAsync();
 
         void Select(Sample sample);
+
+        void Update(Clip clip);
 
         #endregion Public Methods
     }

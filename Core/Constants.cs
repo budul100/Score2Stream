@@ -11,6 +11,8 @@
         public const int MaxDuration = 1000;
         public const int MaxQueueSize = 20;
         public const int MaxThreshold = 100;
+
+        public const int MinDelay = 80;
         public const int MinQueueSize = 1;
 
         public const int PortHttpWebServer = 5003;
@@ -22,6 +24,10 @@
 
         public const string SplitterTitle = " | ";
         public const char SplitterVersion = '.';
+
+        public const string TabBoard = "Board";
+        public const string TabClips = "Clips";
+        public const string TabSamples = "Samples";
 
         #endregion Public Fields
     }

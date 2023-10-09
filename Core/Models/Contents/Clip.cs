@@ -9,6 +9,7 @@ using System.Text.Json.Serialization;
 namespace Score2Stream.Core.Models.Contents
 {
     public class Clip
+        : Nameable
     {
         #region Private Fields
 
@@ -37,8 +38,6 @@ namespace Score2Stream.Core.Models.Contents
         [JsonIgnore]
         public Mat Mat { get; set; }
 
-        public string Name { get; set; }
-
         public int NoiseRemoval { get; set; } = NoiseRemovalDefault;
 
         [JsonIgnore]
@@ -58,9 +57,10 @@ namespace Score2Stream.Core.Models.Contents
         [JsonIgnore]
         public Template Template { get; set; }
 
-        public string TemplateDescription { get; set; }
+        public string TemplateName { get; set; }
 
         public int ThresholdMonochrome { get; set; } = ThresholdMonochromeDefault;
+
         public ClipType Type { get; set; } = ClipType.None;
 
         [JsonIgnore]

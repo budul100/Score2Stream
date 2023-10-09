@@ -1,5 +1,6 @@
 ﻿using Avalonia.Media.Imaging;
 using OpenCvSharp;
+using Score2Stream.Core.Enums;
 using System.Text.Json.Serialization;
 
 namespace Score2Stream.Core.Models.Contents
@@ -17,11 +18,7 @@ namespace Score2Stream.Core.Models.Contents
 
         public int Index { get; set; }
 
-        [JsonIgnore]
-        public bool IsMatching { get; set; }
-
-        [JsonIgnore]
-        public bool IsSimilar { get; set; }
+        public bool IsVerified { get; set; }
 
         [JsonIgnore]
         public Mat Mat { get; set; }
@@ -31,6 +28,9 @@ namespace Score2Stream.Core.Models.Contents
 
         [JsonIgnore]
         public Template Template { get; set; }
+
+        [JsonIgnore]
+        public SampleType Type { get; set; }
 
         public string Value { get; set; }
 

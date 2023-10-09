@@ -1,5 +1,6 @@
 ﻿using Score2Stream.Core.Models.Contents;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Score2Stream.Core.Interfaces
 {
@@ -7,9 +8,9 @@ namespace Score2Stream.Core.Interfaces
     {
         #region Public Properties
 
-        ISampleService SampleService { get; }
-
         Template Active { get; }
+
+        ISampleService SampleService { get; }
 
         List<Template> Templates { get; }
 
@@ -17,13 +18,11 @@ namespace Score2Stream.Core.Interfaces
 
         #region Public Methods
 
-        void Add(Clip clip);
-
         void Add(Template template);
 
-        void Remove();
+        void Create();
 
-        void Remove(Template template);
+        Task RemoveAsync();
 
         void Select(Template template);
 

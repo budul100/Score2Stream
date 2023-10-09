@@ -10,7 +10,7 @@ namespace Score2Stream.VideoService.Extensions
     {
         #region Public Methods
 
-        public static IEnumerable<KeyValuePair<double, Sample>> GetSimilarSamples(this Clip clip, double thresholdMatching)
+        public static IEnumerable<KeyValuePair<double, Sample>> GetMatches(this Clip clip)
         {
             var relevants = clip?.Template?.Samples?
                 .Where(s => !string.IsNullOrWhiteSpace(s.Value)).ToArray();
@@ -21,8 +21,7 @@ namespace Score2Stream.VideoService.Extensions
                 {
                     var similarity = relevant.Mat.GetSimilarityTo(clip.Mat);
 
-                    if (similarity > thresholdMatching
-                        && similarity != 1)
+                    if (similarity != 1)
                     {
                         var result = new KeyValuePair<double, Sample>(
                             key: similarity,

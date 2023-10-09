@@ -32,8 +32,7 @@ namespace Score2Stream.ClipModule.ViewModels
 
         #region Public Constructors
 
-        public ClipViewModel(IScoreboardService scoreboardService,
-            IEventAggregator eventAggregator)
+        public ClipViewModel(IScoreboardService scoreboardService, IEventAggregator eventAggregator)
         {
             this.scoreboardService = scoreboardService;
             this.eventAggregator = eventAggregator;
@@ -119,6 +118,7 @@ namespace Score2Stream.ClipModule.ViewModels
                     }
 
                     Clip.Template = value;
+                    Clip.TemplateName = value.Name;
 
                     RaisePropertyChanged(nameof(Template));
                 }
@@ -191,6 +191,7 @@ namespace Score2Stream.ClipModule.ViewModels
             isInitializing = true;
 
             this.clipService = clipService;
+            this.IsActive = clipService.Active == clip;
 
             this.Clip = clip;
             this.Type = clip.Type;

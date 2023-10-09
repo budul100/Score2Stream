@@ -32,6 +32,7 @@
                 <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.MenuRegion}" />
             </prism:RegionManager.RegionName>
         </ContentControl>
+
         <Grid DockPanel.Dock="Bottom">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*" />

@@ -47,7 +47,12 @@ namespace Score2Stream.VideoModule.ViewModels
 
         public double? Height
         {
-            get { return height; }
+            get
+            {
+                return HasValue
+                    ? height
+                    : default;
+            }
             set
             {
                 var current = !double.IsNaN(value ?? double.NaN)
@@ -60,7 +65,12 @@ namespace Score2Stream.VideoModule.ViewModels
 
         public double? HeightName
         {
-            get { return heightName; }
+            get
+            {
+                return HasValue
+                    ? heightName
+                    : default;
+            }
             set
             {
                 var current = !double.IsNaN(value ?? double.NaN)
@@ -109,7 +119,12 @@ namespace Score2Stream.VideoModule.ViewModels
 
         public double? Width
         {
-            get { return width; }
+            get
+            {
+                return HasValue
+                    ? width
+                    : default;
+            }
             set
             {
                 var current = !double.IsNaN(value ?? double.NaN)
@@ -122,7 +137,12 @@ namespace Score2Stream.VideoModule.ViewModels
 
         public double? WidthName
         {
-            get { return widthName; }
+            get
+            {
+                return HasValue
+                    ? widthName
+                    : default;
+            }
             set
             {
                 var current = !double.IsNaN(value ?? double.NaN)

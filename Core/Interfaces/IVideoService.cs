@@ -26,11 +26,9 @@ namespace Score2Stream.Core.Interfaces
 
         TimeSpan? ProcessingTime { get; }
 
-        double ThresholdDetecting { get; set; }
+        int ThresholdMatching { get; set; }
 
-        double ThresholdMatching { get; set; }
-
-        TimeSpan WaitingDuration { get; set; }
+        int WaitingDuration { get; set; }
 
         #endregion Public Properties
 

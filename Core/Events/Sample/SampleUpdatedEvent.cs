@@ -2,7 +2,7 @@
 
 namespace Score2Stream.Core.Events.Sample
 {
-    public class SampleUpdatedValueEvent
+    public class SampleUpdatedEvent
         : PubSubEvent<Models.Contents.Sample>
     { }
 }
