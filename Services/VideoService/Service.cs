@@ -349,9 +349,17 @@ namespace Score2Stream.VideoService
                         clip.Images.Dequeue();
                     }
 
+                    var blendedImage = clip.Images.AsBlended();
+
+                    var noiselessImage = clip.NoiseRemoval == 0
+                        ? blendedImage
+                        : blendedImage.WithoutNoise(
+                            erodeIterations: clip.NoiseRemoval,
+                            dilateIterations: clip.NoiseRemoval);
+
                     var thresholdMonochrome = clip.ThresholdMonochrome / Constants.DividerThreshold;
 
-                    var monochromeImage = clip.Images.AsBlended()
+                    var monochromeImage = noiselessImage
                         .ToMonochrome(thresholdMonochrome);
 
                     var contourRectangle = !NoCentering
@@ -362,19 +370,13 @@ namespace Score2Stream.VideoService
                         ? monochromeImage.ToCropped(contourRectangle.Value)
                         : monochromeImage;
 
-                    var currentImage = clip.NoiseRemoval == 0
-                        ? croppedImage
-                        : croppedImage.WithoutNoise(
-                            erodeIterations: clip.NoiseRemoval,
-                            dilateIterations: clip.NoiseRemoval);
-
-                    clip.Mat = currentImage;
+                    clip.Mat = croppedImage;
                     clip.Width = widthMax;
                     clip.Height = heightMax;
 
-                    if (currentImage != default)
+                    if (clip.Mat != default)
                     {
-                        var bitmapStream = currentImage.ToCentered(
+                        var bitmapStream = clip.Mat.ToCentered(
                             fullWidth: clip.Width,
                             fullHeight: clip.Height);
 
