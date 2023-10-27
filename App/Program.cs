@@ -10,11 +10,21 @@ namespace Score2Stream
 {
     internal static class Program
     {
+        #region Private Fields
+
+        private const int MaxGpuResourceSizeBytes = 256000000;
+
+        #endregion Private Fields
+
         #region Public Methods
 
         public static AppBuilder BuildAvaloniaApp() => AppBuilder
             .Configure<App>()
             .UsePlatformDetect()
+            .With(new SkiaOptions
+            {
+                MaxGpuResourceSizeBytes = MaxGpuResourceSizeBytes
+            })
             .With(new X11PlatformOptions
             {
                 EnableMultiTouch = true,

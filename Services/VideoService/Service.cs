@@ -273,6 +273,8 @@ namespace Score2Stream.VideoService
                         }
                     }
 
+                    var position = 0.0;
+
                     if (!deviceId.HasValue)
                     {
                         if (frameCount == 0)
@@ -289,10 +291,20 @@ namespace Score2Stream.VideoService
                                 propertyId: VideoCaptureProperties.PosFrames,
                                 value: frameIndex);
                         }
+
+                        position = video.Get(VideoCaptureProperties.PosMsec);
                     }
 
                     await UpdateVideoAsync(
                         capturingStart: capturingStart);
+
+                    if (!deviceId.HasValue
+                        && ProcessingTime?.Milliseconds > 0)
+                    {
+                        video.Set(
+                            propertyId: VideoCaptureProperties.PosMsec,
+                            value: position + ProcessingTime.Value.Milliseconds);
+                    }
                 }
                 while (hasContent
                     && !cancellationTokenSource.IsCancellationRequested);
