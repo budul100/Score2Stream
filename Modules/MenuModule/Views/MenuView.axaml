@@ -210,7 +210,10 @@
                     </rib:RibbonGroupBox>
 
                     <rib:RibbonGroupBox Header="Video options">
-                        <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
+                        <StackPanel
+                            Margin="0,0,4,4"
+                            IsEnabled="{Binding IsActive}"
+                            Orientation="Horizontal">
                             <TextBlock
                                 Width="100"
                                 Margin="0,0,4,0"
@@ -225,7 +228,10 @@
                                 Minimum="{Binding MinDelay}"
                                 Value="{Binding ProcessingDelay, Mode=TwoWay}" />
                         </StackPanel>
-                        <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
+                        <StackPanel
+                            Margin="0,0,4,4"
+                            IsEnabled="{Binding IsActive}"
+                            Orientation="Horizontal">
                             <TextBlock
                                 Width="100"
                                 Margin="0,0,4,0"
@@ -247,7 +253,8 @@
                             VerticalAlignment="Center"
                             Content="Deactivate cropping"
                             FontSize="11"
-                            IsChecked="{Binding NoCentering, Mode=TwoWay}" />
+                            IsChecked="{Binding NoCentering, Mode=TwoWay}"
+                            IsEnabled="{Binding IsActive}" />
                     </rib:RibbonGroupBox>
                 </rib:RibbonTab.Groups>
             </rib:RibbonTab>
@@ -277,13 +284,14 @@
                             MinSize="Large" />
                     </rib:RibbonGroupBox>
 
-                    <rib:RibbonGroupBox Header="Samples detection">
+                    <rib:RibbonGroupBox Header="Samples detection" IsEnabled="{Binding IsActive}">
                         <rib:RibbonToggleButton
                             Classes.IsActive="{Binding IsSampleDetection}"
                             Classes.IsNotActive="{Binding !IsSampleDetection}"
                             Content="Detect samples"
                             FontSize="11"
                             IsChecked="{Binding IsSampleDetection}"
+                            IsEnabled="{Binding IsActive}"
                             MinSize="Large">
                             <rib:RibbonToggleButton.Styles>
                                 <Style Selector="RibbonToggleButton.IsActive">
@@ -299,7 +307,10 @@
                             </rib:RibbonToggleButton.Styles>
                         </rib:RibbonToggleButton>
 
-                        <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
+                        <StackPanel
+                            Margin="0,0,4,4"
+                            IsEnabled="{Binding IsActive}"
+                            Orientation="Horizontal">
                             <TextBlock
                                 Width="100"
                                 Margin="0,0,4,0"
@@ -316,7 +327,7 @@
                         </StackPanel>
                     </rib:RibbonGroupBox>
 
-                    <rib:RibbonGroupBox Header="Samples handling">
+                    <rib:RibbonGroupBox Header="Samples handling" IsEnabled="{Binding IsActive}">
                         <rib:RibbonButton
                             Command="{Binding SampleAddCommand}"
                             Content="Add as sample"
@@ -343,8 +354,11 @@
                             MinSize="Large" />
                     </rib:RibbonGroupBox>
 
-                    <rib:RibbonGroupBox Header="Sample options">
-                        <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
+                    <rib:RibbonGroupBox Header="Sample options" IsEnabled="{Binding IsActive}">
+                        <StackPanel
+                            Margin="0,0,4,4"
+                            IsEnabled="{Binding IsActive}"
+                            Orientation="Horizontal">
                             <TextBlock
                                 Width="100"
                                 Margin="0,0,4,0"
@@ -359,7 +373,10 @@
                                 Minimum="0"
                                 Value="{Binding ThresholdMatching, Mode=TwoWay}" />
                         </StackPanel>
-                        <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
+                        <StackPanel
+                            Margin="0,0,4,4"
+                            IsEnabled="{Binding IsActive}"
+                            Orientation="Horizontal">
                             <TextBlock
                                 Width="100"
                                 Margin="0,0,4,0"
@@ -379,7 +396,8 @@
                             VerticalAlignment="Center"
                             Content="Deactivate auto recognition"
                             FontSize="11"
-                            IsChecked="{Binding NoRecognition, Mode=TwoWay}" />
+                            IsChecked="{Binding NoRecognition, Mode=TwoWay}"
+                            IsEnabled="{Binding IsActive}" />
                     </rib:RibbonGroupBox>
                 </rib:RibbonTab.Groups>
             </rib:RibbonTab>

@@ -82,6 +82,8 @@ namespace Score2Stream.VideoService
 
         public bool IsActive { get; private set; }
 
+        public bool IsEnded { get; private set; }
+
         public string Name { get; private set; }
 
         public bool NoCentering
@@ -302,6 +304,7 @@ namespace Score2Stream.VideoService
             Bitmap = default;
 
             IsActive = false;
+            IsEnded = true;
 
             await UpdateVideoAsync();
 

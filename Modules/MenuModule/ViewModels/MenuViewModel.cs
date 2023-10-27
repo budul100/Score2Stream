@@ -19,6 +19,8 @@ using Score2Stream.Core.Interfaces;
 using Score2Stream.Core.Models.Contents;
 using Score2Stream.Core.Models.Settings;
 using Score2Stream.Core.Prism;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -151,9 +153,13 @@ namespace Score2Stream.MenuModule.ViewModels
         #region Public Properties
 
         public static int MaxDuration => Constants.MaxDuration;
+
         public static int MaxQueueSize => Constants.MaxQueueSize;
+
         public static int MaxThreshold => Constants.MaxThreshold;
+
         public static int MinDelay => Constants.MinDelay;
+
         public static int MinQueueSize => Constants.MinQueueSize;
 
         public static string TabBoard => Constants.TabBoard;
@@ -172,7 +178,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public int ImagesQueueSize
         {
-            get { return inputService.VideoService.ImagesQueueSize; }
+            get { return inputService?.VideoService?.ImagesQueueSize ?? MinQueueSize; }
             set
             {
                 if (IsActive
@@ -216,7 +222,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public bool NoCentering
         {
-            get { return inputService.VideoService.NoCentering; }
+            get { return inputService?.VideoService?.NoCentering ?? false; }
             set
             {
                 if (IsActive
@@ -230,7 +236,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public bool NoRecognition
         {
-            get { return inputService.SampleService.NoRecognition; }
+            get { return inputService?.SampleService?.NoRecognition ?? false; }
             set
             {
                 if (IsActive
@@ -246,7 +252,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public int ProcessingDelay
         {
-            get { return inputService.VideoService.ProcessingDelay; }
+            get { return inputService?.VideoService?.ProcessingDelay ?? MinDelay; }
             set
             {
                 if (IsActive
@@ -292,7 +298,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public int ThresholdDetecting
         {
-            get { return inputService.SampleService.ThresholdDetecting; }
+            get { return inputService?.SampleService?.ThresholdDetecting ?? 0; }
             set
             {
                 if (IsActive
@@ -308,7 +314,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public int ThresholdMatching
         {
-            get { return inputService.VideoService.ThresholdMatching; }
+            get { return inputService?.VideoService?.ThresholdMatching ?? 0; }
             set
             {
                 if (IsActive
@@ -324,7 +330,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public int WaitingDuration
         {
-            get { return inputService.VideoService.WaitingDuration; }
+            get { return inputService?.VideoService?.WaitingDuration ?? 0; }
             set
             {
                 if (IsActive
@@ -472,40 +478,46 @@ namespace Score2Stream.MenuModule.ViewModels
 
         private void UpdateInputs()
         {
-            Inputs.Clear();
+            var menuInputs = new HashSet<Guid>(Inputs.Where(i => i.CommandParameter != default).Select(i => (i.CommandParameter as Input).Guid));
+            var serviceInputs = new HashSet<Guid>(inputService.Inputs.Select(i => i.Guid));
 
-            var ordereds = inputService.Inputs
-                .OrderByDescending(i => i.IsDevice)
-                .ThenBy(i => i.Name).ToArray();
-
-            foreach (var ordered in ordereds)
+            if (!menuInputs.SetEquals(serviceInputs))
             {
-                var input = new RibbonDropDownItem
+                Inputs.Clear();
+
+                var ordereds = inputService.Inputs
+                    .OrderByDescending(i => i.IsDevice)
+                    .ThenBy(i => i.Name).ToArray();
+
+                foreach (var ordered in ordereds)
+                {
+                    var input = new RibbonDropDownItem
+                    {
+                        Command = InputSelectCommand,
+                        CommandParameter = ordered,
+                        IsChecked = ordered.IsActive,
+                        Text = ordered.Name
+                    };
+
+                    Inputs.Add(input);
+                }
+
+                var selectFileInput = new RibbonDropDownItem
                 {
                     Command = InputSelectCommand,
-                    CommandParameter = ordered,
-                    IsChecked = ordered.IsActive,
-                    Text = ordered.Name
+                    Text = InputFileText,
                 };
 
-                Inputs.Add(input);
+                Inputs.Add(selectFileInput);
+
+                RaisePropertyChanged(nameof(Inputs));
+                RaisePropertyChanged(nameof(IsActive));
+                RaisePropertyChanged(nameof(NoCentering));
+                RaisePropertyChanged(nameof(ProcessingDelay));
+                RaisePropertyChanged(nameof(ThresholdDetecting));
+                RaisePropertyChanged(nameof(ThresholdMatching));
+                RaisePropertyChanged(nameof(WaitingDuration));
             }
-
-            var selectFileInput = new RibbonDropDownItem
-            {
-                Command = InputSelectCommand,
-                Text = InputFileText,
-            };
-
-            Inputs.Add(selectFileInput);
-
-            RaisePropertyChanged(nameof(Inputs));
-            RaisePropertyChanged(nameof(IsActive));
-            RaisePropertyChanged(nameof(NoCentering));
-            RaisePropertyChanged(nameof(ProcessingDelay));
-            RaisePropertyChanged(nameof(ThresholdDetecting));
-            RaisePropertyChanged(nameof(ThresholdMatching));
-            RaisePropertyChanged(nameof(WaitingDuration));
         }
 
         private void UpdateSamples()

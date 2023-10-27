@@ -1,4 +1,5 @@
 ﻿using Score2Stream.Core.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
@@ -27,9 +28,15 @@ namespace Score2Stream.Core.Models.Contents
         public string FileName { get; set; }
 
         [JsonIgnore]
+        public Guid Guid { get; set; }
+
+        [JsonIgnore]
         public bool IsActive => VideoService?.IsActive ?? false;
 
         public bool IsDevice { get; }
+
+        [JsonIgnore]
+        public bool IsEnded => VideoService?.IsEnded ?? false;
 
         public string Name { get; set; }
 

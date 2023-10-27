@@ -99,9 +99,9 @@ namespace Score2Stream.InputService
         {
             isInitializing = true;
 
-            var inputs = GetInputs().ToArray();
+            UpdateInputs();
 
-            foreach (var input in inputs)
+            foreach (var input in Inputs)
             {
                 var current = input.IsDevice
                     ? settings?.Inputs?.SingleOrDefault(i => i.DeviceId == input.DeviceId)
@@ -131,22 +131,26 @@ namespace Score2Stream.InputService
                 }
             }
 
-            isInitializing = false;
-
             var relevant = Inputs.FirstOrDefault(i => !i.IsDevice
                 || settings?.Inputs?.Any(s => s.DeviceId == i.DeviceId) == true);
 
             Select(relevant);
 
+            isInitializing = false;
+
             SaveClips();
             SaveTemplates();
+
+            eventAggregator
+                .GetEvent<InputsChangedEvent>()
+                .Publish();
         }
 
         public void Select(Input input)
         {
             if (input != default)
             {
-                AddInput(input);
+                RunInput(input);
 
                 if (input != Active)
                 {
@@ -210,25 +214,6 @@ namespace Score2Stream.InputService
 
         #region Private Methods
 
-        private void AddInput(Input input)
-        {
-            if (input != default)
-            {
-                if (input.VideoService == default)
-                {
-                    input.VideoService = containerProvider
-                        .Resolve<IVideoService>();
-                }
-
-                if (!input.IsActive)
-                {
-                    input.VideoService.RunAsync(input);
-                }
-
-                Inputs.Add(input);
-            }
-        }
-
         private Input GetInput(string fileName)
         {
             var result = default(Input);
@@ -243,49 +228,35 @@ namespace Score2Stream.InputService
                     result = new Input(false)
                     {
                         FileName = fileName,
+                        Guid = System.Guid.NewGuid(),
                         Name = Path.GetFileName(fileName),
                     };
+
+                    Inputs.Add(result);
                 }
             }
 
             return result;
         }
 
-        private IEnumerable<Input> GetInputs()
+        private Input GetInput(int deviceId, string name)
         {
-            UpdateDevices();
+            var result = Inputs
+                .SingleOrDefault(i => i.DeviceId == deviceId);
 
-            var devices = Inputs
-                .Where(i => i.IsDevice).ToArray();
-
-            foreach (var device in devices)
+            if (result == default)
             {
-                if (settings?.Inputs?.Any(i => i.DeviceId == device.DeviceId) == true)
+                result = new Input(true)
                 {
-                    AddInput(device);
-                }
+                    DeviceId = deviceId,
+                    Guid = System.Guid.NewGuid(),
+                    Name = name,
+                };
 
-                yield return device;
+                Inputs.Add(result);
             }
 
-            if (settings.Inputs?.Any() == true)
-            {
-                var fileNames = settings.Inputs
-                    .Where(i => !i.IsDevice)
-                    .Select(i => i.FileName).ToArray();
-
-                foreach (var fileName in fileNames)
-                {
-                    var file = GetInput(fileName);
-
-                    if (file != default)
-                    {
-                        AddInput(file);
-
-                        yield return file;
-                    }
-                }
-            }
+            return result;
         }
 
         private void OnVideoChanged()
@@ -296,6 +267,23 @@ namespace Score2Stream.InputService
             eventAggregator
                 .GetEvent<InputsChangedEvent>()
                 .Publish();
+        }
+
+        private void RunInput(Input input)
+        {
+            if (input != default)
+            {
+                if (input.VideoService == default)
+                {
+                    input.VideoService = containerProvider
+                        .Resolve<IVideoService>();
+                }
+
+                if (!input.IsActive)
+                {
+                    input.VideoService.RunAsync(input);
+                }
+            }
         }
 
         private void SaveClips()
@@ -314,7 +302,8 @@ namespace Score2Stream.InputService
             if (!isInitializing)
             {
                 settings.Inputs = Inputs
-                    .Where(i => i.IsActive).ToList();
+                    .Where(i => i.IsActive
+                        && !i.IsEnded).ToList();
 
                 settingsService.Save();
             }
@@ -353,8 +342,8 @@ namespace Score2Stream.InputService
                 .OrderBy(d => d.Value).ToArray();
 
             var toBeRemoveds = Inputs
-                .Where(i => !i.IsActive
-                    && !devices.Any(d => d.Key == i.DeviceId)).ToArray();
+                .Where(i => i.IsEnded
+                    || (i.IsDevice && !devices.Any(d => d.Key == i.DeviceId))).ToArray();
 
             foreach (var toBeRemoved in toBeRemoveds)
             {
@@ -368,13 +357,9 @@ namespace Score2Stream.InputService
 
             foreach (var toBeAdded in toBeAddeds)
             {
-                var current = new Input(true)
-                {
-                    DeviceId = toBeAdded.Key,
-                    Name = toBeAdded.Value,
-                };
-
-                Inputs.Add(current);
+                GetInput(
+                    deviceId: toBeAdded.Key,
+                    name: toBeAdded.Value);
             }
 
             if (toBeRemoveds.Any() || toBeAddeds.Any())
@@ -382,6 +367,32 @@ namespace Score2Stream.InputService
                 eventAggregator
                     .GetEvent<InputsChangedEvent>()
                     .Publish();
+            }
+        }
+
+        private void UpdateInputs()
+        {
+            UpdateDevices();
+
+            if (settings.Inputs?.Any() == true)
+            {
+                var devices = Inputs
+                    .Where(i => i.IsDevice)
+                    .Where(d => settings.Inputs.Any(i => i.DeviceId == d.DeviceId)).ToArray();
+
+                foreach (var device in devices)
+                {
+                    RunInput(device);
+                }
+
+                var files = settings.Inputs
+                    .Where(i => !i.IsDevice)
+                    .Select(i => GetInput(i.FileName)).ToArray();
+
+                foreach (var file in files)
+                {
+                    RunInput(file);
+                }
             }
         }
 

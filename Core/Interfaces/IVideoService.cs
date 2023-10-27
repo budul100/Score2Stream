@@ -18,6 +18,8 @@ namespace Score2Stream.Core.Interfaces
 
         bool IsActive { get; }
 
+        bool IsEnded { get; }
+
         string Name { get; }
 
         bool NoCentering { get; set; }

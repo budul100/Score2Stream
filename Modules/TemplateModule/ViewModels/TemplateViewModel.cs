@@ -62,7 +62,7 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         #region Public Properties
 
-        public Bitmap Bitmap => inputService.ClipService.Active?.Bitmap;
+        public Bitmap Bitmap => inputService.ClipService?.Active?.Bitmap;
 
         public string Current => GetCurrent();
 
@@ -95,7 +95,7 @@ namespace Score2Stream.TemplateModule.ViewModels
         {
             var result = default(string);
 
-            var clip = inputService.ClipService.Active;
+            var clip = inputService.ClipService?.Active;
 
             if (clip != default)
             {
