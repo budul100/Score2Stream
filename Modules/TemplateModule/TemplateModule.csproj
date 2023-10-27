@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
@@ -9,8 +9,6 @@
 	<ItemGroup>
 		<PackageReference Include="Avalonia" Version="11.0.5" />
 		<PackageReference Include="Avalonia.Desktop" Version="11.0.5" />
-		<PackageReference Include="Avalonia.Xaml.Interactions" Version="11.0.2" />
-		<PackageReference Include="Avalonia.Xaml.Interactivity" Version="11.0.2" />
 	</ItemGroup>
 
 	<ItemGroup>
