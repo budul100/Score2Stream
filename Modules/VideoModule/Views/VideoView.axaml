@@ -44,12 +44,14 @@
         </Style>
     </UserControl.Styles>
 
-    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+    <ScrollViewer
+        Margin="5"
+        BorderBrush="LightSlateGray"
+        BorderThickness="2"
+        HorizontalScrollBarVisibility="Auto"
+        VerticalScrollBarVisibility="Auto">
         <paz:ZoomBorder
-            Margin="5"
             Background="LightGray"
-            BorderBrush="LightSlateGray"
-            BorderThickness="2"
             Focusable="True"
             PanButton="Right"
             Stretch="Uniform"
