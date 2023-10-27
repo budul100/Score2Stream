@@ -10,8 +10,8 @@
     xmlns:mo="using:Score2Stream.Core.Models"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:rib="clr-namespace:AvaloniaUI.Ribbon;assembly=AvaloniaUI.Ribbon"
-    d:DesignHeight="80"
-    d:DesignWidth="300"
+    d:DesignHeight="150"
+    d:DesignWidth="500"
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
     <UserControl.Resources>

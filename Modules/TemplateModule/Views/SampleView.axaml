@@ -9,8 +9,8 @@
     xmlns:en="clr-namespace:Score2Stream.Core.Enums;assembly=Core"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
+    d:DesignHeight="80"
+    d:DesignWidth="200"
     IsActive="{Binding IsActive, Mode=TwoWay}"
     mc:Ignorable="d">
 
@@ -21,6 +21,7 @@
     <Border
         Name="SampleBorder"
         Margin="2"
+        VerticalAlignment="Center"
         BorderBrush="LightGray"
         BorderThickness="4"
         CornerRadius="3">
@@ -116,7 +117,6 @@
                         Name="ValueTextBox"
                         Width="40"
                         VerticalAlignment="Center"
-                        d:Text="LoremIspum"
                         Text="{Binding Value, Mode=TwoWay}">
 
                         <i:Interaction.Behaviors>
@@ -141,7 +141,6 @@
                 <TextBlock
                     Grid.Row="2"
                     VerticalAlignment="Center"
-                    d:Text="Difference: 77"
                     Text="{Binding Difference}" />
             </Grid>
         </StackPanel>

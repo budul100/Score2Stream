@@ -10,7 +10,7 @@
     xmlns:prism="http://prismlibrary.com/"
     xmlns:v="using:Score2Stream.ScoreboardModule.Views"
     xmlns:vm="using:Score2Stream.ScoreboardModule.ViewModels"
-    d:DesignWidth="600"
+    d:DesignWidth="500"
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">

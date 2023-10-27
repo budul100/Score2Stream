@@ -29,9 +29,12 @@ namespace Score2Stream.RecognitionService
                 path1: Environment.CurrentDirectory,
                 path2: TesseractTrainedData);
 
-            engine = new Engine(
-                dataPath: dataPath,
-                languages: TesseractLanguages);
+            if (Directory.Exists(dataPath))
+            {
+                engine = new Engine(
+                    dataPath: dataPath,
+                    languages: TesseractLanguages);
+            }
         }
 
         #endregion Public Constructors

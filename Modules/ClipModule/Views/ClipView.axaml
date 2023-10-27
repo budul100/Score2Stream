@@ -8,8 +8,8 @@
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="using:System"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
+    d:DesignHeight="120"
+    d:DesignWidth="700"
     mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -24,7 +24,7 @@
         BorderThickness="2"
         CornerRadius="3">
 
-        <DockPanel Name="ClipPanel">
+        <StackPanel Name="ClipPanel" Orientation="Horizontal">
 
             <i:Interaction.Behaviors>
                 <a:DataTriggerBehavior
@@ -56,8 +56,7 @@
                 VerticalAlignment="Center"
                 Background="LightGray"
                 BorderBrush="LightSlateGray"
-                BorderThickness="2"
-                DockPanel.Dock="Left">
+                BorderThickness="2">
                 <Image
                     Width="40"
                     Height="60"
@@ -68,9 +67,9 @@
 
             <Grid Margin="5">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
+                    <ColumnDefinition MinWidth="250" />
                     <ColumnDefinition Width="4" />
-                    <ColumnDefinition />
+                    <ColumnDefinition MinWidth="250" />
                     <ColumnDefinition Width="4" />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
@@ -175,9 +174,10 @@
                     Grid.Column="4"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
-                    d:Text="=&gt; LoremIspum"
                     Text="{Binding Value}" />
+
             </Grid>
-        </DockPanel>
+        </StackPanel>
     </Border>
+
 </UserControl>

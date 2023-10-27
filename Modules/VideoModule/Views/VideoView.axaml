@@ -12,8 +12,8 @@
     xmlns:prism="http://prismlibrary.com/"
     xmlns:v="using:Score2Stream.VideoModule.Views"
     xmlns:vm="using:Score2Stream.VideoModule.ViewModels"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
+    d:DesignHeight="200"
+    d:DesignWidth="300"
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
 
