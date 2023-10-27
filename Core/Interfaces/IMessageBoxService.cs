@@ -1,5 +1,5 @@
 ﻿using Avalonia.Controls;
-using MessageBox.Avalonia.Enums;
+using MsBox.Avalonia.Enums;
 using System.Threading.Tasks;
 
 namespace Score2Stream.Core.Interfaces

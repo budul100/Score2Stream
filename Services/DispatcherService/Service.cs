@@ -10,15 +10,15 @@ namespace Score2Stream.DispatcherService
     {
         #region Public Methods
 
-        public async Task<T> InvokeAsync<T>(Func<T> function)
+        public async Task<T> InvokeAsync<T>(Func<T> callback)
         {
-            if (function is null)
+            if (callback is null)
             {
-                throw new ArgumentNullException(nameof(function));
+                throw new ArgumentNullException(nameof(callback));
             }
 
             var result = await Dispatcher.UIThread.InvokeAsync<T>(
-                function: function,
+                callback: callback,
                 priority: DispatcherPriority.Background);
 
             return result;

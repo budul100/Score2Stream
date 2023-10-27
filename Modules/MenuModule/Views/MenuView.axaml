@@ -121,7 +121,7 @@
 
     <UserControl.Styles>
         <StyleInclude Source="avares://AvaloniaUI.Ribbon/Styles/Fluent/AvaloniaRibbon.xaml" />
-        <StyleInclude Source="avares://Material.Icons.Avalonia/App.xaml" />
+        <StyleInclude Source="avares://Material.Icons.Avalonia/MaterialIconStyles.axaml" />
     </UserControl.Styles>
 
     <rib:Ribbon SelectedIndex="{Binding TabIndex}">
@@ -177,7 +177,7 @@
                         <rib:RibbonDropDownButton
                             Content="Source"
                             FontSize="11"
-                            Items="{Binding Inputs}"
+                            ItemsSource="{Binding Inputs}"
                             LargeIcon="{DynamicResource IconCameraOn}"
                             MinSize="Large" />
                         <rib:RibbonButton
@@ -273,7 +273,7 @@
                         <rib:RibbonDropDownButton
                             Content="Template"
                             FontSize="11"
-                            Items="{Binding Templates}"
+                            ItemsSource="{Binding Templates}"
                             LargeIcon="{DynamicResource IconTemplate}"
                             MinSize="Large" />
                         <rib:RibbonButton

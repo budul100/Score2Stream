@@ -74,7 +74,7 @@
             </Image>
         </Border>
 
-        <ItemsControl Items="{Binding Selections}">
+        <ItemsControl ItemsSource="{Binding Selections}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Canvas />

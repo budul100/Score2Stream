@@ -1,5 +1,5 @@
 ﻿using Avalonia.Media.Imaging;
-using MessageBox.Avalonia.Enums;
+using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Score2Stream.Core;
 using Score2Stream.Core.Enums;

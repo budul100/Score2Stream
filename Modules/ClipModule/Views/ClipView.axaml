@@ -94,7 +94,7 @@
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         IsEnabled="{Binding HasItems, RelativeSource={RelativeSource Self}}"
-                        Items="{Binding Types}"
+                        ItemsSource="{Binding Types}"
                         SelectedItem="{Binding Type}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
@@ -119,7 +119,7 @@
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         IsEnabled="{Binding #TemplatesComboBox.HasItems}"
-                        Items="{Binding Templates}"
+                        ItemsSource="{Binding Templates}"
                         SelectedItem="{Binding Template, Mode=TwoWay}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>

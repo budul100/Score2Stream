@@ -2,6 +2,7 @@
 
 ## Version 1.4.0
 
+* Updated to Avalonia 11
 * Recognition service added for automatic detection of sample values
 * Noise removal has been added (https://github.com/budul100/Score2Stream/issues/9)
 * Templates are independent of samples

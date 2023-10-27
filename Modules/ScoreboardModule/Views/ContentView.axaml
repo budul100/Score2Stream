@@ -587,7 +587,7 @@
             </Grid>
 
             <Panel Margin="5">
-                <ItemsControl Items="{Binding Tickers}">
+                <ItemsControl ItemsSource="{Binding Tickers}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel />

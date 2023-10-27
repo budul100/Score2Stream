@@ -20,10 +20,7 @@ namespace Score2Stream
                 EnableMultiTouch = true,
                 UseDBusMenu = true
             })
-            .With(new Win32PlatformOptions
-            {
-                AllowEglInitialization = true
-            })
+            .With(new Win32PlatformOptions())
             .UseSkia()
             .UseReactiveUI()
             .UseManagedSystemDialogs()
@@ -33,32 +30,32 @@ namespace Score2Stream
 
         #region Private Methods
 
-        private static int Main(string[] args)
+        private static double GetScaling(string[] args)
         {
-            double GetScaling()
+            var idx = Array.IndexOf(args, "--scaling");
+
+            if (idx != 0 && args.Length > idx + 1 &&
+                double.TryParse(args[idx + 1], NumberStyles.Any, CultureInfo.InvariantCulture, out var scaling))
             {
-                var idx = Array.IndexOf(args, "--scaling");
-
-                if (idx != 0 && args.Length > idx + 1 &&
-                    double.TryParse(args[idx + 1], NumberStyles.Any, CultureInfo.InvariantCulture, out var scaling))
-                {
-                    return scaling;
-                }
-
-                return 1;
+                return scaling;
             }
 
+            return 1;
+        }
+
+        private static int Main(string[] args)
+        {
             var builder = BuildAvaloniaApp();
 
             if (args.Contains("--fbdev"))
             {
                 SilenceConsole();
-                return builder.StartLinuxFbDev(args, scaling: GetScaling());
+                return builder.StartLinuxFbDev(args, scaling: GetScaling(args));
             }
             else if (args.Contains("--drm"))
             {
                 SilenceConsole();
-                return builder.StartLinuxDrm(args, scaling: GetScaling());
+                return builder.StartLinuxDrm(args, scaling: GetScaling(args));
             }
             else
             {

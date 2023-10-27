@@ -1,4 +1,4 @@
-﻿using MessageBox.Avalonia.Enums;
+﻿using MsBox.Avalonia.Enums;
 using OpenCvSharp;
 using Prism.Events;
 using Prism.Ioc;

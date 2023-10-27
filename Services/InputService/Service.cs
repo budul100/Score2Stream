@@ -1,5 +1,5 @@
 ﻿using Hompus.VideoInputDevices;
-using MessageBox.Avalonia.Enums;
+using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Prism.Ioc;
 using Score2Stream.Core.Events.Clip;

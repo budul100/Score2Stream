@@ -13,7 +13,7 @@
     mc:Ignorable="d">
     <Panel Margin="5">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <ItemsControl Items="{Binding Clips}">
+            <ItemsControl ItemsSource="{Binding Clips}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel />

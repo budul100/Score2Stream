@@ -1,5 +1,5 @@
 ﻿using Avalonia.Media.Imaging;
-using MessageBox.Avalonia.Enums;
+using MsBox.Avalonia.Enums;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;

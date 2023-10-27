@@ -1,8 +1,8 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using MessageBox.Avalonia;
-using MessageBox.Avalonia.DTO;
-using MessageBox.Avalonia.Enums;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Dto;
+using MsBox.Avalonia.Enums;
 using Score2Stream.Core.Interfaces;
 using System;
 using System.Threading.Tasks;
@@ -51,9 +51,9 @@ namespace Score2Stream.MessageBoxService
                 WindowStartupLocation = windowStartupLocation,
             };
 
-            var dialog = MessageBoxManager.GetMessageBoxStandardWindow(messageBoxParams);
+            var dialog = MessageBoxManager.GetMessageBoxStandard(messageBoxParams);
 
-            var result = await dialog.ShowDialog(desktop.MainWindow);
+            var result = await dialog.ShowWindowDialogAsync(desktop.MainWindow);
 
             return result;
         }
@@ -73,9 +73,9 @@ namespace Score2Stream.MessageBoxService
                 WindowStartupLocation = windowStartupLocation,
             };
 
-            var dialog = MessageBoxManager.GetMessageBoxStandardWindow(messageBoxParams);
+            var dialog = MessageBoxManager.GetMessageBoxStandard(messageBoxParams);
 
-            await dialog.ShowDialog(desktop.MainWindow);
+            await dialog.ShowWindowDialogAsync(desktop.MainWindow);
         }
 
         #endregion Public Methods

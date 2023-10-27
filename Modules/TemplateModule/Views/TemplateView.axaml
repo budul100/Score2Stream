@@ -100,7 +100,7 @@
                 </a:DataTriggerBehavior>
             </i:Interaction.Behaviors>
 
-            <ItemsControl Items="{Binding Samples}">
+            <ItemsControl ItemsSource="{Binding Samples}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel />

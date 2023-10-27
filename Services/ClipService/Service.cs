@@ -1,4 +1,4 @@
-﻿using MessageBox.Avalonia.Enums;
+﻿using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Score2Stream.Core.Events.Clip;
 using Score2Stream.Core.Extensions;

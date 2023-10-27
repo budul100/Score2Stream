@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
@@ -7,13 +7,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Avalonia" Version="0.10.19" />
-		<PackageReference Include="Avalonia.Desktop" Version="0.10.19" />
-		<PackageReference Include="Avalonia.Xaml.Interactions" Version="0.10.19" />
-		<PackageReference Include="Avalonia.Xaml.Interactivity" Version="0.10.19" />
-		<PackageReference Include="AvaloniaUIRibbon" Version="1.1.0-beta" />
-		<PackageReference Include="MessageBox.Avalonia" Version="2.1.0" />
-		<PackageReference Include="XamlNameReferenceGenerator" Version="1.6.1" />
+		<PackageReference Include="Avalonia" Version="11.0.5" />
+		<PackageReference Include="Avalonia.Desktop" Version="11.0.5" />
+		<PackageReference Include="Avalonia.LinuxFramebuffer" Version="11.0.5" />
+		<PackageReference Include="Avalonia.Xaml.Interactions" Version="11.0.2" />
+		<PackageReference Include="Avalonia.Xaml.Interactions.Custom" Version="11.0.2" />
+		<PackageReference Include="Avalonia.Xaml.Interactivity" Version="11.0.2" />
+		<PackageReference Include="MessageBox.Avalonia" Version="3.1.5.1" />
 	</ItemGroup>
 
 	<ItemGroup>
