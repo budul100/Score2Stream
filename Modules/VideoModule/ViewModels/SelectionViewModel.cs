@@ -13,6 +13,7 @@ namespace Score2Stream.VideoModule.ViewModels
         private double? height;
         private double? heightName;
         private bool isActive;
+        private bool isEditing;
         private double? left;
         private double? top;
         private double? width;
@@ -39,7 +40,7 @@ namespace Score2Stream.VideoModule.ViewModels
 
         public Clip Clip { get; private set; }
 
-        public string Description => HasValue && Width > 0 && Height > 0
+        public string Description => HasValue && !IsEditing && Width > 0 && Height > 0
             ? Clip?.Description
             : default;
 
@@ -85,6 +86,16 @@ namespace Score2Stream.VideoModule.ViewModels
         {
             get { return isActive; }
             set { SetProperty(ref isActive, value); }
+        }
+
+        public bool IsEditing
+        {
+            get { return isEditing; }
+            set
+            {
+                SetProperty(ref isEditing, value);
+                RaisePropertyChanged(nameof(Description));
+            }
         }
 
         public double? Left

@@ -8,6 +8,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:paz="using:Avalonia.Controls.PanAndZoom"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:v="using:Score2Stream.VideoModule.Views"
     xmlns:vm="using:Score2Stream.VideoModule.ViewModels"
@@ -43,48 +44,55 @@
         </Style>
     </UserControl.Styles>
 
-    <Grid Name="VideoGrid" Margin="5">
-
-        <i:Interaction.Behaviors>
-            <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="VideoGrid">
-                <a:InvokeCommandAction Command="{Binding MousePressedCommand}" />
-            </a:EventTriggerBehavior>
-            <a:EventTriggerBehavior EventName="PointerReleased" SourceObject="VideoGrid">
-                <a:InvokeCommandAction Command="{Binding MouseReleasedCommand}" />
-            </a:EventTriggerBehavior>
-            <bv:PointerPositionBehavior PointerX="{Binding MouseX, Mode=TwoWay}" PointerY="{Binding MouseY, Mode=TwoWay}" />
-        </i:Interaction.Behaviors>
-
-        <Border
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+        <paz:ZoomBorder
+            Margin="5"
             Background="LightGray"
             BorderBrush="LightSlateGray"
-            BorderThickness="2">
-            <i:Interaction.Behaviors>
-                <bv:SizeChangedBehavior Width="{Binding FullWidth, Mode=TwoWay}" Height="{Binding FullHeight, Mode=TwoWay}" />
-            </i:Interaction.Behaviors>
-            <Image
-                Margin="2"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Source="{Binding Bitmap}"
-                Stretch="Uniform">
-                <i:Interaction.Behaviors>
-                    <bv:SizeChangedBehavior Width="{Binding BitmapWidth, Mode=TwoWay}" Height="{Binding BitmapHeight, Mode=TwoWay}" />
-                </i:Interaction.Behaviors>
-            </Image>
-        </Border>
+            BorderThickness="2"
+            Focusable="True"
+            PanButton="Right"
+            Stretch="Uniform"
+            ZoomSpeed="1.2">
 
-        <ItemsControl ItemsSource="{Binding Selections}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <Canvas />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.DataTemplates>
-                <DataTemplate DataType="{x:Type vm:SelectionViewModel}">
-                    <v:SelectionView />
-                </DataTemplate>
-            </ItemsControl.DataTemplates>
-        </ItemsControl>
-    </Grid>
+            <Grid Name="VideoGrid">
+                <i:Interaction.Behaviors>
+                    <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="VideoGrid">
+                        <a:InvokeCommandAction Command="{Binding MousePressedCommand}" PassEventArgsToCommand="True" />
+                    </a:EventTriggerBehavior>
+                    <a:EventTriggerBehavior EventName="PointerReleased" SourceObject="VideoGrid">
+                        <a:InvokeCommandAction Command="{Binding MouseReleasedCommand}" PassEventArgsToCommand="True" />
+                    </a:EventTriggerBehavior>
+                    <bv:PointerPositionBehavior PointerX="{Binding MouseX, Mode=TwoWay}" PointerY="{Binding MouseY, Mode=TwoWay}" />
+                </i:Interaction.Behaviors>
+
+                <i:Interaction.Behaviors>
+                    <bv:SizeChangedBehavior Width="{Binding FullWidth, Mode=TwoWay}" Height="{Binding FullHeight, Mode=TwoWay}" />
+                </i:Interaction.Behaviors>
+
+                <Image
+                    Margin="2"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Source="{Binding Bitmap}">
+                    <i:Interaction.Behaviors>
+                        <bv:SizeChangedBehavior Width="{Binding BitmapWidth, Mode=TwoWay}" Height="{Binding BitmapHeight, Mode=TwoWay}" />
+                    </i:Interaction.Behaviors>
+                </Image>
+
+                <ItemsControl ItemsSource="{Binding Selections}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Canvas />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.DataTemplates>
+                        <DataTemplate DataType="{x:Type vm:SelectionViewModel}">
+                            <v:SelectionView />
+                        </DataTemplate>
+                    </ItemsControl.DataTemplates>
+                </ItemsControl>
+            </Grid>
+        </paz:ZoomBorder>
+    </ScrollViewer>
 </UserControl>

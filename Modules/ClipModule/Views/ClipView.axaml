@@ -143,6 +143,7 @@
                         MaxHeight="5"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
+                        Increment="5"
                         Maximum="100"
                         Minimum="0"
                         Value="{Binding ThresholdMonochrome, Mode=TwoWay}" />
@@ -162,6 +163,7 @@
                         MaxHeight="5"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
+                        Increment="1"
                         Maximum="10"
                         Minimum="0"
                         Value="{Binding NoiseRemoval, Mode=TwoWay}" />

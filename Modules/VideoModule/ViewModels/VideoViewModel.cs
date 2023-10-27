@@ -1,4 +1,5 @@
-﻿using Avalonia.Media.Imaging;
+﻿using Avalonia.Input;
+using Avalonia.Media.Imaging;
 using MsBox.Avalonia.Enums;
 using Prism.Commands;
 using Prism.Events;
@@ -35,7 +36,7 @@ namespace Score2Stream.VideoModule.ViewModels
         private double fullWidth;
         private double? horizontalMax;
         private double? horizontalMin;
-        private bool isMouseActive;
+        private bool isEditing;
         private bool movedToBottom;
         private bool movedToRight;
         private double? verticalMax;
@@ -74,8 +75,8 @@ namespace Score2Stream.VideoModule.ViewModels
                 action: () => Bitmap = inputService.VideoService?.Bitmap,
                 keepSubscriberReferenceAlive: true);
 
-            MousePressedCommand = new DelegateCommand(OnMousePressed);
-            MouseReleasedCommand = new DelegateCommand(OnMouseReleasedAsync);
+            MousePressedCommand = new DelegateCommand<PointerPressedEventArgs>(e => OnMousePressed(e));
+            MouseReleasedCommand = new DelegateCommand<PointerReleasedEventArgs>(e => OnMouseReleasedAsync(e));
         }
 
         #endregion Public Constructors
@@ -134,9 +135,9 @@ namespace Score2Stream.VideoModule.ViewModels
             }
         }
 
-        public DelegateCommand MousePressedCommand { get; }
+        public DelegateCommand<PointerPressedEventArgs> MousePressedCommand { get; }
 
-        public DelegateCommand MouseReleasedCommand { get; }
+        public DelegateCommand<PointerReleasedEventArgs> MouseReleasedCommand { get; }
 
         public double MouseX
         {
@@ -155,21 +156,20 @@ namespace Score2Stream.VideoModule.ViewModels
                         value = horizontalMax.Value;
                     }
 
-                    if (!activeSelection.HasValue)
+                    if (!ActiveSelection.HasValue)
                     {
-                        activeSelection.Left = value;
+                        ActiveSelection.Left = value;
                     }
-                    else if (value > (activeSelection.Right ?? 0)
-                        || (value >= (activeSelection.Left ?? 0) && movedToRight))
+                    else if (value > (ActiveSelection.Right ?? 0) || (value >= (ActiveSelection.Left ?? 0) && movedToRight))
                     {
-                        activeSelection.Width = value - activeSelection.Left.Value;
+                        ActiveSelection.Width = value - ActiveSelection.Left.Value;
                         movedToRight = true;
                     }
-                    else if (value < (activeSelection.Left ?? 0)
-                        || (value <= (activeSelection.Right ?? 0) && !movedToRight))
+                    else if (value < (ActiveSelection.Left ?? 0)
+                        || (value <= (ActiveSelection.Right ?? 0) && !movedToRight))
                     {
-                        activeSelection.Width = (activeSelection.Width ?? 0) + activeSelection.Left.Value - value;
-                        activeSelection.Left = value;
+                        ActiveSelection.Width = (ActiveSelection.Width ?? 0) + ActiveSelection.Left.Value - value;
+                        ActiveSelection.Left = value;
                         movedToRight = false;
                     }
                 }
@@ -193,21 +193,21 @@ namespace Score2Stream.VideoModule.ViewModels
                         value = verticalMax.Value;
                     }
 
-                    if (!activeSelection.HasValue)
+                    if (!ActiveSelection.HasValue)
                     {
-                        activeSelection.Top = value;
+                        ActiveSelection.Top = value;
                     }
-                    else if (value > (activeSelection.Bottom ?? 0)
-                        || (value >= (activeSelection.Top ?? 0) && movedToBottom))
+                    else if (value > (ActiveSelection.Bottom ?? 0)
+                        || (value >= (ActiveSelection.Top ?? 0) && movedToBottom))
                     {
-                        activeSelection.Height = value - activeSelection.Top.Value;
+                        ActiveSelection.Height = value - ActiveSelection.Top.Value;
                         movedToBottom = true;
                     }
-                    else if (value < (activeSelection.Top ?? 0)
-                        || (value <= (activeSelection.Bottom ?? 0) && !movedToBottom))
+                    else if (value < (ActiveSelection.Top ?? 0)
+                        || (value <= (ActiveSelection.Bottom ?? 0) && !movedToBottom))
                     {
-                        activeSelection.Height = (activeSelection.Height ?? 0) + activeSelection.Top.Value - value;
-                        activeSelection.Top = value;
+                        ActiveSelection.Height = (ActiveSelection.Height ?? 0) + ActiveSelection.Top.Value - value;
+                        ActiveSelection.Top = value;
                         movedToBottom = false;
                     }
                 }
@@ -247,8 +247,8 @@ namespace Score2Stream.VideoModule.ViewModels
 
         private bool IsMouseEditing(bool isActivating = false)
         {
-            var result = (isMouseActive || isActivating)
-                && activeSelection != default
+            var result = (isEditing || isActivating)
+                && ActiveSelection != default
                 && Bitmap != default
                 && regionManager.Regions[nameof(RegionType.EditRegion)]?.NavigationService.Journal
                     .CurrentEntry.Uri.OriginalString == nameof(ViewType.Clips);
@@ -256,28 +256,30 @@ namespace Score2Stream.VideoModule.ViewModels
             return result;
         }
 
-        private void OnMousePressed()
+        private void OnMousePressed(PointerPressedEventArgs eventArgs)
         {
-            if (IsMouseEditing(
-                isActivating: true))
+            if (eventArgs.GetCurrentPoint(default).Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonPressed
+                && IsMouseEditing(true))
             {
-                activeSelection.Left = default;
-                activeSelection.Top = default;
-                activeSelection.Height = default;
-                activeSelection.Width = default;
+                ActiveSelection.IsEditing = true;
+                ActiveSelection.Left = default;
+                ActiveSelection.Top = default;
+                ActiveSelection.Height = default;
+                ActiveSelection.Width = default;
 
-                isMouseActive = true;
+                isEditing = true;
             }
         }
 
-        private async void OnMouseReleasedAsync()
+        private async void OnMouseReleasedAsync(PointerReleasedEventArgs eventArgs)
         {
-            if (IsMouseEditing())
+            if (eventArgs.GetCurrentPoint(default).Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonReleased
+                && IsMouseEditing())
             {
                 var dimensionsCanBeSet = ButtonResult.Yes;
 
-                if (activeSelection.Clip.HasDimensions
-                    && (activeSelection.Clip?.Template?.Samples?.Any() == true))
+                if (ActiveSelection.Clip.HasDimensions
+                    && (ActiveSelection.Clip?.Template?.Samples?.Any() == true))
                 {
                     dimensionsCanBeSet = await messageBoxService.GetMessageBoxResultAsync(
                         contentMessage: "Shall the dimension of the clip be changed?",
@@ -286,36 +288,38 @@ namespace Score2Stream.VideoModule.ViewModels
 
                 if (dimensionsCanBeSet == ButtonResult.Yes)
                 {
-                    activeSelection.Clip.HasDimensions = false;
+                    ActiveSelection.Clip.HasDimensions = false;
 
                     var actualWidth = GetActualWidth();
 
                     if ((actualWidth ?? 0) > 0
-                        && (activeSelection.Left ?? 0) >= horizontalMin.Value)
+                        && (ActiveSelection.Left ?? 0) >= horizontalMin.Value)
                     {
-                        activeSelection.Clip.RelativeX1 = ((activeSelection.Left ?? 0) - horizontalMin.Value) / actualWidth.Value;
-                        activeSelection.Clip.RelativeX2 = ((activeSelection.Left ?? 0) +
-                            (activeSelection.Width ?? 0) - horizontalMin.Value) / actualWidth.Value;
+                        ActiveSelection.Clip.RelativeX1 = ((ActiveSelection.Left ?? 0) - horizontalMin.Value) / actualWidth.Value;
+                        ActiveSelection.Clip.RelativeX2 = ((ActiveSelection.Left ?? 0) +
+                            (ActiveSelection.Width ?? 0) - horizontalMin.Value) / actualWidth.Value;
 
-                        activeSelection.Clip.HasDimensions = true;
+                        ActiveSelection.Clip.HasDimensions = true;
                     }
 
                     var actualHeight = GetActualHeight();
 
                     if ((actualHeight ?? 0) > 0
-                        && (activeSelection.Top ?? 0) >= verticalMin.Value)
+                        && (ActiveSelection.Top ?? 0) >= verticalMin.Value)
                     {
-                        activeSelection.Clip.RelativeY1 = ((activeSelection.Top ?? 0) - verticalMin.Value) / actualHeight.Value;
-                        activeSelection.Clip.RelativeY2 = ((activeSelection.Top ?? 0) - verticalMin.Value +
-                            (activeSelection.Height ?? 0)) / actualHeight.Value;
+                        ActiveSelection.Clip.RelativeY1 = ((ActiveSelection.Top ?? 0) - verticalMin.Value) / actualHeight.Value;
+                        ActiveSelection.Clip.RelativeY2 = ((ActiveSelection.Top ?? 0) - verticalMin.Value +
+                            (ActiveSelection.Height ?? 0)) / actualHeight.Value;
 
-                        activeSelection.Clip.HasDimensions = true;
+                        ActiveSelection.Clip.HasDimensions = true;
                     }
 
-                    if (activeSelection.Clip.HasDimensions)
+                    ActiveSelection.IsEditing = false;
+
+                    if (ActiveSelection.Clip.HasDimensions)
                     {
                         eventAggregator.GetEvent<ClipUpdatedEvent>().Publish(
-                            payload: activeSelection.Clip);
+                            payload: ActiveSelection.Clip);
                     }
                 }
                 else
@@ -324,7 +328,7 @@ namespace Score2Stream.VideoModule.ViewModels
                 }
             }
 
-            isMouseActive = false;
+            isEditing = false;
         }
 
         private void SetDimensions()

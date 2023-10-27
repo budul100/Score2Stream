@@ -241,6 +241,7 @@
                             <NumericUpDown
                                 Width="130"
                                 MaxHeight="5"
+                                Increment="1"
                                 Maximum="{Binding MaxQueueSize}"
                                 Minimum="1"
                                 Value="{Binding ImagesQueueSize, Mode=TwoWay}" />
