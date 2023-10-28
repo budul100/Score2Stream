@@ -31,13 +31,13 @@ namespace Score2Stream.TemplateModule.ViewModels
 
             OnFocusGotCommand = new DelegateCommand(
                 executeMethod: () => sampleService.Select(Sample));
-
             OnFocusLostCommand = new DelegateCommand(
                 executeMethod: () => Sample.IsVerified = true);
 
+            OnSelectionCommand = new DelegateCommand(
+                executeMethod: () => sampleService.Select(Sample));
             OnSelectionNextCommand = new DelegateCommand(
                 executeMethod: () => sampleService.Next(false));
-
             OnSelectionPreviousCommand = new DelegateCommand(
                 executeMethod: () => sampleService.Next(true));
 
@@ -78,6 +78,8 @@ namespace Score2Stream.TemplateModule.ViewModels
         public DelegateCommand OnFocusLostCommand { get; }
 
         public DelegateCommand OnRemoveCommand { get; }
+
+        public DelegateCommand OnSelectionCommand { get; }
 
         public DelegateCommand OnSelectionNextCommand { get; }
 

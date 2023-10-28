@@ -6,7 +6,7 @@
 
         public const int ClipPositionFactor = 50;
 
-        public const int DelayMin = 80;
+        public const int DelayMin = 10;
 
         public const int DurationMax = 1000;
         public const int DurationUpdateTitle = 500;
@@ -17,7 +17,7 @@
         public const int QueueSizeMax = 20;
         public const int QueueSizeMin = 1;
 
-        public const int RecognitionMilliSecondsMax = 1000 * 60 * 10;
+        public const int RecognitionDurationMax = 1000 * 60;
 
         public const double SelectionFontSize = 16.0;
         public const double SelectionThicknessActive = 3.0;

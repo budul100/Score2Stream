@@ -81,8 +81,8 @@
 
                 <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="SamplePanel">
                     <a:InvokeCommandAction Command="{Binding OnSelectionCommand}" />
-                    <a:CallMethodAction MethodName="Focus" TargetObject="ValueTextBox" />
                 </a:EventTriggerBehavior>
+
             </i:Interaction.Behaviors>
 
             <Border
