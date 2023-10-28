@@ -186,7 +186,6 @@ namespace Score2Stream.ClipService
 
             if (Active != default)
             {
-                result.Template = Active.Template;
                 result.NoiseRemoval = Active.NoiseRemoval;
                 result.ThresholdMonochrome = Active.ThresholdMonochrome;
             }
