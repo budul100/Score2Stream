@@ -38,7 +38,8 @@ namespace Score2Stream.VideoModule.ViewModels
         private double fullWidth;
         private double? horizontalMax;
         private double? horizontalMin;
-        private bool isEditing;
+        private double mouseX;
+        private double mouseY;
         private bool movedToBottom;
         private bool movedToRight;
         private double? verticalMax;
@@ -163,24 +164,11 @@ namespace Score2Stream.VideoModule.ViewModels
                     {
                         value = horizontalMax.Value;
                     }
-
-                    if (!ActiveSelection.HasValue)
-                    {
-                        ActiveSelection.Left = value;
-                    }
-                    else if (value > (ActiveSelection.Right ?? 0) || (value >= (ActiveSelection.Left ?? 0) && movedToRight))
-                    {
-                        ActiveSelection.Width = value - ActiveSelection.Left.Value;
-                        movedToRight = true;
-                    }
-                    else if (value < (ActiveSelection.Left ?? 0)
-                        || (value <= (ActiveSelection.Right ?? 0) && !movedToRight))
-                    {
-                        ActiveSelection.Width = (ActiveSelection.Width ?? 0) + ActiveSelection.Left.Value - value;
-                        ActiveSelection.Left = value;
-                        movedToRight = false;
-                    }
                 }
+
+                mouseX = value;
+
+                UpdateSelection();
             }
         }
 
@@ -189,8 +177,7 @@ namespace Score2Stream.VideoModule.ViewModels
             get { return default; }
             set
             {
-                if (IsMouseEditing()
-                    && verticalMin.HasValue)
+                if (verticalMin.HasValue)
                 {
                     if (value < verticalMin)
                     {
@@ -200,25 +187,11 @@ namespace Score2Stream.VideoModule.ViewModels
                     {
                         value = verticalMax.Value;
                     }
-
-                    if (!ActiveSelection.HasValue)
-                    {
-                        ActiveSelection.Top = value;
-                    }
-                    else if (value > (ActiveSelection.Bottom ?? 0)
-                        || (value >= (ActiveSelection.Top ?? 0) && movedToBottom))
-                    {
-                        ActiveSelection.Height = value - ActiveSelection.Top.Value;
-                        movedToBottom = true;
-                    }
-                    else if (value < (ActiveSelection.Top ?? 0)
-                        || (value <= (ActiveSelection.Bottom ?? 0) && !movedToBottom))
-                    {
-                        ActiveSelection.Height = (ActiveSelection.Height ?? 0) + ActiveSelection.Top.Value - value;
-                        ActiveSelection.Top = value;
-                        movedToBottom = false;
-                    }
                 }
+
+                mouseY = value;
+
+                UpdateSelection();
             }
         }
 
@@ -257,9 +230,9 @@ namespace Score2Stream.VideoModule.ViewModels
 
         private bool IsMouseEditing(bool isActivating = false)
         {
-            var result = (isEditing || isActivating)
-                && ActiveSelection != default
+            var result = ActiveSelection != default
                 && Bitmap != default
+                && (ActiveSelection.IsEditing || isActivating)
                 && regionManager.Regions[nameof(RegionType.EditRegion)]?.NavigationService.Journal
                     .CurrentEntry.Uri.OriginalString == nameof(ViewType.Clips);
 
@@ -277,7 +250,8 @@ namespace Score2Stream.VideoModule.ViewModels
                 ActiveSelection.Height = default;
                 ActiveSelection.Width = default;
 
-                isEditing = true;
+                MouseX = mouseX;
+                MouseY = mouseY;
             }
         }
 
@@ -337,8 +311,6 @@ namespace Score2Stream.VideoModule.ViewModels
                     SetDimensions();
                 }
             }
-
-            isEditing = false;
         }
 
         private void OnZoomChanged(ZoomChangedEventArgs eventArgs)
@@ -370,6 +342,46 @@ namespace Score2Stream.VideoModule.ViewModels
             }
 
             UpdateSelections();
+        }
+
+        private void UpdateSelection()
+        {
+            if (IsMouseEditing())
+            {
+                if (!ActiveSelection.HasValue)
+                {
+                    ActiveSelection.Left = mouseX;
+                    ActiveSelection.Top = mouseY;
+                }
+                else
+                {
+                    if (mouseX > (ActiveSelection.Right ?? 0) || (mouseX >= (ActiveSelection.Left ?? 0) && movedToRight))
+                    {
+                        ActiveSelection.Width = mouseX - ActiveSelection.Left.Value;
+                        movedToRight = true;
+                    }
+                    else if (mouseX < (ActiveSelection.Left ?? 0)
+                        || (mouseX <= (ActiveSelection.Right ?? 0) && !movedToRight))
+                    {
+                        ActiveSelection.Width = (ActiveSelection.Width ?? 0) + ActiveSelection.Left.Value - mouseX;
+                        ActiveSelection.Left = mouseX;
+                        movedToRight = false;
+                    }
+
+                    if (mouseY > (ActiveSelection.Bottom ?? 0) || (mouseY >= (ActiveSelection.Top ?? 0) && movedToBottom))
+                    {
+                        ActiveSelection.Height = mouseY - ActiveSelection.Top.Value;
+                        movedToBottom = true;
+                    }
+                    else if (mouseY < (ActiveSelection.Top ?? 0)
+                        || (mouseY <= (ActiveSelection.Bottom ?? 0) && !movedToBottom))
+                    {
+                        ActiveSelection.Height = (ActiveSelection.Height ?? 0) + ActiveSelection.Top.Value - mouseY;
+                        ActiveSelection.Top = mouseY;
+                        movedToBottom = false;
+                    }
+                }
+            }
         }
 
         private void UpdateSelections()
