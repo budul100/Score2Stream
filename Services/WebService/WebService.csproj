@@ -11,15 +11,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Remove="wwwroot\**" />
-		<Content Remove="wwwroot\**" />
 		<EmbeddedResource Include="wwwroot\**\*">
 			<Link>wwwroot\%(RecursiveDir)%(Filename)%(Extension)</Link>
 			<LogicalName>
 				wwwroot\%(RecursiveDir)%(Filename)%(Extension)
 			</LogicalName>
 		</EmbeddedResource>
-		<None Remove="wwwroot\**" />
 	</ItemGroup>
 
 	<ItemGroup>

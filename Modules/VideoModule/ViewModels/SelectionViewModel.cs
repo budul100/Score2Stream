@@ -1,5 +1,6 @@
 ﻿using Prism.Events;
 using Prism.Mvvm;
+using Score2Stream.Core;
 using Score2Stream.Core.Events.Clip;
 using Score2Stream.Core.Models.Contents;
 
@@ -18,6 +19,7 @@ namespace Score2Stream.VideoModule.ViewModels
         private double? top;
         private double? width;
         private double? widthName;
+        private double zoom;
 
         #endregion Private Fields
 
@@ -43,6 +45,8 @@ namespace Score2Stream.VideoModule.ViewModels
         public string Description => HasValue && !IsEditing && Width > 0 && Height > 0
             ? Clip?.Description
             : default;
+
+        public double FontSize => Constants.SelectionFontSize / Zoom;
 
         public bool HasValue => Left.HasValue && Top.HasValue;
 
@@ -85,7 +89,13 @@ namespace Score2Stream.VideoModule.ViewModels
         public bool IsActive
         {
             get { return isActive; }
-            set { SetProperty(ref isActive, value); }
+            set
+            {
+                SetProperty(ref isActive, value);
+
+                RaisePropertyChanged(nameof(Thickness));
+                RaisePropertyChanged(nameof(FontSize));
+            }
         }
 
         public bool IsEditing
@@ -94,6 +104,7 @@ namespace Score2Stream.VideoModule.ViewModels
             set
             {
                 SetProperty(ref isEditing, value);
+
                 RaisePropertyChanged(nameof(Description));
             }
         }
@@ -114,6 +125,10 @@ namespace Score2Stream.VideoModule.ViewModels
         public double? Right => HasValue
             ? Left.Value + Width
             : default;
+
+        public double Thickness => IsActive
+            ? Constants.SelectionThicknessActive / Zoom
+            : Constants.SelectionThicknessNormal / Zoom;
 
         public double? Top
         {
@@ -160,7 +175,27 @@ namespace Score2Stream.VideoModule.ViewModels
                     ? value
                     : default;
 
-                { SetProperty(ref widthName, current); }
+                SetProperty(ref widthName, current);
+            }
+        }
+
+        public double Zoom
+        {
+            get
+            {
+                return zoom > 0
+                    ? zoom
+                    : 1;
+            }
+            set
+            {
+                if (zoom != value)
+                {
+                    zoom = value;
+
+                    RaisePropertyChanged(nameof(Thickness));
+                    RaisePropertyChanged(nameof(FontSize));
+                }
             }
         }
 
@@ -168,13 +203,16 @@ namespace Score2Stream.VideoModule.ViewModels
 
         #region Public Methods
 
-        public void Initialize(Clip clip, bool isActive, double? actualLeft, double? actualTop, double? actualWidth,
-            double? actualHeight)
+        public void Initialize(Clip clip, bool isActive, double zoom, double? actualLeft, double? actualTop,
+            double? actualWidth, double? actualHeight)
         {
             Clip = clip;
             IsActive = isActive;
+            Zoom = zoom;
 
             RaisePropertyChanged(nameof(Description));
+            RaisePropertyChanged(nameof(Thickness));
+            RaisePropertyChanged(nameof(FontSize));
 
             if (actualWidth.HasValue
                 && actualHeight.HasValue)

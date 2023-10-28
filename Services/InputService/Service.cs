@@ -47,7 +47,6 @@ namespace Score2Stream.InputService
             eventAggregator.GetEvent<VideoStartedEvent>().Subscribe(
                 action: OnVideoChanged,
                 keepSubscriberReferenceAlive: true);
-
             eventAggregator.GetEvent<VideoEndedEvent>().Subscribe(
                 action: OnVideoChanged,
                 keepSubscriberReferenceAlive: true);
@@ -55,7 +54,9 @@ namespace Score2Stream.InputService
             eventAggregator.GetEvent<ClipsChangedEvent>().Subscribe(
                 action: SaveClips,
                 keepSubscriberReferenceAlive: true);
-
+            eventAggregator.GetEvent<ClipsOrderedEvent>().Subscribe(
+                action: SaveClips,
+                keepSubscriberReferenceAlive: true);
             eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
                 action: _ => SaveClips(),
                 keepSubscriberReferenceAlive: true);
@@ -67,7 +68,9 @@ namespace Score2Stream.InputService
             eventAggregator.GetEvent<SamplesChangedEvent>().Subscribe(
                 action: SaveTemplates,
                 keepSubscriberReferenceAlive: true);
-
+            eventAggregator.GetEvent<SamplesOrderedEvent>().Subscribe(
+                action: SaveTemplates,
+                keepSubscriberReferenceAlive: true);
             eventAggregator.GetEvent<SampleUpdatedEvent>().Subscribe(
                 action: _ => SaveTemplates(),
                 keepSubscriberReferenceAlive: true);

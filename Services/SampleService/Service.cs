@@ -115,8 +115,7 @@ namespace Score2Stream.SampleService
                     RemoveSample(sample);
                 }
 
-                eventAggregator.GetEvent<SamplesChangedEvent>()
-                    .Publish();
+                eventAggregator.GetEvent<SamplesChangedEvent>().Publish();
 
                 Select(default);
             }
@@ -171,8 +170,7 @@ namespace Score2Stream.SampleService
                 sample.Index = index++;
             }
 
-            eventAggregator.GetEvent<SamplesOrderedEvent>()
-                .Publish();
+            eventAggregator.GetEvent<SamplesOrderedEvent>().Publish();
         }
 
         public async Task RemoveAsync()
@@ -196,8 +194,7 @@ namespace Score2Stream.SampleService
 
                     Select(next);
 
-                    eventAggregator.GetEvent<SamplesChangedEvent>()
-                        .Publish();
+                    eventAggregator.GetEvent<SamplesChangedEvent>().Publish();
                 }
             }
         }
@@ -210,9 +207,7 @@ namespace Score2Stream.SampleService
                     ? sample
                     : default;
 
-                eventAggregator
-                    .GetEvent<SampleSelectedEvent>()
-                    .Publish(Active);
+                eventAggregator.GetEvent<SampleSelectedEvent>().Publish(Active);
             }
         }
 
@@ -244,9 +239,7 @@ namespace Score2Stream.SampleService
             {
                 Add(sample);
 
-                eventAggregator
-                    .GetEvent<SamplesChangedEvent>()
-                    .Publish();
+                eventAggregator.GetEvent<SamplesChangedEvent>().Publish();
 
                 if (selectSample)
                 {
@@ -282,7 +275,7 @@ namespace Score2Stream.SampleService
 
             if (Samples?.Any() == true)
             {
-                var thresholdDetecting = Math.Abs(ThresholdDetecting) / Constants.DividerThreshold;
+                var thresholdDetecting = Math.Abs(ThresholdDetecting) / Constants.ThresholdDivider;
 
                 foreach (var sample in Samples)
                 {

@@ -372,7 +372,7 @@ namespace Score2Stream.VideoService
                             erodeIterations: clip.NoiseRemoval,
                             dilateIterations: clip.NoiseRemoval);
 
-                    var thresholdMonochrome = clip.ThresholdMonochrome / Constants.DividerThreshold;
+                    var thresholdMonochrome = clip.ThresholdMonochrome / Constants.ThresholdDivider;
 
                     var monochromeImage = noiselessImage
                         .ToMonochrome(thresholdMonochrome);
@@ -445,8 +445,8 @@ namespace Score2Stream.VideoService
                 var match = clip.GetMatches()
                     .OrderByDescending(c => c.Key).FirstOrDefault();
 
-                var similarity = Convert.ToInt32(match.Key * Constants.DividerThreshold);
-                var thresholdMatching = Math.Abs(ThresholdMatching) / Constants.DividerThreshold;
+                var similarity = Convert.ToInt32(match.Key * Constants.ThresholdDivider);
+                var thresholdMatching = Math.Abs(ThresholdMatching) / Constants.ThresholdDivider;
 
                 if (match.Value != default
                     && match.Key >= thresholdMatching)

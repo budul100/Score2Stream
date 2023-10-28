@@ -35,6 +35,8 @@ namespace Score2Stream.Core.Models.Contents
         [JsonIgnore]
         public Queue<Mat> Images { get; set; } = new Queue<Mat>();
 
+        public int Index { get; set; }
+
         [JsonIgnore]
         public Mat Mat { get; set; }
 

@@ -40,6 +40,9 @@ namespace Score2Stream.ClipModule.ViewModels
             eventAggregator
                 .GetEvent<ClipsChangedEvent>()
                 .Subscribe(UpdateClips);
+            eventAggregator.GetEvent<ClipsOrderedEvent>().Subscribe(
+                action: () => OrderClips(),
+                keepSubscriberReferenceAlive: true);
 
             UpdateClips();
         }
@@ -48,7 +51,7 @@ namespace Score2Stream.ClipModule.ViewModels
 
         #region Public Properties
 
-        public ObservableCollection<ClipViewModel> Clips { get; } = new ObservableCollection<ClipViewModel>();
+        public ObservableCollection<ClipViewModel> Clips { get; private set; } = new ObservableCollection<ClipViewModel>();
 
         #endregion Public Properties
 
@@ -60,6 +63,13 @@ namespace Score2Stream.ClipModule.ViewModels
         #endregion Public Methods
 
         #region Private Methods
+
+        private void OrderClips()
+        {
+            Clips = new ObservableCollection<ClipViewModel>(Clips.OrderBy(s => s.Clip.Index));
+
+            RaisePropertyChanged(nameof(Clips));
+        }
 
         private void UpdateClips()
         {
@@ -77,6 +87,8 @@ namespace Score2Stream.ClipModule.ViewModels
 
                     Clips.Add(current);
                 }
+
+                OrderClips();
             }
         }
 

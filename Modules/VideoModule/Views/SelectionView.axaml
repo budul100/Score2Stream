@@ -18,27 +18,10 @@
             Height="{Binding Height, Mode=TwoWay}"
             Fill="Transparent"
             Stroke="Red"
-            StrokeDashArray="4,2">
+            StrokeDashArray="4,2"
+            StrokeThickness="{Binding Thickness, Mode=OneWay}">
             <i:Interaction.Behaviors>
                 <bv:SizeChangedBehavior />
-                <a:DataTriggerBehavior
-                    Binding="{Binding IsActive}"
-                    ComparisonCondition="Equal"
-                    Value="True">
-                    <a:ChangePropertyAction
-                        PropertyName="StrokeThickness"
-                        TargetObject="SelectionRectangle"
-                        Value="3" />
-                </a:DataTriggerBehavior>
-                <a:DataTriggerBehavior
-                    Binding="{Binding IsActive}"
-                    ComparisonCondition="NotEqual"
-                    Value="True">
-                    <a:ChangePropertyAction
-                        PropertyName="StrokeThickness"
-                        TargetObject="SelectionRectangle"
-                        Value="1" />
-                </a:DataTriggerBehavior>
             </i:Interaction.Behaviors>
         </Rectangle>
 
@@ -46,6 +29,7 @@
             Name="SelectionTextBlock"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
+            FontSize="{Binding FontSize, Mode=OneWay}"
             Foreground="Red"
             Text="{Binding Description, Mode=OneWay}">
             <i:Interaction.Behaviors>

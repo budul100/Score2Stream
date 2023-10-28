@@ -1,5 +1,6 @@
 ﻿using MsBox.Avalonia.Enums;
 using Prism.Events;
+using Score2Stream.Core;
 using Score2Stream.Core.Events.Clip;
 using Score2Stream.Core.Extensions;
 using Score2Stream.Core.Interfaces;
@@ -18,6 +19,8 @@ namespace Score2Stream.ClipService
         private readonly IEventAggregator eventAggregator;
         private readonly IMessageBoxService messageBoxService;
         private readonly IScoreboardService scoreboardService;
+
+        private int index;
 
         #endregion Private Fields
 
@@ -39,7 +42,7 @@ namespace Score2Stream.ClipService
 
         public Clip Active { get; private set; }
 
-        public List<Clip> Clips { get; } = new List<Clip>();
+        public List<Clip> Clips { get; private set; } = new List<Clip>();
 
         public ITemplateService TemplateService { get; }
 
@@ -113,6 +116,22 @@ namespace Score2Stream.ClipService
             }
         }
 
+        public void Order()
+        {
+            Clips = Clips
+                .OrderBy(c => (int)(c.RelativeY1 * Constants.ClipPositionFactor))
+                .ThenBy(c => (int)(c.RelativeX1 * Constants.ClipPositionFactor)).ToList();
+
+            index = 0;
+
+            foreach (var clips in Clips)
+            {
+                clips.Index = index++;
+            }
+
+            eventAggregator.GetEvent<ClipsOrderedEvent>().Publish();
+        }
+
         public async Task RemoveAsync()
         {
             if (Active != default)
@@ -162,6 +181,7 @@ namespace Score2Stream.ClipService
             var result = new Clip()
             {
                 Name = name,
+                Index = index++,
             };
 
             if (Active != default)

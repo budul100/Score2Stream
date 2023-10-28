@@ -72,6 +72,9 @@ namespace Score2Stream.MenuModule.ViewModels
             this.InputStopAllCommand = new DelegateCommand(
                 executeMethod: () => inputService.StopAsync(),
                 canExecuteMethod: () => inputService.IsActive);
+            this.InputCenterCommand = new DelegateCommand(
+                executeMethod: CenterInput,
+                canExecuteMethod: () => inputService.IsActive);
 
             this.ClipAddCommand = new DelegateCommand(
                 executeMethod: () => inputService.ClipService?.Create(),
@@ -81,6 +84,9 @@ namespace Score2Stream.MenuModule.ViewModels
                 canExecuteMethod: () => inputService.ClipService?.Active != default);
             this.ClipsRemoveAllCommand = new DelegateCommand(
                 executeMethod: () => inputService.ClipService?.ClearAsync(),
+                canExecuteMethod: () => inputService.ClipService?.Clips?.Any() == true);
+            this.ClipsOrderAllCommand = new DelegateCommand(
+                executeMethod: () => inputService.ClipService?.Order(),
                 canExecuteMethod: () => inputService.ClipService?.Clips?.Any() == true);
 
             this.TemplateSelectCommand = new DelegateCommand<Template>(
@@ -98,7 +104,7 @@ namespace Score2Stream.MenuModule.ViewModels
             this.SamplesRemoveAllCommand = new DelegateCommand(
                 executeMethod: () => inputService.SampleService.ClearAsync(),
                 canExecuteMethod: () => inputService?.SampleService?.Samples?.Any() == true);
-            this.SamplesOrderCommand = new DelegateCommand(
+            this.SamplesOrderAllCommand = new DelegateCommand(
                 executeMethod: () => inputService.SampleService.Order(),
                 canExecuteMethod: () => inputService?.SampleService?.Samples?.Any() == true);
 
@@ -152,15 +158,15 @@ namespace Score2Stream.MenuModule.ViewModels
 
         #region Public Properties
 
-        public static int MaxDuration => Constants.MaxDuration;
+        public static int MaxDuration => Constants.DurationMax;
 
-        public static int MaxQueueSize => Constants.MaxQueueSize;
+        public static int MaxQueueSize => Constants.QueueSizeMax;
 
-        public static int MaxThreshold => Constants.MaxThreshold;
+        public static int MaxThreshold => Constants.ThresholdMax;
 
-        public static int MinDelay => Constants.MinDelay;
+        public static int MinDelay => Constants.DelayMin;
 
-        public static int MinQueueSize => Constants.MinQueueSize;
+        public static int MinQueueSize => Constants.QueueSizeMin;
 
         public static string TabBoard => Constants.TabBoard;
 
@@ -171,6 +177,8 @@ namespace Score2Stream.MenuModule.ViewModels
         public DelegateCommand ClipAddCommand { get; }
 
         public DelegateCommand ClipRemoveCommand { get; }
+
+        public DelegateCommand ClipsOrderAllCommand { get; }
 
         public DelegateCommand ClipsRemoveAllCommand { get; }
 
@@ -191,6 +199,8 @@ namespace Score2Stream.MenuModule.ViewModels
                 }
             }
         }
+
+        public DelegateCommand InputCenterCommand { get; }
 
         public ObservableCollection<RibbonDropDownItem> Inputs { get; } = new ObservableCollection<RibbonDropDownItem>();
 
@@ -270,7 +280,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public DelegateCommand SampleRemoveCommand { get; }
 
-        public DelegateCommand SamplesOrderCommand { get; }
+        public DelegateCommand SamplesOrderAllCommand { get; }
 
         public DelegateCommand SamplesRemoveAllCommand { get; }
 
@@ -355,10 +365,16 @@ namespace Score2Stream.MenuModule.ViewModels
 
         #region Private Methods
 
+        private void CenterInput()
+        {
+            eventAggregator.GetEvent<VideoCenteredEvent>().Publish();
+        }
+
         private void OnClipsChanged()
         {
             ClipRemoveCommand.RaiseCanExecuteChanged();
             ClipsRemoveAllCommand.RaiseCanExecuteChanged();
+            ClipsOrderAllCommand.RaiseCanExecuteChanged();
 
             SampleAddCommand.RaiseCanExecuteChanged();
         }
@@ -523,7 +539,7 @@ namespace Score2Stream.MenuModule.ViewModels
         private void UpdateSamples()
         {
             SamplesRemoveAllCommand.RaiseCanExecuteChanged();
-            SamplesOrderCommand.RaiseCanExecuteChanged();
+            SamplesOrderAllCommand.RaiseCanExecuteChanged();
         }
 
         private void UpdateTemplates()

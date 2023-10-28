@@ -45,6 +45,12 @@
                 Height="32"
                 Kind="VideocamOffOutline" />
         </ControlTemplate>
+        <ControlTemplate x:Key="IconInputCenter">
+            <mat:MaterialIcon
+                Width="32"
+                Height="32"
+                Kind="ImageFilterCenterFocus" />
+        </ControlTemplate>
         <ControlTemplate x:Key="IconClipAdd">
             <mat:MaterialIcon
                 Width="32"
@@ -62,6 +68,12 @@
                 Width="32"
                 Height="32"
                 Kind="VectorSquareRemove" />
+        </ControlTemplate>
+        <ControlTemplate x:Key="IconClipOrderAll">
+            <mat:MaterialIcon
+                Width="32"
+                Height="32"
+                Kind="VectorArrangeBelow" />
         </ControlTemplate>
         <ControlTemplate x:Key="IconTemplateUse">
             <mat:MaterialIcon
@@ -186,6 +198,12 @@
                             FontSize="11"
                             LargeIcon="{DynamicResource IconCameraOff}"
                             MinSize="Large" />
+                        <rib:RibbonButton
+                            Command="{Binding InputCenterCommand}"
+                            Content="Center input"
+                            FontSize="11"
+                            LargeIcon="{DynamicResource IconInputCenter}"
+                            MinSize="Large" />
                     </rib:RibbonGroupBox>
 
                     <rib:RibbonGroupBox Header="Clips selection">
@@ -206,6 +224,12 @@
                             Content="Remove all"
                             FontSize="11"
                             LargeIcon="{DynamicResource IconClipRemoveAll}"
+                            MinSize="Large" />
+                        <rib:RibbonButton
+                            Command="{Binding ClipsOrderAllCommand}"
+                            Content="Order all"
+                            FontSize="11"
+                            LargeIcon="{DynamicResource IconClipOrderAll}"
                             MinSize="Large" />
                     </rib:RibbonGroupBox>
 
@@ -348,8 +372,8 @@
                             LargeIcon="{DynamicResource IconSamplesRemoveAll}"
                             MinSize="Large" />
                         <rib:RibbonButton
-                            Command="{Binding SamplesOrderCommand}"
-                            Content="Order samples"
+                            Command="{Binding SamplesOrderAllCommand}"
+                            Content="Order all"
                             FontSize="11"
                             LargeIcon="{DynamicResource IconSamplesOrder}"
                             MinSize="Large" />

@@ -46,7 +46,6 @@ namespace Score2Stream.TemplateModule.ViewModels
             eventAggregator.GetEvent<SamplesChangedEvent>().Subscribe(
                 action: () => UpdateSamples(),
                 keepSubscriberReferenceAlive: true);
-
             eventAggregator.GetEvent<SamplesOrderedEvent>().Subscribe(
                 action: () => OrderSamples(),
                 keepSubscriberReferenceAlive: true);
@@ -145,6 +144,8 @@ namespace Score2Stream.TemplateModule.ViewModels
 
                     Samples.Add(current);
                 }
+
+                OrderSamples();
             }
 
             RaisePropertyChanged(nameof(Samples));

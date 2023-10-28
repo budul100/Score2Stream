@@ -28,6 +28,8 @@ namespace Score2Stream.Core.Interfaces
 
         void Next(bool backward);
 
+        void Order();
+
         Task RemoveAsync();
 
         void Select(Clip clip);

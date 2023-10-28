@@ -1,10 +1,12 @@
-﻿using Avalonia.Input;
+﻿using Avalonia.Controls.PanAndZoom;
+using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using MsBox.Avalonia.Enums;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
+using Score2Stream.Core;
 using Score2Stream.Core.Enums;
 using Score2Stream.Core.Events.Clip;
 using Score2Stream.Core.Events.Input;
@@ -41,6 +43,7 @@ namespace Score2Stream.VideoModule.ViewModels
         private bool movedToRight;
         private double? verticalMax;
         private double? verticalMin;
+        private double zoom;
 
         #endregion Private Fields
 
@@ -77,11 +80,16 @@ namespace Score2Stream.VideoModule.ViewModels
 
             MousePressedCommand = new DelegateCommand<PointerPressedEventArgs>(e => OnMousePressed(e));
             MouseReleasedCommand = new DelegateCommand<PointerReleasedEventArgs>(e => OnMouseReleasedAsync(e));
+            ZoomChangedCommand = new DelegateCommand<ZoomChangedEventArgs>(e => OnZoomChanged(e));
         }
 
         #endregion Public Constructors
 
         #region Public Properties
+
+        public static double ZoomMax => Constants.ZoomMax;
+
+        public static double ZoomMin => Constants.ZoomMin;
 
         public SelectionViewModel ActiveSelection
         {
@@ -216,6 +224,8 @@ namespace Score2Stream.VideoModule.ViewModels
 
         public ObservableCollection<SelectionViewModel> Selections { get; } = new ObservableCollection<SelectionViewModel>();
 
+        public DelegateCommand<ZoomChangedEventArgs> ZoomChangedCommand { get; }
+
         #endregion Public Properties
 
         #region Public Methods
@@ -331,6 +341,16 @@ namespace Score2Stream.VideoModule.ViewModels
             isEditing = false;
         }
 
+        private void OnZoomChanged(ZoomChangedEventArgs eventArgs)
+        {
+            zoom = eventArgs.ZoomX;
+
+            foreach (var selection in Selections)
+            {
+                selection.Zoom = zoom;
+            }
+        }
+
         private void SetDimensions()
         {
             if (BitmapHeight == 0 || BitmapWidth == 0)
@@ -372,6 +392,7 @@ namespace Score2Stream.VideoModule.ViewModels
                     current.Initialize(
                         clip: clip,
                         isActive: isActive,
+                        zoom: zoom,
                         actualLeft: horizontalMin,
                         actualTop: verticalMin,
                         actualWidth: actualWidth,

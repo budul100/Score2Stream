@@ -50,14 +50,28 @@
         BorderThickness="2"
         HorizontalScrollBarVisibility="Auto"
         VerticalScrollBarVisibility="Auto">
+
         <paz:ZoomBorder
+            Name="VideoBorder"
             Background="LightGray"
             Focusable="True"
+            MaxZoomX="{Binding ZoomMax, Mode=OneWay}"
+            MaxZoomY="{Binding ZoomMax, Mode=OneWay}"
+            MinZoomX="{Binding ZoomMin, Mode=OneWay}"
+            MinZoomY="{Binding ZoomMin, Mode=OneWay}"
             PanButton="Right"
             Stretch="Uniform"
             ZoomSpeed="1.2">
 
+            <i:Interaction.Behaviors>
+                <a:EventTriggerBehavior EventName="ZoomChanged" SourceObject="VideoBorder">
+                    <a:InvokeCommandAction Command="{Binding ZoomChangedCommand}" PassEventArgsToCommand="True" />
+                </a:EventTriggerBehavior>
+                <bv:SizeChangedBehavior Width="{Binding FullWidth, Mode=TwoWay}" Height="{Binding FullHeight, Mode=TwoWay}" />
+            </i:Interaction.Behaviors>
+
             <Grid Name="VideoGrid">
+
                 <i:Interaction.Behaviors>
                     <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="VideoGrid">
                         <a:InvokeCommandAction Command="{Binding MousePressedCommand}" PassEventArgsToCommand="True" />
@@ -66,10 +80,6 @@
                         <a:InvokeCommandAction Command="{Binding MouseReleasedCommand}" PassEventArgsToCommand="True" />
                     </a:EventTriggerBehavior>
                     <bv:PointerPositionBehavior PointerX="{Binding MouseX, Mode=TwoWay}" PointerY="{Binding MouseY, Mode=TwoWay}" />
-                </i:Interaction.Behaviors>
-
-                <i:Interaction.Behaviors>
-                    <bv:SizeChangedBehavior Width="{Binding FullWidth, Mode=TwoWay}" Height="{Binding FullHeight, Mode=TwoWay}" />
                 </i:Interaction.Behaviors>
 
                 <Image
