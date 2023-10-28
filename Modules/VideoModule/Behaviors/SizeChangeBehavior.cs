@@ -5,7 +5,7 @@ using Avalonia.Xaml.Interactivity;
 
 namespace Score2Stream.VideoModule.Behaviors
 {
-    public class SizeChangedBehavior
+    public class SizeChangeBehavior
         : Behavior<Control>
     {
         #region Public Fields

@@ -9,14 +9,14 @@ namespace Score2Stream.TemplateModule.Behaviors
     {
         #region Public Fields
 
-        public static readonly StyledProperty<string> IsActiveProperty = AvaloniaProperty.Register<FocusOnActivationBehavior, string>(
+        public static readonly StyledProperty<bool> IsActiveProperty = AvaloniaProperty.Register<FocusOnActivationBehavior, bool>(
             name: nameof(IsActive));
 
         #endregion Public Fields
 
         #region Public Properties
 
-        public string IsActive
+        public bool IsActive
         {
             get => GetValue(IsActiveProperty);
             set => SetValue(IsActiveProperty, value);

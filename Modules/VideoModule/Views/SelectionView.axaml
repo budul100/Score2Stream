@@ -19,11 +19,7 @@
             Fill="Transparent"
             Stroke="Red"
             StrokeDashArray="4,2"
-            StrokeThickness="{Binding Thickness, Mode=OneWay}">
-            <i:Interaction.Behaviors>
-                <bv:SizeChangedBehavior />
-            </i:Interaction.Behaviors>
-        </Rectangle>
+            StrokeThickness="{Binding Thickness, Mode=OneWay}" />
 
         <TextBlock
             Name="SelectionTextBlock"
@@ -32,8 +28,9 @@
             FontSize="{Binding FontSize, Mode=OneWay}"
             Foreground="Red"
             Text="{Binding Description, Mode=OneWay}">
+
             <i:Interaction.Behaviors>
-                <bv:SizeChangedBehavior Width="{Binding WidthName, Mode=TwoWay}" Height="{Binding HeightName, Mode=TwoWay}" />
+
                 <a:DataTriggerBehavior
                     Binding="{Binding IsActive}"
                     ComparisonCondition="Equal"
@@ -60,6 +57,8 @@
                         TargetObject="SelectionTextBlock"
                         Value="Normal" />
                 </a:DataTriggerBehavior>
+
+                <bv:SizeChangeBehavior Width="{Binding WidthName, Mode=TwoWay}" Height="{Binding HeightName, Mode=TwoWay}" />
             </i:Interaction.Behaviors>
         </TextBlock>
     </Panel>

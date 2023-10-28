@@ -64,21 +64,25 @@
             ZoomSpeed="1.2">
 
             <i:Interaction.Behaviors>
+
                 <a:EventTriggerBehavior EventName="ZoomChanged" SourceObject="VideoBorder">
                     <a:InvokeCommandAction Command="{Binding ZoomChangedCommand}" PassEventArgsToCommand="True" />
                 </a:EventTriggerBehavior>
-                <bv:SizeChangedBehavior Width="{Binding FullWidth, Mode=TwoWay}" Height="{Binding FullHeight, Mode=TwoWay}" />
+
+                <bv:SizeChangeBehavior Width="{Binding FullWidth, Mode=TwoWay}" Height="{Binding FullHeight, Mode=TwoWay}" />
             </i:Interaction.Behaviors>
 
             <Grid Name="VideoGrid">
 
                 <i:Interaction.Behaviors>
+
                     <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="VideoGrid">
                         <a:InvokeCommandAction Command="{Binding MousePressedCommand}" PassEventArgsToCommand="True" />
                     </a:EventTriggerBehavior>
                     <a:EventTriggerBehavior EventName="PointerReleased" SourceObject="VideoGrid">
                         <a:InvokeCommandAction Command="{Binding MouseReleasedCommand}" PassEventArgsToCommand="True" />
                     </a:EventTriggerBehavior>
+
                     <bv:PointerPositionBehavior PointerX="{Binding MouseX, Mode=TwoWay}" PointerY="{Binding MouseY, Mode=TwoWay}" />
                 </i:Interaction.Behaviors>
 
@@ -88,7 +92,7 @@
                     VerticalAlignment="Center"
                     Source="{Binding Bitmap}">
                     <i:Interaction.Behaviors>
-                        <bv:SizeChangedBehavior Width="{Binding BitmapWidth, Mode=TwoWay}" Height="{Binding BitmapHeight, Mode=TwoWay}" />
+                        <bv:SizeChangeBehavior Width="{Binding BitmapWidth, Mode=TwoWay}" Height="{Binding BitmapHeight, Mode=TwoWay}" />
                     </i:Interaction.Behaviors>
                 </Image>
 

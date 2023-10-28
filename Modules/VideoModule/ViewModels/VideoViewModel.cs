@@ -60,8 +60,19 @@ namespace Score2Stream.VideoModule.ViewModels
             this.regionManager = regionManager;
             this.eventAggregator = eventAggregator;
 
+            MousePressedCommand = new DelegateCommand<PointerPressedEventArgs>(e => OnMousePressed(e));
+            MouseReleasedCommand = new DelegateCommand<PointerReleasedEventArgs>(e => OnMouseReleasedAsync(e));
+            ZoomChangedCommand = new DelegateCommand<ZoomChangedEventArgs>(e => OnZoomChanged(e));
+
             eventAggregator.GetEvent<InputSelectedEvent>().Subscribe(
                 action: _ => UpdateSelections(),
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
+                action: () => Bitmap = inputService.VideoService?.Bitmap,
+                keepSubscriberReferenceAlive: true);
+            eventAggregator.GetEvent<VideoCenteredEvent>().Subscribe(
+                action: () => OnVideoCentredEvent.Invoke(this, default),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
@@ -70,21 +81,18 @@ namespace Score2Stream.VideoModule.ViewModels
             eventAggregator.GetEvent<ClipsChangedEvent>().Subscribe(
                 action: UpdateSelections,
                 keepSubscriberReferenceAlive: true);
-
             eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
                 action: _ => UpdateSelections(),
                 keepSubscriberReferenceAlive: true);
-
-            eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
-                action: () => Bitmap = inputService.VideoService?.Bitmap,
-                keepSubscriberReferenceAlive: true);
-
-            MousePressedCommand = new DelegateCommand<PointerPressedEventArgs>(e => OnMousePressed(e));
-            MouseReleasedCommand = new DelegateCommand<PointerReleasedEventArgs>(e => OnMouseReleasedAsync(e));
-            ZoomChangedCommand = new DelegateCommand<ZoomChangedEventArgs>(e => OnZoomChanged(e));
         }
 
         #endregion Public Constructors
+
+        #region Public Events
+
+        public event EventHandler OnVideoCentredEvent;
+
+        #endregion Public Events
 
         #region Public Properties
 

@@ -82,7 +82,6 @@
                 <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="SamplePanel">
                     <a:InvokeCommandAction Command="{Binding OnSelectionCommand}" />
                 </a:EventTriggerBehavior>
-
             </i:Interaction.Behaviors>
 
             <Border
