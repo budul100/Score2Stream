@@ -507,11 +507,14 @@ namespace Score2Stream.MenuModule.ViewModels
 
                 foreach (var ordered in ordereds)
                 {
+                    var isChecked = (ordered.IsDevice && ordered.IsActive)
+                        || (!ordered.IsDevice && !ordered.IsEnded);
+
                     var input = new RibbonDropDownItem
                     {
                         Command = InputSelectCommand,
                         CommandParameter = ordered,
-                        IsChecked = ordered.IsActive,
+                        IsChecked = isChecked,
                         Text = ordered.Name
                     };
 
