@@ -1,5 +1,9 @@
 # Change log
 
+## Version 1.5.0
+
+* ...
+
 ## Version 1.4.0
 
 * Updated to Avalonia 11
