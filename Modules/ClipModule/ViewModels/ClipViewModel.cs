@@ -178,9 +178,11 @@ namespace Score2Stream.ClipModule.ViewModels
 
         public ObservableCollection<ClipType> Types { get; } = new ObservableCollection<ClipType>();
 
-        public string Value => !string.IsNullOrWhiteSpace(Clip?.Value)
-            ? $"=> {Clip.Value} (Similarity: {Clip.Similarity}%)"
-            : $"=> -/- (Similarity: {Clip.Similarity}%)";
+        public string Value => Clip?.Template != default
+            ? !string.IsNullOrWhiteSpace(Clip.Value)
+                ? $"=> {Clip.Value} (Similarity: {Clip.Similarity}%)"
+                : $"=> -/- (Similarity: {Clip.Similarity}%)"
+            : "No template selected";
 
         #endregion Public Properties
 
