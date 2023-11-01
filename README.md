@@ -18,6 +18,8 @@ Graphics output:
 
 ## Usage
 
+==Some sample data for testing can be found in the [additionals](./Additionals/Samples)==
+
 The configuration of Score2Stream consists of the following steps:
 
 1. Selecting webcam as the input source (this can be a video file for testing purposes too).
