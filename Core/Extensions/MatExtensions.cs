@@ -56,9 +56,19 @@ namespace Score2Stream.Core.Extensions
                 if (contours.Length > 0)
                 {
                     var relevant = contours
-                        .OrderByDescending(c => c.Length).First();
+                        .Where(c => c.All(p => p.X > 0 && p.Y > 0 && p.X < image.Width && p.Y < image.Height))
+                        .SelectMany(c => c);
 
                     result = Cv2.BoundingRect(relevant);
+                }
+
+                if (result == default)
+                {
+                    result = new Rect(
+                        x: 0,
+                        y: 0,
+                        width: image.Width,
+                        height: image.Height);
                 }
             }
 

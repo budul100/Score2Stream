@@ -2,7 +2,7 @@
 
 ## Version 1.5.0
 
-* ...
+* Cropping considers all elements which not cover a clip border
 
 ## Version 1.4.0
 
