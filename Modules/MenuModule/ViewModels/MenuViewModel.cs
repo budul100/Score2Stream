@@ -230,16 +230,16 @@ namespace Score2Stream.MenuModule.ViewModels
             }
         }
 
-        public bool NoCentering
+        public bool NoCropping
         {
-            get { return inputService?.VideoService?.NoCentering ?? false; }
+            get { return inputService?.VideoService?.NoCropping ?? false; }
             set
             {
                 if (IsActive
-                    && inputService.VideoService.NoCentering != value)
+                    && inputService.VideoService.NoCropping != value)
                 {
-                    inputService.VideoService.NoCentering = value;
-                    RaisePropertyChanged(nameof(NoCentering));
+                    inputService.VideoService.NoCropping = value;
+                    RaisePropertyChanged(nameof(NoCropping));
                 }
             }
         }
@@ -531,7 +531,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
                 RaisePropertyChanged(nameof(Inputs));
                 RaisePropertyChanged(nameof(IsActive));
-                RaisePropertyChanged(nameof(NoCentering));
+                RaisePropertyChanged(nameof(NoCropping));
                 RaisePropertyChanged(nameof(ProcessingDelay));
                 RaisePropertyChanged(nameof(ThresholdDetecting));
                 RaisePropertyChanged(nameof(ThresholdMatching));

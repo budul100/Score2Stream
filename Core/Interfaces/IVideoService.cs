@@ -22,7 +22,7 @@ namespace Score2Stream.Core.Interfaces
 
         string Name { get; }
 
-        bool NoCentering { get; set; }
+        bool NoCropping { get; set; }
 
         int ProcessingDelay { get; set; }
 

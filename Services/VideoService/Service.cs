@@ -86,14 +86,14 @@ namespace Score2Stream.VideoService
 
         public string Name { get; private set; }
 
-        public bool NoCentering
+        public bool NoCropping
         {
-            get { return settings.Video.NoCentering; }
+            get { return settings.Video.NoCropping; }
             set
             {
-                if (settings.Video.NoCentering != value)
+                if (settings.Video.NoCropping != value)
                 {
-                    settings.Video.NoCentering = value;
+                    settings.Video.NoCropping = value;
                     settingsService.Save();
                 }
             }
@@ -377,7 +377,7 @@ namespace Score2Stream.VideoService
                     var monochromeImage = noiselessImage
                         .ToMonochrome(thresholdMonochrome);
 
-                    var contourRectangle = !NoCentering
+                    var contourRectangle = !NoCropping
                         ? monochromeImage.GetContour()
                         : default;
 

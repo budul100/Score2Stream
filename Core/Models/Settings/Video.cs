@@ -15,7 +15,7 @@
 
         public int ImagesQueueSize { get; set; } = ImagesQueueSizeDefault;
 
-        public bool NoCentering { get; set; }
+        public bool NoCropping { get; set; }
 
         public int ProcessingDelay { get; set; } = ProcessingDelayDefault;
 
