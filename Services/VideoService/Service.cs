@@ -411,11 +411,11 @@ namespace Score2Stream.VideoService
             {
                 var size = frame.Size();
 
-                var firstX = Convert.ToInt32(clip.RelativeX1 * size.Width);
-                var secondX = Convert.ToInt32(clip.RelativeX2 * size.Width);
+                var firstX = Convert.ToInt32(clip.X1 * size.Width);
+                var secondX = Convert.ToInt32(clip.X2 * size.Width);
 
-                var firstY = Convert.ToInt32(clip.RelativeY1 * size.Height);
-                var secondY = Convert.ToInt32(clip.RelativeY2 * size.Height);
+                var firstY = Convert.ToInt32(clip.Y1 * size.Height);
+                var secondY = Convert.ToInt32(clip.Y2 * size.Height);
 
                 var rectangle = size.GetRectangle(
                     firstX: firstX,

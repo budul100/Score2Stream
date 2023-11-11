@@ -63,6 +63,12 @@
                 Height="{StaticResource IconHeight}"
                 Kind="VectorSquarePlus" />
         </ControlTemplate>
+        <ControlTemplate x:Key="IconClipUndoSize">
+            <mat:MaterialIcon
+                Width="{StaticResource IconWidth}"
+                Height="{StaticResource IconHeight}"
+                Kind="Undo" />
+        </ControlTemplate>
         <ControlTemplate x:Key="IconClipRemoveSelected">
             <mat:MaterialIcon
                 Width="{StaticResource IconWidth}"
@@ -230,6 +236,12 @@
                             Content="Remove all"
                             FontSize="{StaticResource FontSize}"
                             LargeIcon="{DynamicResource IconClipRemoveAll}"
+                            MinSize="Large" />
+                        <rib:RibbonButton
+                            Command="{Binding ClipUndoSizeCommand}"
+                            Content="Undo resizing"
+                            FontSize="{StaticResource FontSize}"
+                            LargeIcon="{DynamicResource IconClipUndoSize}"
                             MinSize="Large" />
                         <rib:RibbonButton
                             Command="{Binding ClipsOrderAllCommand}"

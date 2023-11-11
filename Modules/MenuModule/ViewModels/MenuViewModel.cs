@@ -88,6 +88,9 @@ namespace Score2Stream.MenuModule.ViewModels
             this.ClipsOrderAllCommand = new DelegateCommand(
                 executeMethod: () => inputService.ClipService?.Order(),
                 canExecuteMethod: () => inputService.ClipService?.Clips?.Any() == true);
+            this.ClipUndoSizeCommand = new DelegateCommand(
+                executeMethod: () => inputService.ClipService?.UndoSize(),
+                canExecuteMethod: () => inputService.ClipService?.UndoSizePossible == true);
 
             this.TemplateSelectCommand = new DelegateCommand<Template>(
                 executeMethod: t => inputService?.TemplateService?.Select(t));
@@ -136,7 +139,7 @@ namespace Score2Stream.MenuModule.ViewModels
             eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
                 action: _ => OnClipsChanged());
             eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
-                action: _ => UpdateTemplates());
+                action: _ => OnClipsUpdated());
 
             eventAggregator.GetEvent<TemplatesChangedEvent>().Subscribe(
                 action: UpdateTemplates);
@@ -181,6 +184,8 @@ namespace Score2Stream.MenuModule.ViewModels
         public DelegateCommand ClipsOrderAllCommand { get; }
 
         public DelegateCommand ClipsRemoveAllCommand { get; }
+
+        public DelegateCommand ClipUndoSizeCommand { get; }
 
         public DelegateCommand GraphicsReloadCommand { get; }
 
@@ -377,6 +382,14 @@ namespace Score2Stream.MenuModule.ViewModels
             ClipsOrderAllCommand.RaiseCanExecuteChanged();
 
             SampleAddCommand.RaiseCanExecuteChanged();
+        }
+
+        private void OnClipsUpdated()
+        {
+            ClipUndoSizeCommand.RaiseCanExecuteChanged();
+            ClipsOrderAllCommand.RaiseCanExecuteChanged();
+
+            UpdateTemplates();
         }
 
         private void OnGraphicsUpdated()

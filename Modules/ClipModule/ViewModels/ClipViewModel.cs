@@ -93,8 +93,7 @@ namespace Score2Stream.ClipModule.ViewModels
 
                     Clip.NoiseRemoval = value;
 
-                    eventAggregator.GetEvent<ClipUpdatedEvent>().Publish(
-                        payload: Clip);
+                    eventAggregator.GetEvent<ClipUpdatedEvent>().Publish(Clip);
                 }
 
                 RaisePropertyChanged(nameof(NoiseRemoval));
@@ -144,8 +143,7 @@ namespace Score2Stream.ClipModule.ViewModels
 
                     Clip.ThresholdMonochrome = value;
 
-                    eventAggregator.GetEvent<ClipUpdatedEvent>().Publish(
-                        payload: Clip);
+                    eventAggregator.GetEvent<ClipUpdatedEvent>().Publish(Clip);
                 }
 
                 RaisePropertyChanged(nameof(ThresholdMonochrome));

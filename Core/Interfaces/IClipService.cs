@@ -14,6 +14,8 @@ namespace Score2Stream.Core.Interfaces
 
         ITemplateService TemplateService { get; }
 
+        bool UndoSizePossible { get; }
+
         #endregion Public Properties
 
         #region Public Methods
@@ -33,6 +35,8 @@ namespace Score2Stream.Core.Interfaces
         Task RemoveAsync();
 
         void Select(Clip clip);
+
+        void UndoSize();
 
         #endregion Public Methods
     }

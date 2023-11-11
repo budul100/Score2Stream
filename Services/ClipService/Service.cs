@@ -46,6 +46,11 @@ namespace Score2Stream.ClipService
 
         public ITemplateService TemplateService { get; }
 
+        public bool UndoSizePossible => Active?.X1Last.HasValue == true
+            && Active.X2Last.HasValue
+            && Active.Y1Last.HasValue
+            && Active.Y2Last.HasValue;
+
         #endregion Public Properties
 
         #region Public Methods
@@ -119,8 +124,8 @@ namespace Score2Stream.ClipService
         public void Order()
         {
             Clips = Clips
-                .OrderBy(c => (int)(c.RelativeY1 * Constants.ClipPositionFactor))
-                .ThenBy(c => (int)(c.RelativeX1 * Constants.ClipPositionFactor)).ToList();
+                .OrderBy(c => (int)(c.Y1 * Constants.ClipPositionFactor))
+                .ThenBy(c => (int)(c.X1 * Constants.ClipPositionFactor)).ToList();
 
             index = 0;
 
@@ -168,6 +173,31 @@ namespace Score2Stream.ClipService
             eventAggregator
                 .GetEvent<ClipSelectedEvent>()
                 .Publish(Active);
+        }
+
+        public void UndoSize()
+        {
+            if (UndoSizePossible)
+            {
+                var lastX1 = Active.X1;
+                var lastX2 = Active.X2;
+                var lastY1 = Active.Y1;
+                var lastY2 = Active.Y2;
+
+                Active.X1 = Active.X1Last.Value;
+                Active.X2 = Active.X2Last.Value;
+                Active.Y1 = Active.Y1Last.Value;
+                Active.Y2 = Active.Y2Last.Value;
+
+                Active.X1Last = lastX1;
+                Active.X2Last = lastX2;
+                Active.Y1Last = lastY1;
+                Active.Y2Last = lastY2;
+
+                Active.HasDimensions = true;
+
+                eventAggregator.GetEvent<ClipUpdatedEvent>().Publish(Active);
+            }
         }
 
         #endregion Public Methods

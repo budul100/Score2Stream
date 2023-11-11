@@ -233,10 +233,10 @@ namespace Score2Stream.VideoModule.ViewModels
             if (actualWidth.HasValue
                 && actualHeight.HasValue)
             {
-                Left = actualLeft + (Clip.RelativeX1 * actualWidth);
-                Width = (Clip.RelativeX2 - Clip.RelativeX1) * actualWidth;
-                Top = actualTop + (Clip.RelativeY1 * actualHeight);
-                Height = (Clip.RelativeY2 - Clip.RelativeY1) * actualHeight;
+                Left = actualLeft + (Clip.X1 * actualWidth);
+                Width = (Clip.X2 - Clip.X1) * actualWidth;
+                Top = actualTop + (Clip.Y1 * actualHeight);
+                Height = (Clip.Y2 - Clip.Y1) * actualHeight;
             }
         }
 

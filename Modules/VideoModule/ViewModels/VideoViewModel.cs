@@ -287,8 +287,11 @@ namespace Score2Stream.VideoModule.ViewModels
                     if ((actualWidth ?? 0) > 0
                         && (ActiveSelection.Left ?? 0) >= horizontalMin.Value)
                     {
-                        ActiveSelection.Clip.RelativeX1 = ((ActiveSelection.Left ?? 0) - horizontalMin.Value) / actualWidth.Value;
-                        ActiveSelection.Clip.RelativeX2 = ((ActiveSelection.Left ?? 0) +
+                        ActiveSelection.Clip.X1Last = ActiveSelection.Clip.X1;
+                        ActiveSelection.Clip.X2Last = ActiveSelection.Clip.X2;
+
+                        ActiveSelection.Clip.X1 = ((ActiveSelection.Left ?? 0) - horizontalMin.Value) / actualWidth.Value;
+                        ActiveSelection.Clip.X2 = ((ActiveSelection.Left ?? 0) +
                             (ActiveSelection.Width ?? 0) - horizontalMin.Value) / actualWidth.Value;
 
                         ActiveSelection.Clip.HasDimensions = true;
@@ -299,8 +302,11 @@ namespace Score2Stream.VideoModule.ViewModels
                     if ((actualHeight ?? 0) > 0
                         && (ActiveSelection.Top ?? 0) >= verticalMin.Value)
                     {
-                        ActiveSelection.Clip.RelativeY1 = ((ActiveSelection.Top ?? 0) - verticalMin.Value) / actualHeight.Value;
-                        ActiveSelection.Clip.RelativeY2 = ((ActiveSelection.Top ?? 0) - verticalMin.Value +
+                        ActiveSelection.Clip.Y1Last = ActiveSelection.Clip.Y1;
+                        ActiveSelection.Clip.Y2Last = ActiveSelection.Clip.Y2;
+
+                        ActiveSelection.Clip.Y1 = ((ActiveSelection.Top ?? 0) - verticalMin.Value) / actualHeight.Value;
+                        ActiveSelection.Clip.Y2 = ((ActiveSelection.Top ?? 0) - verticalMin.Value +
                             (ActiveSelection.Height ?? 0)) / actualHeight.Value;
 
                         ActiveSelection.Clip.HasDimensions = true;
@@ -310,8 +316,7 @@ namespace Score2Stream.VideoModule.ViewModels
 
                     if (ActiveSelection.Clip.HasDimensions)
                     {
-                        eventAggregator.GetEvent<ClipUpdatedEvent>().Publish(
-                            payload: ActiveSelection.Clip);
+                        eventAggregator.GetEvent<ClipUpdatedEvent>().Publish(ActiveSelection.Clip);
                     }
                 }
                 else

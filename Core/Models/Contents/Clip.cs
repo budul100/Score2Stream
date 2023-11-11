@@ -45,14 +45,6 @@ namespace Score2Stream.Core.Models.Contents
         [JsonIgnore]
         public Rect? Rect { get; set; }
 
-        public double RelativeX1 { get; set; }
-
-        public double RelativeX2 { get; set; }
-
-        public double RelativeY1 { get; set; }
-
-        public double RelativeY2 { get; set; }
-
         [JsonIgnore]
         public int Similarity { get; set; }
 
@@ -78,6 +70,26 @@ namespace Score2Stream.Core.Models.Contents
         public string Value { get; set; }
 
         public int Width { get; set; }
+
+        public double X1 { get; set; }
+
+        [JsonIgnore]
+        public double? X1Last { get; set; }
+
+        public double X2 { get; set; }
+
+        [JsonIgnore]
+        public double? X2Last { get; set; }
+
+        public double Y1 { get; set; }
+
+        [JsonIgnore]
+        public double? Y1Last { get; set; }
+
+        public double Y2 { get; set; }
+
+        [JsonIgnore]
+        public double? Y2Last { get; set; }
 
         #endregion Public Properties
     }
