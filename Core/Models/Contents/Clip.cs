@@ -55,19 +55,25 @@ namespace Score2Stream.Core.Models.Contents
 
         public int ThresholdMonochrome { get; set; } = ThresholdMonochromeDefault;
 
+        [JsonIgnore]
+        public DateTime TimeDetection { get; set; }
+
+        [JsonIgnore]
+        public DateTime TimeUpdate { get; set; }
+
         public ClipType Type { get; set; } = ClipType.None;
 
         [JsonIgnore]
         public int UpdateSimilarity { get; set; }
 
         [JsonIgnore]
-        public DateTime UpdateTime { get; set; }
-
-        [JsonIgnore]
         public string UpdateValue { get; set; }
 
         [JsonIgnore]
         public string Value { get; set; }
+
+        [JsonIgnore]
+        public string ValueLast { get; set; }
 
         public int Width { get; set; }
 

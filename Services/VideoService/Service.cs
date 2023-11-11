@@ -299,11 +299,12 @@ namespace Score2Stream.VideoService
                         capturingStart: capturingStart);
 
                     if (!deviceId.HasValue
-                        && ProcessingTime?.Milliseconds > 0)
+                        && ProcessingDelay > 0
+                        && ProcessingTime?.TotalMilliseconds > 0)
                     {
                         video.Set(
                             propertyId: VideoCaptureProperties.PosMsec,
-                            value: position + ProcessingTime.Value.Milliseconds);
+                            value: position + ProcessingTime.Value.TotalMilliseconds);
                     }
                 }
                 while (hasContent
@@ -442,11 +443,14 @@ namespace Score2Stream.VideoService
             }
             else if (clip.Template != default)
             {
+                var thresholdMatching = Math.Abs(ThresholdMatching) / Constants.ThresholdDivider;
+
                 var match = clip.GetMatches()
-                    .OrderByDescending(c => c.Key).FirstOrDefault();
+                    .OrderByDescending(m => m.Key >= thresholdMatching
+                        && clip.IsNeighbour(m.Value?.Value))
+                    .ThenByDescending(m => m.Key).FirstOrDefault();
 
                 var similarity = Convert.ToInt32(match.Key * Constants.ThresholdDivider);
-                var thresholdMatching = Math.Abs(ThresholdMatching) / Constants.ThresholdDivider;
 
                 if (match.Value != default
                     && match.Key >= thresholdMatching)
@@ -484,7 +488,9 @@ namespace Score2Stream.VideoService
         {
             videoUpdatedEvent.Publish();
 
-            await Task.Delay(ProcessingDelay);
+            var delay = ProcessingDelay + Constants.DelayUpdate;
+
+            await Task.Delay(delay);
 
             ProcessingTime = capturingStart.HasValue
                 ? DateTime.Now - capturingStart

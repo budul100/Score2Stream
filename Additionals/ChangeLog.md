@@ -6,6 +6,7 @@
 * Template is assigned automatically to a clip if a sample is added (https://github.com/budul100/Score2Stream/issues/16)
 * Clips can be selected from each view (https://github.com/budul100/Score2Stream/issues/17)
 * Resizing of clips can be undone
+* Detection prefers neighbour values
 
 ## Version 1.4.0
 

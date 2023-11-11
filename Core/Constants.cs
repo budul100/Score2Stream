@@ -6,8 +6,10 @@
 
         public const int ClipPositionFactor = 50;
 
-        public const int DelayMin = 10;
+        public const int DelayMin = 0;
+        public const int DelayUpdate = 1;
 
+        public const int DurationKeepLast = 500;
         public const int DurationMax = 1000;
         public const int DurationUpdateTitle = 500;
 
