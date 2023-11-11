@@ -6,11 +6,11 @@
 
 ## Version 1.5.0
 
-* Cropping considers all elements which not cover a clip border
+* Cropping considers all elements that do not cover a clipping border
 * Template is assigned automatically to a clip if a sample is added (https://github.com/budul100/Score2Stream/issues/16)
 * Clips can be selected from each view (https://github.com/budul100/Score2Stream/issues/17)
 * Resizing of clips can be undone
-* Detection prefers neighbour values
+* Detection prefers neighbor values
 
 ## Version 1.4.0
 
