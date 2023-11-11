@@ -4,6 +4,7 @@ using Prism.Events;
 using Score2Stream.Core;
 using Score2Stream.Core.Enums;
 using Score2Stream.Core.Events.Sample;
+using Score2Stream.Core.Events.Template;
 using Score2Stream.Core.Extensions;
 using Score2Stream.Core.Interfaces;
 using Score2Stream.Core.Models.Contents;
@@ -240,6 +241,14 @@ namespace Score2Stream.SampleService
                 Add(sample);
 
                 eventAggregator.GetEvent<SamplesChangedEvent>().Publish();
+
+                if (clip.Template == default)
+                {
+                    clip.Template = sample.Template;
+                    clip.TemplateName = sample.Template.Name;
+
+                    eventAggregator.GetEvent<TemplateSelectedEvent>().Publish(sample.Template);
+                }
 
                 if (selectSample)
                 {

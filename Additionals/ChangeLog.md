@@ -3,6 +3,7 @@
 ## Version 1.5.0
 
 * Cropping considers all elements which not cover a clip border
+* Template is assigned automatically to a clip if a sample is added (https://github.com/budul100/Score2Stream/issues/16)
 
 ## Version 1.4.0
 
