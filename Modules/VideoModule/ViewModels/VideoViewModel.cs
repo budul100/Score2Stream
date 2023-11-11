@@ -28,7 +28,7 @@ namespace Score2Stream.VideoModule.ViewModels
         private readonly IEventAggregator eventAggregator;
         private readonly IInputService inputService;
         private readonly IMessageBoxService messageBoxService;
-        private readonly IRegionManager regionManager;
+        private readonly INavigationService navigationService;
 
         private SelectionViewModel activeSelection;
         private Bitmap bitmap;
@@ -51,13 +51,14 @@ namespace Score2Stream.VideoModule.ViewModels
         #region Public Constructors
 
         public VideoViewModel(IInputService inputService, IMessageBoxService messageBoxService,
-            IContainerProvider containerProvider, IRegionManager regionManager, IEventAggregator eventAggregator)
+            INavigationService navigationService, IContainerProvider containerProvider, IRegionManager regionManager,
+            IEventAggregator eventAggregator)
             : base(regionManager)
         {
             this.inputService = inputService;
             this.messageBoxService = messageBoxService;
+            this.navigationService = navigationService;
             this.containerProvider = containerProvider;
-            this.regionManager = regionManager;
             this.eventAggregator = eventAggregator;
 
             MousePressedCommand = new DelegateCommand<PointerPressedEventArgs>(e => OnMousePressed(e));
@@ -241,8 +242,7 @@ namespace Score2Stream.VideoModule.ViewModels
             var result = ActiveSelection != default
                 && Bitmap != default
                 && (ActiveSelection.IsEditing || isActivating)
-                && regionManager.Regions[nameof(RegionType.EditRegion)]?.NavigationService.Journal
-                    .CurrentEntry.Uri.OriginalString == nameof(ViewType.Clips);
+                && navigationService.EditView == ViewType.Clips;
 
             return result;
         }
@@ -407,20 +407,18 @@ namespace Score2Stream.VideoModule.ViewModels
                 {
                     var current = containerProvider.Resolve<SelectionViewModel>();
 
-                    var isActive = inputService.ClipService.Active == clip;
-
                     current.Initialize(
                         clip: clip,
-                        isActive: isActive,
                         zoom: zoom,
                         actualLeft: horizontalMin,
                         actualTop: verticalMin,
                         actualWidth: actualWidth,
-                        actualHeight: actualHeight);
+                        actualHeight: actualHeight,
+                        clipService: inputService.ClipService);
 
                     Selections.Add(current);
 
-                    if (isActive)
+                    if (inputService.ClipService.Active == clip)
                     {
                         ActiveSelection = current;
                     }

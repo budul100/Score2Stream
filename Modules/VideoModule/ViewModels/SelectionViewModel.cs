@@ -1,7 +1,10 @@
-﻿using Prism.Events;
+﻿using Prism.Commands;
+using Prism.Events;
 using Prism.Mvvm;
 using Score2Stream.Core;
+using Score2Stream.Core.Enums;
 using Score2Stream.Core.Events.Clip;
+using Score2Stream.Core.Interfaces;
 using Score2Stream.Core.Models.Contents;
 
 namespace Score2Stream.VideoModule.ViewModels
@@ -11,6 +14,9 @@ namespace Score2Stream.VideoModule.ViewModels
     {
         #region Private Fields
 
+        private readonly INavigationService navigationService;
+
+        private IClipService clipService;
         private double? height;
         private double? heightName;
         private bool isActive;
@@ -25,8 +31,13 @@ namespace Score2Stream.VideoModule.ViewModels
 
         #region Public Constructors
 
-        public SelectionViewModel(IEventAggregator eventAggregator)
+        public SelectionViewModel(INavigationService navigationService, IEventAggregator eventAggregator)
         {
+            this.navigationService = navigationService;
+
+            OnSelectionCommand = new DelegateCommand(
+                executeMethod: () => OnSelection());
+
             eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
                 action: c => IsActive = c == Clip,
                 keepSubscriberReferenceAlive: true);
@@ -122,6 +133,8 @@ namespace Score2Stream.VideoModule.ViewModels
             }
         }
 
+        public DelegateCommand OnSelectionCommand { get; }
+
         public double? Right => HasValue
             ? Left.Value + Width
             : default;
@@ -203,12 +216,15 @@ namespace Score2Stream.VideoModule.ViewModels
 
         #region Public Methods
 
-        public void Initialize(Clip clip, bool isActive, double zoom, double? actualLeft, double? actualTop,
-            double? actualWidth, double? actualHeight)
+        public void Initialize(Clip clip, double zoom, double? actualLeft, double? actualTop, double? actualWidth,
+            double? actualHeight, IClipService clipService)
         {
+            this.clipService = clipService;
+
             Clip = clip;
-            IsActive = isActive;
             Zoom = zoom;
+
+            IsActive = clipService.Active == clip;
 
             RaisePropertyChanged(nameof(Description));
             RaisePropertyChanged(nameof(Thickness));
@@ -225,5 +241,17 @@ namespace Score2Stream.VideoModule.ViewModels
         }
 
         #endregion Public Methods
+
+        #region Private Methods
+
+        private void OnSelection()
+        {
+            if (navigationService.EditView != ViewType.Clips)
+            {
+                clipService.Select(Clip);
+            }
+        }
+
+        #endregion Private Methods
     }
 }

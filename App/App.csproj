@@ -52,6 +52,7 @@
 		<ProjectReference Include="..\Services\DispatcherService\DispatcherService.csproj" />
 		<ProjectReference Include="..\Services\InputService\InputService.csproj" />
 		<ProjectReference Include="..\Services\MessageBoxService\MessageBoxService.csproj" />
+		<ProjectReference Include="..\Services\NavigationService\NavigationService.csproj" />
 		<ProjectReference Include="..\Services\RecognitionService\RecognitionService.csproj" />
 		<ProjectReference Include="..\Services\SampleService\SampleService.csproj" />
 		<ProjectReference Include="..\Services\ScoreboardService\ScoreboardService.csproj" />
