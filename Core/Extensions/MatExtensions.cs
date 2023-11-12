@@ -90,13 +90,13 @@ namespace Score2Stream.Core.Extensions
 
                 var match = compare.MatchTemplate(
                     templ: template,
-                    method: TemplateMatchModes.CCoeffNormed);
+                    method: TemplateMatchModes.SqDiffNormed);
 
                 match.MinMaxLoc(
-                    minVal: out _,
-                    maxVal: out double max);
+                    minVal: out double min,
+                    maxVal: out double _);
 
-                result = Math.Abs(max);
+                result = 1 - Math.Abs(min);
             }
 
             return result;
