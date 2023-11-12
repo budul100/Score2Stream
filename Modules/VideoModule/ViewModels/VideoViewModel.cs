@@ -73,7 +73,7 @@ namespace Score2Stream.VideoModule.ViewModels
                 action: () => Bitmap = inputService.VideoService?.Bitmap,
                 keepSubscriberReferenceAlive: true);
             eventAggregator.GetEvent<VideoCenteredEvent>().Subscribe(
-                action: () => OnVideoCentredEvent.Invoke(this, default),
+                action: () => OnVideoCentred(),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
@@ -324,6 +324,13 @@ namespace Score2Stream.VideoModule.ViewModels
                     SetDimensions();
                 }
             }
+        }
+
+        private void OnVideoCentred()
+        {
+            OnVideoCentredEvent.Invoke(
+                sender: this,
+                e: default);
         }
 
         private void OnZoomChanged(ZoomChangedEventArgs eventArgs)

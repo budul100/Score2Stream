@@ -39,6 +39,56 @@ namespace Score2Stream.Core.Extensions
             return result;
         }
 
+        public static Mat AsRotated(this Mat image, float angle)
+        {
+            Mat result;
+
+            if (angle == 0)
+            {
+                result = image;
+            }
+            else
+            {
+                var size = image.Size();
+
+                result = new Mat(
+                    size: size,
+                    type: image.Depth(),
+                    s: image.Channels());
+
+                var cornersImage = new Point2f[]
+                {
+                    new Point2f(0F, size.Height),
+                    new Point2f(0F, 0F),
+                    new Point2f(size.Width, 0F),
+                    new Point2f(size.Width, size.Height)
+                };
+
+                var center = new Point2f(
+                    x: Convert.ToSingle(image.Width) / 2,
+                    y: Convert.ToSingle(image.Height) / 2);
+
+                var rotated = new RotatedRect(
+                    center: center,
+                    size: size,
+                    angle: angle);
+
+                var cornersResult = rotated.Points();
+
+                var transformed = Cv2.GetAffineTransform(
+                    src: cornersImage,
+                    dst: cornersResult);
+
+                Cv2.WarpAffine(
+                    src: image,
+                    dst: result,
+                    m: transformed,
+                    dsize: size);
+            }
+
+            return result;
+        }
+
         public static Rect? GetContour(this Mat image)
         {
             var result = default(Rect?);
@@ -175,19 +225,22 @@ namespace Score2Stream.Core.Extensions
             if (image?.Step(0) > 0
                 && image.Rows > 0)
             {
+                var anchor = new Point(-1, -1);
+                var border = new Scalar(1);
+
                 var eroded = image.Erode(
                     element: default,
-                    anchor: new Point(-1, -1),
+                    anchor: anchor,
                     iterations: erodeIterations,
                     borderType: BorderTypes.Default,
-                    borderValue: new Scalar(1));
+                    borderValue: border);
 
                 result = eroded.Dilate(
                     element: default,
-                    anchor: new Point(-1, -1),
+                    anchor: anchor,
                     iterations: dilateIterations,
                     borderType: BorderTypes.Default,
-                    borderValue: new Scalar(1));
+                    borderValue: border);
             }
 
             return result;

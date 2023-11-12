@@ -114,6 +114,19 @@ namespace Score2Stream.VideoService
 
         public TimeSpan? ProcessingTime { get; private set; }
 
+        public float Rotation
+        {
+            get { return settings.Detection.Rotation; }
+            set
+            {
+                if (settings.Detection.Rotation != value)
+                {
+                    settings.Detection.Rotation = value;
+                    settingsService.Save();
+                }
+            }
+        }
+
         public int ThresholdMatching
         {
             get { return settings.Detection.ThresholdMatching; }
@@ -242,7 +255,9 @@ namespace Score2Stream.VideoService
 
                     if (!currentFrame.Empty())
                     {
-                        frame = currentFrame.Clone();
+                        var clone = currentFrame.Clone();
+                        frame = clone.AsRotated(Rotation);
+
                         var size = frame.Size();
 
                         if (size.Width != widthLast || size.Height != heightLast)

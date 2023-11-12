@@ -9,9 +9,6 @@ namespace Score2Stream.Core.Models.Settings
     {
         #region Private Fields
 
-        private const int TickersFrequencyDefault = 10;
-        private const int TickersSize = 6;
-
         private (string, bool)[] tickers = Array.Empty<(string, bool)>();
 
         #endregion Private Fields
@@ -51,7 +48,7 @@ namespace Score2Stream.Core.Models.Settings
             }
         }
 
-        public int TickersFrequency { get; set; } = TickersFrequencyDefault;
+        public int TickersFrequency { get; set; } = Constants.TickersFrequencyDefault;
 
         public List<Tuple<string, bool>> TickersList
         {
@@ -83,11 +80,11 @@ namespace Score2Stream.Core.Models.Settings
 
         private void InitializeTickers()
         {
-            if (Tickers.Length != TickersSize)
+            if (Tickers.Length != Constants.TickersSize)
             {
                 Array.Resize(
-                    ref tickers,
-                    TickersSize);
+                    array: ref tickers,
+                    newSize: Constants.TickersSize);
             }
         }
 

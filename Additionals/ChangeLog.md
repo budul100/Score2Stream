@@ -2,7 +2,7 @@
 
 ## Version 1.6.0
 
-...
+* Input can be rotated
 
 ## Version 1.5.0
 

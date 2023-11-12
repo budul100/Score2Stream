@@ -28,6 +28,8 @@ namespace Score2Stream.Core.Interfaces
 
         TimeSpan? ProcessingTime { get; }
 
+        float Rotation { get; set; }
+
         int ThresholdMatching { get; set; }
 
         int WaitingDuration { get; set; }

@@ -35,8 +35,8 @@ namespace Score2Stream.MenuModule.ViewModels
         private const int IndexBoard = 0;
         private const int IndexClips = 1;
         private const int IndexSamples = 2;
-
         private const string InputFileText = "Select file ...";
+
         private readonly IEventAggregator eventAggregator;
         private readonly IInputService inputService;
         private readonly IRegionManager regionManager;
@@ -72,8 +72,15 @@ namespace Score2Stream.MenuModule.ViewModels
             this.InputStopAllCommand = new DelegateCommand(
                 executeMethod: () => inputService.StopAsync(),
                 canExecuteMethod: () => inputService.IsActive);
+
             this.InputCenterCommand = new DelegateCommand(
-                executeMethod: CenterInput,
+                executeMethod: ChangeInputCentred,
+                canExecuteMethod: () => inputService.IsActive);
+            this.InputRotateLeftCommand = new DelegateCommand(
+                executeMethod: ChangeInputRotateLeft,
+                canExecuteMethod: () => inputService.IsActive);
+            this.InputRotateRightCommand = new DelegateCommand(
+                executeMethod: ChangeInputRotateRight,
                 canExecuteMethod: () => inputService.IsActive);
 
             this.ClipAddCommand = new DelegateCommand(
@@ -163,13 +170,13 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public static int MaxDuration => Constants.DurationMax;
 
-        public static int MaxQueueSize => Constants.QueueSizeMax;
+        public static int MaxQueueSize => Constants.ImageQueueSizeMax;
 
         public static int MaxThreshold => Constants.ThresholdMax;
 
         public static int MinDelay => Constants.DelayMin;
 
-        public static int MinQueueSize => Constants.QueueSizeMin;
+        public static int MinQueueSize => Constants.ImageQueueSizeMin;
 
         public static string TabBoard => Constants.TabBoard;
 
@@ -191,7 +198,11 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public int ImagesQueueSize
         {
-            get { return inputService?.VideoService?.ImagesQueueSize ?? MinQueueSize; }
+            get
+            {
+                return inputService?.VideoService?.ImagesQueueSize
+                    ?? Constants.ImageQueueSizeDefault;
+            }
             set
             {
                 if (IsActive
@@ -206,6 +217,10 @@ namespace Score2Stream.MenuModule.ViewModels
         }
 
         public DelegateCommand InputCenterCommand { get; }
+
+        public DelegateCommand InputRotateLeftCommand { get; }
+
+        public DelegateCommand InputRotateRightCommand { get; }
 
         public ObservableCollection<RibbonDropDownItem> Inputs { get; } = new ObservableCollection<RibbonDropDownItem>();
 
@@ -370,9 +385,27 @@ namespace Score2Stream.MenuModule.ViewModels
 
         #region Private Methods
 
-        private void CenterInput()
+        private void ChangeInputCentred()
         {
             eventAggregator.GetEvent<VideoCenteredEvent>().Publish();
+        }
+
+        private void ChangeInputRotateLeft()
+        {
+            if (inputService?.VideoService?.Rotation > Constants.RotateMin
+                && inputService?.VideoService?.Rotation < Constants.RotateMax)
+            {
+                inputService.VideoService.Rotation -= Constants.RotateStep;
+            }
+        }
+
+        private void ChangeInputRotateRight()
+        {
+            if (inputService?.VideoService?.Rotation > Constants.RotateMin
+                && inputService?.VideoService?.Rotation < Constants.RotateMax)
+            {
+                inputService.VideoService.Rotation += Constants.RotateStep;
+            }
         }
 
         private void OnClipsChanged()
@@ -416,6 +449,11 @@ namespace Score2Stream.MenuModule.ViewModels
         private void OnVideoUpdated()
         {
             InputStopAllCommand.RaiseCanExecuteChanged();
+
+            InputCenterCommand.RaiseCanExecuteChanged();
+            InputRotateLeftCommand.RaiseCanExecuteChanged();
+            InputRotateRightCommand.RaiseCanExecuteChanged();
+
             ClipAddCommand.RaiseCanExecuteChanged();
         }
 

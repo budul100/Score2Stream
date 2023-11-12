@@ -2,22 +2,15 @@
 {
     public class Video
     {
-        #region Private Fields
-
-        private const int ImagesQueueSizeDefault = 3;
-        private const int ProcessingDelayDefault = 100;
-
-        #endregion Private Fields
-
         #region Public Properties
 
         public string FilePathVideo { get; set; }
 
-        public int ImagesQueueSize { get; set; } = ImagesQueueSizeDefault;
+        public int ImagesQueueSize { get; set; } = Constants.ImageQueueSizeDefault;
 
         public bool NoCropping { get; set; }
 
-        public int ProcessingDelay { get; set; } = ProcessingDelayDefault;
+        public int ProcessingDelay { get; set; } = Constants.DelayProcessingDefault;
 
         #endregion Public Properties
     }

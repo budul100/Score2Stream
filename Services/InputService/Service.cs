@@ -127,7 +127,8 @@ namespace Score2Stream.InputService
                     foreach (var clip in clips)
                     {
                         clip.Template = input.TemplateService.Templates?
-                            .SingleOrDefault(t => t.Name == clip.TemplateName);
+                            .FirstOrDefault(t => t.Name == clip.TemplateName
+                                && t.Samples?.Any() == true);
 
                         input.ClipService.Add(clip);
                     }

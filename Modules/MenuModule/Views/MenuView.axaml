@@ -57,6 +57,18 @@
                 Height="{StaticResource IconHeight}"
                 Kind="ImageFilterCenterFocus" />
         </ControlTemplate>
+        <ControlTemplate x:Key="IconInputRotateLeft">
+            <mat:MaterialIcon
+                Width="{StaticResource IconWidth}"
+                Height="{StaticResource IconHeight}"
+                Kind="RotateLeft" />
+        </ControlTemplate>
+        <ControlTemplate x:Key="IconInputRotateRight">
+            <mat:MaterialIcon
+                Width="{StaticResource IconWidth}"
+                Height="{StaticResource IconHeight}"
+                Kind="RotateRight" />
+        </ControlTemplate>
         <ControlTemplate x:Key="IconClipAdd">
             <mat:MaterialIcon
                 Width="{StaticResource IconWidth}"
@@ -210,15 +222,30 @@
                             FontSize="{StaticResource FontSize}"
                             LargeIcon="{DynamicResource IconCameraOff}"
                             MinSize="Large" />
+                    </rib:RibbonGroupBox>
+
+                    <rib:RibbonGroupBox Header="Video handling">
                         <rib:RibbonButton
                             Command="{Binding InputCenterCommand}"
-                            Content="Center input"
+                            Content="Center video"
                             FontSize="{StaticResource FontSize}"
                             LargeIcon="{DynamicResource IconInputCenter}"
                             MinSize="Large" />
+                        <rib:RibbonButton
+                            Command="{Binding InputRotateLeftCommand}"
+                            Content="Rotate to left"
+                            FontSize="{StaticResource FontSize}"
+                            LargeIcon="{DynamicResource IconInputRotateLeft}"
+                            MinSize="Large" />
+                        <rib:RibbonButton
+                            Command="{Binding InputRotateRightCommand}"
+                            Content="Rotate to right"
+                            FontSize="{StaticResource FontSize}"
+                            LargeIcon="{DynamicResource IconInputRotateRight}"
+                            MinSize="Large" />
                     </rib:RibbonGroupBox>
 
-                    <rib:RibbonGroupBox Header="Clips selection">
+                    <rib:RibbonGroupBox Header="Clips handling">
                         <rib:RibbonButton
                             Command="{Binding ClipAddCommand}"
                             Content="Add new clip"
