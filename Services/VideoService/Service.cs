@@ -116,12 +116,12 @@ namespace Score2Stream.VideoService
 
         public float Rotation
         {
-            get { return settings.Detection.Rotation; }
+            get { return settings.Video.Rotation; }
             set
             {
-                if (settings.Detection.Rotation != value)
+                if (settings.Video.Rotation != value)
                 {
-                    settings.Detection.Rotation = value;
+                    settings.Video.Rotation = value;
                     settingsService.Save();
                 }
             }
@@ -240,6 +240,8 @@ namespace Score2Stream.VideoService
                         throw new ApplicationException(
                             message: $"Cannot open file {fileName}.");
                     }
+
+                    Rotation = 0;
                 }
 
                 IsActive = true;

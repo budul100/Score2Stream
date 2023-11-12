@@ -12,6 +12,8 @@
 
         public int ProcessingDelay { get; set; } = Constants.DelayProcessingDefault;
 
+        public float Rotation { get; set; }
+
         #endregion Public Properties
     }
 }
