@@ -2,7 +2,9 @@
 
 ## Version 1.6.0
 
-* Input can be rotated
+* Inputs can be rotated
+* Templates can be added from menu
+* File handling adjusted to Avalonia 11
 
 ## Version 1.5.0
 
