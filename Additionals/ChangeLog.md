@@ -7,7 +7,7 @@
 ## Version 1.5.1
 
 * Inputs can be rotated
-* Templates can be added from menu
+* Templates can be added directly as menu function
 * File handling adjusted to Avalonia 11
 
 ## Version 1.5.0
