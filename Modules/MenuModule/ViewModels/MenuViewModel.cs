@@ -102,7 +102,7 @@ namespace Score2Stream.MenuModule.ViewModels
                 canExecuteMethod: () => inputService.ClipService?.UndoSizePossible == true);
 
             this.TemplateSelectCommand = new DelegateCommand<Template>(
-                executeMethod: t => inputService?.TemplateService?.Select(t));
+                executeMethod: t => SelectTemplate(t));
             this.TemplateRemoveCommand = new DelegateCommand(
                 executeMethod: () => inputService.TemplateService.RemoveAsync(),
                 canExecuteMethod: () => inputService?.TemplateService?.Active != default);
@@ -444,6 +444,8 @@ namespace Score2Stream.MenuModule.ViewModels
 
             TemplateRemoveCommand.RaiseCanExecuteChanged();
             SampleAddCommand.RaiseCanExecuteChanged();
+
+            UpdateSamples();
         }
 
         private void OnVideoUpdated()
@@ -465,9 +467,9 @@ namespace Score2Stream.MenuModule.ViewModels
             }
             else
             {
-                var fileName = input?.FileName;
+                var path = input?.FileName;
 
-                if (input?.IsActive != true || !File.Exists(fileName))
+                if (input?.IsActive != true || !File.Exists(path))
                 {
                     var mainWindow = Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
                         ? desktop.MainWindow
@@ -482,24 +484,26 @@ namespace Score2Stream.MenuModule.ViewModels
                         inputDirectory = await topLevel.StorageProvider.TryGetFolderFromPathAsync(folderPath);
                     }
 
-                    var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+                    var paths = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
                     {
                         SuggestedStartLocation = inputDirectory,
                         Title = InputFileText,
                         AllowMultiple = false
                     });
 
-                    fileName = files.FirstOrDefault()?.Path.AbsolutePath;
+                    path = paths.Count >= 1
+                        ? paths[0].Path.AbsolutePath
+                        : default;
                 }
 
-                if (File.Exists(fileName))
+                if (File.Exists(path))
                 {
-                    settings.Video.FilePathVideo = fileName;
+                    settings.Video.FilePathVideo = path;
                     settingsService.Save();
                 }
 
                 inputService.Select(
-                    fileName: fileName);
+                    fileName: path);
             }
         }
 
@@ -542,6 +546,21 @@ namespace Score2Stream.MenuModule.ViewModels
                         regionName: nameof(RegionType.EditRegion),
                         source: nameof(ViewType.Templates));
                     break;
+            }
+        }
+
+        private void SelectTemplate(Template template)
+        {
+            if (inputService?.TemplateService != default)
+            {
+                if (template == default)
+                {
+                    inputService.TemplateService.Create();
+                }
+                else
+                {
+                    inputService.TemplateService.Select(template);
+                }
             }
         }
 
