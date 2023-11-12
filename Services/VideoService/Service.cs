@@ -127,6 +127,9 @@ namespace Score2Stream.VideoService
             }
         }
 
+        public bool RotationPossible => Rotation >= Constants.RotateMin
+            && Rotation <= Constants.RotateMax;
+
         public int ThresholdMatching
         {
             get { return settings.Detection.ThresholdMatching; }

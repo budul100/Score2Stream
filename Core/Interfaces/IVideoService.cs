@@ -30,6 +30,8 @@ namespace Score2Stream.Core.Interfaces
 
         float Rotation { get; set; }
 
+        bool RotationPossible { get; }
+
         int ThresholdMatching { get; set; }
 
         int WaitingDuration { get; set; }
