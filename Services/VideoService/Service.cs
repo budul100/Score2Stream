@@ -240,8 +240,6 @@ namespace Score2Stream.VideoService
                         throw new ApplicationException(
                             message: $"Cannot open file {fileName}.");
                     }
-
-                    Rotation = 0;
                 }
 
                 IsActive = true;
