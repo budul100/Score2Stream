@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.LogicalTree;
 using Avalonia.Threading;
+using AvaloniaUI.Ribbon.Enums;
 using System;
 using System.Collections.Specialized;
 using System.Linq;

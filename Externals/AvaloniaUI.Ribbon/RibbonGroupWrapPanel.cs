@@ -1,5 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using AvaloniaUI.Ribbon.Enums;
+using AvaloniaUI.Ribbon.Interfaces;
 using System.Linq;
 
 namespace AvaloniaUI.Ribbon

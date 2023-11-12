@@ -1,6 +1,8 @@
 ﻿using Avalonia;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
+using AvaloniaUI.Ribbon.Enums;
+using AvaloniaUI.Ribbon.Interfaces;
 using System;
 
 namespace AvaloniaUI.Ribbon
@@ -10,12 +12,19 @@ namespace AvaloniaUI.Ribbon
         #region Public Fields
 
         public static readonly StyledProperty<bool> CanAddToQuickAccessProperty = RibbonButton.CanAddToQuickAccessProperty.AddOwner<RibbonToggleButton>();
+
         public static readonly StyledProperty<IControlTemplate> IconProperty = RibbonButton.IconProperty.AddOwner<RibbonToggleButton>();
+
         public static readonly StyledProperty<IControlTemplate> LargeIconProperty = RibbonButton.LargeIconProperty.AddOwner<RibbonToggleButton>();
+
         public static readonly AvaloniaProperty<RibbonControlSize> MaxSizeProperty;
+
         public static readonly AvaloniaProperty<RibbonControlSize> MinSizeProperty;
+
         public static readonly StyledProperty<IControlTemplate> QuickAccessIconProperty = RibbonButton.QuickAccessIconProperty.AddOwner<RibbonToggleButton>();
+
         public static readonly StyledProperty<IControlTemplate> QuickAccessTemplateProperty = AvaloniaProperty.Register<RibbonButton, IControlTemplate>(nameof(Template));
+
         public static readonly AvaloniaProperty<RibbonControlSize> SizeProperty;
 
         #endregion Public Fields

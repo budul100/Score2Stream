@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.Primitives;
 using Avalonia.Styling;
+using AvaloniaUI.Ribbon.Extensions;
 using System;
 using System.Collections.Specialized;
 using System.Linq;

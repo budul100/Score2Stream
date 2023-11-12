@@ -1,6 +1,6 @@
 using Avalonia.Controls.Templates;
 
-namespace AvaloniaUI.Ribbon
+namespace AvaloniaUI.Ribbon.Interfaces
 {
     public interface ICanAddToQuickAccess
     {

@@ -4,6 +4,7 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Styling;
+using AvaloniaUI.Ribbon.Interfaces;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -11,77 +12,15 @@ using System.Reactive.Linq;
 
 namespace AvaloniaUI.Ribbon
 {
-    public class QuickAccessItem : ContentControl
-    {
-        #region Public Fields
-
-        public static readonly StyledProperty<ICanAddToQuickAccess> ItemProperty = AvaloniaProperty.Register<QuickAccessItem, ICanAddToQuickAccess>(nameof(Item), null);
-
-        #endregion Public Fields
-
-        #region Public Properties
-
-        public ICanAddToQuickAccess Item
-        {
-            get => GetValue(ItemProperty);
-            set => SetValue(ItemProperty, value);
-        }
-
-        #endregion Public Properties
-
-        #region Protected Properties
-
-        protected override Type StyleKeyOverride => typeof(QuickAccessItem);
-
-        #endregion Protected Properties
-
-        #region Protected Methods
-
-        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
-        {
-            base.OnApplyTemplate(e);
-            e.NameScope.Find<MenuItem>("PART_RemoveFromQuickAccessToolbar")!.Click += (_, _) => Avalonia.VisualTree.VisualExtensions.FindAncestorOfType<QuickAccessToolbar>(this)?.RemoveItem(Item);
-        }
-
-        #endregion Protected Methods
-    }
-
-    public class QuickAccessRecommendation : AvaloniaObject//INotifyPropertyChanged
-    {
-        #region Public Fields
-
-        public static readonly StyledProperty<bool?> IsCheckedProperty = ToggleButton.IsCheckedProperty.AddOwner<QuickAccessRecommendation>();
-        public static readonly StyledProperty<ICanAddToQuickAccess> ItemProperty = QuickAccessItem.ItemProperty.AddOwner<QuickAccessRecommendation>();
-
-        #endregion Public Fields
-
-        #region Public Properties
-
-        public bool? IsChecked
-        {
-            get => GetValue(IsCheckedProperty);
-            set => SetValue(IsCheckedProperty, value);
-        }
-
-        public ICanAddToQuickAccess Item
-        {
-            get => GetValue(ItemProperty);
-            set => SetValue(ItemProperty, value);
-        }
-
-        #endregion Public Properties
-
-        /*void NotifyPropertyChanged([CallerMemberName]string propertyName = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        public event PropertyChangedEventHandler PropertyChanged;*/
-    }
-
     [TemplatePart("PART_MoreButton", typeof(ToggleButton))]
     public class QuickAccessToolbar : ItemsControl//, IKeyTipHandler
     {
         #region Public Fields
 
         public static readonly AttachedProperty<bool> IsCheckedProperty = AvaloniaProperty.RegisterAttached<QuickAccessToolbar, MenuItem, bool>("IsChecked");
+
         public static readonly DirectProperty<QuickAccessToolbar, ObservableCollection<QuickAccessRecommendation>> RecommendedItemsProperty = AvaloniaProperty.RegisterDirect<QuickAccessToolbar, ObservableCollection<QuickAccessRecommendation>>(nameof(RecommendedItems), o => o.RecommendedItems, (o, v) => o.RecommendedItems = v);
+
         public static readonly StyledProperty<Ribbon> RibbonProperty = AvaloniaProperty.Register<QuickAccessToolbar, Ribbon>(nameof(Ribbon));
 
         #endregion Public Fields

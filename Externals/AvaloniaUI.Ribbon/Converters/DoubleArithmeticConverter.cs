@@ -1,4 +1,4 @@
-namespace AvaloniaUI.Ribbon
+namespace AvaloniaUI.Ribbon.Converters
 {
     /*public enum ArithmeticOperation
     {

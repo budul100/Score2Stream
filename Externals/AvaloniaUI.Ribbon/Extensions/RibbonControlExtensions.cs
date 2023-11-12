@@ -1,39 +1,7 @@
 ﻿using Avalonia.Controls;
 
-namespace AvaloniaUI.Ribbon
+namespace AvaloniaUI.Ribbon.Extensions
 {
-    public enum RibbonControlSize
-    {
-        Small,
-        Medium,
-        Large
-    }
-
-    public interface IRibbonControl
-    {
-        #region Public Properties
-
-        RibbonControlSize MaxSize
-        {
-            get;
-            set;
-        }
-
-        RibbonControlSize MinSize
-        {
-            get;
-            set;
-        }
-
-        RibbonControlSize Size
-        {
-            get;
-            set;
-        }
-
-        #endregion Public Properties
-    }
-
     public static class RibbonControlExtensions
     {
         #region Public Methods

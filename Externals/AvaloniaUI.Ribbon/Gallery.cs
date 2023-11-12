@@ -3,7 +3,8 @@ using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
-using Avalonia.Input;
+using AvaloniaUI.Ribbon.Enums;
+using AvaloniaUI.Ribbon.Interfaces;
 using System;
 
 namespace AvaloniaUI.Ribbon
@@ -20,9 +21,13 @@ namespace AvaloniaUI.Ribbon
         #region Public Fields
 
         public static readonly StyledProperty<bool> IsDropDownOpenProperty;
+
         public static readonly StyledProperty<double> ItemHeightProperty = AvaloniaProperty.Register<Gallery, double>(nameof(ItemHeight));
+
         public static readonly AvaloniaProperty<RibbonControlSize> MaxSizeProperty;
+
         public static readonly AvaloniaProperty<RibbonControlSize> MinSizeProperty;
+
         public static readonly AvaloniaProperty<RibbonControlSize> SizeProperty;
 
         #endregion Public Fields
@@ -136,17 +141,5 @@ namespace AvaloniaUI.Ribbon
         }
 
         #endregion Private Methods
-    }
-
-    public class GalleryScrollContentPresenter : ScrollContentPresenter
-    {
-        #region Protected Methods
-
-        protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
-        {
-            //base.OnPointerWheelChanged(e);
-        }
-
-        #endregion Protected Methods
     }
 }

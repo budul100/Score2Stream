@@ -2,7 +2,7 @@
 using System;
 using System.Globalization;
 
-namespace AvaloniaUI.Ribbon
+namespace AvaloniaUI.Ribbon.Converters
 {
     public class IsNullConverter : IValueConverter
     {

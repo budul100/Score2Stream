@@ -6,7 +6,7 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Styles.Resources>
-    
+
     <StyleInclude Source="/Styles/Default/Controls/Gallery.xaml" />
     <StyleInclude Source="/Styles/Default/Controls/Ribbon.xaml" />
     <StyleInclude Source="/Styles/Default/Controls/RibbonTab.xaml" />

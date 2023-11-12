@@ -1,6 +1,8 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
+using AvaloniaUI.Ribbon.Enums;
+using AvaloniaUI.Ribbon.Interfaces;
 
 namespace AvaloniaUI.Ribbon
 {
@@ -9,14 +11,23 @@ namespace AvaloniaUI.Ribbon
         #region Public Fields
 
         public static readonly StyledProperty<bool> CanAddToQuickAccessProperty = RibbonButton.CanAddToQuickAccessProperty.AddOwner<RibbonDropDownButton>();
+
         public static readonly StyledProperty<object> ContentProperty = ContentControl.ContentProperty.AddOwner<RibbonDropDownButton>();
+
         public static readonly StyledProperty<IControlTemplate> IconProperty = RibbonButton.IconProperty.AddOwner<RibbonDropDownButton>();
+
         public static readonly StyledProperty<bool> IsDropDownOpenProperty = ComboBox.IsDropDownOpenProperty.AddOwner<RibbonDropDownButton>();
+
         public static readonly StyledProperty<IControlTemplate> LargeIconProperty = RibbonButton.LargeIconProperty.AddOwner<RibbonDropDownButton>();
+
         public static readonly AvaloniaProperty<RibbonControlSize> MaxSizeProperty;
+
         public static readonly AvaloniaProperty<RibbonControlSize> MinSizeProperty;
+
         public static readonly StyledProperty<IControlTemplate> QuickAccessIconProperty = RibbonButton.QuickAccessIconProperty.AddOwner<RibbonToggleButton>();
+
         public static readonly StyledProperty<IControlTemplate> QuickAccessTemplateProperty = RibbonButton.QuickAccessTemplateProperty.AddOwner<RibbonDropDownButton>();
+
         public static readonly AvaloniaProperty<RibbonControlSize> SizeProperty;
 
         #endregion Public Fields

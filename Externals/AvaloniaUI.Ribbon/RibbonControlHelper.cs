@@ -1,6 +1,8 @@
 ﻿using Avalonia;
 using Avalonia.Controls.Primitives;
 using Avalonia.Layout;
+using AvaloniaUI.Ribbon.Enums;
+using AvaloniaUI.Ribbon.Interfaces;
 using System;
 
 namespace AvaloniaUI.Ribbon

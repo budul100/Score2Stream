@@ -1,23 +1,19 @@
 ﻿using Avalonia;
 using Avalonia.Controls.Primitives;
+using AvaloniaUI.Ribbon.Enums;
 using System;
 using System.Windows.Input;
 
 namespace AvaloniaUI.Ribbon
 {
-    public enum GroupDisplayMode
-    {
-        Large,
-        Small/*,
-        Flyout*/
-    }
-
     public class RibbonGroupBox : HeaderedItemsControl
     {
         #region Public Fields
 
         public static readonly StyledProperty<object> CommandParameterProperty = AvaloniaProperty.Register<RibbonGroupBox, object>(nameof(CommandParameter));
+
         public static readonly DirectProperty<RibbonGroupBox, ICommand> CommandProperty;
+
         public static readonly StyledProperty<GroupDisplayMode> DisplayModeProperty = StyledProperty<RibbonGroupBox>.Register<RibbonGroupBox, GroupDisplayMode>(nameof(DisplayMode), GroupDisplayMode.Small);
 
         #endregion Public Fields

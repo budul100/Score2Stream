@@ -10,6 +10,7 @@ namespace AvaloniaUI.Ribbon
         #region Public Fields
 
         public static readonly StyledProperty<object> CommandParameterProperty;
+
         public static readonly StyledProperty<ICommand> CommandProperty;
 
         #endregion Public Fields

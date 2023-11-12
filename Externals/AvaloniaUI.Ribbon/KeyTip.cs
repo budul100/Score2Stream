@@ -15,6 +15,7 @@ namespace AvaloniaUI.Ribbon
         #region Public Fields
 
         public static readonly AttachedProperty<string> KeyTipKeysProperty = AvaloniaProperty.RegisterAttached<KeyTip, Control, string>("KeyTipKeys");
+
         public static readonly AttachedProperty<bool> ShowChildKeyTipKeysProperty = AvaloniaProperty.RegisterAttached<KeyTip, Control, bool>("ShowChildKeyTipKeys");
 
         #endregion Public Fields

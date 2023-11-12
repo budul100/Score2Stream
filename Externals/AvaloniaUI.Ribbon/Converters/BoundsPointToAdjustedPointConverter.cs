@@ -3,7 +3,7 @@ using Avalonia.Data.Converters;
 using System;
 using System.Globalization;
 
-namespace AvaloniaUI.Ribbon
+namespace AvaloniaUI.Ribbon.Converters
 {
     /*public class DoubleBindingsToPointConverter : IMultiValueConverter
     {
@@ -37,7 +37,7 @@ namespace AvaloniaUI.Ribbon
             double x = 0;
             double y = 0;
 
-            if ((value is Rect rect) && (parameter != null))
+            if (value is Rect rect && parameter != null)
             {
                 string[] paramParts = parameter.ToString().Replace(" ", string.Empty).Split(',');
 

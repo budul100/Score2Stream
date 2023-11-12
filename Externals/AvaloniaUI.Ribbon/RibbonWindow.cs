@@ -2,20 +2,14 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
-using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
-using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using System;
 using System.Collections.Generic;
-using System.Drawing.Imaging;
-using System.Globalization;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Timers;
-using Icon = System.Drawing.Icon;
 
 namespace AvaloniaUI.Ribbon
 {
@@ -25,10 +19,15 @@ namespace AvaloniaUI.Ribbon
         #region Public Fields
 
         public static readonly StyledProperty<bool> LeftSideCaptionButtonsProperty = AvaloniaProperty.Register<RibbonWindow, bool>(nameof(LeftSideCaptionButtons), UseLeftSideCaptionButtons());
+
         public static readonly StyledProperty<Orientation> OrientationProperty = StackPanel.OrientationProperty.AddOwner<RibbonWindow>();
+
         public static readonly StyledProperty<QuickAccessToolbar> QuickAccessToolbarProperty = Ribbon.QuickAccessToolbarProperty.AddOwner<RibbonWindow>();
+
         public static readonly StyledProperty<Ribbon> RibbonProperty = AvaloniaProperty.Register<RibbonWindow, Ribbon>(nameof(Ribbon), null);
+
         public static readonly StyledProperty<IBrush> TitleBarBackgroundProperty = AvaloniaProperty.Register<RibbonWindow, IBrush>(nameof(TitleBarBackground));
+
         public static readonly StyledProperty<IBrush> TitleBarForegroundProperty = AvaloniaProperty.Register<RibbonWindow, IBrush>(nameof(TitleBarForeground));
 
         #endregion Public Fields
@@ -283,54 +282,5 @@ namespace AvaloniaUI.Ribbon
         //            window.BeginResizeDrag(edge, ep);
         //    };
         //}
-    }
-
-    public class WindowIconToImageConverter : IValueConverter
-    {
-        #region Public Methods
-
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value != null)
-            {
-                var wIcon = value as WindowIcon;
-                MemoryStream stream = new MemoryStream();
-                wIcon.Save(stream);
-                stream.Position = 0;
-                try
-                {
-                    return new Bitmap(stream);
-                }
-                catch (ArgumentNullException)
-                {
-                    try
-                    {
-                        Icon icon = new Icon(stream);
-                        System.Drawing.Bitmap bmp = icon.ToBitmap();
-                        bmp.Save(stream, ImageFormat.Png);
-                        return new Bitmap(stream);
-                    }
-                    catch (ArgumentException)
-                    {
-                        Icon icon = Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetEntryAssembly().Location);
-                        System.Drawing.Bitmap bmp = icon.ToBitmap();
-                        Stream stream3 = new MemoryStream();
-                        bmp.Save(stream3, ImageFormat.Png);
-                        return new Bitmap(stream3);
-                    }
-                }
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion Public Methods
     }
 }

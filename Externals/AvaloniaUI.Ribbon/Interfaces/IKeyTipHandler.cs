@@ -1,6 +1,6 @@
 ﻿using Avalonia.Input;
 
-namespace AvaloniaUI.Ribbon
+namespace AvaloniaUI.Ribbon.Interfaces
 {
     public interface IKeyTipHandler
     {
