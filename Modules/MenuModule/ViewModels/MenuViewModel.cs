@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform.Storage;
 using AvaloniaUI.Ribbon;
 using Prism.Commands;
 using Prism.Events;
@@ -36,6 +37,7 @@ namespace Score2Stream.MenuModule.ViewModels
         private const int IndexClips = 1;
         private const int IndexSamples = 2;
         private const string InputFileText = "Select file ...";
+        private const string TemplateAddText = "Add new template";
 
         private readonly IEventAggregator eventAggregator;
         private readonly IInputService inputService;
@@ -43,7 +45,7 @@ namespace Score2Stream.MenuModule.ViewModels
         private readonly Session settings;
         private readonly ISettingsService<Session> settingsService;
 
-        private string inputDirectory;
+        private IStorageFolder inputDirectory;
         private int tabIndex;
 
         #endregion Private Fields
@@ -467,25 +469,27 @@ namespace Score2Stream.MenuModule.ViewModels
 
                 if (input?.IsActive != true || !File.Exists(fileName))
                 {
-                    if (!Directory.Exists(inputDirectory))
-                    {
-                        inputDirectory = Path.GetDirectoryName(settings.Video.FilePathVideo);
-                    }
-
-                    var dialog = new OpenFileDialog
-                    {
-                        Directory = inputDirectory,
-                        Title = InputFileText,
-                        AllowMultiple = false
-                    };
-
                     var mainWindow = Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
                         ? desktop.MainWindow
                         : default;
 
-                    var result = await dialog.ShowAsync(mainWindow);
+                    var topLevel = Window.GetTopLevel(mainWindow);
 
-                    fileName = result?.FirstOrDefault();
+                    if (!Directory.Exists(inputDirectory?.Path?.AbsolutePath)
+                        && Directory.Exists(Path.GetDirectoryName(settings.Video.FilePathVideo)))
+                    {
+                        var folderPath = Path.GetDirectoryName(settings.Video.FilePathVideo);
+                        inputDirectory = await topLevel.StorageProvider.TryGetFolderFromPathAsync(folderPath);
+                    }
+
+                    var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+                    {
+                        SuggestedStartLocation = inputDirectory,
+                        Title = InputFileText,
+                        AllowMultiple = false
+                    });
+
+                    fileName = files.FirstOrDefault()?.Path.AbsolutePath;
                 }
 
                 if (File.Exists(fileName))
@@ -617,6 +621,14 @@ namespace Score2Stream.MenuModule.ViewModels
 
                     Templates.Add(template);
                 }
+
+                var selectTemplateAdd = new RibbonDropDownItem
+                {
+                    Command = TemplateSelectCommand,
+                    Text = TemplateAddText,
+                };
+
+                Templates.Add(selectTemplateAdd);
 
                 RaisePropertyChanged(nameof(Templates));
             }
