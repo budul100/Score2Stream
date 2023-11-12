@@ -21,6 +21,7 @@ namespace Score2Stream.ClipService
         private readonly IScoreboardService scoreboardService;
 
         private int index;
+        private bool orderDescending;
 
         #endregion Private Fields
 
@@ -60,6 +61,8 @@ namespace Score2Stream.ClipService
             if (clip != default)
             {
                 Clips.Add(clip);
+
+                orderDescending = false;
 
                 scoreboardService.SetClip(
                     clip: clip,
@@ -123,9 +126,20 @@ namespace Score2Stream.ClipService
 
         public void Order()
         {
-            Clips = Clips
-                .OrderBy(c => (int)(c.Y1 * Constants.ClipPositionFactor))
-                .ThenBy(c => (int)(c.X1 * Constants.ClipPositionFactor)).ToList();
+            if (orderDescending)
+            {
+                Clips = Clips
+                    .OrderByDescending(c => (int)(c.Y1 * Constants.ClipPositionFactor))
+                    .ThenByDescending(c => (int)(c.X1 * Constants.ClipPositionFactor)).ToList();
+            }
+            else
+            {
+                Clips = Clips
+                    .OrderBy(c => (int)(c.Y1 * Constants.ClipPositionFactor))
+                    .ThenBy(c => (int)(c.X1 * Constants.ClipPositionFactor)).ToList();
+            }
+
+            orderDescending = !orderDescending;
 
             index = 0;
 
@@ -230,6 +244,8 @@ namespace Score2Stream.ClipService
                 scoreboardService.RemoveClip(clip);
 
                 Clips.Remove(clip);
+
+                orderDescending = false;
             }
         }
 

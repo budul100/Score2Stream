@@ -97,7 +97,7 @@
             <mat:MaterialIcon
                 Width="{StaticResource IconWidth}"
                 Height="{StaticResource IconHeight}"
-                Kind="SortAscending" />
+                Kind="Sort" />
         </ControlTemplate>
         <ControlTemplate x:Key="IconTemplateUse">
             <mat:MaterialIcon
@@ -151,7 +151,7 @@
             <mat:MaterialIcon
                 Width="{StaticResource IconWidth}"
                 Height="{StaticResource IconHeight}"
-                Kind="SortNumericAscending" />
+                Kind="SortNumericVariant" />
         </ControlTemplate>
     </UserControl.Resources>
 

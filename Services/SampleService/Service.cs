@@ -28,6 +28,7 @@ namespace Score2Stream.SampleService
         private readonly ISettingsService<Session> settingsService;
 
         private int index;
+        private bool orderDescending;
         private Template template;
 
         #endregion Private Fields
@@ -103,6 +104,8 @@ namespace Score2Stream.SampleService
                 }
 
                 Samples.Add(sample);
+
+                orderDescending = false;
             }
         }
 
@@ -138,7 +141,7 @@ namespace Score2Stream.SampleService
         {
             AddClip(
                 clip: clip,
-                selectSample: true);
+                select: true);
         }
 
         public void Initialize(Template template)
@@ -160,9 +163,20 @@ namespace Score2Stream.SampleService
 
         public void Order()
         {
-            Samples = Samples
-                .OrderByDescending(s => string.IsNullOrWhiteSpace(s.Value))
-                .ThenBy(s => s.Value).ToList();
+            if (orderDescending)
+            {
+                Samples = Samples
+                    .OrderByDescending(s => string.IsNullOrWhiteSpace(s.Value))
+                    .ThenByDescending(s => s.Value).ToList();
+            }
+            else
+            {
+                Samples = Samples
+                    .OrderByDescending(s => string.IsNullOrWhiteSpace(s.Value))
+                    .ThenBy(s => s.Value).ToList();
+            }
+
+            orderDescending = !orderDescending;
 
             index = 0;
 
@@ -223,7 +237,7 @@ namespace Score2Stream.SampleService
                 {
                     AddClip(
                         clip: clip,
-                        selectSample: false);
+                        select: false);
                 }
             }
         }
@@ -232,7 +246,7 @@ namespace Score2Stream.SampleService
 
         #region Private Methods
 
-        private void AddClip(Clip clip, bool selectSample)
+        private void AddClip(Clip clip, bool select)
         {
             var sample = GetSample(clip);
 
@@ -250,7 +264,7 @@ namespace Score2Stream.SampleService
                     eventAggregator.GetEvent<TemplateSelectedEvent>().Publish(sample.Template);
                 }
 
-                if (selectSample)
+                if (select)
                 {
                     Select(sample);
                 }
@@ -309,6 +323,8 @@ namespace Score2Stream.SampleService
                 sample.Template?.Samples.Remove(sample);
 
                 Samples.Remove(sample);
+
+                orderDescending = false;
             }
         }
 

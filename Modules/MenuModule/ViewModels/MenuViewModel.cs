@@ -78,10 +78,10 @@ namespace Score2Stream.MenuModule.ViewModels
                 canExecuteMethod: () => inputService.IsActive);
             this.InputRotateLeftCommand = new DelegateCommand(
                 executeMethod: ChangeInputRotateLeft,
-                canExecuteMethod: () => inputService.VideoService?.RotationPossible == true);
+                canExecuteMethod: () => inputService.VideoService?.RotationLeftPossible == true);
             this.InputRotateRightCommand = new DelegateCommand(
                 executeMethod: ChangeInputRotateRight,
-                canExecuteMethod: () => inputService.VideoService?.RotationPossible == true);
+                canExecuteMethod: () => inputService.VideoService?.RotationRightPossible == true);
 
             this.ClipAddCommand = new DelegateCommand(
                 executeMethod: () => inputService.ClipService?.Create(),
@@ -392,7 +392,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
         private void ChangeInputRotateLeft()
         {
-            if (inputService?.VideoService?.RotationPossible == true)
+            if (inputService?.VideoService?.RotationLeftPossible == true)
             {
                 inputService.VideoService.Rotation -= Constants.RotateStep;
             }
@@ -400,7 +400,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
         private void ChangeInputRotateRight()
         {
-            if (inputService?.VideoService?.RotationPossible == true)
+            if (inputService?.VideoService?.RotationRightPossible == true)
             {
                 inputService.VideoService.Rotation += Constants.RotateStep;
             }

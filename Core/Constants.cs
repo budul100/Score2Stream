@@ -30,8 +30,8 @@
 
         public const int RecognitionDurationMax = 1000 * 60;
 
-        public const double RotateMax = 5;
-        public const double RotateMin = -5;
+        public const float RotateLeftMax = -10F;
+        public const float RotateRightMax = 10F;
         public const float RotateStep = 0.2F;
 
         public const double SelectionFontSize = 16.0;
