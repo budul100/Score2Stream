@@ -3,7 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
-using Score2Stream.Core.Interfaces;
+using Score2Stream.Commons.Interfaces;
 using System;
 using System.Threading.Tasks;
 

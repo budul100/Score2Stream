@@ -27,7 +27,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\Core\Core.csproj" />
+		<ProjectReference Include="..\..\Commons\Commons.csproj" />
 		<ProjectReference Include="..\..\Services\RecognitionService\RecognitionService.csproj" />
 	</ItemGroup>
 

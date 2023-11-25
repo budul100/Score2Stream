@@ -1,7 +1,7 @@
 ﻿using Prism.Events;
 using Prism.Mvvm;
-using Score2Stream.Core.Events.Scoreboard;
-using Score2Stream.Core.Interfaces;
+using Score2Stream.Commons.Events.Scoreboard;
+using Score2Stream.Commons.Interfaces;
 
 namespace Score2Stream.ScoreboardModule.ViewModels
 {

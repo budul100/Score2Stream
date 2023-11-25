@@ -2,12 +2,12 @@
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
-using Score2Stream.Core.Enums;
-using Score2Stream.Core.Events.Clip;
-using Score2Stream.Core.Events.Template;
-using Score2Stream.Core.Events.Video;
-using Score2Stream.Core.Interfaces;
-using Score2Stream.Core.Models.Contents;
+using Score2Stream.Commons.Enums;
+using Score2Stream.Commons.Events.Clip;
+using Score2Stream.Commons.Events.Template;
+using Score2Stream.Commons.Events.Video;
+using Score2Stream.Commons.Interfaces;
+using Score2Stream.Commons.Models.Contents;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -58,7 +58,7 @@ namespace Score2Stream.ClipModule.ViewModels
                 action: () => UpdateImage(),
                 keepSubscriberReferenceAlive: true);
 
-            types = Core.Extensions.EnumExtensions
+            types = Commons.Extensions.EnumExtensions
                 .GetValues<ClipType>().ToArray();
         }
 

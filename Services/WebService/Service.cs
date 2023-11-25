@@ -1,7 +1,7 @@
 ﻿using Prism.Events;
-using Score2Stream.Core.Events.Graphics;
-using Score2Stream.Core.Events.Scoreboard;
-using Score2Stream.Core.Interfaces;
+using Score2Stream.Commons.Events.Graphics;
+using Score2Stream.Commons.Events.Scoreboard;
+using Score2Stream.Commons.Interfaces;
 using Score2Stream.WebService.Workers;
 using System;
 using System.Net;

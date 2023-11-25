@@ -1,6 +1,6 @@
-﻿using Score2Stream.Core;
-using Score2Stream.Core.Extensions;
-using Score2Stream.Core.Models.Contents;
+﻿using Score2Stream.Commons;
+using Score2Stream.Commons.Extensions;
+using Score2Stream.Commons.Models.Contents;
 using System;
 using System.Collections.Generic;
 using System.Linq;

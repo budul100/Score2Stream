@@ -1,10 +1,10 @@
 ﻿using MsBox.Avalonia.Enums;
 using Prism.Events;
-using Score2Stream.Core;
-using Score2Stream.Core.Events.Clip;
-using Score2Stream.Core.Extensions;
-using Score2Stream.Core.Interfaces;
-using Score2Stream.Core.Models.Contents;
+using Score2Stream.Commons;
+using Score2Stream.Commons.Events.Clip;
+using Score2Stream.Commons.Extensions;
+using Score2Stream.Commons.Interfaces;
+using Score2Stream.Commons.Models.Contents;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;

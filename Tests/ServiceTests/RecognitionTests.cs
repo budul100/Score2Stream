@@ -1,5 +1,5 @@
 using OpenCvSharp;
-using Score2Stream.Core.Extensions;
+using Score2Stream.Commons.Extensions;
 using System.IO;
 using Xunit;
 

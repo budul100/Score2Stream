@@ -2,13 +2,13 @@
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
-using Score2Stream.Core.Events.Detection;
-using Score2Stream.Core.Events.Sample;
-using Score2Stream.Core.Events.Template;
-using Score2Stream.Core.Events.Video;
-using Score2Stream.Core.Interfaces;
-using Score2Stream.Core.Models.Contents;
-using Score2Stream.Core.Prism;
+using Score2Stream.Commons.Events.Detection;
+using Score2Stream.Commons.Events.Sample;
+using Score2Stream.Commons.Events.Template;
+using Score2Stream.Commons.Events.Video;
+using Score2Stream.Commons.Interfaces;
+using Score2Stream.Commons.Models.Contents;
+using Score2Stream.Commons.Prism;
 using System.Collections.ObjectModel;
 using System.Linq;
 

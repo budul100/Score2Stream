@@ -1,7 +1,7 @@
 ﻿using Prism.Ioc;
 using Prism.Modularity;
 using Prism.Regions;
-using Score2Stream.Core.Enums;
+using Score2Stream.Commons.Enums;
 
 namespace Score2Stream.ClipModule
 {

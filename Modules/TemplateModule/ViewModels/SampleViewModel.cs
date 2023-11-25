@@ -2,11 +2,11 @@
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
-using Score2Stream.Core.Enums;
-using Score2Stream.Core.Events.Sample;
-using Score2Stream.Core.Events.Video;
-using Score2Stream.Core.Interfaces;
-using Score2Stream.Core.Models.Contents;
+using Score2Stream.Commons.Enums;
+using Score2Stream.Commons.Events.Sample;
+using Score2Stream.Commons.Events.Video;
+using Score2Stream.Commons.Interfaces;
+using Score2Stream.Commons.Models.Contents;
 
 namespace Score2Stream.TemplateModule.ViewModels
 {

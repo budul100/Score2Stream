@@ -1,5 +1,5 @@
-﻿using Score2Stream.Core;
-using Score2Stream.Core.Interfaces;
+﻿using Score2Stream.Commons;
+using Score2Stream.Commons.Interfaces;
 using System;
 using System.IO;
 using System.Text.Json;

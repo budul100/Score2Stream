@@ -1,5 +1,5 @@
 ﻿using OpenCvSharp;
-using Score2Stream.Core.Interfaces;
+using Score2Stream.Commons.Interfaces;
 using System;
 using System.IO;
 using TesseractOCR;

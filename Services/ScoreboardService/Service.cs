@@ -1,14 +1,14 @@
 ﻿using Avalonia.Media;
 using Prism.Events;
-using Score2Stream.Core.Enums;
-using Score2Stream.Core.Events.Clip;
-using Score2Stream.Core.Events.Graphics;
-using Score2Stream.Core.Events.Scoreboard;
-using Score2Stream.Core.Events.Video;
-using Score2Stream.Core.Interfaces;
-using Score2Stream.Core.Models.Contents;
-using Score2Stream.Core.Models.Scoreboard;
-using Score2Stream.Core.Models.Settings;
+using Score2Stream.Commons.Enums;
+using Score2Stream.Commons.Events.Clip;
+using Score2Stream.Commons.Events.Graphics;
+using Score2Stream.Commons.Events.Scoreboard;
+using Score2Stream.Commons.Events.Video;
+using Score2Stream.Commons.Interfaces;
+using Score2Stream.Commons.Models.Contents;
+using Score2Stream.Commons.Models.Scoreboard;
+using Score2Stream.Commons.Models.Settings;
 using Score2Stream.ScoreboardService.Extensions;
 using System;
 using System.Collections.Generic;
@@ -380,7 +380,7 @@ namespace Score2Stream.ScoreboardService
 
         private IEnumerable<ClipType> GetClipTypes()
         {
-            var types = Core.Extensions.EnumExtensions
+            var types = Commons.Extensions.EnumExtensions
                 .GetValues<ClipType>().ToArray();
 
             foreach (var type in types)

@@ -42,7 +42,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Core\Core.csproj" />
+		<ProjectReference Include="..\Commons\Commons.csproj" />
 		<ProjectReference Include="..\Modules\ClipModule\ClipModule.csproj" />
 		<ProjectReference Include="..\Modules\MenuModule\MenuModule.csproj" />
 		<ProjectReference Include="..\Modules\ScoreboardModule\ScoreboardModule.csproj" />

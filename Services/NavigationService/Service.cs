@@ -1,6 +1,6 @@
 ﻿using Prism.Regions;
-using Score2Stream.Core.Enums;
-using Score2Stream.Core.Interfaces;
+using Score2Stream.Commons.Enums;
+using Score2Stream.Commons.Interfaces;
 
 namespace NavigationService
 {

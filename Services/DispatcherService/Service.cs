@@ -1,5 +1,5 @@
 ﻿using Avalonia.Threading;
-using Score2Stream.Core.Interfaces;
+using Score2Stream.Commons.Interfaces;
 using System;
 using System.Threading.Tasks;
 
