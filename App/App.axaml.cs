@@ -97,8 +97,6 @@ namespace Score2Stream
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            //// Register Services
-
             var dispatcherService = new DispatcherService.Service();
             containerRegistry.RegisterInstance<IDispatcherService>(dispatcherService);
 
@@ -118,8 +116,6 @@ namespace Score2Stream
             containerRegistry.Register<IClipService, ClipService.Service>();
             containerRegistry.Register<ITemplateService, TemplateService.Service>();
             containerRegistry.Register<ISampleService, SampleService.Service>();
-
-            // Views - Generic
 
             containerRegistry.Register<MainView>();
         }
