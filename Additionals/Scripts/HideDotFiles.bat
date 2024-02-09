@@ -1,6 +1,6 @@
 @ECHO off
 
-PUSHD %1
+pushd %~dp0..\..
 
 call :treeProcess
 goto :eof
