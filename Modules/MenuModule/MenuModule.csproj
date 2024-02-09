@@ -7,9 +7,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Avalonia" Version="11.0.5" />
-		<PackageReference Include="Avalonia.Desktop" Version="11.0.5" />
-		<PackageReference Include="Material.Icons.Avalonia" Version="2.0.1" />
+		<PackageReference Include="Avalonia" Version="11.0.9" />
+		<PackageReference Include="Avalonia.Desktop" Version="11.0.9" />
+		<PackageReference Include="Material.Icons.Avalonia" Version="2.1.0" />
 	</ItemGroup>
 
 	<ItemGroup>

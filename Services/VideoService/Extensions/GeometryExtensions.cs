@@ -1,5 +1,5 @@
-﻿using OpenCvSharp;
-using System;
+﻿using System;
+using OpenCvSharp;
 
 namespace Score2Stream.VideoService.Extensions
 {
@@ -29,10 +29,10 @@ namespace Score2Stream.VideoService.Extensions
                 && secondScaled.HasValue)
             {
                 result = new Rect(
-                    x: Math.Min(firstScaled.Value.X, secondScaled.Value.X),
-                    y: Math.Min(firstScaled.Value.Y, secondScaled.Value.Y),
-                    width: Math.Abs(firstScaled.Value.X - secondScaled.Value.X),
-                    height: Math.Abs(firstScaled.Value.Y - secondScaled.Value.Y));
+                    X: Math.Min(firstScaled.Value.X, secondScaled.Value.X),
+                    Y: Math.Min(firstScaled.Value.Y, secondScaled.Value.Y),
+                    Width: Math.Abs(firstScaled.Value.X - secondScaled.Value.X),
+                    Height: Math.Abs(firstScaled.Value.Y - secondScaled.Value.Y));
             }
 
             return result;

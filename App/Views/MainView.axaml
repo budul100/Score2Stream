@@ -17,14 +17,17 @@
     prism:ViewModelLocator.AutoWireViewModel="True"
     Icon="/Assets/Score2Stream.ico"
     WindowState="{Binding WindowState, Mode=TwoWay}">
+
     <Window.Resources>
         <co:EnumToStringConverter x:Key="EnumToStringConverter" />
     </Window.Resources>
+
     <i:Interaction.Behaviors>
         <a:EventTriggerBehavior EventName="Closing" SourceObject="{Binding Window}">
             <a:InvokeCommandAction Command="{Binding OnClosingCommand}" PassEventArgsToCommand="True" />
         </a:EventTriggerBehavior>
     </i:Interaction.Behaviors>
+
     <DockPanel LastChildFill="True">
 
         <ContentControl DockPanel.Dock="Top">

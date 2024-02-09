@@ -1,7 +1,7 @@
-﻿using OpenCvSharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenCvSharp;
 
 namespace Score2Stream.Commons.Extensions
 {
@@ -58,10 +58,10 @@ namespace Score2Stream.Commons.Extensions
 
                 var cornersImage = new Point2f[]
                 {
-                    new Point2f(0F, size.Height),
-                    new Point2f(0F, 0F),
-                    new Point2f(size.Width, 0F),
-                    new Point2f(size.Width, size.Height)
+                    new(0F, size.Height),
+                    new(0F, 0F),
+                    new(size.Width, 0F),
+                    new(size.Width, size.Height)
                 };
 
                 var center = new Point2f(
@@ -115,10 +115,10 @@ namespace Score2Stream.Commons.Extensions
                 if (result == default)
                 {
                     result = new Rect(
-                        x: 0,
-                        y: 0,
-                        width: image.Width,
-                        height: image.Height);
+                        X: 0,
+                        Y: 0,
+                        Width: image.Width,
+                        Height: image.Height);
                 }
             }
 

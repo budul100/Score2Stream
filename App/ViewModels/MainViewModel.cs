@@ -29,7 +29,7 @@ namespace Score2Stream.ViewModels
         private readonly ISettingsService<Session> settingsService;
 
         private DateTime? lastUpdateTitle;
-        private string title = "Score2Stream";
+        private string title;
         private bool userWantsToQuit;
 
         #endregion Private Fields

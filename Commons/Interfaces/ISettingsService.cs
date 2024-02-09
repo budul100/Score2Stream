@@ -7,7 +7,7 @@
 
         T Get();
 
-        void Initialize(string fileName = "userSettings.json");
+        void Initialize(string fileName);
 
         void Save();
 

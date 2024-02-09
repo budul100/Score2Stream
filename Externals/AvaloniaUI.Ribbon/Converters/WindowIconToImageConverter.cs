@@ -1,11 +1,10 @@
-﻿using Avalonia.Controls;
-using Avalonia.Data.Converters;
-using Avalonia.Media.Imaging;
-using System;
+﻿using System;
+using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
-using Icon = System.Drawing.Icon;
+using Avalonia.Controls;
+using Avalonia.Data.Converters;
 
 namespace AvaloniaUI.Ribbon.Converters
 {
@@ -23,16 +22,16 @@ namespace AvaloniaUI.Ribbon.Converters
                 stream.Position = 0;
                 try
                 {
-                    return new Bitmap(stream);
+                    return new Avalonia.Media.Imaging.Bitmap(stream);
                 }
                 catch (ArgumentNullException)
                 {
                     try
                     {
-                        Icon icon = new Icon(stream);
+                        var icon = new Icon(stream);
                         System.Drawing.Bitmap bmp = icon.ToBitmap();
                         bmp.Save(stream, ImageFormat.Png);
-                        return new Bitmap(stream);
+                        return new Avalonia.Media.Imaging.Bitmap(stream);
                     }
                     catch (ArgumentException)
                     {
@@ -40,7 +39,7 @@ namespace AvaloniaUI.Ribbon.Converters
                         System.Drawing.Bitmap bmp = icon.ToBitmap();
                         Stream stream3 = new MemoryStream();
                         bmp.Save(stream3, ImageFormat.Png);
-                        return new Bitmap(stream3);
+                        return new Avalonia.Media.Imaging.Bitmap(stream3);
                     }
                 }
             }
