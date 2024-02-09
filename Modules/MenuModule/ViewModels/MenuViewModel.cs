@@ -1,4 +1,9 @@
-﻿using Avalonia;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
@@ -20,11 +25,6 @@ using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
 using Score2Stream.Commons.Prism;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
 
 namespace Score2Stream.MenuModule.ViewModels
 {
@@ -94,12 +94,15 @@ namespace Score2Stream.MenuModule.ViewModels
             this.ClipsRemoveAllCommand = new DelegateCommand(
                 executeMethod: () => inputService.ClipService?.ClearAsync(),
                 canExecuteMethod: () => inputService.ClipService?.Clips?.Any() == true);
-            this.ClipsOrderAllCommand = new DelegateCommand(
-                executeMethod: () => inputService.ClipService?.Order(),
-                canExecuteMethod: () => inputService.ClipService?.Clips?.Any() == true);
             this.ClipUndoSizeCommand = new DelegateCommand(
                 executeMethod: () => inputService.ClipService?.UndoSize(),
                 canExecuteMethod: () => inputService.ClipService?.UndoSizePossible == true);
+            this.ClipsOrderAllCommand = new DelegateCommand(
+                executeMethod: () => inputService.ClipService?.Order(),
+                canExecuteMethod: () => inputService.ClipService?.Clips?.Any() == true);
+            this.ClipsEmptyCommand = new DelegateCommand(
+                executeMethod: () => inputService.ClipService?.Empty(),
+                canExecuteMethod: () => inputService.ClipService?.Clips?.Any() == true);
 
             this.TemplateSelectCommand = new DelegateCommand<Template>(
                 executeMethod: t => SelectTemplate(t));
@@ -189,6 +192,8 @@ namespace Score2Stream.MenuModule.ViewModels
         public DelegateCommand ClipAddCommand { get; }
 
         public DelegateCommand ClipRemoveCommand { get; }
+
+        public DelegateCommand ClipsEmptyCommand { get; }
 
         public DelegateCommand ClipsOrderAllCommand { get; }
 

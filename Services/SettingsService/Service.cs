@@ -1,10 +1,10 @@
-﻿using Score2Stream.Commons;
-using Score2Stream.Commons.Interfaces;
-using System;
+﻿using System;
 using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Score2Stream.Commons;
+using Score2Stream.Commons.Interfaces;
 
 namespace Score2Stream.SettingsService
 {

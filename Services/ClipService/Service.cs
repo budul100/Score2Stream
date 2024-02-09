@@ -7,6 +7,7 @@ using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 namespace Score2Stream.ClipService
@@ -110,6 +111,14 @@ namespace Score2Stream.ClipService
                 .Publish();
 
             Select(clip);
+        }
+
+        public void Empty()
+        {
+            foreach (var clip in Clips)
+            {
+                clip.ValueLast = default;
+            }
         }
 
         public void Next(bool backward)

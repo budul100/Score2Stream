@@ -293,7 +293,8 @@ namespace Score2Stream.InputService
         private void SaveClips()
         {
             if (!isInitializing
-                && Active != default)
+                && Active != default
+                && Active.Clips != ClipService?.Clips)
             {
                 Active.Clips = ClipService?.Clips;
 
@@ -316,7 +317,8 @@ namespace Score2Stream.InputService
         private void SaveTemplates()
         {
             if (!isInitializing
-                && Active != default)
+                && Active != default
+                && Active.Templates != TemplateService?.Templates)
             {
                 Active.Templates = TemplateService?.Templates;
 

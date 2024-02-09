@@ -75,6 +75,12 @@
                 Height="{StaticResource IconHeight}"
                 Kind="VectorSquarePlus" />
         </ControlTemplate>
+        <ControlTemplate x:Key="IconClipsEmpty">
+            <mat:MaterialIcon
+                Width="{StaticResource IconWidth}"
+                Height="{StaticResource IconHeight}"
+                Kind="DeleteVariant" />
+        </ControlTemplate>
         <ControlTemplate x:Key="IconClipUndoSize">
             <mat:MaterialIcon
                 Width="{StaticResource IconWidth}"
@@ -276,6 +282,12 @@
                             FontSize="{StaticResource FontSize}"
                             LargeIcon="{DynamicResource IconClipOrderAll}"
                             MinSize="Large" />
+                        <rib:RibbonButton
+                            Command="{Binding ClipsEmptyCommand}"
+                            Content="Empty neighbours"
+                            FontSize="{StaticResource FontSize}"
+                            LargeIcon="{DynamicResource IconClipsEmpty}"
+                            MinSize="Large" />
                     </rib:RibbonGroupBox>
 
                     <rib:RibbonGroupBox Header="Video options">
@@ -318,6 +330,13 @@
                     </rib:RibbonGroupBox>
 
                     <rib:RibbonGroupBox Header="Clip options">
+                        <CheckBox
+                            Margin="0,0,4,4"
+                            VerticalAlignment="Center"
+                            Content="Deactivate neighbour detection"
+                            FontSize="{StaticResource FontSize}"
+                            IsChecked="{Binding NoNeighboring, Mode=TwoWay}"
+                            IsEnabled="{Binding IsActive}" />
                         <CheckBox
                             Margin="0,0,4,4"
                             VerticalAlignment="Center"

@@ -6,7 +6,7 @@ namespace Score2Stream.Commons.Extensions
     {
         #region Public Methods
 
-        public static T GetNext<T>(this List<T> values, T active, bool backward = false)
+        public static T GetNext<T>(this IList<T> values, T active, bool backward = false)
         {
             var result = active;
 

@@ -4,6 +4,8 @@
     {
         #region Public Properties
 
+        public bool NoNeighboring { get; set; }
+
         public bool NoRecognition { get; set; }
 
         public int ThresholdDetecting { get; set; } = Constants.DetectionThresholdDefault;

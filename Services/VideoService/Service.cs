@@ -1,4 +1,9 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using OpenCvSharp;
 using Prism.Events;
 using Score2Stream.Commons;
@@ -11,11 +16,6 @@ using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
 using Score2Stream.VideoService.Extensions;
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Score2Stream.VideoService
 {
@@ -94,6 +94,19 @@ namespace Score2Stream.VideoService
                 if (settings.Video.NoCropping != value)
                 {
                     settings.Video.NoCropping = value;
+                    settingsService.Save();
+                }
+            }
+        }
+
+        public bool NoNeighboring
+        {
+            get { return settings.Detection.NoNeighboring; }
+            set
+            {
+                if (settings.Detection.NoNeighboring != value)
+                {
+                    settings.Detection.NoNeighboring = value;
                     settingsService.Save();
                 }
             }
@@ -466,7 +479,7 @@ namespace Score2Stream.VideoService
 
                 var match = clip.GetMatches()
                     .OrderByDescending(m => m.Key >= thresholdMatching
-                        && clip.IsNeighbour(m.Value?.Value))
+                        && (NoNeighboring || clip.IsNeighbour(m.Value?.Value)))
                     .ThenByDescending(m => m.Key).FirstOrDefault();
 
                 var similarity = Convert.ToInt32(match.Key * Constants.ThresholdDivider);
