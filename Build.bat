@@ -6,7 +6,7 @@ echo.
 
 pushd .\Additionals\Scripts
 
-call Clean.bat
+call CleanFolders.bat
 
 popd
 

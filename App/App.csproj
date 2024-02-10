@@ -14,7 +14,7 @@
 
 	<PropertyGroup>
 		<AssemblyVersion>$(VersionMajor).$(VersionMinor).$(VersionBuild)</AssemblyVersion>
-		<AssemblyName>Score2Stream</AssemblyName>
+		<AssemblyName>Score2Stream_$(AssemblyVersion)</AssemblyName>
 	</PropertyGroup>
 
 	<ItemGroup>
