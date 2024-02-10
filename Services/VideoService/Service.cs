@@ -99,14 +99,14 @@ namespace Score2Stream.VideoService
             }
         }
 
-        public bool NoNeighboring
+        public bool PreferNeighbors
         {
-            get { return settings.Detection.NoNeighboring; }
+            get { return settings.Detection.PreferNeighbors; }
             set
             {
-                if (settings.Detection.NoNeighboring != value)
+                if (settings.Detection.PreferNeighbors != value)
                 {
-                    settings.Detection.NoNeighboring = value;
+                    settings.Detection.PreferNeighbors = value;
                     settingsService.Save();
                 }
             }
@@ -479,7 +479,7 @@ namespace Score2Stream.VideoService
 
                 var match = clip.GetMatches()
                     .OrderByDescending(m => m.Key >= thresholdMatching
-                        && (NoNeighboring || clip.IsNeighbour(m.Value?.Value)))
+                        && (!PreferNeighbors || clip.IsNeighbour(m.Value?.Value)))
                     .ThenByDescending(m => m.Key).FirstOrDefault();
 
                 var similarity = Convert.ToInt32(match.Key * Constants.ThresholdDivider);
