@@ -1,6 +1,6 @@
-﻿using Score2Stream.Commons.Models.Contents;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Score2Stream.Commons.Models.Contents;
 
 namespace Score2Stream.Commons.Interfaces
 {
@@ -28,9 +28,7 @@ namespace Score2Stream.Commons.Interfaces
 
         void Initialize();
 
-        void Select(Input input);
-
-        void Select(string fileName);
+        Task SelectAsync(Input input);
 
         Task StopAsync();
 

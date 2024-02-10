@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Score2Stream.Commons.Assets;
+using Score2Stream.Commons.Interfaces;
+using System;
 using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Score2Stream.Commons;
-using Score2Stream.Commons.Interfaces;
 
 namespace Score2Stream.SettingsService
 {
@@ -14,9 +14,12 @@ namespace Score2Stream.SettingsService
     {
         #region Private Fields
 
-        private const string AppName = nameof(Score2Stream);
+        private const int WaitingPositions = 2;
 
-        private readonly SemaphoreSlim saveLock = new(1, 1);
+        private readonly object saveLock = new();
+        private readonly SemaphoreSlim waitLock = new(
+            initialCount: 1,
+            maxCount: WaitingPositions);
 
         private string filePath;
         private string folderPath;
@@ -93,7 +96,7 @@ namespace Score2Stream.SettingsService
 
             var result = Path.Combine(
                 path1: appDataFolder,
-                path2: AppName);
+                path2: Texts.AppName);
 
             return result;
         }
@@ -151,17 +154,23 @@ namespace Score2Stream.SettingsService
             { }
         }
 
-        private async void SaveSettingsAsync()
+        private async Task SaveSettingsAsync()
         {
-            await saveLock.WaitAsync();
+            if (waitLock.CurrentCount < WaitingPositions)
+            {
+                await waitLock.WaitAsync();
 
-            try
-            {
-                SaveSettings();
-            }
-            finally
-            {
-                saveLock.Release();
+                try
+                {
+                    lock (saveLock)
+                    {
+                        SaveSettings();
+                    }
+                }
+                finally
+                {
+                    waitLock.Release();
+                }
             }
         }
 

@@ -1,4 +1,5 @@
 ﻿using Avalonia.Media;
+using Score2Stream.Commons.Assets;
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
@@ -55,6 +56,7 @@ namespace Score2Stream.Commons.Models.Settings
             get
             {
                 var result = new List<Tuple<string, bool>>();
+
                 foreach (var ticker in tickers)
                 {
                     result.Add(new Tuple<string, bool>(ticker.Item1, ticker.Item2));
@@ -65,6 +67,7 @@ namespace Score2Stream.Commons.Models.Settings
             set
             {
                 var result = new List<(string, bool)>();
+
                 foreach (var ticker in value)
                 {
                     result.Add((ticker.Item1, ticker.Item2));

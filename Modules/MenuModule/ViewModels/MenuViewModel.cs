@@ -1,17 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Platform.Storage;
+﻿using Avalonia.Platform.Storage;
 using AvaloniaUI.Ribbon;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Regions;
-using Score2Stream.Commons;
+using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Events.Clip;
 using Score2Stream.Commons.Events.Detection;
@@ -25,6 +17,10 @@ using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
 using Score2Stream.Commons.Prism;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Score2Stream.MenuModule.ViewModels
 {
@@ -36,7 +32,6 @@ namespace Score2Stream.MenuModule.ViewModels
         private const int IndexBoard = 0;
         private const int IndexClips = 1;
         private const int IndexSamples = 2;
-        private const string InputFileText = "Select file ...";
         private const string TemplateAddText = "Add new template";
 
         private readonly IEventAggregator eventAggregator;
@@ -70,7 +65,7 @@ namespace Score2Stream.MenuModule.ViewModels
             this.InputsUpdateCommand = new DelegateCommand(
                 executeMethod: UpdateInputs);
             this.InputSelectCommand = new DelegateCommand<Input>(
-                executeMethod: i => SelectInputAsync(i));
+                executeMethod: i => inputService.SelectAsync(i));
             this.InputStopAllCommand = new DelegateCommand(
                 executeMethod: () => inputService.StopAsync(),
                 canExecuteMethod: () => inputService.IsActive);
@@ -165,8 +160,6 @@ namespace Score2Stream.MenuModule.ViewModels
 
             eventAggregator.GetEvent<ScoreboardChangedEvent>().Subscribe(
                 action: () => ScoreboardUpdateCommand.RaiseCanExecuteChanged());
-
-            inputService.Initialize();
         }
 
         #endregion Public Constructors
@@ -464,54 +457,6 @@ namespace Score2Stream.MenuModule.ViewModels
             ClipAddCommand.RaiseCanExecuteChanged();
         }
 
-        private async void SelectInputAsync(Input input)
-        {
-            if (input?.IsDevice == true)
-            {
-                inputService.Select(input);
-            }
-            else
-            {
-                var path = input?.FileName;
-
-                if (input?.IsActive != true || !File.Exists(path))
-                {
-                    var mainWindow = Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
-                        ? desktop.MainWindow
-                        : default;
-
-                    var topLevel = Window.GetTopLevel(mainWindow);
-
-                    if (!Directory.Exists(inputDirectory?.Path?.AbsolutePath)
-                        && Directory.Exists(Path.GetDirectoryName(settings.Video.FilePathVideo)))
-                    {
-                        var folderPath = Path.GetDirectoryName(settings.Video.FilePathVideo);
-                        inputDirectory = await topLevel.StorageProvider.TryGetFolderFromPathAsync(folderPath);
-                    }
-
-                    var paths = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
-                    {
-                        SuggestedStartLocation = inputDirectory,
-                        Title = InputFileText,
-                        AllowMultiple = false
-                    });
-
-                    path = paths.Count >= 1
-                        ? paths[0].Path.AbsolutePath
-                        : default;
-                }
-
-                if (File.Exists(path))
-                {
-                    settings.Video.FilePathVideo = path;
-                    settingsService.Save();
-                }
-
-                inputService.Select(
-                    fileName: path);
-            }
-        }
-
         private void SelectTab(string tabName)
         {
             switch (tabName)
@@ -601,7 +546,7 @@ namespace Score2Stream.MenuModule.ViewModels
                 var selectFileInput = new RibbonDropDownItem
                 {
                     Command = InputSelectCommand,
-                    Text = InputFileText,
+                    Text = Texts.InputFileText,
                 };
 
                 Inputs.Add(selectFileInput);

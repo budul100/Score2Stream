@@ -6,19 +6,29 @@ using Prism.DryIoc;
 using Prism.Ioc;
 using Prism.Modularity;
 using Prism.Regions;
+using Score2Stream.App.Views;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Settings;
-using Score2Stream.Views;
 using Splat;
 using System;
 using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 
-namespace Score2Stream
+namespace Score2Stream.App
 {
     public class App
         : PrismApplication
     {
+        #region Private Fields
+
+        private IClassicDesktopStyleApplicationLifetime desktop;
+        private MainView mainWindow;
+        private SplashView splashWindow;
+
+        #endregion Private Fields
+
         #region Public Properties
 
         public static bool IsSingleViewLifetime => Environment
@@ -36,15 +46,24 @@ namespace Score2Stream
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
-
             base.Initialize();
         }
 
         public override void OnFrameworkInitializationCompleted()
         {
-            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            desktop = ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
+
+            if (desktop != default)
             {
                 desktop.Startup += OnStartup;
+
+                splashWindow = Container.Resolve<SplashView>();
+
+                desktop.MainWindow = splashWindow;
+                splashWindow.Show();
+
+                var dispatcherService = Container.Resolve<IDispatcherService>();
+                Task.Run(() => dispatcherService.InvokeAsync(InitializeApp));
             }
 
             base.OnFrameworkInitializationCompleted();
@@ -70,12 +89,11 @@ namespace Score2Stream
 
         protected override AvaloniaObject CreateShell()
         {
-            //if (IsSingleViewLifetime)
-            //    return Container.Resolve<MainControl>(); // For Linux Framebuffer or DRM
-            //else
-            //    return Container.Resolve<MainWindow>();
+            mainWindow = !IsSingleViewLifetime
+                ? Container.Resolve<MainView>()
+                : default; // For Linux Framebuffer or DRM: Container.Resolve<MainControl>();
 
-            return Container.Resolve<MainView>();
+            return mainWindow;
         }
 
         protected override void OnInitialized()
@@ -100,12 +118,10 @@ namespace Score2Stream
             var dispatcherService = new DispatcherService.Service();
             containerRegistry.RegisterInstance<IDispatcherService>(dispatcherService);
 
-            var messageBoxService = new MessageBoxService.Service(App.Current);
-            containerRegistry.RegisterInstance<IMessageBoxService>(messageBoxService);
-
             var recognitionService = new RecognitionService.Service();
             containerRegistry.RegisterInstance<IRecognitionService>(recognitionService);
 
+            containerRegistry.RegisterSingleton<IDialogService, DialogService.Service>();
             containerRegistry.RegisterSingleton<INavigationService, NavigationService.Service>();
             containerRegistry.RegisterSingleton<ISettingsService<Session>, SettingsService.Service<Session>>();
             containerRegistry.RegisterSingleton<IScoreboardService, ScoreboardService.Service>();
@@ -123,6 +139,33 @@ namespace Score2Stream
         #endregion Protected Methods
 
         #region Private Methods
+
+        private void InitializeApp()
+        {
+            try
+            {
+                var inputService = Container.Resolve<IInputService>();
+                inputService.Initialize();
+
+                desktop.MainWindow = mainWindow;
+
+                var assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
+                var iconUri = $"avares://{assemblyName}/Assets/{assemblyName}.png";
+
+                var dialogService = Container.Resolve<IDialogService>();
+                dialogService.Initialize(
+                    window: mainWindow,
+                    iconUri: iconUri);
+
+                splashWindow.Close();
+            }
+            catch (TaskCanceledException)
+            {
+                desktop.MainWindow = default;
+
+                splashWindow.Close();
+            }
+        }
 
         private void OnStartup(object s, ControlledApplicationLifetimeStartupEventArgs e)
         {

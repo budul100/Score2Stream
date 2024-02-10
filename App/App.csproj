@@ -4,6 +4,7 @@
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net6.0</TargetFramework>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
 		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
 		<ApplicationIcon>Assets\Score2Stream.ico</ApplicationIcon>
 		<VersionMajor>1</VersionMajor>
@@ -13,15 +14,11 @@
 
 	<PropertyGroup>
 		<AssemblyVersion>$(VersionMajor).$(VersionMinor).$(VersionBuild)</AssemblyVersion>
-		<AssemblyName>Score2Stream_$(AssemblyVersion)</AssemblyName>
+		<AssemblyName>Score2Stream</AssemblyName>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<AvaloniaResource Include="Assets\**" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Content Include="Assets\Score2Stream.ico" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -49,9 +46,9 @@
 		<ProjectReference Include="..\Modules\TemplateModule\TemplateModule.csproj" />
 		<ProjectReference Include="..\Modules\VideoModule\VideoModule.csproj" />
 		<ProjectReference Include="..\Services\ClipService\ClipService.csproj" />
+		<ProjectReference Include="..\Services\DialogService\DialogService.csproj" />
 		<ProjectReference Include="..\Services\DispatcherService\DispatcherService.csproj" />
 		<ProjectReference Include="..\Services\InputService\InputService.csproj" />
-		<ProjectReference Include="..\Services\MessageBoxService\MessageBoxService.csproj" />
 		<ProjectReference Include="..\Services\NavigationService\NavigationService.csproj" />
 		<ProjectReference Include="..\Services\RecognitionService\RecognitionService.csproj" />
 		<ProjectReference Include="..\Services\SampleService\SampleService.csproj" />
@@ -60,18 +57,6 @@
 		<ProjectReference Include="..\Services\TemplateService\TemplateService.csproj" />
 		<ProjectReference Include="..\Services\VideoService\VideoService.csproj" />
 		<ProjectReference Include="..\Services\WebService\WebService.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <AvaloniaXaml Update="Views\MainView.axaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </AvaloniaXaml>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Compile Update="Views\MainView.xaml.cs">
-	    <DependentUpon>MainView.axaml</DependentUpon>
-	  </Compile>
 	</ItemGroup>
 
 </Project>

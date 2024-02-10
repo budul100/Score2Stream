@@ -1,7 +1,8 @@
 ﻿using MsBox.Avalonia.Enums;
 using Prism.Events;
-using Score2Stream.Commons;
+using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Events.Clip;
+using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
@@ -17,10 +18,9 @@ namespace Score2Stream.ClipService
     {
         #region Private Fields
 
+        private readonly IDialogService dialogService;
         private readonly IEventAggregator eventAggregator;
-        private readonly IMessageBoxService messageBoxService;
         private readonly IScoreboardService scoreboardService;
-
         private int index;
         private bool orderDescending;
 
@@ -29,11 +29,11 @@ namespace Score2Stream.ClipService
         #region Public Constructors
 
         public Service(IScoreboardService scoreboardService, ITemplateService templateService,
-            IMessageBoxService messageBoxService, IEventAggregator eventAggregator)
+            IDialogService dialogService, IEventAggregator eventAggregator)
         {
             this.scoreboardService = scoreboardService;
             this.eventAggregator = eventAggregator;
-            this.messageBoxService = messageBoxService;
+            this.dialogService = dialogService;
 
             TemplateService = templateService;
         }
@@ -61,6 +61,13 @@ namespace Score2Stream.ClipService
         {
             if (clip != default)
             {
+                if (Clips.Count >= Constants.MaxCountClips)
+                {
+                    throw new MaxCountExceededException(
+                        type: typeof(Clip),
+                        maxCount: Constants.MaxCountClips);
+                }
+
                 Clips.Add(clip);
 
                 orderDescending = false;
@@ -90,7 +97,7 @@ namespace Score2Stream.ClipService
 
         public async Task ClearAsync()
         {
-            var result = await messageBoxService.GetMessageBoxResultAsync(
+            var result = await dialogService.GetMessageBoxResultAsync(
                 contentMessage: "Shall all clips be removed?",
                 contentTitle: "Remove all clips");
 
@@ -102,15 +109,25 @@ namespace Score2Stream.ClipService
 
         public void Create()
         {
-            var clip = GetClip();
+            try
+            {
+                var clip = GetClip();
 
-            Add(clip);
+                Add(clip);
 
-            eventAggregator
-                .GetEvent<ClipsChangedEvent>()
-                .Publish();
+                eventAggregator
+                    .GetEvent<ClipsChangedEvent>()
+                    .Publish();
 
-            Select(clip);
+                Select(clip);
+            }
+            catch (MaxCountExceededException exception)
+            {
+                dialogService.ShowMessageBoxAsync(
+                    contentMessage: exception.Message,
+                    contentTitle: "Maximum count exceeded",
+                    icon: Icon.Error);
+            }
         }
 
         public void Empty()
@@ -168,7 +185,7 @@ namespace Score2Stream.ClipService
 
                 if (Active.HasDimensions)
                 {
-                    result = await messageBoxService.GetMessageBoxResultAsync(
+                    result = await dialogService.GetMessageBoxResultAsync(
                         contentMessage: "Shall the selected clip be removed?",
                         contentTitle: "Remove clip");
                 }

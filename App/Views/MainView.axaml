@@ -1,5 +1,5 @@
 <Window
-    x:Class="Score2Stream.Views.MainView"
+    x:Class="Score2Stream.App.Views.MainView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
@@ -10,20 +10,25 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:rb="using:AvaloniaUI.Ribbon"
-    xmlns:vm="using:Score2Stream.ViewModels"
+    xmlns:vm="using:Score2Stream.App.ViewModels"
     Title="{Binding Title}"
     Width="{Binding Width, Mode=TwoWay}"
     Height="{Binding Height, Mode=TwoWay}"
     prism:ViewModelLocator.AutoWireViewModel="True"
-    Icon="/Assets/Score2Stream.ico"
+    x:DataType="vm:MainViewModel"
+    Icon="/Assets/Score2Stream.png"
     WindowState="{Binding WindowState, Mode=TwoWay}">
 
     <Window.Resources>
-        <co:EnumToStringConverter x:Key="EnumToStringConverter" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Window.Resources>
 
     <i:Interaction.Behaviors>
-        <a:EventTriggerBehavior EventName="Closing" SourceObject="{Binding Window}">
+        <a:EventTriggerBehavior EventName="Closing">
             <a:InvokeCommandAction Command="{Binding OnClosingCommand}" PassEventArgsToCommand="True" />
         </a:EventTriggerBehavior>
     </i:Interaction.Behaviors>

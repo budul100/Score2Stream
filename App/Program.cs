@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 
-namespace Score2Stream
+namespace Score2Stream.App
 {
     internal static class Program
     {

@@ -4,7 +4,7 @@ using MsBox.Avalonia.Enums;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
-using Score2Stream.Commons;
+using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Events.Video;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Settings;
@@ -14,7 +14,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace Score2Stream.ViewModels
+namespace Score2Stream.App.ViewModels
 {
     public class MainViewModel
         : BindableBase
@@ -22,8 +22,8 @@ namespace Score2Stream.ViewModels
         #region Private Fields
 
         private readonly string assemblyTitle;
+        private readonly IDialogService dialogService;
         private readonly IInputService inputService;
-        private readonly IMessageBoxService messageBoxService;
         private readonly IScoreboardService scoreboardService;
         private readonly Session settings;
         private readonly ISettingsService<Session> settingsService;
@@ -37,13 +37,12 @@ namespace Score2Stream.ViewModels
         #region Public Constructors
 
         public MainViewModel(ISettingsService<Session> settingsService, IInputService inputService,
-            IScoreboardService scoreboardService, IMessageBoxService messageBoxService, IEventAggregator eventAggregator)
+            IScoreboardService scoreboardService, IDialogService dialogService, IEventAggregator eventAggregator)
         {
             this.settingsService = settingsService;
             this.inputService = inputService;
             this.scoreboardService = scoreboardService;
-            this.messageBoxService = messageBoxService;
-
+            this.dialogService = dialogService;
             settings = settingsService.Get();
             assemblyTitle = GetAssemblyTitle();
 
@@ -262,7 +261,7 @@ namespace Score2Stream.ViewModels
             {
                 eventArgs.Cancel = true;
 
-                var result = await messageBoxService.GetMessageBoxResultAsync(
+                var result = await dialogService.GetMessageBoxResultAsync(
                     contentMessage: "Shall the application be closed?",
                     contentTitle: "Close application");
 

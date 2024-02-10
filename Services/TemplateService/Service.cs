@@ -1,14 +1,16 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using MsBox.Avalonia.Enums;
+﻿using MsBox.Avalonia.Enums;
 using OpenCvSharp;
 using Prism.Events;
 using Prism.Ioc;
+using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Events.Template;
+using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Score2Stream.TemplateService
 {
@@ -18,17 +20,17 @@ namespace Score2Stream.TemplateService
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
+        private readonly IDialogService dialogService;
         private readonly IEventAggregator eventAggregator;
-        private readonly IMessageBoxService messageBoxService;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public Service(IMessageBoxService messageBoxService, IContainerProvider containerProvider,
+        public Service(IDialogService dialogService, IContainerProvider containerProvider,
             IEventAggregator eventAggregator)
         {
-            this.messageBoxService = messageBoxService;
+            this.dialogService = dialogService;
             this.containerProvider = containerProvider;
             this.eventAggregator = eventAggregator;
         }
@@ -63,6 +65,7 @@ namespace Score2Stream.TemplateService
                         sample.Mat = Mat.FromImageData(
                             imageBytes: sample.Image,
                             mode: ImreadModes.Unchanged);
+
                         sample.Template = template;
 
                         template.SampleService.Add(sample);
@@ -75,22 +78,32 @@ namespace Score2Stream.TemplateService
 
         public void Create()
         {
-            var template = GetTemplate();
+            try
+            {
+                var template = GetTemplate();
 
-            AddTemplate(template);
+                AddTemplate(template);
 
-            eventAggregator
-                .GetEvent<TemplatesChangedEvent>()
-                .Publish();
+                eventAggregator
+                    .GetEvent<TemplatesChangedEvent>()
+                    .Publish();
 
-            Select(template);
+                Select(template);
+            }
+            catch (MaxCountExceededException exception)
+            {
+                dialogService.ShowMessageBoxAsync(
+                    contentMessage: exception.Message,
+                    contentTitle: "Maximum count exceeded",
+                    icon: Icon.Error);
+            }
         }
 
         public async Task RemoveAsync()
         {
             if (Active != default)
             {
-                var result = await messageBoxService.GetMessageBoxResultAsync(
+                var result = await dialogService.GetMessageBoxResultAsync(
                     contentMessage: "Shall the selected template be removed?",
                     contentTitle: "Remove template");
 
@@ -110,7 +123,12 @@ namespace Score2Stream.TemplateService
                     }
                     else
                     {
-                        Create();
+                        try
+                        {
+                            Create();
+                        }
+                        catch (MaxCountExceededException)
+                        { }
                     }
                 }
             }
@@ -137,6 +155,13 @@ namespace Score2Stream.TemplateService
         {
             if (template != default)
             {
+                if (Templates.Count >= Constants.MaxCountTemplates)
+                {
+                    throw new MaxCountExceededException(
+                        type: typeof(Template),
+                        maxCount: Constants.MaxCountTemplates);
+                }
+
                 if (template.SampleService == default)
                 {
                     template.SampleService = containerProvider

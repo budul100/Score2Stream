@@ -1,4 +1,6 @@
-﻿namespace Score2Stream.Commons.Models.Settings
+﻿using Score2Stream.Commons.Assets;
+
+namespace Score2Stream.Commons.Models.Settings
 {
     public class Video
     {

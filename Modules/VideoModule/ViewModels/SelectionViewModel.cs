@@ -1,7 +1,7 @@
 ﻿using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
-using Score2Stream.Commons;
+using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Events.Clip;
 using Score2Stream.Commons.Interfaces;

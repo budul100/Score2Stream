@@ -1,18 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
-using Score2Stream.Commons;
+using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Template;
+using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Score2Stream.SampleService
 {
@@ -21,8 +22,8 @@ namespace Score2Stream.SampleService
     {
         #region Private Fields
 
+        private readonly IDialogService dialogService;
         private readonly IEventAggregator eventAggregator;
-        private readonly IMessageBoxService messageBoxService;
         private readonly IRecognitionService recognitionService;
         private readonly Session settings;
         private readonly ISettingsService<Session> settingsService;
@@ -36,11 +37,11 @@ namespace Score2Stream.SampleService
         #region Public Constructors
 
         public Service(ISettingsService<Session> settingsService, IRecognitionService recognitionService,
-            IMessageBoxService messageBoxService, IEventAggregator eventAggregator)
+            IDialogService dialogService, IEventAggregator eventAggregator)
         {
             this.settingsService = settingsService;
             this.recognitionService = recognitionService;
-            this.messageBoxService = messageBoxService;
+            this.dialogService = dialogService;
             this.eventAggregator = eventAggregator;
 
             this.settings = settingsService.Get();
@@ -90,6 +91,13 @@ namespace Score2Stream.SampleService
         {
             if (sample?.Mat != default)
             {
+                if (Samples.Count >= Constants.MaxCountSamples)
+                {
+                    throw new MaxCountExceededException(
+                        type: typeof(Sample),
+                        maxCount: Constants.MaxCountSamples);
+                }
+
                 var centeredImage = sample.Mat.ToCentered(
                     fullWidth: sample.Width,
                     fullHeight: sample.Height);
@@ -127,7 +135,7 @@ namespace Score2Stream.SampleService
 
         public async Task ClearAsync()
         {
-            var result = await messageBoxService.GetMessageBoxResultAsync(
+            var result = await dialogService.GetMessageBoxResultAsync(
                 contentMessage: "Shall all samples be removed?",
                 contentTitle: "Remove all samples");
 
@@ -139,9 +147,19 @@ namespace Score2Stream.SampleService
 
         public void Create(Clip clip)
         {
-            AddClip(
-                clip: clip,
-                select: true);
+            try
+            {
+                AddClip(
+                    clip: clip,
+                    select: true);
+            }
+            catch (MaxCountExceededException exception)
+            {
+                dialogService.ShowMessageBoxAsync(
+                    contentMessage: exception.Message,
+                    contentTitle: "Maximum count exceeded",
+                    icon: Icon.Error);
+            }
         }
 
         public void Initialize(Template template)
@@ -196,7 +214,7 @@ namespace Score2Stream.SampleService
 
                 if (Active.IsVerified)
                 {
-                    result = await messageBoxService.GetMessageBoxResultAsync(
+                    result = await dialogService.GetMessageBoxResultAsync(
                         contentMessage: "Shall the selected sample be removed?",
                         contentTitle: "Remove sample");
                 }
@@ -233,11 +251,17 @@ namespace Score2Stream.SampleService
                 var relevant = GetSimilar(clip);
 
                 if (IsDetection
-                    && (relevant == default || relevant.Type == SampleType.None))
+                    && (relevant == default || relevant.Type == SampleType.None)
+                    && Samples.Count < Constants.MaxCountClips)
                 {
-                    AddClip(
-                        clip: clip,
-                        select: false);
+                    try
+                    {
+                        AddClip(
+                            clip: clip,
+                            select: false);
+                    }
+                    catch (MaxCountExceededException)
+                    { }
                 }
             }
         }

@@ -2,12 +2,12 @@ using Avalonia.Controls;
 
 namespace Score2Stream.App.Views
 {
-    public partial class MainView
+    public partial class SplashView
         : Window
     {
         #region Public Constructors
 
-        public MainView()
+        public SplashView()
         {
             InitializeComponent();
         }

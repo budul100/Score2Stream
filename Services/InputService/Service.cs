@@ -1,15 +1,19 @@
-﻿using Hompus.VideoInputDevices;
+﻿using Avalonia.Platform.Storage;
+using Hompus.VideoInputDevices;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Prism.Ioc;
+using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Events.Clip;
 using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Template;
 using Score2Stream.Commons.Events.Video;
+using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -23,22 +27,23 @@ namespace Score2Stream.InputService
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
+        private readonly IDialogService dialogService;
         private readonly IEventAggregator eventAggregator;
-        private readonly IMessageBoxService messageBoxService;
         private readonly Session settings;
         private readonly ISettingsService<Session> settingsService;
 
         private bool isInitializing;
+        private IStorageFolder startLocation;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public Service(ISettingsService<Session> settingsService, IMessageBoxService messageBoxService,
+        public Service(ISettingsService<Session> settingsService, IDialogService dialogService,
             IContainerProvider containerProvider, IEventAggregator eventAggregator)
         {
             this.settingsService = settingsService;
-            this.messageBoxService = messageBoxService;
+            this.dialogService = dialogService;
             this.containerProvider = containerProvider;
             this.eventAggregator = eventAggregator;
 
@@ -74,6 +79,8 @@ namespace Score2Stream.InputService
             eventAggregator.GetEvent<SampleUpdatedEvent>().Subscribe(
                 action: _ => SaveTemplates(),
                 keepSubscriberReferenceAlive: true);
+
+            Task.Run(async () => startLocation = await dialogService.GetFolderAsync(settings.Video.FilePathVideo));
         }
 
         #endregion Public Constructors
@@ -116,7 +123,12 @@ namespace Score2Stream.InputService
 
                     foreach (var template in templates)
                     {
-                        input.TemplateService.Add(template);
+                        try
+                        {
+                            input.TemplateService.Add(template);
+                        }
+                        catch (MaxCountExceededException)
+                        { }
                     }
                 }
 
@@ -130,7 +142,12 @@ namespace Score2Stream.InputService
                             .FirstOrDefault(t => t.Name == clip.TemplateName
                                 && t.Samples?.Any() == true);
 
-                        input.ClipService.Add(clip);
+                        try
+                        {
+                            input.ClipService.Add(clip);
+                        }
+                        catch (MaxCountExceededException)
+                        { }
                     }
                 }
             }
@@ -138,7 +155,7 @@ namespace Score2Stream.InputService
             var relevant = Inputs.FirstOrDefault(i => !i.IsDevice
                 || settings?.Inputs?.Any(s => s.DeviceId == i.DeviceId) == true);
 
-            Select(relevant);
+            SelectInput(relevant);
 
             isInitializing = false;
 
@@ -150,40 +167,25 @@ namespace Score2Stream.InputService
                 .Publish();
         }
 
-        public void Select(Input input)
+        public async Task SelectAsync(Input input)
         {
-            if (input != default)
+            if (input?.IsDevice != true
+                && (input?.IsActive != true || !File.Exists(input?.FileName)))
             {
-                RunInput(input);
-
-                if (input != Active)
+                try
                 {
-                    Active = input;
-
-                    if (TemplateService != default)
-                    {
-                        if (TemplateService.Templates?.Any() != true)
-                        {
-                            TemplateService.Create();
-                        }
-
-                        TemplateService.Select(TemplateService.Templates?.FirstOrDefault());
-                    }
-
-                    eventAggregator
-                        .GetEvent<InputSelectedEvent>()
-                        .Publish(Active);
-
-                    SaveInputs();
+                    input = await GetInputAsync();
+                }
+                catch (MaxCountExceededException exception)
+                {
+                    await dialogService.ShowMessageBoxAsync(
+                        contentMessage: exception.Message,
+                        contentTitle: "Maximum count exceeded",
+                        icon: Icon.Error);
                 }
             }
-        }
 
-        public void Select(string fileName)
-        {
-            var input = GetInput(fileName);
-
-            Select(input);
+            SelectInput(input);
         }
 
         public async Task StopAsync()
@@ -193,7 +195,7 @@ namespace Score2Stream.InputService
 
             if (relevants.Any())
             {
-                var result = await messageBoxService.GetMessageBoxResultAsync(
+                var result = await dialogService.GetMessageBoxResultAsync(
                     contentMessage: "Shall all inputs be stopped?",
                     contentTitle: "Stop inputs");
 
@@ -224,6 +226,13 @@ namespace Score2Stream.InputService
 
             if (File.Exists(fileName))
             {
+                if (Inputs.Count >= Constants.MaxCountInputs)
+                {
+                    throw new MaxCountExceededException(
+                        type: typeof(Input),
+                        maxCount: Constants.MaxCountInputs);
+                }
+
                 result = Inputs
                     .SingleOrDefault(i => i.FileName == fileName);
 
@@ -232,7 +241,7 @@ namespace Score2Stream.InputService
                     result = new Input(false)
                     {
                         FileName = fileName,
-                        Guid = System.Guid.NewGuid(),
+                        Guid = Guid.NewGuid(),
                         Name = Path.GetFileName(fileName),
                     };
 
@@ -253,11 +262,47 @@ namespace Score2Stream.InputService
                 result = new Input(true)
                 {
                     DeviceId = deviceId,
-                    Guid = System.Guid.NewGuid(),
+                    Guid = Guid.NewGuid(),
                     Name = name,
                 };
 
                 Inputs.Add(result);
+            }
+
+            return result;
+        }
+
+        private async Task<Input> GetInputAsync()
+        {
+            if (Inputs.Count >= Constants.MaxCountInputs)
+            {
+                throw new MaxCountExceededException(
+                    type: typeof(Input),
+                    maxCount: Constants.MaxCountInputs);
+            }
+
+            var result = default(Input);
+
+            var paths = await dialogService.OpenFilePickerAsync(
+                title: Texts.InputFileText,
+                allowMultiple: false,
+                startLocation: startLocation);
+
+            if (paths?.Any() == true)
+            {
+                var fileName = paths
+                    .Select(p => p.Path.LocalPath)
+                    .FirstOrDefault(p => File.Exists(p));
+
+                if (!string.IsNullOrWhiteSpace(fileName))
+                {
+                    startLocation = await dialogService.GetFolderAsync(fileName);
+
+                    settings.Video.FilePathVideo = fileName;
+                    settingsService.Save();
+
+                    result = GetInput(fileName);
+                }
             }
 
             return result;
@@ -293,8 +338,7 @@ namespace Score2Stream.InputService
         private void SaveClips()
         {
             if (!isInitializing
-                && Active != default
-                && Active.Clips != ClipService?.Clips)
+                && Active != default)
             {
                 Active.Clips = ClipService?.Clips;
 
@@ -306,19 +350,23 @@ namespace Score2Stream.InputService
         {
             if (!isInitializing)
             {
-                settings.Inputs = Inputs
+                var inputs = Inputs
                     .Where(i => i.IsActive
                         && !i.IsEnded).ToList();
 
-                settingsService.Save();
+                if (settings.Inputs != inputs)
+                {
+                    settings.Inputs = inputs;
+
+                    settingsService.Save();
+                }
             }
         }
 
         private void SaveTemplates()
         {
             if (!isInitializing
-                && Active != default
-                && Active.Templates != TemplateService?.Templates)
+                && Active != default)
             {
                 Active.Templates = TemplateService?.Templates;
 
@@ -337,6 +385,40 @@ namespace Score2Stream.InputService
                 }
 
                 settingsService.Save();
+            }
+        }
+
+        private void SelectInput(Input input)
+        {
+            if (input != default)
+            {
+                RunInput(input);
+
+                if (input != Active)
+                {
+                    Active = input;
+
+                    if (TemplateService != default)
+                    {
+                        if (TemplateService.Templates?.Any() != true)
+                        {
+                            try
+                            {
+                                TemplateService.Create();
+                            }
+                            catch (MaxCountExceededException)
+                            { }
+                        }
+
+                        TemplateService.Select(TemplateService.Templates?.FirstOrDefault());
+                    }
+
+                    eventAggregator
+                        .GetEvent<InputSelectedEvent>()
+                        .Publish(Active);
+
+                    SaveInputs();
+                }
             }
         }
 
@@ -393,12 +475,19 @@ namespace Score2Stream.InputService
 
                 var files = settings.Inputs
                     .Where(i => !i.IsDevice)
-                    .Select(i => GetInput(i.FileName)).ToArray();
+                    .Select(i => i.FileName).ToArray();
 
-                foreach (var file in files)
+                try
                 {
-                    RunInput(file);
+                    foreach (var file in files)
+                    {
+                        var input = GetInput(file);
+
+                        RunInput(input);
+                    }
                 }
+                catch (MaxCountExceededException)
+                { }
             }
         }
 

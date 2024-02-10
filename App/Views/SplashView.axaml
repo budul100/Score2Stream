@@ -1,0 +1,55 @@
+<Window
+    x:Class="Score2Stream.App.Views.SplashView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:prism="http://prismlibrary.com/"
+    xmlns:vm="using:Score2Stream.App.ViewModels"
+    Title="SplashScreen"
+    Width="{StaticResource SplashViewSize}"
+    Height="{StaticResource SplashViewSize}"
+    prism:ViewModelLocator.AutoWireViewModel="True"
+    x:DataType="vm:SplashViewModel"
+    SystemDecorations="None"
+    Topmost="True"
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid ColumnDefinitions="*,Auto" RowDefinitions="*,Auto">
+        <Image
+            Grid.Row="0"
+            Grid.RowSpan="2"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            Source="/Assets/Score2Stream.jpg" />
+        <TextBlock
+            Grid.Row="1"
+            Grid.Column="0"
+            Margin="{StaticResource ContentMargin}"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Foreground="White"
+            Text="{Binding Message}" />
+        <Button
+            Grid.Row="1"
+            Grid.Column="2"
+            Margin="{StaticResource ContentMargin}"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            DockPanel.Dock="Bottom"
+            Foreground="White">
+            Cancel
+        </Button>
+    </Grid>
+</Window>

@@ -1,0 +1,11 @@
+<ResourceDictionary
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:co="using:Score2Stream.Commons.Converters">
+
+    <x:Double x:Key="SplashViewSize">500</x:Double>
+
+    <Thickness x:Key="ContentMargin">4</Thickness>
+
+    <co:EnumToStringConverter x:Key="EnumToStringConverter" />
+</ResourceDictionary>

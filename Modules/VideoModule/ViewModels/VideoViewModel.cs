@@ -1,4 +1,7 @@
-﻿using Avalonia.Controls.PanAndZoom;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using Avalonia.Controls.PanAndZoom;
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using MsBox.Avalonia.Enums;
@@ -6,16 +9,13 @@ using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
-using Score2Stream.Commons;
+using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Events.Clip;
 using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Events.Video;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Prism;
-using System;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace Score2Stream.VideoModule.ViewModels
 {
@@ -25,9 +25,9 @@ namespace Score2Stream.VideoModule.ViewModels
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
+        private readonly IDialogService dialogService;
         private readonly IEventAggregator eventAggregator;
         private readonly IInputService inputService;
-        private readonly IMessageBoxService messageBoxService;
         private readonly INavigationService navigationService;
 
         private SelectionViewModel activeSelection;
@@ -50,14 +50,14 @@ namespace Score2Stream.VideoModule.ViewModels
 
         #region Public Constructors
 
-        public VideoViewModel(IInputService inputService, IMessageBoxService messageBoxService,
-            INavigationService navigationService, IContainerProvider containerProvider, IRegionManager regionManager,
+        public VideoViewModel(IInputService inputService, INavigationService navigationService,
+            IDialogService dialogService, IContainerProvider containerProvider, IRegionManager regionManager,
             IEventAggregator eventAggregator)
             : base(regionManager)
         {
             this.inputService = inputService;
-            this.messageBoxService = messageBoxService;
             this.navigationService = navigationService;
+            this.dialogService = dialogService;
             this.containerProvider = containerProvider;
             this.eventAggregator = eventAggregator;
 
@@ -273,7 +273,7 @@ namespace Score2Stream.VideoModule.ViewModels
                 if (ActiveSelection.Clip.HasDimensions
                     && (ActiveSelection.Clip?.Template?.Samples?.Any() == true))
                 {
-                    dimensionsCanBeSet = await messageBoxService.GetMessageBoxResultAsync(
+                    dimensionsCanBeSet = await dialogService.GetMessageBoxResultAsync(
                         contentMessage: "Shall the dimension of the clip be changed?",
                         contentTitle: "Change dimension");
                 }

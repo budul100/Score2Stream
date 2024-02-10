@@ -1,11 +1,11 @@
-﻿namespace Score2Stream.Commons
+﻿namespace Score2Stream.Commons.Assets
 {
     public static class Constants
     {
         #region Public Fields
 
-        public const int AppHeightDefault = 800;
-        public const int AppWidthDefault = 1200;
+        public const int AppSizeHeightDefault = 800;
+        public const int AppSizeWidthDefault = 1200;
 
         public const int ClipPositionFactor = 50;
 
@@ -24,6 +24,11 @@
         public const int ImageQueueSizeDefault = 3;
         public const int ImageQueueSizeMax = 20;
         public const int ImageQueueSizeMin = 1;
+
+        public const int MaxCountClips = 20;
+        public const int MaxCountInputs = 5;
+        public const int MaxCountSamples = 100;
+        public const int MaxCountTemplates = 10;
 
         public const int PortHttpWebServer = 5003;
         public const int PortHttpWebSocket = 9000;
