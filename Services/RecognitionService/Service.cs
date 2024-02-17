@@ -1,7 +1,7 @@
-﻿using OpenCvSharp;
-using Score2Stream.Commons.Interfaces;
-using System;
+﻿using System;
 using System.IO;
+using OpenCvSharp;
+using Score2Stream.Commons.Interfaces;
 using TesseractOCR;
 using TesseractOCR.Enums;
 using TesseractOCR.Pix;
