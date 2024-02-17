@@ -29,7 +29,6 @@ namespace Score2Stream.InputService
         private readonly IContainerProvider containerProvider;
         private readonly IDialogService dialogService;
         private readonly IEventAggregator eventAggregator;
-        private readonly Session settings;
         private readonly ISettingsService<Session> settingsService;
 
         private bool isInitializing;
@@ -46,8 +45,6 @@ namespace Score2Stream.InputService
             this.dialogService = dialogService;
             this.containerProvider = containerProvider;
             this.eventAggregator = eventAggregator;
-
-            this.settings = settingsService.Get();
 
             eventAggregator.GetEvent<VideoStartedEvent>().Subscribe(
                 action: OnVideoChanged,
@@ -79,8 +76,6 @@ namespace Score2Stream.InputService
             eventAggregator.GetEvent<SampleUpdatedEvent>().Subscribe(
                 action: _ => SaveTemplates(),
                 keepSubscriberReferenceAlive: true);
-
-            Task.Run(async () => startLocation = await dialogService.GetFolderAsync(settings.Video.FilePathVideo));
         }
 
         #endregion Public Constructors
@@ -109,13 +104,15 @@ namespace Score2Stream.InputService
         {
             isInitializing = true;
 
+            Task.Run(async () => startLocation = await dialogService.GetFolderAsync(settingsService.Contents.Video.FilePathVideo));
+
             UpdateInputs();
 
             foreach (var input in Inputs)
             {
                 var current = input.IsDevice
-                    ? settings?.Inputs?.SingleOrDefault(i => i.DeviceId == input.DeviceId)
-                    : settings?.Inputs?.SingleOrDefault(i => i.FileName == input.FileName);
+                    ? settingsService.Contents.Inputs?.SingleOrDefault(i => i.DeviceId == input.DeviceId)
+                    : settingsService.Contents.Inputs?.SingleOrDefault(i => i.FileName == input.FileName);
 
                 if (current?.Templates?.Any() == true)
                 {
@@ -153,7 +150,7 @@ namespace Score2Stream.InputService
             }
 
             var relevant = Inputs.FirstOrDefault(i => !i.IsDevice
-                || settings?.Inputs?.Any(s => s.DeviceId == i.DeviceId) == true);
+                || settingsService.Contents.Inputs?.Any(s => s.DeviceId == i.DeviceId) == true);
 
             SelectInput(relevant);
 
@@ -298,7 +295,7 @@ namespace Score2Stream.InputService
                 {
                     startLocation = await dialogService.GetFolderAsync(fileName);
 
-                    settings.Video.FilePathVideo = fileName;
+                    settingsService.Contents.Video.FilePathVideo = fileName;
                     settingsService.Save();
 
                     result = GetInput(fileName);
@@ -354,9 +351,9 @@ namespace Score2Stream.InputService
                     .Where(i => i.IsActive
                         && !i.IsEnded).ToList();
 
-                if (settings.Inputs != inputs)
+                if (settingsService.Contents.Inputs != inputs)
                 {
-                    settings.Inputs = inputs;
+                    settingsService.Contents.Inputs = inputs;
 
                     settingsService.Save();
                 }
@@ -465,18 +462,18 @@ namespace Score2Stream.InputService
         {
             UpdateDevices();
 
-            if (settings.Inputs?.Any() == true)
+            if (settingsService.Contents.Inputs?.Any() == true)
             {
                 var devices = Inputs
                     .Where(i => i.IsDevice)
-                    .Where(d => settings.Inputs.Any(i => i.DeviceId == d.DeviceId)).ToArray();
+                    .Where(d => settingsService.Contents.Inputs.Any(i => i.DeviceId == d.DeviceId)).ToArray();
 
                 foreach (var device in devices)
                 {
                     RunInput(device);
                 }
 
-                var files = settings.Inputs
+                var files = settingsService.Contents.Inputs
                     .Where(i => !i.IsDevice)
                     .Select(i => i.FileName).ToArray();
 

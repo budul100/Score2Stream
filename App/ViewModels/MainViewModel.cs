@@ -1,4 +1,9 @@
-﻿using Avalonia.Controls;
+﻿using System;
+using System.ComponentModel;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using MsBox.Avalonia.Enums;
 using Prism.Commands;
@@ -8,11 +13,6 @@ using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Events.Video;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Settings;
-using System;
-using System.ComponentModel;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 
 namespace Score2Stream.App.ViewModels
 {
@@ -25,7 +25,6 @@ namespace Score2Stream.App.ViewModels
         private readonly IDialogService dialogService;
         private readonly IInputService inputService;
         private readonly IScoreboardService scoreboardService;
-        private readonly Session settings;
         private readonly ISettingsService<Session> settingsService;
 
         private DateTime? lastUpdateTitle;
@@ -43,14 +42,16 @@ namespace Score2Stream.App.ViewModels
             this.inputService = inputService;
             this.scoreboardService = scoreboardService;
             this.dialogService = dialogService;
-            settings = settingsService.Get();
-            assemblyTitle = GetAssemblyTitle();
 
-            this.OnClosingCommand = new DelegateCommand<CancelEventArgs>(OnClosingAsync);
+            OnClosingCommand = new DelegateCommand<CancelEventArgs>(OnClosingAsync);
+
+            assemblyTitle = GetAssemblyTitle();
 
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
                 action: () => UpdateTitle(),
                 keepSubscriberReferenceAlive: true);
+
+            LoadSettings();
 
             UpdateTitle();
         }
@@ -59,17 +60,18 @@ namespace Score2Stream.App.ViewModels
 
         #region Public Properties
 
-        public int Height
+        public int? Height
         {
             get
             {
-                return settings.App.Height;
+                return settingsService.Contents?.App.Height;
             }
             set
             {
-                if (settings.App.Height != value)
+                if (value.HasValue
+                    && settingsService.Contents.App.Height != value)
                 {
-                    settings.App.Height = value;
+                    settingsService.Contents.App.Height = value.Value;
 
                     settingsService.Save();
 
@@ -86,17 +88,18 @@ namespace Score2Stream.App.ViewModels
             set { SetProperty(ref title, value); }
         }
 
-        public int Width
+        public int? Width
         {
             get
             {
-                return settings.App.Width;
+                return settingsService.Contents?.App.Width;
             }
             set
             {
-                if (settings.App.Width != value)
+                if (value.HasValue
+                    && settingsService.Contents.App.Width != value)
                 {
-                    settings.App.Width = value;
+                    settingsService.Contents.App.Width = value.Value;
 
                     settingsService.Save();
 
@@ -105,17 +108,26 @@ namespace Score2Stream.App.ViewModels
             }
         }
 
-        public WindowState WindowState
+        public WindowState? WindowState
         {
             get
             {
-                return Enum.Parse<WindowState>(settings.App.WindowState);
+                if (Enum.TryParse<WindowState>(
+                    value: settingsService.Contents?.App.WindowState,
+                    result: out var result))
+                {
+                    return result;
+                }
+                else
+                {
+                    return default;
+                }
             }
             set
             {
-                if (settings.App.WindowState != value.ToString())
+                if (settingsService.Contents.App.WindowState != value.ToString())
                 {
-                    settings.App.WindowState = value.ToString();
+                    settingsService.Contents.App.WindowState = value.ToString();
 
                     settingsService.Save();
 
@@ -146,7 +158,7 @@ namespace Score2Stream.App.ViewModels
                 version.Append(assembly.Version.Build);
             }
 
-            var result = $"{nameof(Score2Stream)} ({version})";
+            var result = $"{nameof(Score2Stream)} {version}";
 
             return result;
         }
@@ -250,6 +262,15 @@ namespace Score2Stream.App.ViewModels
             }
 
             return result.ToString();
+        }
+
+        private void LoadSettings()
+        {
+            var sessionPath = settingsService.GetPath(
+                appName: Texts.AppName,
+                fileName: Constants.SettingsFileNameDefault);
+
+            settingsService.Load(sessionPath);
         }
 
         private async void OnClosingAsync(CancelEventArgs eventArgs)

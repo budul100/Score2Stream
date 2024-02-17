@@ -1,4 +1,8 @@
-﻿using MsBox.Avalonia.Enums;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Events.Clip;
@@ -6,10 +10,6 @@ using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
 
 namespace Score2Stream.ClipService
 {
@@ -21,6 +21,7 @@ namespace Score2Stream.ClipService
         private readonly IDialogService dialogService;
         private readonly IEventAggregator eventAggregator;
         private readonly IScoreboardService scoreboardService;
+
         private int index;
         private bool orderDescending;
 

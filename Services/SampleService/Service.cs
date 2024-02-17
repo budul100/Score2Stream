@@ -25,7 +25,6 @@ namespace Score2Stream.SampleService
         private readonly IDialogService dialogService;
         private readonly IEventAggregator eventAggregator;
         private readonly IRecognitionService recognitionService;
-        private readonly Session settings;
         private readonly ISettingsService<Session> settingsService;
 
         private int index;
@@ -43,8 +42,6 @@ namespace Score2Stream.SampleService
             this.recognitionService = recognitionService;
             this.dialogService = dialogService;
             this.eventAggregator = eventAggregator;
-
-            this.settings = settingsService.Get();
         }
 
         #endregion Public Constructors
@@ -57,12 +54,12 @@ namespace Score2Stream.SampleService
 
         public bool NoRecognition
         {
-            get { return settings.Detection.NoRecognition; }
+            get { return settingsService.Contents.Detection.NoRecognition; }
             set
             {
-                if (settings.Detection.NoRecognition != value)
+                if (settingsService.Contents.Detection.NoRecognition != value)
                 {
-                    settings.Detection.NoRecognition = value;
+                    settingsService.Contents.Detection.NoRecognition = value;
                     settingsService.Save();
                 }
             }
@@ -72,12 +69,12 @@ namespace Score2Stream.SampleService
 
         public int ThresholdDetecting
         {
-            get { return settings.Detection.ThresholdDetecting; }
+            get { return settingsService.Contents.Detection.ThresholdDetecting; }
             set
             {
-                if (settings.Detection.ThresholdDetecting != value)
+                if (settingsService.Contents.Detection.ThresholdDetecting != value)
                 {
-                    settings.Detection.ThresholdDetecting = value;
+                    settingsService.Contents.Detection.ThresholdDetecting = value;
                     settingsService.Save();
                 }
             }

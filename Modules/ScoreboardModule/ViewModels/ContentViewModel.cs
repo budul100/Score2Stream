@@ -1,4 +1,6 @@
-﻿using Avalonia.Media;
+﻿using System.Collections.ObjectModel;
+using System.Linq;
+using Avalonia.Media;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
@@ -6,8 +8,6 @@ using Score2Stream.Commons.Events.Scoreboard;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Settings;
 using Score2Stream.Commons.Prism;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace Score2Stream.ScoreboardModule.ViewModels
 {
@@ -301,9 +301,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         private void InitializeTickers()
         {
-            var settings = settingsService.Get();
-
-            for (var index = 0; index < settings.Scoreboard.Tickers.Length; index++)
+            for (var index = 0; index < settingsService.Contents.Scoreboard.Tickers.Length; index++)
             {
                 var current = containerProvider.Resolve<TickerViewModel>();
 

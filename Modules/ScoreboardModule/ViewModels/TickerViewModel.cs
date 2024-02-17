@@ -12,6 +12,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         private readonly IEventAggregator eventAggregator;
         private readonly IScoreboardService scoreboardService;
+
         private int number;
 
         #endregion Private Fields
@@ -83,7 +84,8 @@ namespace Score2Stream.ScoreboardModule.ViewModels
             }
         }
 
-        public bool UpToDate => scoreboardService.TickersUpToDate[number];
+        public bool UpToDate => scoreboardService?.TickersUpToDate?.Length == 0
+            || scoreboardService.TickersUpToDate[number];
 
         #endregion Public Properties
 

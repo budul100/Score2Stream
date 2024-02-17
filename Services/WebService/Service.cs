@@ -1,13 +1,15 @@
-﻿using Prism.Events;
+﻿using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Reflection.Metadata;
+using System.Threading;
+using System.Threading.Tasks;
+using Prism.Events;
+using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Events.Graphics;
 using Score2Stream.Commons.Events.Scoreboard;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.WebService.Workers;
-using System;
-using System.Net;
-using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Score2Stream.WebService
 {
@@ -15,9 +17,6 @@ namespace Score2Stream.WebService
         : IWebService
     {
         #region Private Fields
-
-        private const int PortServerHttpDefault = 5000;
-        private const int PortSocketHttpDefault = 9000;
 
         private readonly IDispatcherService dispatcherService;
         private readonly IEventAggregator eventAggregator;
@@ -51,11 +50,11 @@ namespace Score2Stream.WebService
         public bool IsActive => webSocket != default
             && webServer != default;
 
-        public int PortServerHttp { get; set; } = PortServerHttpDefault;
+        public int PortServerHttp { get; set; } = Constants.PortServerHttpDefault;
 
         public int PortServerHttps { get; set; }
 
-        public int PortSocketHttp { get; set; } = PortSocketHttpDefault;
+        public int PortSocketHttp { get; set; } = Constants.PortSocketHttpDefault;
 
         public int PortSocketHttps { get; set; }
 

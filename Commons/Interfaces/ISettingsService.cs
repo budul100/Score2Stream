@@ -1,15 +1,27 @@
-﻿namespace Score2Stream.Commons.Interfaces
+﻿using System;
+
+namespace Score2Stream.Commons.Interfaces
 {
     public interface ISettingsService<T>
+        : IDisposable
         where T : class
     {
+        #region Public Properties
+
+        T Contents { get; }
+
+        string Path { get; }
+
+        #endregion Public Properties
+
         #region Public Methods
 
-        T Get();
+        string GetPath(string appName, string fileName,
+            Environment.SpecialFolder baseFolder = Environment.SpecialFolder.LocalApplicationData);
 
-        void Initialize(string fileName);
+        void Load(string filePath);
 
-        void Save();
+        void Save(string filePath = default);
 
         #endregion Public Methods
     }

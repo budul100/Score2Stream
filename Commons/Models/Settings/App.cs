@@ -6,6 +6,8 @@ namespace Score2Stream.Commons.Models.Settings
     {
         #region Public Properties
 
+        public bool AllowMultipleInstances { get; set; }
+
         public int Height { get; set; } = Constants.AppSizeHeightDefault;
 
         public int Width { get; set; } = Constants.AppSizeWidthDefault;

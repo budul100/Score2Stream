@@ -1,5 +1,4 @@
-﻿using Score2Stream.Commons.Assets;
-using Score2Stream.Commons.Interfaces;
+﻿using Score2Stream.Commons.Interfaces;
 using System;
 using System.IO;
 using System.Text.Json;
@@ -9,7 +8,7 @@ using System.Threading.Tasks;
 namespace Score2Stream.SettingsService
 {
     public class Service<T>
-        : ISettingsService<T>, IDisposable
+        : ISettingsService<T>
         where T : class
     {
         #region Private Fields
@@ -17,16 +16,22 @@ namespace Score2Stream.SettingsService
         private const int WaitingPositions = 2;
 
         private readonly object saveLock = new();
+
         private readonly SemaphoreSlim waitLock = new(
             initialCount: 1,
             maxCount: WaitingPositions);
 
-        private string filePath;
-        private string folderPath;
         private bool isDisposed;
-        private T settings;
 
         #endregion Private Fields
+
+        #region Public Properties
+
+        public T Contents { get; private set; }
+
+        public string Path { get; private set; }
+
+        #endregion Public Properties
 
         #region Public Methods
 
@@ -39,33 +44,35 @@ namespace Score2Stream.SettingsService
                 obj: this);
         }
 
-        public T Get()
+        public string GetPath(string appName, string fileName,
+            Environment.SpecialFolder baseFolder = Environment.SpecialFolder.LocalApplicationData)
         {
-            if (settings == default)
-            {
-                Initialize();
-            }
+            var appDataFolder = Environment.GetFolderPath(baseFolder);
 
-            return settings;
+            var result = System.IO.Path.Combine(
+                path1: appDataFolder,
+                path2: appName,
+                path3: fileName);
+
+            return result;
         }
 
-        public void Initialize(string fileName = Constants.SettingsFileNameDefault)
+        public void Load(string filePath)
         {
-            this.folderPath = GetSettingsFolderPath();
-            this.filePath = Path.Combine(
-                path1: folderPath,
-                path2: fileName);
+            SetPath(filePath);
 
-            LoadSettings(filePath);
+            LoadSettings();
 
-            if (settings is default(T))
+            if (Contents is default(T))
             {
-                settings = Activator.CreateInstance<T>();
+                Contents = Activator.CreateInstance<T>();
             }
         }
 
-        public void Save()
+        public void Save(string filePath = default)
         {
+            SetPath(filePath);
+
             Task.Run(() => SaveSettingsAsync());
         }
 
@@ -90,26 +97,15 @@ namespace Score2Stream.SettingsService
 
         #region Private Methods
 
-        private static string GetSettingsFolderPath()
+        private void LoadSettings()
         {
-            var appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-
-            var result = Path.Combine(
-                path1: appDataFolder,
-                path2: Texts.AppName);
-
-            return result;
-        }
-
-        private void LoadSettings(string filePath)
-        {
-            if (!File.Exists(filePath))
+            if (!File.Exists(Path))
             {
                 SaveSettings();
             }
 
             using var settingsFileStream = new FileStream(
-                path: filePath,
+                path: Path,
                 mode: FileMode.Open,
                 access: FileAccess.Read);
 
@@ -120,7 +116,7 @@ namespace Score2Stream.SettingsService
 
             try
             {
-                settings = JsonSerializer.Deserialize<T>(
+                Contents = JsonSerializer.Deserialize<T>(
                     utf8Json: settingsFileStream,
                     options: options);
             }
@@ -129,13 +125,15 @@ namespace Score2Stream.SettingsService
 
         private void SaveSettings()
         {
+            var folderPath = System.IO.Path.GetDirectoryName(Path);
+
             if (!Directory.Exists(folderPath))
             {
                 Directory.CreateDirectory(folderPath);
             }
 
             using var settingsFileStream = new FileStream(
-                path: filePath,
+                path: Path,
                 mode: FileMode.Create);
 
             var options = new JsonSerializerOptions
@@ -147,7 +145,7 @@ namespace Score2Stream.SettingsService
             {
                 JsonSerializer.Serialize(
                     utf8Json: settingsFileStream,
-                    value: settings,
+                    value: Contents,
                     options: options);
             }
             catch
@@ -171,6 +169,14 @@ namespace Score2Stream.SettingsService
                 {
                     waitLock.Release();
                 }
+            }
+        }
+
+        private void SetPath(string filePath)
+        {
+            if (!string.IsNullOrWhiteSpace(filePath))
+            {
+                Path = System.IO.Path.GetFullPath(filePath);
             }
         }
 

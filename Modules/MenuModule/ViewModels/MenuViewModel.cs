@@ -1,4 +1,8 @@
-﻿using Avalonia.Platform.Storage;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using Avalonia.Platform.Storage;
 using AvaloniaUI.Ribbon;
 using Prism.Commands;
 using Prism.Events;
@@ -17,10 +21,6 @@ using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
 using Score2Stream.Commons.Prism;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace Score2Stream.MenuModule.ViewModels
 {
@@ -37,10 +37,7 @@ namespace Score2Stream.MenuModule.ViewModels
         private readonly IEventAggregator eventAggregator;
         private readonly IInputService inputService;
         private readonly IRegionManager regionManager;
-        private readonly Session settings;
         private readonly ISettingsService<Session> settingsService;
-
-        private IStorageFolder inputDirectory;
         private int tabIndex;
 
         #endregion Private Fields
@@ -56,8 +53,6 @@ namespace Score2Stream.MenuModule.ViewModels
             this.inputService = inputService;
             this.regionManager = regionManager;
             this.eventAggregator = eventAggregator;
-
-            this.settings = settingsService.Get();
 
             this.OnTabSelectionCommand = new DelegateCommand<string>(
                 executeMethod: n => SelectTab(n));
@@ -181,6 +176,21 @@ namespace Score2Stream.MenuModule.ViewModels
         public static string TabClips => Constants.TabClips;
 
         public static string TabSamples => Constants.TabSamples;
+
+        public bool AllowMultipleInstances
+        {
+            get { return settingsService.Contents.App.AllowMultipleInstances; }
+            set
+            {
+                if (settingsService.Contents.App.AllowMultipleInstances != value)
+                {
+                    settingsService.Contents.App.AllowMultipleInstances = value;
+                    settingsService.Save();
+
+                    RaisePropertyChanged(nameof(AllowMultipleInstances));
+                }
+            }
+        }
 
         public DelegateCommand ClipAddCommand { get; }
 

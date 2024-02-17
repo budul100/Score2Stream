@@ -1,5 +1,11 @@
-﻿using Avalonia.Media;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.Json;
+using Avalonia.Media;
 using Prism.Events;
+using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Events.Clip;
 using Score2Stream.Commons.Events.Graphics;
@@ -10,11 +16,6 @@ using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Scoreboard;
 using Score2Stream.Commons.Models.Settings;
 using Score2Stream.ScoreboardService.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
 
 namespace Score2Stream.ScoreboardService
 {
@@ -23,13 +24,10 @@ namespace Score2Stream.ScoreboardService
     {
         #region Private Fields
 
-        private const char GameClockSplitterDefault = ':';
-
         private readonly IDictionary<ClipType, Clip> clips = new Dictionary<ClipType, Clip>();
         private readonly IEnumerable<ClipType> clipTypes;
         private readonly IEventAggregator eventAggregator;
         private readonly JsonSerializerOptions serializeOptions;
-        private readonly Session settings;
         private readonly ISettingsService<Session> settingsService;
 
         private string clockGame;
@@ -56,8 +54,6 @@ namespace Score2Stream.ScoreboardService
         {
             this.settingsService = settingsService;
             this.eventAggregator = eventAggregator;
-
-            settings = settingsService.Get();
 
             serializeOptions = new JsonSerializerOptions
             {
@@ -100,17 +96,24 @@ namespace Score2Stream.ScoreboardService
         {
             get
             {
-                var result = Color.Parse(settings.Scoreboard.ColorGuest);
-
-                return result;
+                if (Color.TryParse(
+                    s: settingsService.Contents?.Scoreboard.ColorGuest,
+                    color: out var result))
+                {
+                    return result;
+                }
+                else
+                {
+                    return default;
+                }
             }
             set
             {
                 var color = value.ToString();
 
-                if (color != settings.Scoreboard.ColorGuest)
+                if (color != settingsService.Contents.Scoreboard.ColorGuest)
                 {
-                    settings.Scoreboard.ColorGuest = color;
+                    settingsService.Contents.Scoreboard.ColorGuest = color;
                     settingsService.Save();
                 }
             }
@@ -122,17 +125,24 @@ namespace Score2Stream.ScoreboardService
         {
             get
             {
-                var result = Color.Parse(settings.Scoreboard.ColorHome);
-
-                return result;
+                if (Color.TryParse(
+                    s: settingsService.Contents?.Scoreboard.ColorHome,
+                    color: out var result))
+                {
+                    return result;
+                }
+                else
+                {
+                    return default;
+                }
             }
             set
             {
                 var color = value.ToString();
 
-                if (color != settings.Scoreboard.ColorHome)
+                if (color != settingsService.Contents.Scoreboard.ColorHome)
                 {
-                    settings.Scoreboard.ColorHome = color;
+                    settingsService.Contents.Scoreboard.ColorHome = color;
                     settingsService.Save();
                 }
             }
@@ -152,12 +162,12 @@ namespace Score2Stream.ScoreboardService
 
         public string Periods
         {
-            get { return settings.Scoreboard.Periods; }
+            get { return settingsService.Contents?.Scoreboard.Periods; }
             set
             {
-                if (value != settings.Scoreboard.Periods)
+                if (value != settingsService.Contents.Scoreboard.Periods)
                 {
-                    settings.Scoreboard.Periods = value;
+                    settingsService.Contents.Scoreboard.Periods = value;
                     settingsService.Save();
                 }
             }
@@ -181,12 +191,12 @@ namespace Score2Stream.ScoreboardService
 
         public string TeamGuest
         {
-            get { return settings.Scoreboard.TeamGuest; }
+            get { return settingsService.Contents?.Scoreboard.TeamGuest; }
             set
             {
-                if (value != settings.Scoreboard.TeamGuest)
+                if (value != settingsService.Contents.Scoreboard.TeamGuest)
                 {
-                    settings.Scoreboard.TeamGuest = value;
+                    settingsService.Contents.Scoreboard.TeamGuest = value;
                     settingsService.Save();
                 }
             }
@@ -196,12 +206,12 @@ namespace Score2Stream.ScoreboardService
 
         public string TeamHome
         {
-            get { return settings.Scoreboard.TeamHome; }
+            get { return settingsService.Contents?.Scoreboard.TeamHome; }
             set
             {
-                if (value != settings.Scoreboard.TeamHome)
+                if (value != settingsService.Contents.Scoreboard.TeamHome)
                 {
-                    settings.Scoreboard.TeamHome = value;
+                    settingsService.Contents.Scoreboard.TeamHome = value;
                     settingsService.Save();
                 }
             }
@@ -209,16 +219,16 @@ namespace Score2Stream.ScoreboardService
 
         public bool TeamHomeUpToDate => TeamHome == teamHome;
 
-        public (string, bool)[] Tickers => settings.Scoreboard.Tickers;
+        public (string, bool)[] Tickers => settingsService.Contents?.Scoreboard.Tickers;
 
         public int TickersFrequency
         {
-            get { return settings.Scoreboard.TickersFrequency; }
+            get { return settingsService.Contents?.Scoreboard.TickersFrequency ?? 0; }
             set
             {
-                if (settings.Scoreboard.TickersFrequency != value)
+                if (settingsService.Contents.Scoreboard.TickersFrequency != value)
                 {
-                    settings.Scoreboard.TickersFrequency = value;
+                    settingsService.Contents.Scoreboard.TickersFrequency = value;
 
                     settingsService.Save();
                 }
@@ -278,9 +288,9 @@ namespace Score2Stream.ScoreboardService
 
         public void SetTicker(int number, string text)
         {
-            if (settings.Scoreboard.Tickers.Length > number)
+            if (settingsService.Contents.Scoreboard.Tickers.Length > number)
             {
-                settings.Scoreboard.Tickers[number].Item1 = text;
+                settingsService.Contents.Scoreboard.Tickers[number].Item1 = text;
                 settingsService.Save();
 
                 TickersUpToDate = GetTickersUpToDate().ToArray();
@@ -289,9 +299,9 @@ namespace Score2Stream.ScoreboardService
 
         public void SetTicker(int number, bool isActive)
         {
-            if (settings.Scoreboard.Tickers.Length > number)
+            if (settingsService.Contents.Scoreboard.Tickers.Length > number)
             {
-                settings.Scoreboard.Tickers[number].Item2 = isActive;
+                settingsService.Contents.Scoreboard.Tickers[number].Item2 = isActive;
                 settingsService.Save();
 
                 TickersUpToDate = GetTickersUpToDate().ToArray();
@@ -325,7 +335,7 @@ namespace Score2Stream.ScoreboardService
                 scoreGuest = ScoreGuest;
             }
 
-            tickers = Tickers.ToArray();
+            tickers = Tickers?.ToArray();
             TickersUpToDate = GetTickersUpToDate().ToArray();
 
             UpdateTicker();
@@ -417,7 +427,7 @@ namespace Score2Stream.ScoreboardService
                 }
                 else
                 {
-                    result.Append(GameClockSplitterDefault);
+                    result.Append(Constants.GameClockSplitterDefault);
                 }
             }
 
@@ -496,12 +506,16 @@ namespace Score2Stream.ScoreboardService
 
         private IEnumerable<bool> GetTickersUpToDate()
         {
-            for (var index = 0; index < tickers.Count(); index++)
+            if (tickers?.Any() == true)
             {
-                var result = settings.Scoreboard.Tickers[index].Item2 == tickers.ElementAt(index).Item2
-                    && (!settings.Scoreboard.Tickers[index].Item2 || settings.Scoreboard.Tickers[index].Item1 == tickers.ElementAt(index).Item1);
+                for (var index = 0; index < tickers.Count(); index++)
+                {
+                    var result = settingsService.Contents.Scoreboard.Tickers[index].Item2 == tickers.ElementAt(index).Item2
+                        && (!settingsService.Contents.Scoreboard.Tickers[index].Item2
+                        || settingsService.Contents.Scoreboard.Tickers[index].Item1 == tickers.ElementAt(index).Item1);
 
-                yield return result;
+                    yield return result;
+                }
             }
         }
 
@@ -559,27 +573,30 @@ namespace Score2Stream.ScoreboardService
 
         private void UpdateTicker()
         {
-            var current = default(string);
-
-            var relevants = tickers
-                .Where(t => t.Item2).ToArray();
-
-            if (relevants?.Any() == true)
+            if (tickers?.Any() == true)
             {
-                if (string.IsNullOrEmpty(ticker) || ++tickersInd >= relevants.Length)
+                var current = default(string);
+
+                var relevants = tickers
+                    .Where(t => t.Item2).ToArray();
+
+                if (relevants?.Any() == true)
                 {
-                    tickersInd = 0;
+                    if (string.IsNullOrEmpty(ticker) || ++tickersInd >= relevants.Length)
+                    {
+                        tickersInd = 0;
+                    }
+
+                    current = relevants[tickersInd].Item1;
                 }
 
-                current = relevants[tickersInd].Item1;
-            }
+                if (current != ticker)
+                {
+                    ticker = current;
+                }
 
-            if (current != ticker)
-            {
-                ticker = current;
+                tickerLastUpdate = DateTime.Now;
             }
-
-            tickerLastUpdate = DateTime.Now;
         }
 
         #endregion Private Methods

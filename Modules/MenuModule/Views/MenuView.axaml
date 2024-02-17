@@ -202,6 +202,15 @@
                             LargeIcon="{DynamicResource IconUpdate}"
                             MinSize="Large" />
                     </rib:RibbonGroupBox>
+
+                    <rib:RibbonGroupBox Header="App options">
+                        <CheckBox
+                            Margin="0,0,4,4"
+                            VerticalAlignment="Center"
+                            Content="Allow multiple instances"
+                            FontSize="{StaticResource FontSize}"
+                            IsChecked="{Binding AllowMultipleInstances, Mode=TwoWay}" />
+                    </rib:RibbonGroupBox>
                 </rib:RibbonTab.Groups>
             </rib:RibbonTab>
 

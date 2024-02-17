@@ -21,17 +21,23 @@
         public const int DurationMax = 1000;
         public const int DurationUpdateTitle = 500;
 
+        public const int ExitCodeStandard = 0;
+
+        public const char GameClockSplitterDefault = ':';
+
         public const int ImageQueueSizeDefault = 3;
         public const int ImageQueueSizeMax = 20;
         public const int ImageQueueSizeMin = 1;
+
+        public const string LockFileName = ".lock";
 
         public const int MaxCountClips = 20;
         public const int MaxCountInputs = 5;
         public const int MaxCountSamples = 100;
         public const int MaxCountTemplates = 10;
 
-        public const int PortHttpWebServer = 5003;
-        public const int PortHttpWebSocket = 9000;
+        public const int PortServerHttpDefault = 5000;
+        public const int PortSocketHttpDefault = 9000;
 
         public const int RecognitionDurationMax = 1000 * 60;
 

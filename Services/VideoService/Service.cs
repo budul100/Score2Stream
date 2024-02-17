@@ -26,7 +26,6 @@ namespace Score2Stream.VideoService
 
         private readonly IDispatcherService dispatcherService;
         private readonly IEventAggregator eventAggregator;
-        private readonly Session settings;
         private readonly ISettingsService<Session> settingsService;
         private readonly VideoUpdatedEvent videoUpdatedEvent;
 
@@ -52,8 +51,6 @@ namespace Score2Stream.VideoService
 
             ClipService = clipService;
 
-            this.settings = settingsService.Get();
-
             videoUpdatedEvent = eventAggregator
                 .GetEvent<VideoUpdatedEvent>();
         }
@@ -68,13 +65,13 @@ namespace Score2Stream.VideoService
 
         public int ImagesQueueSize
         {
-            get { return settings.Video.ImagesQueueSize; }
+            get { return settingsService.Contents.Video.ImagesQueueSize; }
             set
             {
-                if (value != settings.Video.ImagesQueueSize
+                if (value != settingsService.Contents.Video.ImagesQueueSize
                     && value > 0)
                 {
-                    settings.Video.ImagesQueueSize = value;
+                    settingsService.Contents.Video.ImagesQueueSize = value;
                     settingsService.Save();
                 }
             }
@@ -88,12 +85,12 @@ namespace Score2Stream.VideoService
 
         public bool NoCropping
         {
-            get { return settings.Video.NoCropping; }
+            get { return settingsService.Contents.Video.NoCropping; }
             set
             {
-                if (settings.Video.NoCropping != value)
+                if (settingsService.Contents.Video.NoCropping != value)
                 {
-                    settings.Video.NoCropping = value;
+                    settingsService.Contents.Video.NoCropping = value;
                     settingsService.Save();
                 }
             }
@@ -101,12 +98,12 @@ namespace Score2Stream.VideoService
 
         public bool PreferNeighbors
         {
-            get { return settings.Detection.PreferNeighbors; }
+            get { return settingsService.Contents.Detection.PreferNeighbors; }
             set
             {
-                if (settings.Detection.PreferNeighbors != value)
+                if (settingsService.Contents.Detection.PreferNeighbors != value)
                 {
-                    settings.Detection.PreferNeighbors = value;
+                    settingsService.Contents.Detection.PreferNeighbors = value;
                     settingsService.Save();
                 }
             }
@@ -114,12 +111,12 @@ namespace Score2Stream.VideoService
 
         public int ProcessingDelay
         {
-            get { return settings.Video.ProcessingDelay; }
+            get { return settingsService.Contents.Video.ProcessingDelay; }
             set
             {
-                if (settings.Video.ProcessingDelay != value)
+                if (settingsService.Contents.Video.ProcessingDelay != value)
                 {
-                    settings.Video.ProcessingDelay = value;
+                    settingsService.Contents.Video.ProcessingDelay = value;
                     settingsService.Save();
                 }
             }
@@ -129,12 +126,12 @@ namespace Score2Stream.VideoService
 
         public float Rotation
         {
-            get { return settings.Video.Rotation; }
+            get { return settingsService.Contents.Video.Rotation; }
             set
             {
-                if (settings.Video.Rotation != value)
+                if (settingsService.Contents.Video.Rotation != value)
                 {
-                    settings.Video.Rotation = value;
+                    settingsService.Contents.Video.Rotation = value;
                     settingsService.Save();
                 }
             }
@@ -146,12 +143,12 @@ namespace Score2Stream.VideoService
 
         public int ThresholdMatching
         {
-            get { return settings.Detection.ThresholdMatching; }
+            get { return settingsService.Contents.Detection.ThresholdMatching; }
             set
             {
-                if (settings.Detection.ThresholdMatching != value)
+                if (settingsService.Contents.Detection.ThresholdMatching != value)
                 {
-                    settings.Detection.ThresholdMatching = value;
+                    settingsService.Contents.Detection.ThresholdMatching = value;
                     settingsService.Save();
                 }
             }
@@ -159,12 +156,12 @@ namespace Score2Stream.VideoService
 
         public int WaitingDuration
         {
-            get { return settings.Detection.WaitingDuration; }
+            get { return settingsService.Contents.Detection.WaitingDuration; }
             set
             {
-                if (settings.Detection.WaitingDuration != value)
+                if (settingsService.Contents.Detection.WaitingDuration != value)
                 {
-                    settings.Detection.WaitingDuration = value;
+                    settingsService.Contents.Detection.WaitingDuration = value;
                     settingsService.Save();
                 }
             }

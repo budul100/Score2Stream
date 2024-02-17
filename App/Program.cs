@@ -1,10 +1,10 @@
-﻿using Avalonia;
-using Avalonia.Dialogs;
-using Avalonia.ReactiveUI;
-using System;
+﻿using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
+using Avalonia;
+using Avalonia.Dialogs;
+using Avalonia.ReactiveUI;
 
 namespace Score2Stream.App
 {
@@ -45,7 +45,11 @@ namespace Score2Stream.App
             var idx = Array.IndexOf(args, "--scaling");
 
             if (idx != 0 && args.Length > idx + 1 &&
-                double.TryParse(args[idx + 1], NumberStyles.Any, CultureInfo.InvariantCulture, out var scaling))
+                double.TryParse(
+                    s: args[idx + 1],
+                    style: NumberStyles.Any,
+                    provider: CultureInfo.InvariantCulture,
+                    result: out var scaling))
             {
                 return scaling;
             }
@@ -60,16 +64,27 @@ namespace Score2Stream.App
             if (args.Contains("--fbdev"))
             {
                 SilenceConsole();
-                return builder.StartLinuxFbDev(args, scaling: GetScaling(args));
+
+                var scaling = GetScaling(args);
+
+                return builder.StartLinuxFbDev(
+                    args: args,
+                    scaling: scaling);
             }
             else if (args.Contains("--drm"))
             {
                 SilenceConsole();
-                return builder.StartLinuxDrm(args, scaling: GetScaling(args));
+
+                var scaling = GetScaling(args);
+
+                return builder.StartLinuxDrm(
+                    args: args,
+                    scaling: scaling);
             }
             else
             {
-                return builder.StartWithClassicDesktopLifetime(args);
+                return builder.StartWithClassicDesktopLifetime(
+                    args: args);
             }
         }
 
@@ -81,7 +96,9 @@ namespace Score2Stream.App
 
                 while (true) Console.ReadKey(true);
             })
-            { IsBackground = true }.Start();
+            {
+                IsBackground = true
+            }.Start();
         }
 
         #endregion Private Methods
