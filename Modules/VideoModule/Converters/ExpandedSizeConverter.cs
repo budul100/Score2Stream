@@ -1,10 +1,11 @@
-﻿using Avalonia;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Avalonia;
+using Score2Stream.Commons.Converters;
 
-namespace Score2Stream.Commons.Converters
+namespace Score2Stream.VideoModule.Converters
 {
     public class ExpandedSizeConverter
         : OneWayMultiValueConverter
@@ -25,7 +26,7 @@ namespace Score2Stream.Commons.Converters
             var actualSize = (double?)values[2];
 
             var result = actualSize > givenSize
-                ? position - ((actualSize - givenSize) / 2)
+                ? position - (actualSize - givenSize) / 2
                 : position;
 
             return result;
