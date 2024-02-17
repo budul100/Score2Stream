@@ -121,7 +121,7 @@ namespace Score2Stream.Commons.Extensions
             return result;
         }
 
-        public static double GetSimilarityTo(this Mat image, Mat template)
+        public static double GetSimilarityTo(this Mat image, Mat template, bool preventMultipleComparison)
         {
             var result = default(double);
 
@@ -134,15 +134,38 @@ namespace Score2Stream.Commons.Extensions
                     dsize: template.Size(),
                     interpolation: InterpolationFlags.Nearest);
 
-                var match = compare.MatchTemplate(
+                var matchSqDiff = compare.MatchTemplate(
                     templ: template,
                     method: TemplateMatchModes.SqDiffNormed);
 
-                match.MinMaxLoc(
-                    minVal: out double min,
+                matchSqDiff.MinMaxLoc(
+                    minVal: out double minSqDiff,
                     maxVal: out double _);
 
-                result = 1 - Math.Abs(min);
+                if (preventMultipleComparison)
+                {
+                    result = 1 - Math.Abs(minSqDiff);
+                }
+                else
+                {
+                    var matchCCoeff = compare.MatchTemplate(
+                        templ: template,
+                        method: TemplateMatchModes.CCoeffNormed);
+
+                    matchCCoeff.MinMaxLoc(
+                        minVal: out double _,
+                        maxVal: out double maxCCoeff);
+
+                    var matchCCorr = compare.MatchTemplate(
+                        templ: template,
+                        method: TemplateMatchModes.CCorrNormed);
+
+                    matchCCorr.MinMaxLoc(
+                        minVal: out double _,
+                        maxVal: out double maxCCorr);
+
+                    result = (1 - Math.Abs(minSqDiff)) * Math.Abs(maxCCoeff) * Math.Abs(maxCCorr);
+                }
             }
 
             return result;

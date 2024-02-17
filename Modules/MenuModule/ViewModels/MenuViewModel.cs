@@ -278,6 +278,20 @@ namespace Score2Stream.MenuModule.ViewModels
             }
         }
 
+        public bool NoMultiComparison
+        {
+            get { return inputService?.SampleService?.NoMultiComparison ?? false; }
+            set
+            {
+                if (IsActive
+                    && inputService.SampleService.NoMultiComparison != value)
+                {
+                    inputService.SampleService.NoMultiComparison = value;
+                    RaisePropertyChanged(nameof(NoMultiComparison));
+                }
+            }
+        }
+
         public bool NoRecognition
         {
             get { return inputService?.SampleService?.NoRecognition ?? false; }

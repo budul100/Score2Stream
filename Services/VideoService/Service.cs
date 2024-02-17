@@ -474,7 +474,8 @@ namespace Score2Stream.VideoService
             {
                 var thresholdMatching = Math.Abs(ThresholdMatching) / Constants.ThresholdDivider;
 
-                var match = clip.GetMatches()
+                var match = clip
+                    .GetMatches(settingsService.Contents.Detection.NoMultiComparison)
                     .OrderByDescending(m => m.Key >= thresholdMatching
                         && (!PreferNeighbors || clip.IsNeighbour(m.Value?.Value)))
                     .ThenByDescending(m => m.Key).FirstOrDefault();

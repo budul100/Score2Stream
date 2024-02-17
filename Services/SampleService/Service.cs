@@ -52,6 +52,19 @@ namespace Score2Stream.SampleService
 
         public bool IsDetection { get; set; }
 
+        public bool NoMultiComparison
+        {
+            get { return settingsService.Contents.Detection.NoMultiComparison; }
+            set
+            {
+                if (settingsService.Contents.Detection.NoMultiComparison != value)
+                {
+                    settingsService.Contents.Detection.NoMultiComparison = value;
+                    settingsService.Save();
+                }
+            }
+        }
+
         public bool NoRecognition
         {
             get { return settingsService.Contents.Detection.NoRecognition; }
@@ -323,7 +336,9 @@ namespace Score2Stream.SampleService
 
                 foreach (var sample in Samples)
                 {
-                    sample.Similarity = sample.Mat.GetSimilarityTo(clip.Mat);
+                    sample.Similarity = sample.Mat.GetSimilarityTo(
+                        template: clip.Mat,
+                        preventMultipleComparison: settingsService.Contents.Detection.NoMultiComparison);
 
                     sample.Type = sample.Similarity < thresholdDetecting
                         ? SampleType.None

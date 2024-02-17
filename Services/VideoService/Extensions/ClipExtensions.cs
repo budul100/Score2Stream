@@ -1,9 +1,9 @@
-﻿using Score2Stream.Commons.Assets;
-using Score2Stream.Commons.Extensions;
-using Score2Stream.Commons.Models.Contents;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Score2Stream.Commons.Assets;
+using Score2Stream.Commons.Extensions;
+using Score2Stream.Commons.Models.Contents;
 
 namespace Score2Stream.VideoService.Extensions
 {
@@ -11,7 +11,7 @@ namespace Score2Stream.VideoService.Extensions
     {
         #region Public Methods
 
-        public static IEnumerable<KeyValuePair<double, Sample>> GetMatches(this Clip clip)
+        public static IEnumerable<KeyValuePair<double, Sample>> GetMatches(this Clip clip, bool preventMultipleComparison)
         {
             var relevants = clip?.Template?.Samples?
                 .Where(s => !string.IsNullOrWhiteSpace(s.Value)).ToArray();
@@ -20,7 +20,9 @@ namespace Score2Stream.VideoService.Extensions
             {
                 foreach (var relevant in relevants)
                 {
-                    var similarity = relevant.Mat.GetSimilarityTo(clip.Mat);
+                    var similarity = relevant.Mat.GetSimilarityTo(
+                        template: clip.Mat,
+                        preventMultipleComparison: preventMultipleComparison);
 
                     if (similarity != 1)
                     {

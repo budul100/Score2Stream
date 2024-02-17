@@ -1,10 +1,10 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System;
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
+using Avalonia.Media.Imaging;
 using OpenCvSharp;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace Score2Stream.Commons.Models.Contents
 {
