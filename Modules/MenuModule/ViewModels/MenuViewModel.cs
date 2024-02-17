@@ -242,6 +242,9 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public bool IsActive => inputService.IsActive;
 
+        public bool IsDetectionAvailable => IsActive
+            && inputService?.ClipService?.Active != default;
+
         public bool IsSampleDetection
         {
             get
@@ -250,7 +253,8 @@ namespace Score2Stream.MenuModule.ViewModels
             }
             set
             {
-                if (IsActive)
+                if (IsDetectionAvailable
+                    && inputService?.SampleService.IsDetection != value)
                 {
                     inputService.SampleService.IsDetection = value;
 
@@ -505,6 +509,9 @@ namespace Score2Stream.MenuModule.ViewModels
                     regionManager.RequestNavigate(
                         regionName: nameof(RegionType.EditRegion),
                         source: nameof(ViewType.Templates));
+
+                    UpdateSamples();
+
                     break;
             }
         }
@@ -568,11 +575,15 @@ namespace Score2Stream.MenuModule.ViewModels
                 RaisePropertyChanged(nameof(ThresholdDetecting));
                 RaisePropertyChanged(nameof(ThresholdMatching));
                 RaisePropertyChanged(nameof(WaitingDuration));
+
+                UpdateSamples();
             }
         }
 
         private void UpdateSamples()
         {
+            RaisePropertyChanged(nameof(IsDetectionAvailable));
+
             SamplesRemoveAllCommand.RaiseCanExecuteChanged();
             SamplesOrderAllCommand.RaiseCanExecuteChanged();
         }

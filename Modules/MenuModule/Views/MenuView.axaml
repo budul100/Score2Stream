@@ -389,7 +389,7 @@
                             Content="Detect samples"
                             FontSize="{StaticResource FontSize}"
                             IsChecked="{Binding IsSampleDetection}"
-                            IsEnabled="{Binding IsActive}"
+                            IsEnabled="{Binding IsDetectionAvailable}"
                             MinSize="Large">
                             <rib:RibbonToggleButton.Styles>
                                 <Style Selector="RibbonToggleButton.IsActive">
