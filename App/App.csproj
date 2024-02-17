@@ -9,7 +9,7 @@
 		<ApplicationIcon>Assets\Score2Stream.ico</ApplicationIcon>
 		<VersionMajor>1</VersionMajor>
 		<VersionMinor>6</VersionMinor>
-		<VersionBuild>1</VersionBuild>
+		<VersionBuild>2</VersionBuild>
 	</PropertyGroup>
 
 	<PropertyGroup>
