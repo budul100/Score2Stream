@@ -41,13 +41,9 @@ namespace Score2Stream.Commons.Extensions
 
         public static Mat AsRotated(this Mat image, float angle)
         {
-            Mat result;
+            var result = image;
 
-            if (angle == 0)
-            {
-                result = image;
-            }
-            else
+            if (angle != 0)
             {
                 var size = image.Size();
 
@@ -154,16 +150,22 @@ namespace Score2Stream.Commons.Extensions
 
         public static Mat ToCentered(this Mat image, int fullWidth, int fullHeight)
         {
-            var horizontal = (int)Math.Ceiling((double)Math.Abs(fullWidth - image.Width) / 2);
-            var vertical = (int)Math.Ceiling((double)Math.Abs(fullHeight - image.Height) / 2);
+            var result = image;
 
-            var result = image.CopyMakeBorder(
-                top: vertical,
-                bottom: vertical,
-                left: horizontal,
-                right: horizontal,
-                borderType: BorderTypes.Constant,
-                value: 0);
+            if (image?.Step(0) > 0
+                && image.Rows > 0)
+            {
+                var horizontal = (int)Math.Ceiling((double)Math.Abs(fullWidth - image.Width) / 2);
+                var vertical = (int)Math.Ceiling((double)Math.Abs(fullHeight - image.Height) / 2);
+
+                result = image.CopyMakeBorder(
+                    top: vertical,
+                    bottom: vertical,
+                    left: horizontal,
+                    right: horizontal,
+                    borderType: BorderTypes.Constant,
+                    value: 0);
+            }
 
             return result;
         }
@@ -178,7 +180,7 @@ namespace Score2Stream.Commons.Extensions
 
         public static Mat ToInverted(this Mat image)
         {
-            var result = default(Mat);
+            var result = image;
 
             if (image?.Step(0) > 0
                 && image.Rows > 0)
@@ -198,7 +200,7 @@ namespace Score2Stream.Commons.Extensions
 
         public static Mat ToMonochrome(this Mat image, double threshold)
         {
-            var result = default(Mat);
+            var result = image;
 
             if (image?.Step(0) > 0
                 && image.Rows > 0)
@@ -220,7 +222,7 @@ namespace Score2Stream.Commons.Extensions
 
         public static Mat WithoutNoise(this Mat image, int erodeIterations, int dilateIterations)
         {
-            var result = default(Mat);
+            var result = image;
 
             if (image?.Step(0) > 0
                 && image.Rows > 0)

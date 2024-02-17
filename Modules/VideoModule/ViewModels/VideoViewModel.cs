@@ -1,4 +1,7 @@
-﻿using Avalonia.Controls.PanAndZoom;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using Avalonia.Controls.PanAndZoom;
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using MsBox.Avalonia.Enums;
@@ -13,9 +16,6 @@ using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Events.Video;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Prism;
-using System;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace Score2Stream.VideoModule.ViewModels
 {
