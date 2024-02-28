@@ -10,7 +10,7 @@ namespace Score2Stream.Commons.Interfaces
 
         Input Active { get; }
 
-        IClipService ClipService { get; }
+        IAreaService AreaService { get; }
 
         HashSet<Input> Inputs { get; }
 

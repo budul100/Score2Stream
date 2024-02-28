@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Commons", "Commons\Commons.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{F601B3EC-079D-49C4-9124-D96B68CF1C54}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClipService", "Services\ClipService\ClipService.csproj", "{4BECFE46-77BE-4FC1-936C-ED0677428D53}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AreaService", "Services\AreaService\AreaService.csproj", "{4BECFE46-77BE-4FC1-936C-ED0677428D53}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebService", "Services\WebService\WebService.csproj", "{63DF460C-ED39-4CCD-935A-EA0E7C2D6FF9}"
 EndProject
@@ -33,7 +33,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MenuModule", "Modules\MenuM
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VideoModule", "Modules\VideoModule\VideoModule.csproj", "{219620AB-B41E-4525-88C5-896461F0ED83}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClipModule", "Modules\ClipModule\ClipModule.csproj", "{DAF03EAC-5D90-44AF-A404-20E1CA4BFCC7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AreaModule", "Modules\AreaModule\AreaModule.csproj", "{DAF03EAC-5D90-44AF-A404-20E1CA4BFCC7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TemplateModule", "Modules\TemplateModule\TemplateModule.csproj", "{50312892-5F31-40C3-A4C7-339D0C0BC30E}"
 EndProject

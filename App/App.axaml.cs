@@ -1,3 +1,7 @@
+using System;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -5,18 +9,12 @@ using Avalonia.Markup.Xaml;
 using Prism.DryIoc;
 using Prism.Ioc;
 using Prism.Modularity;
-using Prism.Regions;
 using Score2Stream.App.Views;
 using Score2Stream.Commons.Assets;
-using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Settings;
 using Splat;
-using System;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 
 namespace Score2Stream.App
 {
@@ -97,8 +95,8 @@ namespace Score2Stream.App
                 name: nameof(VideoModule));
             moduleCatalog.AddModule<ScoreboardModule.Module>(
                 name: nameof(ScoreboardModule));
-            moduleCatalog.AddModule<ClipModule.Module>(
-                name: nameof(ClipModule));
+            moduleCatalog.AddModule<AreaModule.Module>(
+                name: nameof(AreaModule));
             moduleCatalog.AddModule<TemplateModule.Module>(
                 name: nameof(TemplateModule));
         }
@@ -110,23 +108,6 @@ namespace Score2Stream.App
                 : default; // For Linux Framebuffer or DRM: Container.Resolve<MainControl>();
 
             return mainWindow;
-        }
-
-        protected override void OnInitialized()
-        {
-            var regionManager = Container.Resolve<IRegionManager>();
-
-            regionManager.RegisterViewWithRegion(
-                regionName: nameof(RegionType.MenuRegion),
-                viewType: typeof(MenuModule.Views.MenuView));
-
-            regionManager.RegisterViewWithRegion(
-                regionName: nameof(RegionType.OutputRegion),
-                viewType: typeof(VideoModule.Views.VideoView));
-
-            regionManager.RegisterViewWithRegion(
-                regionName: nameof(RegionType.EditRegion),
-                viewType: typeof(ScoreboardModule.Views.ContentView));
         }
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
@@ -145,7 +126,7 @@ namespace Score2Stream.App
 
             containerRegistry.RegisterSingleton<IInputService, InputService.Service>();
             containerRegistry.Register<IVideoService, VideoService.Service>();
-            containerRegistry.Register<IClipService, ClipService.Service>();
+            containerRegistry.Register<IAreaService, AreaService.Service>();
             containerRegistry.Register<ITemplateService, TemplateService.Service>();
             containerRegistry.Register<ISampleService, SampleService.Service>();
 

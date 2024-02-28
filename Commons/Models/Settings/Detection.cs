@@ -12,11 +12,11 @@ namespace Score2Stream.Commons.Models.Settings
 
         public bool PreferNeighbors { get; set; }
 
-        public int ThresholdDetecting { get; set; } = Constants.DetectionThresholdDefault;
+        public int ThresholdDetecting { get; set; } = Defaults.DetectionThresholdDefault;
 
-        public int ThresholdMatching { get; set; } = Constants.DetectionMatchingDefault;
+        public int ThresholdMatching { get; set; } = Defaults.DetectionMatchingDefault;
 
-        public int WaitingDuration { get; set; } = Constants.DetectionWaitingDefault;
+        public int WaitingDuration { get; set; } = Defaults.DetectionWaitingDefault;
 
         #endregion Public Properties
     }

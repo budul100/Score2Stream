@@ -7,7 +7,7 @@ namespace Score2Stream.VideoService.Extensions
     {
         #region Public Methods
 
-        public static Rect? GetRectangle(this Size picSize, int firstX, int firstY, int secondX, int secondY,
+        public static Rect? GetRectangle(this Size picSize, double firstX, double firstY, double secondX, double secondY,
             Size? vizSize = default)
         {
             var result = default(Rect?);
@@ -28,11 +28,14 @@ namespace Score2Stream.VideoService.Extensions
             if (firstScaled.HasValue
                 && secondScaled.HasValue)
             {
+                var width = Math.Abs(firstScaled.Value.X - secondScaled.Value.X);
+                var height = Math.Abs(firstScaled.Value.Y - secondScaled.Value.Y);
+
                 result = new Rect(
                     X: Math.Min(firstScaled.Value.X, secondScaled.Value.X),
                     Y: Math.Min(firstScaled.Value.Y, secondScaled.Value.Y),
-                    Width: Math.Abs(firstScaled.Value.X - secondScaled.Value.X),
-                    Height: Math.Abs(firstScaled.Value.Y - secondScaled.Value.Y));
+                    Width: width,
+                    Height: height);
             }
 
             return result;

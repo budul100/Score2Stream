@@ -1,0 +1,170 @@
+<UserControl
+    x:Class="Score2Stream.AreaModule.Views.AreaView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:co="clr-namespace:Score2Stream.Commons.Converters;assembly=Commons"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="using:System"
+    xmlns:v="using:Score2Stream.AreaModule.Views"
+    xmlns:vm="using:Score2Stream.AreaModule.ViewModels"
+    d:DesignHeight="120"
+    d:DesignWidth="700"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <co:DescriptionToStringConverter x:Key="DescriptionToStringConverter" />
+
+        <sys:Double x:Key="LabelWidth">100</sys:Double>
+        <sys:Double x:Key="ValueWidth">150</sys:Double>
+    </UserControl.Resources>
+
+    <Border
+        Name="AreaBorder"
+        Margin="2"
+        BorderBrush="LightGray"
+        BorderThickness="2"
+        CornerRadius="3">
+
+        <i:Interaction.Behaviors>
+            <a:DataTriggerBehavior
+                Binding="{Binding IsActive}"
+                ComparisonCondition="Equal"
+                Value="True">
+                <a:ChangePropertyAction
+                    PropertyName="Background"
+                    TargetObject="AreaBorder"
+                    Value="LightBlue" />
+            </a:DataTriggerBehavior>
+            <a:DataTriggerBehavior
+                Binding="{Binding IsActive}"
+                ComparisonCondition="NotEqual"
+                Value="True">
+                <a:ChangePropertyAction
+                    PropertyName="Background"
+                    TargetObject="AreaBorder"
+                    Value="Gainsboro" />
+            </a:DataTriggerBehavior>
+
+            <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="AreaBorder">
+                <a:InvokeCommandAction Command="{Binding OnSelectionCommand}" />
+            </a:EventTriggerBehavior>
+        </i:Interaction.Behaviors>
+
+        <Grid
+            Margin="5"
+            ColumnDefinitions="250,4,250,*"
+            RowDefinitions="*,4,*">
+
+            <StackPanel
+                Grid.Row="0"
+                Grid.Column="0"
+                Orientation="Horizontal">
+                <TextBlock
+                    Width="{StaticResource LabelWidth}"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Text="Type" />
+                <ComboBox
+                    Width="{StaticResource ValueWidth}"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    IsEnabled="{Binding HasItems, RelativeSource={RelativeSource Self}}"
+                    ItemsSource="{Binding Types}"
+                    SelectedItem="{Binding Type}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource DescriptionToStringConverter}}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+
+            <StackPanel
+                Grid.Row="2"
+                Grid.Column="0"
+                Orientation="Horizontal">
+                <TextBlock
+                    Width="{StaticResource LabelWidth}"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Text="Template" />
+                <ComboBox
+                    Name="TemplatesComboBox"
+                    Width="{StaticResource ValueWidth}"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    IsEnabled="{Binding #TemplatesComboBox.HasItems}"
+                    ItemsSource="{Binding Templates}"
+                    SelectedItem="{Binding Template, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+
+            <StackPanel
+                Grid.Row="0"
+                Grid.Column="2"
+                Orientation="Horizontal">
+                <TextBlock
+                    Width="{StaticResource LabelWidth}"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Text="Contrast" />
+                <NumericUpDown
+                    Width="{StaticResource ValueWidth}"
+                    MaxHeight="5"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Increment="5"
+                    Maximum="100"
+                    Minimum="0"
+                    Value="{Binding ThresholdMonochrome, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel
+                Grid.Row="2"
+                Grid.Column="2"
+                Orientation="Horizontal">
+                <TextBlock
+                    Width="{StaticResource LabelWidth}"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Text="Noise removal" />
+                <NumericUpDown
+                    Width="{StaticResource ValueWidth}"
+                    MaxHeight="5"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Increment="1"
+                    Maximum="10"
+                    Minimum="0"
+                    Value="{Binding NoiseRemoval, Mode=TwoWay}" />
+            </StackPanel>
+
+            <ItemsControl
+                Grid.Row="0"
+                Grid.RowSpan="3"
+                Grid.Column="4"
+                Margin="2"
+                ItemsSource="{Binding Clips}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:ClipViewModel">
+                        <v:ClipView />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+        </Grid>
+    </Border>
+</UserControl>

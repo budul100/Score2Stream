@@ -1,0 +1,48 @@
+<UserControl
+    x:Class="Score2Stream.AreaModule.Views.ClipView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="using:System"
+    d:DesignHeight="120"
+    d:DesignWidth="100"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <sys:Double x:Key="TextWidth">100</sys:Double>
+
+        <sys:Double x:Key="ImageHeight">60</sys:Double>
+        <sys:Double x:Key="ImageWidth">40</sys:Double>
+    </UserControl.Resources>
+
+    <Grid RowDefinitions="5*,*">
+        <Border
+            Grid.Row="0"
+            Margin="2"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="LightGray"
+            BorderBrush="LightSlateGray"
+            BorderThickness="2">
+            <Image
+                Width="{StaticResource ImageWidth}"
+                Height="{StaticResource ImageHeight}"
+                VerticalAlignment="Center"
+                Source="{Binding Bitmap}"
+                Stretch="Uniform" />
+        </Border>
+
+        <Viewbox
+            Grid.Row="1"
+            Width="{StaticResource TextWidth}"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            StretchDirection="DownOnly">
+            <TextBlock
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Text="{Binding Description}" />
+        </Viewbox>
+    </Grid>
+</UserControl>

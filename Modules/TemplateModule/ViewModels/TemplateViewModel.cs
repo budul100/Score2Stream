@@ -1,4 +1,6 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System.Collections.ObjectModel;
+using System.Linq;
+using Avalonia.Media.Imaging;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
@@ -6,11 +8,10 @@ using Score2Stream.Commons.Events.Detection;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Template;
 using Score2Stream.Commons.Events.Video;
+using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Prism;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace Score2Stream.TemplateModule.ViewModels
 {
@@ -61,9 +62,20 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         #region Public Properties
 
-        public Bitmap Bitmap => inputService.ClipService?.Active?.Bitmap;
+        public Bitmap Bitmap => inputService.AreaService?.Clip?.Bitmap;
 
-        public string Current => GetCurrent();
+        public string Description => inputService.AreaService?.Clip?.GetDescription(true);
+
+        public string Empty
+        {
+            get { return Template?.Empty; }
+            set
+            {
+                Template.Empty = value;
+
+                RaisePropertyChanged(nameof(Empty));
+            }
+        }
 
         public bool IsDetection
         {
@@ -75,36 +87,9 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         public Template Template { get; private set; }
 
-        public string ValueEmpty
-        {
-            get { return Template?.Empty; }
-            set
-            {
-                Template.Empty = value;
-
-                RaisePropertyChanged(nameof(ValueEmpty));
-            }
-        }
-
         #endregion Public Properties
 
         #region Private Methods
-
-        private string GetCurrent()
-        {
-            var result = default(string);
-
-            var clip = inputService.ClipService?.Active;
-
-            if (clip != default)
-            {
-                result = !string.IsNullOrWhiteSpace(clip?.Value)
-                    ? $"{clip.Description} => {clip.Value} (Similarity: {clip.Similarity}%)"
-                    : $"{clip.Description} => -/- (Similarity: {clip.Similarity}%)";
-            }
-
-            return result;
-        }
 
         private void OrderSamples()
         {
@@ -116,7 +101,7 @@ namespace Score2Stream.TemplateModule.ViewModels
         private void UpdateImage()
         {
             RaisePropertyChanged(nameof(Bitmap));
-            RaisePropertyChanged(nameof(Current));
+            RaisePropertyChanged(nameof(Description));
         }
 
         private void UpdateSamples()

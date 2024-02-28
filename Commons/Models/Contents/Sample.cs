@@ -1,7 +1,7 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System.Text.Json.Serialization;
+using Avalonia.Media.Imaging;
 using OpenCvSharp;
 using Score2Stream.Commons.Enums;
-using System.Text.Json.Serialization;
 
 namespace Score2Stream.Commons.Models.Contents
 {
@@ -12,7 +12,7 @@ namespace Score2Stream.Commons.Models.Contents
         [JsonIgnore]
         public Bitmap Bitmap { get; set; }
 
-        public int Height { get; set; }
+        public double Height { get; set; }
 
         public byte[] Image { get; set; }
 
@@ -34,7 +34,7 @@ namespace Score2Stream.Commons.Models.Contents
 
         public string Value { get; set; }
 
-        public int Width { get; set; }
+        public double Width { get; set; }
 
         #endregion Public Properties
     }

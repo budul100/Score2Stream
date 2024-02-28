@@ -1,15 +1,12 @@
 ﻿using Avalonia.Media;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Models.Contents;
-using System.Collections.Generic;
 
 namespace Score2Stream.Commons.Interfaces
 {
     public interface IScoreboardService
     {
         #region Public Properties
-
-        IEnumerable<ClipType> ClipTypes { get; }
 
         string ClockGame { get; }
 
@@ -77,9 +74,9 @@ namespace Score2Stream.Commons.Interfaces
 
         #region Public Methods
 
-        void RemoveClip(Clip clip);
+        void RemoveArea(Area area);
 
-        void SetClip(Clip clip, ClipType clipType);
+        void SetArea(Area area, AreaType type);
 
         void SetTicker(int number, string text);
 

@@ -1,0 +1,31 @@
+<UserControl
+    x:Class="Score2Stream.AreaModule.Views.AreasView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:prism="http://prismlibrary.com/"
+    xmlns:v="using:Score2Stream.AreaModule.Views"
+    xmlns:vm="using:Score2Stream.AreaModule.ViewModels"
+    d:DesignHeight="200"
+    d:DesignWidth="300"
+    prism:ViewModelLocator.AutoWireViewModel="True"
+    mc:Ignorable="d">
+
+    <ScrollViewer Margin="5" VerticalScrollBarVisibility="Auto">
+
+        <ItemsControl ItemsSource="{Binding Areas}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:AreaViewModel">
+                    <v:AreaView />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+    </ScrollViewer>
+</UserControl>

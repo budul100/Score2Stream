@@ -12,13 +12,7 @@ namespace Score2Stream.Commons.Interfaces
 
         bool IsDetection { get; set; }
 
-        bool NoMultiComparison { get; set; }
-
-        bool NoRecognition { get; set; }
-
         List<Sample> Samples { get; }
-
-        int ThresholdDetecting { get; set; }
 
         #endregion Public Properties
 

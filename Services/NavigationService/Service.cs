@@ -36,7 +36,7 @@ namespace NavigationService
                 {
                     nameof(ViewType.Board) => (ViewType?)ViewType.Board,
 
-                    nameof(ViewType.Clips) => (ViewType?)ViewType.Clips,
+                    nameof(ViewType.Areas) => (ViewType?)ViewType.Areas,
 
                     nameof(ViewType.Templates) => (ViewType?)ViewType.Templates,
 

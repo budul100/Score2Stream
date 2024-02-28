@@ -1,8 +1,8 @@
-﻿using Avalonia.Media;
-using Score2Stream.Commons.Assets;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using Avalonia.Media;
+using Score2Stream.Commons.Assets;
 
 namespace Score2Stream.Commons.Models.Settings
 {
@@ -49,7 +49,7 @@ namespace Score2Stream.Commons.Models.Settings
             }
         }
 
-        public int TickersFrequency { get; set; } = Constants.TickersFrequencyDefault;
+        public int TickersFrequency { get; set; } = Defaults.TickersFrequencyDefault;
 
         public List<Tuple<string, bool>> TickersList
         {

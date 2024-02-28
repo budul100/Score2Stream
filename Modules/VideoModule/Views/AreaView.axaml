@@ -1,0 +1,89 @@
+<UserControl
+    x:Class="Score2Stream.VideoModule.Views.AreaView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:bv="using:Score2Stream.VideoModule.Behaviors"
+    xmlns:co="using:Score2Stream.VideoModule.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:gd="using:AvaloniaGridDefinitionBehavoir"
+    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="using:System"
+    xmlns:v="using:Score2Stream.VideoModule.Views"
+    d:DesignHeight="50"
+    d:DesignWidth="50"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <co:DoubleZoomConverter x:Key="DoubleZoomConverter" />
+
+        <Color x:Key="ColorActive">Red</Color>
+        <Color x:Key="ColorNotActive">Blue</Color>
+
+        <sys:Double x:Key="FontSize">16.0</sys:Double>
+    </UserControl.Resources>
+
+    <Panel>
+
+        <ItemsControl ItemsSource="{Binding Clips}">
+
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+
+                    <Grid
+                        Width="{Binding Width, Mode=TwoWay}"
+                        Height="{Binding Height, Mode=TwoWay}"
+                        gd:GridDefinitionBehavior.ColumnCount="{Binding Segments}"
+                        gd:GridDefinitionBehavior.StarColumns=".*" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.Styles>
+                <Style Selector="ItemsControl > ContentPresenter">
+                    <Setter Property="Grid.Column" Value="{Binding Index}" />
+                </Style>
+            </ItemsControl.Styles>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <v:ClipView />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <TextBlock
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Classes.IsActive="{Binding IsActive}"
+            Text="{Binding Description}">
+
+            <TextBlock.Styles>
+
+                <Style Selector="TextBlock.IsActive">
+                    <Setter Property="FontWeight" Value="Bold" />
+                    <Setter Property="FontStyle" Value="Italic" />
+                    <Setter Property="Foreground" Value="{StaticResource ColorActive}" />
+                </Style>
+
+                <Style Selector="TextBlock">
+                    <Setter Property="FontWeight" Value="Normal" />
+                    <Setter Property="FontStyle" Value="Normal" />
+                    <Setter Property="Foreground" Value="{StaticResource ColorNotActive}" />
+                    <Setter Property="FontSize">
+                        <Setter.Value>
+                            <MultiBinding Converter="{StaticResource DoubleZoomConverter}">
+                                <Binding Source="{StaticResource FontSize}" />
+                                <Binding Path="$parent[Panel].DataContext.Zoom" />
+                            </MultiBinding>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </TextBlock.Styles>
+
+            <i:Interaction.Behaviors>
+                <bv:SizeChangeBehavior Width="{Binding WidthName, Mode=TwoWay}" Height="{Binding HeightName, Mode=TwoWay}" />
+            </i:Interaction.Behaviors>
+        </TextBlock>
+    </Panel>
+</UserControl>

@@ -2,6 +2,7 @@
 using Prism.Modularity;
 using Prism.Regions;
 using Score2Stream.Commons.Enums;
+using Score2Stream.VideoModule.Views;
 
 namespace Score2Stream.VideoModule
 {
@@ -27,17 +28,20 @@ namespace Score2Stream.VideoModule
 
         public void OnInitialized(IContainerProvider containerProvider)
         {
+            regionManager.RegisterViewWithRegion<InputView>(
+                regionName: nameof(RegionType.OutputRegion));
+
             regionManager.RequestNavigate(
                 regionName: nameof(RegionType.OutputRegion),
-                source: nameof(ViewType.Video));
+                source: nameof(ViewType.Inputs));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterForNavigation<Views.VideoView>(
-                name: nameof(ViewType.Video));
+            containerRegistry.RegisterForNavigation<InputView>(
+                name: nameof(ViewType.Inputs));
 
-            containerRegistry.Register<ViewModels.SelectionViewModel>();
+            containerRegistry.RegisterForNavigation<AreaView>();
         }
 
         #endregion Public Methods

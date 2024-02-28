@@ -89,9 +89,7 @@ namespace Score2Stream.Commons.Extensions
         {
             var result = default(Rect?);
 
-            if (image != default
-                && image?.Step(0) > 0
-                && image.Rows > 0)
+            if (image.HasValue())
             {
                 image.FindContours(
                     contours: out var contours,
@@ -125,10 +123,8 @@ namespace Score2Stream.Commons.Extensions
         {
             var result = default(double);
 
-            if (image?.Step(0) > 0
-                && image.Rows > 0
-                && template?.Step(0) > 0
-                && template.Rows > 0)
+            if (image.HasValue()
+                && template.HasValue())
             {
                 var compare = image.Resize(
                     dsize: template.Size(),
@@ -171,12 +167,19 @@ namespace Score2Stream.Commons.Extensions
             return result;
         }
 
-        public static Mat ToCentered(this Mat image, int fullWidth, int fullHeight)
+        public static bool HasValue(this Mat image)
+        {
+            var result = image?.Step(0) > 0
+                && image.Rows > 0;
+
+            return result;
+        }
+
+        public static Mat ToCentered(this Mat image, double fullWidth, double fullHeight)
         {
             var result = image;
 
-            if (image?.Step(0) > 0
-                && image.Rows > 0)
+            if (image.HasValue())
             {
                 var horizontal = (int)Math.Ceiling((double)Math.Abs(fullWidth - image.Width) / 2);
                 var vertical = (int)Math.Ceiling((double)Math.Abs(fullHeight - image.Height) / 2);
@@ -205,8 +208,7 @@ namespace Score2Stream.Commons.Extensions
         {
             var result = image;
 
-            if (image?.Step(0) > 0
-                && image.Rows > 0)
+            if (image.HasValue())
             {
                 result = new Mat(
                     rows: image.Rows,
@@ -225,8 +227,7 @@ namespace Score2Stream.Commons.Extensions
         {
             var result = image;
 
-            if (image?.Step(0) > 0
-                && image.Rows > 0)
+            if (image.HasValue())
             {
                 var monochromeImage = image.Channels() > 1
                     ? image.CvtColor(ColorConversionCodes.BGR2GRAY)
@@ -247,8 +248,7 @@ namespace Score2Stream.Commons.Extensions
         {
             var result = image;
 
-            if (image?.Step(0) > 0
-                && image.Rows > 0)
+            if (image.HasValue())
             {
                 var anchor = new Point(-1, -1);
                 var border = new Scalar(1);

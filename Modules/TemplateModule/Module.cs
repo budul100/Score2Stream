@@ -1,6 +1,7 @@
 ﻿using Prism.Ioc;
 using Prism.Modularity;
 using Score2Stream.Commons.Enums;
+using Score2Stream.TemplateModule.Views;
 
 namespace Score2Stream.TemplateModule
 {
@@ -14,8 +15,10 @@ namespace Score2Stream.TemplateModule
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterForNavigation<Views.TemplateView>(
+            containerRegistry.RegisterForNavigation<TemplateView>(
                 name: nameof(ViewType.Templates));
+
+            containerRegistry.RegisterForNavigation<SampleView>();
         }
 
         #endregion Public Methods

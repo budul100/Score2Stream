@@ -28,6 +28,9 @@ namespace Score2Stream.ScoreboardModule
 
         public void OnInitialized(IContainerProvider containerProvider)
         {
+            regionManager.RegisterViewWithRegion<ContentView>(
+                regionName: nameof(RegionType.EditRegion));
+
             regionManager.RequestNavigate(
                 regionName: nameof(RegionType.EditRegion),
                 source: nameof(ViewType.Board));
@@ -37,6 +40,8 @@ namespace Score2Stream.ScoreboardModule
         {
             containerRegistry.RegisterForNavigation<ContentView>(
                 name: nameof(ViewType.Board));
+
+            containerRegistry.RegisterForNavigation<TickerView>();
         }
 
         #endregion Public Methods

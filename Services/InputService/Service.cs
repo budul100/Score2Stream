@@ -9,7 +9,7 @@ using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Prism.Ioc;
 using Score2Stream.Commons.Assets;
-using Score2Stream.Commons.Events.Clip;
+using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Template;
@@ -28,7 +28,8 @@ namespace Score2Stream.InputService
 
         private readonly IContainerProvider containerProvider;
         private readonly IDialogService dialogService;
-        private readonly IEventAggregator eventAggregator;
+        private readonly InputsChangedEvent inputsChangedEvent;
+        private readonly InputSelectedEvent inputSelectedEvent;
         private readonly ISettingsService<Session> settingsService;
 
         private bool isInitializing;
@@ -44,7 +45,9 @@ namespace Score2Stream.InputService
             this.settingsService = settingsService;
             this.dialogService = dialogService;
             this.containerProvider = containerProvider;
-            this.eventAggregator = eventAggregator;
+
+            inputsChangedEvent = eventAggregator.GetEvent<InputsChangedEvent>();
+            inputSelectedEvent = eventAggregator.GetEvent<InputSelectedEvent>();
 
             eventAggregator.GetEvent<VideoStartedEvent>().Subscribe(
                 action: OnVideoChanged,
@@ -53,14 +56,14 @@ namespace Score2Stream.InputService
                 action: OnVideoChanged,
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<ClipsChangedEvent>().Subscribe(
-                action: SaveClips,
+            eventAggregator.GetEvent<AreasChangedEvent>().Subscribe(
+                action: SaveAreas,
                 keepSubscriberReferenceAlive: true);
-            eventAggregator.GetEvent<ClipsOrderedEvent>().Subscribe(
-                action: SaveClips,
+            eventAggregator.GetEvent<AreasOrderedEvent>().Subscribe(
+                action: SaveAreas,
                 keepSubscriberReferenceAlive: true);
-            eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
-                action: _ => SaveClips(),
+            eventAggregator.GetEvent<AreaModifiedEvent>().Subscribe(
+                action: _ => SaveAreas(),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<TemplatesChangedEvent>().Subscribe(
@@ -73,7 +76,7 @@ namespace Score2Stream.InputService
             eventAggregator.GetEvent<SamplesOrderedEvent>().Subscribe(
                 action: SaveTemplates,
                 keepSubscriberReferenceAlive: true);
-            eventAggregator.GetEvent<SampleUpdatedEvent>().Subscribe(
+            eventAggregator.GetEvent<SampleModifiedEvent>().Subscribe(
                 action: _ => SaveTemplates(),
                 keepSubscriberReferenceAlive: true);
         }
@@ -84,7 +87,7 @@ namespace Score2Stream.InputService
 
         public Input Active { get; private set; }
 
-        public IClipService ClipService => Active?.ClipService;
+        public IAreaService AreaService => Active?.AreaService;
 
         public HashSet<Input> Inputs { get; } = new HashSet<Input>();
 
@@ -129,19 +132,19 @@ namespace Score2Stream.InputService
                     }
                 }
 
-                if (current?.Clips?.Any() == true)
+                if (current?.Areas?.Any() == true)
                 {
-                    var clips = current.Clips.ToArray();
+                    var areas = current.Areas.ToArray();
 
-                    foreach (var clip in clips)
+                    foreach (var area in areas)
                     {
-                        clip.Template = input.TemplateService.Templates?
-                            .FirstOrDefault(t => t.Name == clip.TemplateName
+                        area.Template = input.TemplateService.Templates?
+                            .FirstOrDefault(t => t.Name == area.TemplateName
                                 && t.Samples?.Any() == true);
 
                         try
                         {
-                            input.ClipService.Add(clip);
+                            input.AreaService.Add(area);
                         }
                         catch (MaxCountExceededException)
                         { }
@@ -156,12 +159,10 @@ namespace Score2Stream.InputService
 
             isInitializing = false;
 
-            SaveClips();
+            SaveAreas();
             SaveTemplates();
 
-            eventAggregator
-                .GetEvent<InputsChangedEvent>()
-                .Publish();
+            inputsChangedEvent.Publish();
         }
 
         public async Task SelectAsync(Input input)
@@ -281,7 +282,7 @@ namespace Score2Stream.InputService
             var result = default(Input);
 
             var paths = await dialogService.OpenFilePickerAsync(
-                title: Texts.InputFileText,
+                title: Texts.MenuInputFileText,
                 allowMultiple: false,
                 startLocation: startLocation);
 
@@ -310,9 +311,7 @@ namespace Score2Stream.InputService
             UpdateDevices();
             SaveInputs();
 
-            eventAggregator
-                .GetEvent<InputsChangedEvent>()
-                .Publish();
+            inputsChangedEvent.Publish();
         }
 
         private void RunInput(Input input)
@@ -332,12 +331,12 @@ namespace Score2Stream.InputService
             }
         }
 
-        private void SaveClips()
+        private void SaveAreas()
         {
             if (!isInitializing
                 && Active != default)
             {
-                Active.Clips = ClipService?.Clips;
+                Active.Areas = AreaService?.Areas;
 
                 settingsService.Save();
             }
@@ -413,9 +412,7 @@ namespace Score2Stream.InputService
                         TemplateService.Select(TemplateService.Templates?.FirstOrDefault());
                     }
 
-                    eventAggregator
-                        .GetEvent<InputSelectedEvent>()
-                        .Publish(Active);
+                    inputSelectedEvent.Publish(Active);
 
                     SaveInputs();
                 }
@@ -435,7 +432,7 @@ namespace Score2Stream.InputService
 
             foreach (var toBeRemoved in toBeRemoveds)
             {
-                toBeRemoved.ClipService.Clear();
+                toBeRemoved.AreaService.Clear();
                 toBeRemoved.VideoService?.Dispose();
                 Inputs.Remove(toBeRemoved);
             }
@@ -452,9 +449,7 @@ namespace Score2Stream.InputService
 
             if (toBeRemoveds.Any() || toBeAddeds.Any())
             {
-                eventAggregator
-                    .GetEvent<InputsChangedEvent>()
-                    .Publish();
+                inputsChangedEvent.Publish();
             }
         }
 

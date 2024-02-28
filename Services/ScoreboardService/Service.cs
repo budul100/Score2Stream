@@ -7,6 +7,7 @@ using Avalonia.Media;
 using Prism.Events;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
+using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Clip;
 using Score2Stream.Commons.Events.Graphics;
 using Score2Stream.Commons.Events.Scoreboard;
@@ -24,9 +25,10 @@ namespace Score2Stream.ScoreboardService
     {
         #region Private Fields
 
-        private readonly IDictionary<ClipType, Clip> clips = new Dictionary<ClipType, Clip>();
-        private readonly IEnumerable<ClipType> clipTypes;
-        private readonly IEventAggregator eventAggregator;
+        private readonly AreaModifiedEvent areaModifiedEvent;
+        private readonly ClipModifiedEvent clipModifiedEvent;
+        private readonly Dictionary<ClipType, Clip> clips = new();
+        private readonly ScoreboardUpdatedEvent scoreboardUpdatedEvent;
         private readonly JsonSerializerOptions serializeOptions;
         private readonly ISettingsService<Session> settingsService;
 
@@ -53,13 +55,16 @@ namespace Score2Stream.ScoreboardService
         public Service(ISettingsService<Session> settingsService, IEventAggregator eventAggregator)
         {
             this.settingsService = settingsService;
-            this.eventAggregator = eventAggregator;
 
             serializeOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 WriteIndented = true
             };
+
+            areaModifiedEvent = eventAggregator.GetEvent<AreaModifiedEvent>();
+            clipModifiedEvent = eventAggregator.GetEvent<ClipModifiedEvent>();
+            scoreboardUpdatedEvent = eventAggregator.GetEvent<ScoreboardUpdatedEvent>();
 
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
                 action: UpdateBoard,
@@ -70,7 +75,10 @@ namespace Score2Stream.ScoreboardService
                 action: UpdateBoard,
                 keepSubscriberReferenceAlive: true);
 
-            clipTypes = GetClipTypes().ToArray();
+            clips = Commons.Extensions.EnumExtensions.GetValues<ClipType>()
+                .Where(t => t != ClipType.None).ToDictionary(
+                    keySelector: t => t,
+                    elementSelector: _ => default(Clip));
 
             Update();
         }
@@ -78,9 +86,6 @@ namespace Score2Stream.ScoreboardService
         #endregion Public Constructors
 
         #region Public Properties
-
-        public IEnumerable<ClipType> ClipTypes => clipTypes
-            .Where(t => t == default || (clips.ContainsKey(t) && clips[t] == default)).ToArray();
 
         public string ClockGame { get; private set; }
 
@@ -252,37 +257,86 @@ namespace Score2Stream.ScoreboardService
 
         #region Public Methods
 
-        public void RemoveClip(Clip clip)
+        public void RemoveArea(Area area)
         {
-            if (clip != default)
+            if (area != default)
             {
-                clips[clip.Type] = default;
-                clip.Type = default;
+                area.Type = AreaType.None;
+
+                areaModifiedEvent.Publish(area);
+
+                var relevants = clips
+                    .Where(c => area.Clips.Contains(c.Value))
+                    .Distinct().ToArray();
+
+                if (relevants.Any())
+                {
+                    foreach (var relevant in relevants)
+                    {
+                        clips[relevant.Key] = default;
+
+                        if (relevant.Value.Type != ClipType.None)
+                        {
+                            relevant.Value.Type = ClipType.None;
+
+                            clipModifiedEvent.Publish(relevant.Value);
+                        }
+                    }
+                }
             }
         }
 
-        public void SetClip(Clip clip, ClipType clipType)
+        public void SetArea(Area area, AreaType type)
         {
-            if (clip != default)
+            if (area != default
+                && area.Type != type)
             {
-                if (clip.Type != ClipType.None
-                    && clips[clip.Type] != default
-                    && clips[clip.Type].Type != ClipType.None)
+                if (type == AreaType.None)
                 {
-                    var current = clips[clip.Type];
-
-                    clips[clip.Type] = default;
-                    current.Type = ClipType.None;
+                    RemoveArea(area);
                 }
-
-                if (clipType != ClipType.None)
+                else
                 {
-                    clips[clipType] = clip;
+                    area.Type = type;
+
+                    areaModifiedEvent.Publish(area);
+
+                    var currentTypes = type
+                        .GetClipTypes().ToArray();
+
+                    if (area.Size != currentTypes.Length)
+                    {
+                        throw new ArgumentException(
+                            message: $"The area type {type} does not fit the area size {area.Size}.",
+                            paramName: nameof(type));
+                    }
+
+                    var currentAreas = clips
+                        .Where(c => c.Value != default
+                            && c.Value?.Area != area
+                            && currentTypes.Contains(c.Key))
+                        .Select(c => c.Value.Area)
+                        .Distinct().ToArray();
+
+                    foreach (var currentArea in currentAreas)
+                    {
+                        RemoveArea(currentArea);
+                    }
+
+                    for (var index = 0; index < area.Size; index++)
+                    {
+                        var clip = area.Clips.ElementAt(index);
+
+                        clips[currentTypes[index]] = clip;
+
+                        if (clip.Type != currentTypes[index])
+                        {
+                            clip.Type = currentTypes[index];
+
+                            clipModifiedEvent.Publish(clip);
+                        }
+                    }
                 }
-
-                clip.Type = clipType;
-
-                eventAggregator.GetEvent<ClipUpdatedEvent>().Publish(clip);
             }
         }
 
@@ -386,24 +440,6 @@ namespace Score2Stream.ScoreboardService
             };
 
             return result;
-        }
-
-        private IEnumerable<ClipType> GetClipTypes()
-        {
-            var types = Commons.Extensions.EnumExtensions
-                .GetValues<ClipType>().ToArray();
-
-            foreach (var type in types)
-            {
-                if (type != ClipType.None)
-                {
-                    clips.Add(
-                        key: type,
-                        value: default);
-                }
-
-                yield return type;
-            }
         }
 
         private string GetClockGame()
@@ -566,9 +602,7 @@ namespace Score2Stream.ScoreboardService
                 value: board,
                 options: serializeOptions);
 
-            eventAggregator
-                .GetEvent<ScoreboardUpdatedEvent>()
-                .Publish(Message);
+            scoreboardUpdatedEvent.Publish(Message);
         }
 
         private void UpdateTicker()

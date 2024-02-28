@@ -56,7 +56,7 @@
                     Grid.ColumnSpan="2"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
-                    Text="{Binding Current}" />
+                    Text="{Binding Description}" />
 
                 <TextBlock
                     Grid.Row="1"
@@ -70,7 +70,7 @@
                     Width="40"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
-                    Text="{Binding ValueEmpty, Mode=TwoWay}" />
+                    Text="{Binding Empty, Mode=TwoWay}" />
             </Grid>
         </DockPanel>
 

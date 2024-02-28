@@ -1,6 +1,6 @@
-﻿using Score2Stream.Commons.Models.Contents;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using Score2Stream.Commons.Models.Contents;
 
 namespace Score2Stream.Commons.Extensions
 {

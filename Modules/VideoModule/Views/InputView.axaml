@@ -1,0 +1,115 @@
+<UserControl
+    x:Class="Score2Stream.VideoModule.Views.InputView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:bv="using:Score2Stream.VideoModule.Behaviors"
+    xmlns:co="using:Score2Stream.VideoModule.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:paz="using:Avalonia.Controls.PanAndZoom"
+    xmlns:prism="http://prismlibrary.com/"
+    xmlns:v="using:Score2Stream.VideoModule.Views"
+    d:DesignHeight="200"
+    d:DesignWidth="300"
+    prism:ViewModelLocator.AutoWireViewModel="True"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <co:ExpandedSizeConverter x:Key="ExpandedSizeConverter" />
+    </UserControl.Resources>
+
+    <ScrollViewer
+        Margin="5"
+        BorderBrush="LightSlateGray"
+        BorderThickness="2"
+        HorizontalScrollBarVisibility="Auto"
+        VerticalScrollBarVisibility="Auto">
+
+        <paz:ZoomBorder
+            Name="InputBorder"
+            Background="LightGray"
+            Focusable="True"
+            MaxZoomX="{Binding ZoomMax, Mode=OneWay}"
+            MaxZoomY="{Binding ZoomMax, Mode=OneWay}"
+            MinZoomX="{Binding ZoomMin, Mode=OneWay}"
+            MinZoomY="{Binding ZoomMin, Mode=OneWay}"
+            PanButton="Right"
+            Stretch="Uniform"
+            ZoomSpeed="1.2">
+
+            <i:Interaction.Behaviors>
+
+                <a:EventTriggerBehavior EventName="ZoomChanged" SourceObject="InputBorder">
+                    <a:InvokeCommandAction Command="{Binding ZoomChangedCommand}" PassEventArgsToCommand="True" />
+                </a:EventTriggerBehavior>
+
+                <bv:SizeChangeBehavior Width="{Binding FullWidth, Mode=TwoWay}" Height="{Binding FullHeight, Mode=TwoWay}" />
+            </i:Interaction.Behaviors>
+
+            <Panel Name="VideoPanel">
+
+                <i:Interaction.Behaviors>
+
+                    <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="VideoPanel">
+                        <a:InvokeCommandAction Command="{Binding MousePressedCommand}" PassEventArgsToCommand="True" />
+                    </a:EventTriggerBehavior>
+                    <a:EventTriggerBehavior EventName="PointerReleased" SourceObject="VideoPanel">
+                        <a:InvokeCommandAction Command="{Binding MouseReleasedCommand}" PassEventArgsToCommand="True" />
+                    </a:EventTriggerBehavior>
+
+                    <bv:PointerPositionBehavior PointerX="{Binding MouseX, Mode=TwoWay}" PointerY="{Binding MouseY, Mode=TwoWay}" />
+                </i:Interaction.Behaviors>
+
+                <Image
+                    Margin="2"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Source="{Binding Bitmap}">
+                    <i:Interaction.Behaviors>
+                        <bv:SizeChangeBehavior Width="{Binding BitmapWidth, Mode=TwoWay}" Height="{Binding BitmapHeight, Mode=TwoWay}" />
+                    </i:Interaction.Behaviors>
+                </Image>
+
+                <ItemsControl ItemsSource="{Binding Areas}">
+
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Canvas />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <v:AreaView />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+
+                    <ItemsControl.Styles>
+                        <Style Selector="ItemsControl > ContentPresenter">
+                            <Setter Property="Canvas.Left">
+                                <Setter.Value>
+                                    <MultiBinding Converter="{StaticResource ExpandedSizeConverter}">
+                                        <Binding Path="Left" />
+                                        <Binding Path="Width" />
+                                        <Binding Path="WidthName" />
+                                    </MultiBinding>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="Canvas.Top">
+                                <Setter.Value>
+                                    <MultiBinding Converter="{StaticResource ExpandedSizeConverter}">
+                                        <Binding Path="Top" />
+                                        <Binding Path="Height" />
+                                        <Binding Path="HeightName" />
+                                    </MultiBinding>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ItemsControl.Styles>
+                </ItemsControl>
+            </Panel>
+        </paz:ZoomBorder>
+    </ScrollViewer>
+</UserControl>

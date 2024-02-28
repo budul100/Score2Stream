@@ -8,6 +8,7 @@ using OpenCvSharp;
 using Prism.Events;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
+using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Clip;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Video;
@@ -24,9 +25,12 @@ namespace Score2Stream.VideoService
     {
         #region Private Fields
 
+        private readonly ClipUpdatedEvent clipUpdatedEvent;
         private readonly IDispatcherService dispatcherService;
-        private readonly IEventAggregator eventAggregator;
+        private readonly SampleUpdatedEvent sampleUpdatedEvent;
         private readonly ISettingsService<Session> settingsService;
+        private readonly VideoEndedEvent videoEndedEvent;
+        private readonly VideoStartedEvent videoStartedEvent;
         private readonly VideoUpdatedEvent videoUpdatedEvent;
 
         private CancellationTokenSource cancellationTokenSource;
@@ -42,40 +46,33 @@ namespace Score2Stream.VideoService
 
         #region Public Constructors
 
-        public Service(ISettingsService<Session> settingsService, IClipService clipService,
+        public Service(ISettingsService<Session> settingsService, IAreaService areaService,
             IDispatcherService dispatcherService, IEventAggregator eventAggregator)
         {
             this.dispatcherService = dispatcherService;
-            this.eventAggregator = eventAggregator;
             this.settingsService = settingsService;
 
-            ClipService = clipService;
+            AreaService = areaService;
 
-            videoUpdatedEvent = eventAggregator
-                .GetEvent<VideoUpdatedEvent>();
+            videoStartedEvent = eventAggregator.GetEvent<VideoStartedEvent>();
+            videoEndedEvent = eventAggregator.GetEvent<VideoEndedEvent>();
+            videoUpdatedEvent = eventAggregator.GetEvent<VideoUpdatedEvent>();
+
+            clipUpdatedEvent = eventAggregator.GetEvent<ClipUpdatedEvent>();
+            sampleUpdatedEvent = eventAggregator.GetEvent<SampleUpdatedEvent>();
+
+            eventAggregator.GetEvent<AreaModifiedEvent>().Subscribe(
+                action: a => UpdateRectangles(a),
+                keepSubscriberReferenceAlive: true);
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
+        public IAreaService AreaService { get; }
+
         public Bitmap Bitmap { get; private set; }
-
-        public IClipService ClipService { get; }
-
-        public int ImagesQueueSize
-        {
-            get { return settingsService.Contents.Video.ImagesQueueSize; }
-            set
-            {
-                if (value != settingsService.Contents.Video.ImagesQueueSize
-                    && value > 0)
-                {
-                    settingsService.Contents.Video.ImagesQueueSize = value;
-                    settingsService.Save();
-                }
-            }
-        }
 
         public bool IsActive { get; private set; }
 
@@ -83,89 +80,7 @@ namespace Score2Stream.VideoService
 
         public string Name { get; private set; }
 
-        public bool NoCropping
-        {
-            get { return settingsService.Contents.Video.NoCropping; }
-            set
-            {
-                if (settingsService.Contents.Video.NoCropping != value)
-                {
-                    settingsService.Contents.Video.NoCropping = value;
-                    settingsService.Save();
-                }
-            }
-        }
-
-        public bool PreferNeighbors
-        {
-            get { return settingsService.Contents.Detection.PreferNeighbors; }
-            set
-            {
-                if (settingsService.Contents.Detection.PreferNeighbors != value)
-                {
-                    settingsService.Contents.Detection.PreferNeighbors = value;
-                    settingsService.Save();
-                }
-            }
-        }
-
-        public int ProcessingDelay
-        {
-            get { return settingsService.Contents.Video.ProcessingDelay; }
-            set
-            {
-                if (settingsService.Contents.Video.ProcessingDelay != value)
-                {
-                    settingsService.Contents.Video.ProcessingDelay = value;
-                    settingsService.Save();
-                }
-            }
-        }
-
         public TimeSpan? ProcessingTime { get; private set; }
-
-        public float Rotation
-        {
-            get { return settingsService.Contents.Video.Rotation; }
-            set
-            {
-                if (settingsService.Contents.Video.Rotation != value)
-                {
-                    settingsService.Contents.Video.Rotation = value;
-                    settingsService.Save();
-                }
-            }
-        }
-
-        public bool RotationLeftPossible => Rotation >= Constants.RotateLeftMax;
-
-        public bool RotationRightPossible => Rotation <= Constants.RotateRightMax;
-
-        public int ThresholdMatching
-        {
-            get { return settingsService.Contents.Detection.ThresholdMatching; }
-            set
-            {
-                if (settingsService.Contents.Detection.ThresholdMatching != value)
-                {
-                    settingsService.Contents.Detection.ThresholdMatching = value;
-                    settingsService.Save();
-                }
-            }
-        }
-
-        public int WaitingDuration
-        {
-            get { return settingsService.Contents.Detection.WaitingDuration; }
-            set
-            {
-                if (settingsService.Contents.Detection.WaitingDuration != value)
-                {
-                    settingsService.Contents.Detection.WaitingDuration = value;
-                    settingsService.Save();
-                }
-            }
-        }
 
         #endregion Public Properties
 
@@ -180,10 +95,6 @@ namespace Score2Stream.VideoService
         public async Task RunAsync(Input input)
         {
             this.Name = input.Name;
-
-            eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
-                action: c => UpdateRectangle(c),
-                keepSubscriberReferenceAlive: true);
 
             await StartAsync(
                 deviceId: input.DeviceId,
@@ -221,126 +132,125 @@ namespace Score2Stream.VideoService
             var frameCount = 0.0;
             var frameIndex = 0.0;
 
-            try
+            //try
+            //{
+            //// Creation and disposal of this object should be done in the same thread
+            //// because if not it throws disconnectedContext exception
+
+            await UpdateVideoAsync();
+
+            using var video = new VideoCapture();
+
+            if (deviceId.HasValue)
             {
-                //// Creation and disposal of this object should be done in the same thread
-                //// because if not it throws disconnectedContext exception
-
-                await UpdateVideoAsync();
-
-                using var video = new VideoCapture();
-
-                if (deviceId.HasValue)
+                if (!video.Open(deviceId.Value))
                 {
-                    if (!video.Open(deviceId.Value))
-                    {
-                        throw new ApplicationException(
-                            message: $"Cannot connect to camera {Name}.");
-                    }
+                    throw new ApplicationException(
+                        message: $"Cannot connect to camera {Name}.");
                 }
-                else
-                {
-                    if (!File.Exists(fileName))
-                    {
-                        throw new FileNotFoundException(
-                            message: $"The file {fileName} coud not be found.");
-                    }
-                    else if (!video.Open(fileName))
-                    {
-                        throw new ApplicationException(
-                            message: $"Cannot open file {fileName}.");
-                    }
-                }
-
-                IsActive = true;
-
-                eventAggregator
-                    .GetEvent<VideoStartedEvent>()
-                    .Publish();
-
-                var hasContent = false;
-
-                do
-                {
-                    using var currentFrame = new Mat();
-                    hasContent = video.Read(currentFrame);
-
-                    var capturingStart = DateTime.Now;
-
-                    if (!currentFrame.Empty())
-                    {
-                        var clone = currentFrame.Clone();
-                        frame = clone.AsRotated(Rotation);
-
-                        var size = frame.Size();
-
-                        if (size.Width != widthLast || size.Height != heightLast)
-                        {
-                            foreach (var clip in ClipService.Clips)
-                            {
-                                UpdateRectangle(clip);
-                            }
-                        }
-
-                        heightLast = size.Height;
-                        widthLast = size.Width;
-
-                        Bitmap = new Bitmap(frame.ToMemoryStream());
-                    }
-
-                    var clips = ClipService.Clips
-                        .Where(c => c.Rect.HasValue).ToArray();
-
-                    if (clips?.Any() == true)
-                    {
-                        heightMax = clips.Max(r => r.Rect.Value.Height);
-                        widthMax = clips.Max(r => r.Rect.Value.Width);
-
-                        foreach (var clip in clips)
-                        {
-                            UpdateImage(clip);
-                        }
-                    }
-
-                    var position = 0.0;
-
-                    if (!deviceId.HasValue)
-                    {
-                        if (frameCount == 0)
-                        {
-                            frameCount = video.Get(VideoCaptureProperties.FrameCount);
-                        }
-
-                        if (frameIndex++ > frameCount || !hasContent)
-                        {
-                            frameIndex = 1;
-                            hasContent = true;
-
-                            video.Set(
-                                propertyId: VideoCaptureProperties.PosFrames,
-                                value: frameIndex);
-                        }
-
-                        position = video.Get(VideoCaptureProperties.PosMsec);
-                    }
-
-                    await UpdateVideoAsync(
-                        capturingStart: capturingStart);
-
-                    if (!deviceId.HasValue
-                        && ProcessingDelay > 0
-                        && ProcessingTime?.TotalMilliseconds > 0)
-                    {
-                        video.Set(
-                            propertyId: VideoCaptureProperties.PosMsec,
-                            value: position + ProcessingTime.Value.TotalMilliseconds);
-                    }
-                }
-                while (hasContent
-                    && !cancellationTokenSource.IsCancellationRequested);
             }
-            catch
-            { }
+            else
+            {
+                if (!File.Exists(fileName))
+                {
+                    throw new FileNotFoundException(
+                        message: $"The file {fileName} coud not be found.");
+                }
+                else if (!video.Open(fileName))
+                {
+                    throw new ApplicationException(
+                        message: $"Cannot open file {fileName}.");
+                }
+            }
+
+            IsActive = true;
+
+            videoStartedEvent.Publish();
+
+            var hasContent = false;
+
+            do
+            {
+                using var currentFrame = new Mat();
+                hasContent = video.Read(currentFrame);
+
+                var capturingStart = DateTime.Now;
+
+                if (!currentFrame.Empty())
+                {
+                    var clone = currentFrame.Clone();
+                    frame = clone.AsRotated(settingsService.Contents.Video.Rotation);
+
+                    var size = frame.Size();
+
+                    if (size.Width != widthLast || size.Height != heightLast)
+                    {
+                        foreach (var area in AreaService.Areas)
+                        {
+                            UpdateRectangles(area);
+                        }
+                    }
+
+                    heightLast = size.Height;
+                    widthLast = size.Width;
+
+                    Bitmap = new Bitmap(frame.ToMemoryStream());
+                }
+
+                var clips = AreaService?.Areas?
+                    .SelectMany(a => a.Clips)
+                    .Where(c => c.Rect.HasValue).ToArray();
+
+                if (clips?.Any() == true)
+                {
+                    heightMax = clips.Max(a => a.Rect.Value.Height);
+                    widthMax = clips.Max(a => a.Rect.Value.Width);
+
+                    foreach (var clip in clips)
+                    {
+                        UpdateImage(clip);
+                    }
+                }
+
+                var position = 0.0;
+
+                if (!deviceId.HasValue)
+                {
+                    if (frameCount == 0)
+                    {
+                        frameCount = video.Get(VideoCaptureProperties.FrameCount);
+                    }
+
+                    if (frameIndex++ > frameCount || !hasContent)
+                    {
+                        frameIndex = 1;
+                        hasContent = true;
+
+                        video.Set(
+                            propertyId: VideoCaptureProperties.PosFrames,
+                            value: frameIndex);
+                    }
+
+                    position = video.Get(VideoCaptureProperties.PosMsec);
+                }
+
+                await UpdateVideoAsync(
+                    capturingStart: capturingStart);
+
+                if (!deviceId.HasValue
+                    && settingsService.Contents.Video.ProcessingDelay > 0
+                    && ProcessingTime?.TotalMilliseconds > 0)
+                {
+                    video.Set(
+                        propertyId: VideoCaptureProperties.PosMsec,
+                        value: position + ProcessingTime.Value.TotalMilliseconds);
+                }
+            }
+            while (hasContent
+                && !cancellationTokenSource.IsCancellationRequested);
+            //}
+            //catch
+            //{ }
 
             frame = default;
             Bitmap = default;
@@ -350,9 +260,7 @@ namespace Score2Stream.VideoService
 
             await UpdateVideoAsync();
 
-            eventAggregator
-                .GetEvent<VideoEndedEvent>()
-                .Publish();
+            videoEndedEvent.Publish();
         }
 
         private async Task StartAsync(int? deviceId, string fileName)
@@ -382,50 +290,53 @@ namespace Score2Stream.VideoService
         {
             if (!frame.Empty())
             {
-                var baseImage = frame
+                var current = frame
                     .Clone(clip.Rect.Value);
 
-                clip.Images.Enqueue(baseImage);
+                clip.Images.Enqueue(current);
 
-                if (clip.Images.Count >= ImagesQueueSize)
+                if (clip.Images.Count >= settingsService.Contents.Video.ImagesQueueSize)
                 {
-                    if (clip.Images.Count > ImagesQueueSize)
+                    if (clip.Images.Count > settingsService.Contents.Video.ImagesQueueSize)
                     {
                         clip.Images.Dequeue();
                     }
 
                     var blendedImage = clip.Images.AsBlended();
 
-                    var noiselessImage = clip.NoiseRemoval == 0
+                    var noiselessImage = clip.Area.NoiseRemoval == 0
                         ? blendedImage
                         : blendedImage.WithoutNoise(
-                            erodeIterations: clip.NoiseRemoval,
-                            dilateIterations: clip.NoiseRemoval);
+                            erodeIterations: clip.Area.NoiseRemoval,
+                            dilateIterations: clip.Area.NoiseRemoval);
 
-                    var thresholdMonochrome = clip.ThresholdMonochrome / Constants.ThresholdDivider;
+                    var thresholdMonochrome = clip.Area.ThresholdMonochrome / Constants.ThresholdDivider;
 
                     var monochromeImage = noiselessImage
                         .ToMonochrome(thresholdMonochrome);
 
-                    var contourRectangle = !NoCropping
+                    var contourRectangle = !settingsService.Contents.Video.NoCropping
                         ? monochromeImage.GetContour()
                         : default;
 
-                    var croppedImage = contourRectangle.HasValue
+                    clip.Mat = contourRectangle.HasValue
                         ? monochromeImage.ToCropped(contourRectangle.Value)
                         : monochromeImage;
 
-                    clip.Mat = croppedImage;
-                    clip.Width = widthMax;
-                    clip.Height = heightMax;
-
-                    if (clip.Mat != default)
+                    if (clip.Mat != default
+                        && widthMax > 0
+                        && heightMax > 0)
                     {
-                        var bitmapStream = clip.Mat.ToCentered(
-                            fullWidth: clip.Width,
-                            fullHeight: clip.Height);
+                        var centeredImage = clip.Mat.ToCentered(
+                            fullWidth: widthMax,
+                            fullHeight: heightMax);
 
-                        clip.Bitmap = new Bitmap(bitmapStream.ToMemoryStream());
+                        if (centeredImage.HasValue())
+                        {
+                            var bitmapStream = centeredImage.ToMemoryStream();
+
+                            clip.Bitmap = new Bitmap(bitmapStream);
+                        }
                     }
 
                     UpdateValue(clip);
@@ -433,51 +344,59 @@ namespace Score2Stream.VideoService
             }
         }
 
-        private void UpdateRectangle(Clip clip)
+        private void UpdateRectangles(Area area)
         {
             if (frame != default
-                && clip.HasDimensions
-                && ClipService.Clips.Contains(clip))
+                && area?.HasDimensions == true
+                && AreaService.Areas.Contains(area))
             {
                 var size = frame.Size();
 
-                var firstX = Convert.ToInt32(clip.X1 * size.Width);
-                var secondX = Convert.ToInt32(clip.X2 * size.Width);
+                var areaY1 = area.Y1 * size.Height;
+                var areaY2 = area.Y2 * size.Height;
 
-                var firstY = Convert.ToInt32(clip.Y1 * size.Height);
-                var secondY = Convert.ToInt32(clip.Y2 * size.Height);
+                var areaX1 = area.X1 * size.Width;
+                var areaX2 = area.X2 * size.Width;
 
-                var rectangle = size.GetRectangle(
-                    firstX: firstX,
-                    firstY: firstY,
-                    secondX: secondX,
-                    secondY: secondY);
+                var width = (areaX2 - areaX1) / (double)area.Clips.Count();
 
-                clip.Rect = rectangle;
+                var index = 0;
+
+                foreach (var clip in area.Clips)
+                {
+                    var clipX1 = areaX1 + (width * index);
+                    var clipX2 = clip != area.Clips.Last()
+                        ? areaX1 + (width * ++index)
+                        : areaX2;
+
+                    clip.Rect = size.GetRectangle(
+                        firstX: clipX1,
+                        firstY: areaY1,
+                        secondX: clipX2,
+                        secondY: areaY2);
+                }
             }
         }
 
         private void UpdateValue(Clip clip)
         {
-            var matchSample = default(Sample);
+            var waitingDuration = TimeSpan.FromMilliseconds(Math.Abs(settingsService.Contents.Detection.WaitingDuration));
+            var thresholdMatching = Math.Abs(settingsService.Contents.Detection.ThresholdMatching) / Constants.ThresholdDivider;
 
-            var waitingDuration = TimeSpan.FromMilliseconds(Math.Abs(WaitingDuration));
+            var value = clip.Value;
 
             if (clip.Mat == default)
             {
                 clip.SetValue(
-                    value: clip.Template?.Empty,
+                    value: clip.Area.Template?.Empty,
                     similarity: 0,
                     waitingDuration: waitingDuration);
             }
-            else if (clip.Template != default)
+            else if (clip.Area.Template != default)
             {
-                var thresholdMatching = Math.Abs(ThresholdMatching) / Constants.ThresholdDivider;
-
                 var match = clip
                     .GetMatches(settingsService.Contents.Detection.NoMultiComparison)
-                    .OrderByDescending(m => m.Key >= thresholdMatching
-                        && (!PreferNeighbors || clip.IsNeighbour(m.Value?.Value)))
+                    .OrderByDescending(m => m.Key >= thresholdMatching)
                     .ThenByDescending(m => m.Key).FirstOrDefault();
 
                 var similarity = Convert.ToInt32(match.Key * Constants.ThresholdDivider);
@@ -485,40 +404,39 @@ namespace Score2Stream.VideoService
                 if (match.Value != default
                     && match.Key >= thresholdMatching)
                 {
-                    matchSample = match.Value;
-
                     clip.SetValue(
-                        value: matchSample.Value,
+                        value: match.Value.Value,
                         similarity: similarity,
                         waitingDuration: waitingDuration);
+
+                    if (AreaService.Clip == clip
+                        && match.Value.Type != SampleType.Similar)
+                    {
+                        match.Value.Type = SampleType.Similar;
+
+                        sampleUpdatedEvent.Publish(match.Value);
+                    }
                 }
                 else
                 {
                     clip.SetValue(
-                        value: clip.Template.Empty,
+                        value: clip.Area.Template.Empty,
                         similarity: similarity,
                         waitingDuration: waitingDuration);
                 }
             }
 
-            if (clip == ClipService.Active)
+            if (clip.Value != value)
             {
-                ClipService.TemplateService?.SampleService?.Update(clip);
-
-                if (matchSample != default)
-                {
-                    matchSample.Type = SampleType.Similar;
-                }
+                clipUpdatedEvent.Publish(clip);
             }
-
-            eventAggregator.GetEvent<SamplesUpdatedEvent>().Publish();
         }
 
         private async Task UpdateVideoAsync(DateTime? capturingStart = default)
         {
             videoUpdatedEvent.Publish();
 
-            var delay = ProcessingDelay + Constants.DelayUpdate;
+            var delay = settingsService.Contents.Video.ProcessingDelay + Constants.DelayUpdate;
 
             await Task.Delay(delay);
 

@@ -1,101 +1,48 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 using Avalonia.Media.Imaging;
 using OpenCvSharp;
 using Score2Stream.Commons.Enums;
-using Score2Stream.Commons.Extensions;
 
 namespace Score2Stream.Commons.Models.Contents
 {
     public class Clip
-        : Nameable
     {
-        #region Private Fields
-
-        private const int NoiseRemovalDefault = 0;
-        private const int ThresholdMonochromeDefault = 50;
-
-        #endregion Private Fields
-
         #region Public Properties
 
-        [JsonIgnore]
+        public Area Area { get; set; }
+
         public Bitmap Bitmap { get; set; }
 
-        [JsonIgnore]
-        public string Description => Type != ClipType.None
-            ? Type.GetDescription()
-            : Name;
-
-        public bool HasDimensions { get; set; }
-
-        public int Height { get; set; }
-
-        [JsonIgnore]
         public Queue<Mat> Images { get; set; } = new Queue<Mat>();
 
         public int Index { get; set; }
 
-        [JsonIgnore]
         public Mat Mat { get; set; }
 
-        public int NoiseRemoval { get; set; } = NoiseRemovalDefault;
-
-        [JsonIgnore]
         public Rect? Rect { get; set; }
 
-        [JsonIgnore]
         public int Similarity { get; set; }
 
-        [JsonIgnore]
-        public Template Template { get; set; }
+        public int SimilarityCurrent { get; set; }
 
-        public string TemplateName { get; set; }
+        public DateTime TimeCurrent { get; set; }
 
-        public int ThresholdMonochrome { get; set; } = ThresholdMonochromeDefault;
-
-        [JsonIgnore]
         public DateTime TimeDetection { get; set; }
-
-        [JsonIgnore]
-        public DateTime TimeUpdate { get; set; }
 
         public ClipType Type { get; set; } = ClipType.None;
 
-        [JsonIgnore]
-        public int UpdateSimilarity { get; set; }
-
-        [JsonIgnore]
-        public string UpdateValue { get; set; }
-
-        [JsonIgnore]
         public string Value { get; set; }
 
-        [JsonIgnore]
-        public string ValueLast { get; set; }
-
-        public int Width { get; set; }
+        public string ValueCurrent { get; set; }
 
         public double X1 { get; set; }
 
-        [JsonIgnore]
-        public double? X1Last { get; set; }
-
         public double X2 { get; set; }
 
-        [JsonIgnore]
-        public double? X2Last { get; set; }
+        public double Y1 => Area.Y1;
 
-        public double Y1 { get; set; }
-
-        [JsonIgnore]
-        public double? Y1Last { get; set; }
-
-        public double Y2 { get; set; }
-
-        [JsonIgnore]
-        public double? Y2Last { get; set; }
+        public double Y2 => Area.Y2;
 
         #endregion Public Properties
     }

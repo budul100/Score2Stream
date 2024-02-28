@@ -2,6 +2,7 @@
 using Prism.Modularity;
 using Prism.Regions;
 using Score2Stream.Commons.Enums;
+using Score2Stream.MenuModule.Views;
 
 namespace Score2Stream.MenuModule
 {
@@ -27,6 +28,9 @@ namespace Score2Stream.MenuModule
 
         public void OnInitialized(IContainerProvider containerProvider)
         {
+            regionManager.RegisterViewWithRegion<MenuView>(
+                regionName: nameof(RegionType.MenuRegion));
+
             regionManager.RequestNavigate(
                 regionName: nameof(RegionType.MenuRegion),
                 source: nameof(ViewType.Menu));
@@ -34,7 +38,7 @@ namespace Score2Stream.MenuModule
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterForNavigation<Views.MenuView>(
+            containerRegistry.RegisterForNavigation<MenuView>(
                 name: nameof(ViewType.Menu));
         }
 

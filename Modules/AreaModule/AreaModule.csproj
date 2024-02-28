@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>net6.0</TargetFramework>
+		<RootNamespace>Score2Stream.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Avalonia" Version="11.0.9" />
+		<PackageReference Include="Avalonia.Desktop" Version="11.0.9" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Commons\Commons.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Views\AreasView.axaml.cs">
+	    <DependentUpon>AreasView.axaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Views\AreaView.axaml.cs">
+	    <DependentUpon>AreaView.axaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+</Project>

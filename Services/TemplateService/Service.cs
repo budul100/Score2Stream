@@ -1,4 +1,7 @@
-﻿using MsBox.Avalonia.Enums;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using MsBox.Avalonia.Enums;
 using OpenCvSharp;
 using Prism.Events;
 using Prism.Ioc;
@@ -8,9 +11,6 @@ using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Score2Stream.TemplateService
 {
@@ -21,7 +21,8 @@ namespace Score2Stream.TemplateService
 
         private readonly IContainerProvider containerProvider;
         private readonly IDialogService dialogService;
-        private readonly IEventAggregator eventAggregator;
+        private readonly TemplatesChangedEvent templatesChangedEvent;
+        private readonly TemplateSelectedEvent templateSelectedEvent;
 
         #endregion Private Fields
 
@@ -32,7 +33,9 @@ namespace Score2Stream.TemplateService
         {
             this.dialogService = dialogService;
             this.containerProvider = containerProvider;
-            this.eventAggregator = eventAggregator;
+
+            templatesChangedEvent = eventAggregator.GetEvent<TemplatesChangedEvent>();
+            templateSelectedEvent = eventAggregator.GetEvent<TemplateSelectedEvent>();
         }
 
         #endregion Public Constructors
@@ -84,9 +87,7 @@ namespace Score2Stream.TemplateService
 
                 AddTemplate(template);
 
-                eventAggregator
-                    .GetEvent<TemplatesChangedEvent>()
-                    .Publish();
+                templatesChangedEvent.Publish();
 
                 Select(template);
             }
@@ -116,8 +117,7 @@ namespace Score2Stream.TemplateService
 
                     if (Templates.Any())
                     {
-                        eventAggregator.GetEvent<TemplatesChangedEvent>()
-                            .Publish();
+                        templatesChangedEvent.Publish();
 
                         Select(next);
                     }
@@ -141,9 +141,7 @@ namespace Score2Stream.TemplateService
                 Active = template
                     ?? Templates.FirstOrDefault();
 
-                eventAggregator
-                    .GetEvent<TemplateSelectedEvent>()
-                    .Publish(Active);
+                templateSelectedEvent.Publish(Active);
             }
         }
 

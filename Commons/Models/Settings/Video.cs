@@ -8,11 +8,11 @@ namespace Score2Stream.Commons.Models.Settings
 
         public string FilePathVideo { get; set; }
 
-        public int ImagesQueueSize { get; set; } = Constants.ImageQueueSizeDefault;
+        public int ImagesQueueSize { get; set; } = Defaults.VideoImageQueueSizeDefault;
 
         public bool NoCropping { get; set; }
 
-        public int ProcessingDelay { get; set; } = Constants.DelayProcessingDefault;
+        public int ProcessingDelay { get; set; } = Defaults.VideoDelayProcessingDefault;
 
         public float Rotation { get; set; }
 

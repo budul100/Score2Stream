@@ -16,8 +16,8 @@ namespace Score2Stream.ScoreboardModule.ViewModels
     {
         #region Private Fields
 
-        private readonly ScoreboardChangedEvent changedEvent;
         private readonly IContainerProvider containerProvider;
+        private readonly ScoreboardModifiedEvent scoreboardModifiedEvent;
         private readonly IScoreboardService scoreboardService;
         private readonly ISettingsService<Session> settingsService;
 
@@ -33,9 +33,9 @@ namespace Score2Stream.ScoreboardModule.ViewModels
             this.scoreboardService = scoreboardService;
             this.containerProvider = containerProvider;
 
-            changedEvent = eventAggregator.GetEvent<ScoreboardChangedEvent>();
+            scoreboardModifiedEvent = eventAggregator.GetEvent<ScoreboardModifiedEvent>();
 
-            changedEvent.Subscribe(
+            scoreboardModifiedEvent.Subscribe(
                 action: () => RaisePropertyChanged(nameof(TickersUpToDate)),
                 keepSubscriberReferenceAlive: true);
 
@@ -79,7 +79,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
                 if (!scoreboardService.ColorGuest.Equals(value))
                 {
                     scoreboardService.ColorGuest = value;
-                    changedEvent.Publish();
+                    scoreboardModifiedEvent.Publish();
 
                     RaisePropertyChanged(nameof(ColorGuest));
                     RaisePropertyChanged(nameof(ColorGuestUpToDate));
@@ -97,7 +97,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
                 if (!scoreboardService.ColorHome.Equals(value))
                 {
                     scoreboardService.ColorHome = value;
-                    changedEvent.Publish();
+                    scoreboardModifiedEvent.Publish();
 
                     RaisePropertyChanged(nameof(ColorHome));
                     RaisePropertyChanged(nameof(ColorHomeUpToDate));
@@ -115,7 +115,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
                 if (scoreboardService.IsGameOver != value)
                 {
                     scoreboardService.IsGameOver = value;
-                    changedEvent.Publish();
+                    scoreboardModifiedEvent.Publish();
 
                     RaisePropertyChanged(nameof(IsGameOver));
                     RaisePropertyChanged(nameof(IsGameOverUpToDate));
@@ -133,7 +133,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
                 if (scoreboardService.Period != value)
                 {
                     scoreboardService.Period = value;
-                    changedEvent.Publish();
+                    scoreboardModifiedEvent.Publish();
 
                     RaisePropertyChanged(nameof(Period));
                     RaisePropertyChanged(nameof(PeriodUpToDate));
@@ -163,7 +163,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
                 if (scoreboardService.Periods != value)
                 {
                     scoreboardService.Periods = value;
-                    changedEvent.Publish();
+                    scoreboardModifiedEvent.Publish();
 
                     RaisePropertyChanged(nameof(Periods));
                     RaisePropertyChanged(nameof(PeriodsUpToDate));
@@ -183,7 +183,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
                 if (scoreboardService.ScoreGuest != value)
                 {
                     scoreboardService.ScoreGuest = value;
-                    changedEvent.Publish();
+                    scoreboardModifiedEvent.Publish();
 
                     RaisePropertyChanged(nameof(ScoreGuest));
                     RaisePropertyChanged(nameof(ScoreGuestUpToDate));
@@ -201,7 +201,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
                 if (scoreboardService.ScoreHome != value)
                 {
                     scoreboardService.ScoreHome = value;
-                    changedEvent.Publish();
+                    scoreboardModifiedEvent.Publish();
 
                     RaisePropertyChanged(nameof(ScoreHome));
                     RaisePropertyChanged(nameof(ScoreHomeUpToDate));
@@ -244,7 +244,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
                 if (scoreboardService.TeamGuest != value)
                 {
                     scoreboardService.TeamGuest = value;
-                    changedEvent.Publish();
+                    scoreboardModifiedEvent.Publish();
 
                     RaisePropertyChanged(nameof(TeamGuest));
                     RaisePropertyChanged(nameof(TeamGuestUpToDate));
@@ -262,7 +262,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
                 if (scoreboardService.TeamHome != value)
                 {
                     scoreboardService.TeamHome = value;
-                    changedEvent.Publish();
+                    scoreboardModifiedEvent.Publish();
 
                     RaisePropertyChanged(nameof(TeamHome));
                     RaisePropertyChanged(nameof(TeamHomeUpToDate));

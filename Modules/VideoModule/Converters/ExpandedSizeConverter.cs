@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Avalonia;
+using Score2Stream.Commons.Converters;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Avalonia;
-using Score2Stream.Commons.Converters;
 
 namespace Score2Stream.VideoModule.Converters
 {

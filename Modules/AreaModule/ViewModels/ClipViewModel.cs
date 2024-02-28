@@ -1,0 +1,54 @@
+﻿using Avalonia.Media.Imaging;
+using Prism.Events;
+using Prism.Mvvm;
+using Score2Stream.Commons.Events.Clip;
+using Score2Stream.Commons.Events.Video;
+using Score2Stream.Commons.Extensions;
+using Score2Stream.Commons.Models.Contents;
+
+namespace Score2Stream.AreaModule.ViewModels
+{
+    public class ClipViewModel
+        : BindableBase
+    {
+        #region Private Fields
+
+        private Clip clip;
+
+        #endregion Private Fields
+
+        #region Public Constructors
+
+        public ClipViewModel(IEventAggregator eventAggregator)
+        {
+            eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
+                action: _ => RaisePropertyChanged(nameof(Description)),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: c => c == clip);
+
+            eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
+                action: () => RaisePropertyChanged(nameof(Bitmap)),
+                keepSubscriberReferenceAlive: true);
+        }
+
+        #endregion Public Constructors
+
+        #region Public Properties
+
+        public Bitmap Bitmap => clip.Bitmap;
+
+        public string Description => clip.GetDescription();
+
+        #endregion Public Properties
+
+        #region Public Methods
+
+        public void Initialize(Clip clip)
+        {
+            this.clip = clip;
+        }
+
+        #endregion Public Methods
+    }
+}

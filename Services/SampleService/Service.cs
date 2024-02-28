@@ -23,9 +23,12 @@ namespace Score2Stream.SampleService
         #region Private Fields
 
         private readonly IDialogService dialogService;
-        private readonly IEventAggregator eventAggregator;
         private readonly IRecognitionService recognitionService;
+        private readonly SamplesChangedEvent samplesChangedEvent;
+        private readonly SampleSelectedEvent sampleSelectedEvent;
+        private readonly SamplesOrderedEvent samplesOrderedEvent;
         private readonly ISettingsService<Session> settingsService;
+        private readonly TemplateSelectedEvent templateSelectedEvent;
 
         private int index;
         private bool orderDescending;
@@ -41,7 +44,12 @@ namespace Score2Stream.SampleService
             this.settingsService = settingsService;
             this.recognitionService = recognitionService;
             this.dialogService = dialogService;
-            this.eventAggregator = eventAggregator;
+
+            samplesChangedEvent = eventAggregator.GetEvent<SamplesChangedEvent>();
+            samplesOrderedEvent = eventAggregator.GetEvent<SamplesOrderedEvent>();
+            sampleSelectedEvent = eventAggregator.GetEvent<SampleSelectedEvent>();
+
+            templateSelectedEvent = eventAggregator.GetEvent<TemplateSelectedEvent>();
         }
 
         #endregion Public Constructors
@@ -52,46 +60,7 @@ namespace Score2Stream.SampleService
 
         public bool IsDetection { get; set; }
 
-        public bool NoMultiComparison
-        {
-            get { return settingsService.Contents.Detection.NoMultiComparison; }
-            set
-            {
-                if (settingsService.Contents.Detection.NoMultiComparison != value)
-                {
-                    settingsService.Contents.Detection.NoMultiComparison = value;
-                    settingsService.Save();
-                }
-            }
-        }
-
-        public bool NoRecognition
-        {
-            get { return settingsService.Contents.Detection.NoRecognition; }
-            set
-            {
-                if (settingsService.Contents.Detection.NoRecognition != value)
-                {
-                    settingsService.Contents.Detection.NoRecognition = value;
-                    settingsService.Save();
-                }
-            }
-        }
-
         public List<Sample> Samples { get; private set; } = new List<Sample>();
-
-        public int ThresholdDetecting
-        {
-            get { return settingsService.Contents.Detection.ThresholdDetecting; }
-            set
-            {
-                if (settingsService.Contents.Detection.ThresholdDetecting != value)
-                {
-                    settingsService.Contents.Detection.ThresholdDetecting = value;
-                    settingsService.Save();
-                }
-            }
-        }
 
         #endregion Public Properties
 
@@ -116,7 +85,7 @@ namespace Score2Stream.SampleService
 
                 if (sample.Value == default
                     && recognitionService != default
-                    && !NoRecognition)
+                    && !settingsService.Contents.Detection.NoRecognition)
                 {
                     sample.Value = recognitionService.Recognize(centeredImage);
                 }
@@ -137,7 +106,7 @@ namespace Score2Stream.SampleService
                     RemoveSample(sample);
                 }
 
-                eventAggregator.GetEvent<SamplesChangedEvent>().Publish();
+                samplesChangedEvent.Publish();
 
                 Select(default);
             }
@@ -213,7 +182,7 @@ namespace Score2Stream.SampleService
                 sample.Index = index++;
             }
 
-            eventAggregator.GetEvent<SamplesOrderedEvent>().Publish();
+            samplesOrderedEvent.Publish();
         }
 
         public async Task RemoveAsync()
@@ -237,7 +206,7 @@ namespace Score2Stream.SampleService
 
                     Select(next);
 
-                    eventAggregator.GetEvent<SamplesChangedEvent>().Publish();
+                    samplesChangedEvent.Publish();
                 }
             }
         }
@@ -250,7 +219,7 @@ namespace Score2Stream.SampleService
                     ? sample
                     : default;
 
-                eventAggregator.GetEvent<SampleSelectedEvent>().Publish(Active);
+                sampleSelectedEvent.Publish(Active);
             }
         }
 
@@ -262,7 +231,7 @@ namespace Score2Stream.SampleService
 
                 if (IsDetection
                     && (relevant == default || relevant.Type == SampleType.None)
-                    && Samples.Count < Constants.MaxCountClips)
+                    && Samples.Count < Constants.MaxCountAreas)
                 {
                     try
                     {
@@ -288,14 +257,14 @@ namespace Score2Stream.SampleService
             {
                 Add(sample);
 
-                eventAggregator.GetEvent<SamplesChangedEvent>().Publish();
+                samplesChangedEvent.Publish();
 
-                if (clip.Template == default)
+                if (clip.Area.Template == default)
                 {
-                    clip.Template = sample.Template;
-                    clip.TemplateName = sample.Template.Name;
+                    clip.Area.Template = sample.Template;
+                    clip.Area.TemplateName = sample.Template.Name;
 
-                    eventAggregator.GetEvent<TemplateSelectedEvent>().Publish(sample.Template);
+                    templateSelectedEvent.Publish(sample.Template);
                 }
 
                 if (select)
@@ -313,8 +282,8 @@ namespace Score2Stream.SampleService
             {
                 result = new Sample
                 {
-                    Height = clip.Height,
-                    Width = clip.Width,
+                    Height = clip.Bitmap.Size.Height,
+                    Width = clip.Bitmap.Size.Width,
                     Mat = clip.Mat,
                     Index = index++,
                     Template = template,
@@ -332,7 +301,7 @@ namespace Score2Stream.SampleService
 
             if (Samples?.Any() == true)
             {
-                var thresholdDetecting = Math.Abs(ThresholdDetecting) / Constants.ThresholdDivider;
+                var thresholdDetecting = Math.Abs(settingsService.Contents.Detection.ThresholdDetecting) / Constants.ThresholdDivider;
 
                 foreach (var sample in Samples)
                 {

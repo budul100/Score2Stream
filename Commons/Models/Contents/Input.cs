@@ -1,7 +1,7 @@
-﻿using Score2Stream.Commons.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using Score2Stream.Commons.Interfaces;
 
 namespace Score2Stream.Commons.Models.Contents
 {
@@ -18,10 +18,10 @@ namespace Score2Stream.Commons.Models.Contents
 
         #region Public Properties
 
-        public List<Clip> Clips { get; set; }
+        public List<Area> Areas { get; set; }
 
         [JsonIgnore]
-        public IClipService ClipService => VideoService?.ClipService;
+        public IAreaService AreaService => VideoService?.AreaService;
 
         public int? DeviceId { get; set; }
 
@@ -43,7 +43,7 @@ namespace Score2Stream.Commons.Models.Contents
         public List<Template> Templates { get; set; }
 
         [JsonIgnore]
-        public ITemplateService TemplateService => ClipService?.TemplateService;
+        public ITemplateService TemplateService => AreaService?.TemplateService;
 
         [JsonIgnore]
         public IVideoService VideoService { get; set; }

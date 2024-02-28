@@ -1,0 +1,79 @@
+<UserControl
+    x:Class="Score2Stream.VideoModule.Views.ClipView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:co="using:Score2Stream.VideoModule.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="using:System"
+    d:DesignHeight="50"
+    d:DesignWidth="50"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <co:DoubleZoomConverter x:Key="DoubleZoomConverter" />
+
+        <sys:Double x:Key="ThicknessNotSelected">1.0</sys:Double>
+        <sys:Double x:Key="ThicknessSelected">3.0</sys:Double>
+
+        <Color x:Key="ColorActive">Red</Color>
+        <Color x:Key="ColorNotActive">Blue</Color>
+    </UserControl.Resources>
+
+    <Rectangle
+        Name="ClipRectangle"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        Classes.IsActive="{Binding IsActive}"
+        Classes.IsSelected="{Binding IsSelected}"
+        Fill="Transparent"
+        StrokeDashArray="4,2">
+
+        <Rectangle.Styles>
+
+            <Style Selector="Rectangle.IsActive">
+                <Setter Property="StrokeThickness">
+                    <Setter.Value>
+                        <MultiBinding Converter="{StaticResource DoubleZoomConverter}">
+                            <Binding Source="{StaticResource ThicknessNotSelected}" />
+                            <Binding Path="Zoom" />
+                        </MultiBinding>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Stroke" Value="{StaticResource ColorActive}" />
+            </Style>
+
+            <Style Selector="Rectangle.IsSelected">
+                <Setter Property="StrokeThickness">
+                    <Setter.Value>
+                        <MultiBinding Converter="{StaticResource DoubleZoomConverter}">
+                            <Binding Source="{StaticResource ThicknessSelected}" />
+                            <Binding Path="Zoom" />
+                        </MultiBinding>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Stroke" Value="{StaticResource ColorActive}" />
+            </Style>
+
+            <Style Selector="Rectangle">
+                <Setter Property="StrokeThickness">
+                    <Setter.Value>
+                        <MultiBinding Converter="{StaticResource DoubleZoomConverter}">
+                            <Binding Source="{StaticResource ThicknessNotSelected}" />
+                            <Binding Path="Zoom" />
+                        </MultiBinding>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Stroke" Value="{StaticResource ColorNotActive}" />
+            </Style>
+        </Rectangle.Styles>
+
+        <i:Interaction.Behaviors>
+            <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="ClipRectangle">
+                <a:InvokeCommandAction Command="{Binding OnPressedCommand}" />
+            </a:EventTriggerBehavior>
+        </i:Interaction.Behaviors>
+    </Rectangle>
+</UserControl>

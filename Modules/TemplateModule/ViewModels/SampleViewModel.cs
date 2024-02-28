@@ -15,7 +15,7 @@ namespace Score2Stream.TemplateModule.ViewModels
     {
         #region Private Fields
 
-        private readonly SampleUpdatedEvent sampleUpdatedEvent;
+        private readonly SampleModifiedEvent sampleModifiedEvent;
 
         private bool isActive;
         private ISampleService sampleService;
@@ -41,20 +41,21 @@ namespace Score2Stream.TemplateModule.ViewModels
             OnSelectionPreviousCommand = new DelegateCommand(
                 executeMethod: () => sampleService.Next(true));
 
+            sampleModifiedEvent = eventAggregator.GetEvent<SampleModifiedEvent>();
+
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
                 action: s => IsActive = s == Sample,
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<SamplesUpdatedEvent>().Subscribe(
-                action: () => RaisePropertyChanged(nameof(Type)),
-                keepSubscriberReferenceAlive: true);
+            eventAggregator.GetEvent<SampleUpdatedEvent>().Subscribe(
+                action: _ => RaisePropertyChanged(nameof(Type)),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: s => s == Sample);
 
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
                 action: () => RaisePropertyChanged(nameof(Difference)),
                 keepSubscriberReferenceAlive: true);
-
-            sampleUpdatedEvent = eventAggregator
-                .GetEvent<SampleUpdatedEvent>();
         }
 
         #endregion Public Constructors
@@ -98,7 +99,7 @@ namespace Score2Stream.TemplateModule.ViewModels
 
                 RaisePropertyChanged(nameof(Value));
 
-                sampleUpdatedEvent.Publish(Sample);
+                sampleModifiedEvent.Publish(Sample);
             }
         }
 

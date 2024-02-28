@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
 using Prism.Events;
@@ -50,11 +49,11 @@ namespace Score2Stream.WebService
         public bool IsActive => webSocket != default
             && webServer != default;
 
-        public int PortServerHttp { get; set; } = Constants.PortServerHttpDefault;
+        public int PortServerHttp { get; set; } = Defaults.PortServerHttpDefault;
 
         public int PortServerHttps { get; set; }
 
-        public int PortSocketHttp { get; set; } = Constants.PortSocketHttpDefault;
+        public int PortSocketHttp { get; set; } = Defaults.PortSocketHttpDefault;
 
         public int PortSocketHttps { get; set; }
 

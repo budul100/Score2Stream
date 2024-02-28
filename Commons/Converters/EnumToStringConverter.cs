@@ -5,7 +5,7 @@ using System.Text;
 namespace Score2Stream.Commons.Converters
 {
     public class EnumToStringConverter
-           : OneWayValueConverter
+        : OneWayValueConverter
     {
         #region Public Properties
 

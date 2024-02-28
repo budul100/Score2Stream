@@ -6,7 +6,8 @@
 
         public const string AppName = nameof(Score2Stream);
 
-        public const string InputFileText = "Select file ...";
+        public const string MenuInputFileText = "Select file ...";
+        public const string MenuTemplateAddText = "Add new template";
 
         public const string SplashCancellingMessage = "Cancelling ...";
         public const string SplashLoadingMessage = "Loading ...";

@@ -10,7 +10,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
     {
         #region Private Fields
 
-        private readonly IEventAggregator eventAggregator;
+        private readonly ScoreboardModifiedEvent scoreboardModifiedEvent;
         private readonly IScoreboardService scoreboardService;
 
         private int number;
@@ -22,7 +22,8 @@ namespace Score2Stream.ScoreboardModule.ViewModels
         public TickerViewModel(IScoreboardService scoreboardService, IEventAggregator eventAggregator)
         {
             this.scoreboardService = scoreboardService;
-            this.eventAggregator = eventAggregator;
+
+            scoreboardModifiedEvent = eventAggregator.GetEvent<ScoreboardModifiedEvent>();
 
             eventAggregator.GetEvent<ScoreboardUpdatedEvent>().Subscribe(
                 action: _ => RaisePropertyChanged(nameof(UpToDate)),
@@ -50,9 +51,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
                         number: number,
                         isActive: value);
 
-                    eventAggregator
-                        .GetEvent<ScoreboardChangedEvent>()
-                        .Publish();
+                    scoreboardModifiedEvent.Publish();
 
                     RaisePropertyChanged(nameof(IsActive));
                     RaisePropertyChanged(nameof(UpToDate));
@@ -74,9 +73,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
                         number: number,
                         text: value);
 
-                    eventAggregator
-                        .GetEvent<ScoreboardChangedEvent>()
-                        .Publish();
+                    scoreboardModifiedEvent.Publish();
 
                     RaisePropertyChanged(nameof(Text));
                     RaisePropertyChanged(nameof(UpToDate));

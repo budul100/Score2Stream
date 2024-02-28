@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using Avalonia.Platform.Storage;
-using AvaloniaUI.Ribbon;
+﻿using AvaloniaUI.Ribbon;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Regions;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
+using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Clip;
 using Score2Stream.Commons.Events.Detection;
 using Score2Stream.Commons.Events.Graphics;
@@ -21,6 +17,10 @@ using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
 using Score2Stream.Commons.Prism;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Score2Stream.MenuModule.ViewModels
 {
@@ -32,12 +32,12 @@ namespace Score2Stream.MenuModule.ViewModels
         private const int IndexBoard = 0;
         private const int IndexClips = 1;
         private const int IndexSamples = 2;
-        private const string TemplateAddText = "Add new template";
 
         private readonly IEventAggregator eventAggregator;
         private readonly IInputService inputService;
         private readonly IRegionManager regionManager;
         private readonly ISettingsService<Session> settingsService;
+
         private int tabIndex;
 
         #endregion Private Fields
@@ -69,30 +69,30 @@ namespace Score2Stream.MenuModule.ViewModels
                 executeMethod: ChangeInputCentred,
                 canExecuteMethod: () => inputService.IsActive);
             this.InputRotateLeftCommand = new DelegateCommand(
-                executeMethod: ChangeInputRotateLeft,
-                canExecuteMethod: () => inputService.VideoService?.RotationLeftPossible == true);
+                executeMethod: () => ChangeInputRotate(true),
+                canExecuteMethod: () => CanRotateLeft());
             this.InputRotateRightCommand = new DelegateCommand(
-                executeMethod: ChangeInputRotateRight,
-                canExecuteMethod: () => inputService.VideoService?.RotationRightPossible == true);
+                executeMethod: () => ChangeInputRotate(false),
+                canExecuteMethod: () => CanRotateRight());
 
             this.ClipAddCommand = new DelegateCommand(
-                executeMethod: () => inputService.ClipService?.Create(),
+                executeMethod: () => inputService.AreaService?.Create(2),
                 canExecuteMethod: () => inputService.IsActive);
             this.ClipRemoveCommand = new DelegateCommand(
-                executeMethod: () => inputService.ClipService?.RemoveAsync(),
-                canExecuteMethod: () => inputService.ClipService?.Active != default);
+                executeMethod: () => inputService.AreaService?.RemoveAsync(),
+                canExecuteMethod: () => inputService.AreaService?.Area != default);
             this.ClipsRemoveAllCommand = new DelegateCommand(
-                executeMethod: () => inputService.ClipService?.ClearAsync(),
-                canExecuteMethod: () => inputService.ClipService?.Clips?.Any() == true);
+                executeMethod: () => inputService.AreaService?.ClearAsync(),
+                canExecuteMethod: () => inputService.AreaService?.Areas?.Any() == true);
             this.ClipUndoSizeCommand = new DelegateCommand(
-                executeMethod: () => inputService.ClipService?.UndoSize(),
-                canExecuteMethod: () => inputService.ClipService?.UndoSizePossible == true);
+                executeMethod: () => inputService.AreaService?.Undo(),
+                canExecuteMethod: () => inputService.AreaService?.CanUndo == true);
             this.ClipsOrderAllCommand = new DelegateCommand(
-                executeMethod: () => inputService.ClipService?.Order(),
-                canExecuteMethod: () => inputService.ClipService?.Clips?.Any() == true);
-            this.ClipsEmptyCommand = new DelegateCommand(
-                executeMethod: () => inputService.ClipService?.Empty(),
-                canExecuteMethod: () => inputService.ClipService?.Clips?.Any() == true);
+                executeMethod: () => inputService.AreaService?.Order(),
+                canExecuteMethod: () => inputService.AreaService?.Areas?.Any() == true);
+            //this.ClipsEmptyCommand = new DelegateCommand(
+            //    executeMethod: () => inputService.AreaService?.Empty(),
+            //    canExecuteMethod: () => inputService.AreaService?.Areas?.Any() == true);
 
             this.TemplateSelectCommand = new DelegateCommand<Template>(
                 executeMethod: t => SelectTemplate(t));
@@ -101,8 +101,8 @@ namespace Score2Stream.MenuModule.ViewModels
                 canExecuteMethod: () => inputService?.TemplateService?.Active != default);
 
             this.SampleAddCommand = new DelegateCommand(
-                executeMethod: () => inputService.SampleService?.Create(inputService.ClipService.Active),
-                canExecuteMethod: () => inputService?.ClipService?.Active != default);
+                executeMethod: () => inputService.SampleService?.Create(inputService.AreaService.Clip),
+                canExecuteMethod: () => inputService?.AreaService?.Area != default);
             this.SampleRemoveCommand = new DelegateCommand(
                 executeMethod: () => inputService.SampleService.RemoveAsync(),
                 canExecuteMethod: () => inputService?.SampleService?.Active != default);
@@ -136,11 +136,11 @@ namespace Score2Stream.MenuModule.ViewModels
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
                 action: OnVideoUpdated);
 
-            eventAggregator.GetEvent<ClipsChangedEvent>().Subscribe(
+            eventAggregator.GetEvent<AreasChangedEvent>().Subscribe(
                 action: OnClipsChanged);
             eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
                 action: _ => OnClipsChanged());
-            eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
+            eventAggregator.GetEvent<AreaModifiedEvent>().Subscribe(
                 action: _ => OnClipsUpdated());
 
             eventAggregator.GetEvent<TemplatesChangedEvent>().Subscribe(
@@ -153,7 +153,7 @@ namespace Score2Stream.MenuModule.ViewModels
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
                 action: _ => OnSampleSelected());
 
-            eventAggregator.GetEvent<ScoreboardChangedEvent>().Subscribe(
+            eventAggregator.GetEvent<ScoreboardModifiedEvent>().Subscribe(
                 action: () => ScoreboardUpdateCommand.RaiseCanExecuteChanged());
         }
 
@@ -208,19 +208,17 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public int ImagesQueueSize
         {
-            get
-            {
-                return inputService?.VideoService?.ImagesQueueSize
-                    ?? Constants.ImageQueueSizeDefault;
-            }
+            get { return settingsService.Contents.Video.ImagesQueueSize; }
             set
             {
                 if (IsActive
-                    && inputService.VideoService.ImagesQueueSize != value
                     && value >= MinQueueSize
-                    && value <= MaxQueueSize)
+                    && value <= MaxQueueSize
+                    && value != settingsService.Contents.Video.ImagesQueueSize)
                 {
-                    inputService.VideoService.ImagesQueueSize = value;
+                    settingsService.Contents.Video.ImagesQueueSize = value;
+                    settingsService.Save();
+
                     RaisePropertyChanged(nameof(ImagesQueueSize));
                 }
             }
@@ -243,7 +241,7 @@ namespace Score2Stream.MenuModule.ViewModels
         public bool IsActive => inputService.IsActive;
 
         public bool IsDetectionAvailable => IsActive
-            && inputService?.ClipService?.Active != default;
+            && inputService?.AreaService?.Area != default;
 
         public bool IsSampleDetection
         {
@@ -259,6 +257,7 @@ namespace Score2Stream.MenuModule.ViewModels
                     inputService.SampleService.IsDetection = value;
 
                     eventAggregator.GetEvent<DetectionChangedEvent>().Publish();
+
                     RaisePropertyChanged(nameof(IsSampleDetection));
                 }
             }
@@ -266,13 +265,15 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public bool NoCropping
         {
-            get { return inputService?.VideoService?.NoCropping ?? false; }
+            get { return settingsService.Contents.Video.NoCropping; }
             set
             {
                 if (IsActive
-                    && inputService.VideoService.NoCropping != value)
+                    && settingsService.Contents.Video.NoCropping != value)
                 {
-                    inputService.VideoService.NoCropping = value;
+                    settingsService.Contents.Video.NoCropping = value;
+                    settingsService.Save();
+
                     RaisePropertyChanged(nameof(NoCropping));
                 }
             }
@@ -280,13 +281,15 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public bool NoMultiComparison
         {
-            get { return inputService?.SampleService?.NoMultiComparison ?? false; }
+            get { return settingsService.Contents.Detection.NoMultiComparison; }
             set
             {
                 if (IsActive
-                    && inputService.SampleService.NoMultiComparison != value)
+                    && settingsService.Contents.Detection.NoMultiComparison != value)
                 {
-                    inputService.SampleService.NoMultiComparison = value;
+                    settingsService.Contents.Detection.NoMultiComparison = value;
+                    settingsService.Save();
+
                     RaisePropertyChanged(nameof(NoMultiComparison));
                 }
             }
@@ -294,13 +297,15 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public bool NoRecognition
         {
-            get { return inputService?.SampleService?.NoRecognition ?? false; }
+            get { return settingsService.Contents.Detection.NoRecognition; }
             set
             {
                 if (IsActive
-                    && inputService.SampleService.NoRecognition != value)
+                    && settingsService.Contents.Detection.NoRecognition != value)
                 {
-                    inputService.SampleService.NoRecognition = value;
+                    settingsService.Contents.Detection.NoRecognition = value;
+                    settingsService.Save();
+
                     RaisePropertyChanged(nameof(NoRecognition));
                 }
             }
@@ -310,15 +315,17 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public int ProcessingDelay
         {
-            get { return inputService?.VideoService?.ProcessingDelay ?? MinDelay; }
+            get { return settingsService.Contents.Video.ProcessingDelay; }
             set
             {
                 if (IsActive
-                    && inputService.VideoService.ProcessingDelay != value
                     && value >= MinDelay
-                    && value <= MaxDuration)
+                    && value <= MaxDuration
+                    && settingsService.Contents.Video.ProcessingDelay != value)
                 {
-                    inputService.VideoService.ProcessingDelay = value;
+                    settingsService.Contents.Video.ProcessingDelay = value;
+                    settingsService.Save();
+
                     RaisePropertyChanged(nameof(ProcessingDelay));
                 }
             }
@@ -356,15 +363,17 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public int ThresholdDetecting
         {
-            get { return inputService?.SampleService?.ThresholdDetecting ?? 0; }
+            get { return settingsService.Contents.Detection.ThresholdDetecting; }
             set
             {
                 if (IsActive
-                    && inputService.SampleService.ThresholdDetecting != value
                     && value >= 0
-                    && value <= MaxThreshold)
+                    && value <= MaxThreshold
+                    && settingsService.Contents.Detection.ThresholdDetecting != value)
                 {
-                    inputService.SampleService.ThresholdDetecting = value;
+                    settingsService.Contents.Detection.ThresholdDetecting = value;
+                    settingsService.Save();
+
                     RaisePropertyChanged(nameof(ThresholdDetecting));
                 }
             }
@@ -372,15 +381,17 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public int ThresholdMatching
         {
-            get { return inputService?.VideoService?.ThresholdMatching ?? 0; }
+            get { return settingsService.Contents.Detection.ThresholdMatching; }
             set
             {
                 if (IsActive
-                    && inputService.VideoService.ThresholdMatching != value
                     && value >= 0
-                    && value <= MaxThreshold)
+                    && value <= MaxThreshold
+                    && settingsService.Contents.Detection.ThresholdMatching != value)
                 {
-                    inputService.VideoService.ThresholdMatching = value;
+                    settingsService.Contents.Detection.ThresholdMatching = value;
+                    settingsService.Save();
+
                     RaisePropertyChanged(nameof(ThresholdMatching));
                 }
             }
@@ -388,15 +399,17 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public int WaitingDuration
         {
-            get { return inputService?.VideoService?.WaitingDuration ?? 0; }
+            get { return settingsService.Contents.Detection.WaitingDuration; }
             set
             {
                 if (IsActive
-                    && inputService.VideoService.WaitingDuration != value
                     && value >= 0
-                    && value <= MaxDuration)
+                    && value <= MaxDuration
+                    && settingsService.Contents.Detection.WaitingDuration != value)
                 {
-                    inputService.VideoService.WaitingDuration = value;
+                    settingsService.Contents.Detection.WaitingDuration = value;
+                    settingsService.Save();
+
                     RaisePropertyChanged(nameof(WaitingDuration));
                 }
             }
@@ -413,24 +426,44 @@ namespace Score2Stream.MenuModule.ViewModels
 
         #region Private Methods
 
+        private bool CanRotateLeft()
+        {
+            var result = inputService.IsActive
+                && settingsService.Contents.Video.Rotation >= Constants.RotateLeftMax;
+
+            return result;
+        }
+
+        private bool CanRotateRight()
+        {
+            var result = inputService.IsActive
+                && settingsService.Contents.Video.Rotation <= Constants.RotateRightMax;
+
+            return result;
+        }
+
         private void ChangeInputCentred()
         {
             eventAggregator.GetEvent<VideoCenteredEvent>().Publish();
         }
 
-        private void ChangeInputRotateLeft()
+        private void ChangeInputRotate(bool toLeft)
         {
-            if (inputService?.VideoService?.RotationLeftPossible == true)
+            if (toLeft)
             {
-                inputService.VideoService.Rotation -= Constants.RotateStep;
+                if (CanRotateLeft())
+                {
+                    settingsService.Contents.Video.Rotation -= Constants.RotateStep;
+                    settingsService.Save();
+                }
             }
-        }
-
-        private void ChangeInputRotateRight()
-        {
-            if (inputService?.VideoService?.RotationRightPossible == true)
+            else
             {
-                inputService.VideoService.Rotation += Constants.RotateStep;
+                if (CanRotateRight())
+                {
+                    settingsService.Contents.Video.Rotation += Constants.RotateStep;
+                    settingsService.Save();
+                }
             }
         }
 
@@ -506,17 +539,17 @@ namespace Score2Stream.MenuModule.ViewModels
                     TabIndex = IndexClips;
                     regionManager.RequestNavigate(
                         regionName: nameof(RegionType.EditRegion),
-                        source: nameof(ViewType.Clips));
+                        source: nameof(ViewType.Areas));
 
                     break;
 
                 case Constants.TabSamples:
 
                     if (inputService?.IsActive == true
-                        && inputService?.ClipService?.Clips?.Any() == true
-                        && inputService?.ClipService?.Active == default)
+                        && inputService?.AreaService?.Areas?.Any() == true
+                        && inputService?.AreaService?.Area == default)
                     {
-                        inputService.ClipService.Select(inputService.ClipService.Clips[0]);
+                        inputService.AreaService.Select(inputService.AreaService.Areas[0]);
                     }
 
                     TabIndex = IndexSamples;
@@ -577,7 +610,7 @@ namespace Score2Stream.MenuModule.ViewModels
                 var selectFileInput = new RibbonDropDownItem
                 {
                     Command = InputSelectCommand,
-                    Text = Texts.InputFileText,
+                    Text = Texts.MenuInputFileText,
                 };
 
                 Inputs.Add(selectFileInput);
@@ -629,7 +662,7 @@ namespace Score2Stream.MenuModule.ViewModels
                 var selectTemplateAdd = new RibbonDropDownItem
                 {
                     Command = TemplateSelectCommand,
-                    Text = TemplateAddText,
+                    Text = Texts.MenuTemplateAddText,
                 };
 
                 Templates.Add(selectTemplateAdd);

@@ -6,9 +6,9 @@
 
         Board,
 
-        Video,
+        Inputs,
 
-        Clips,
+        Areas,
 
         Templates,
     }

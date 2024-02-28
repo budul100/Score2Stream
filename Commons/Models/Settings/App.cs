@@ -8,9 +8,9 @@ namespace Score2Stream.Commons.Models.Settings
 
         public bool AllowMultipleInstances { get; set; }
 
-        public int Height { get; set; } = Constants.AppSizeHeightDefault;
+        public int Height { get; set; } = Defaults.AppSizeHeightDefault;
 
-        public int Width { get; set; } = Constants.AppSizeWidthDefault;
+        public int Width { get; set; } = Defaults.AppSizeWidthDefault;
 
         public string WindowState { get; set; } = nameof(Avalonia.Controls.WindowState.Maximized);
 
