@@ -19,7 +19,7 @@
         <sys:Double x:Key="ThicknessSelected">3.0</sys:Double>
 
         <Color x:Key="ColorActive">Red</Color>
-        <Color x:Key="ColorNotActive">Blue</Color>
+        <Color x:Key="ColorNotActive">BlueViolet</Color>
     </UserControl.Resources>
 
     <Rectangle

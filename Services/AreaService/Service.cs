@@ -1,4 +1,9 @@
-﻿using MsBox.Avalonia.Enums;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Score2Stream.AreaService.Extensions;
 using Score2Stream.Commons.Assets;
@@ -8,11 +13,6 @@ using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
 
 namespace Score2Stream.AreaService
 {
@@ -253,9 +253,11 @@ namespace Score2Stream.AreaService
 
         public void Select(Area area)
         {
-            Area = area;
+            Area = Area != area
+                ? area
+                : default;
 
-            areaSelectedEvent.Publish(area);
+            areaSelectedEvent.Publish(Area);
         }
 
         public void Select(Clip clip)
@@ -266,7 +268,9 @@ namespace Score2Stream.AreaService
 
             clipSelectedEvent.Publish(Clip);
 
-            Select(Clip?.Area);
+            Area = Clip?.Area;
+
+            areaSelectedEvent.Publish(Area);
         }
 
         public void Undo()

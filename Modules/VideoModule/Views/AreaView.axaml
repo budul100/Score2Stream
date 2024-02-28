@@ -19,7 +19,7 @@
         <co:DoubleZoomConverter x:Key="DoubleZoomConverter" />
 
         <Color x:Key="ColorActive">Red</Color>
-        <Color x:Key="ColorNotActive">Blue</Color>
+        <Color x:Key="ColorNotActive">BlueViolet</Color>
 
         <sys:Double x:Key="FontSize">16.0</sys:Double>
     </UserControl.Resources>
