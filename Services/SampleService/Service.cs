@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Score2Stream.Commons.Assets;
@@ -14,6 +10,10 @@ using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Score2Stream.SampleService
 {
@@ -27,6 +27,7 @@ namespace Score2Stream.SampleService
         private readonly SamplesChangedEvent samplesChangedEvent;
         private readonly SampleSelectedEvent sampleSelectedEvent;
         private readonly SamplesOrderedEvent samplesOrderedEvent;
+        private readonly SampleUpdatedEvent sampleUpdatedEvent;
         private readonly ISettingsService<Session> settingsService;
         private readonly TemplateSelectedEvent templateSelectedEvent;
 
@@ -45,6 +46,8 @@ namespace Score2Stream.SampleService
             this.recognitionService = recognitionService;
             this.dialogService = dialogService;
 
+            sampleUpdatedEvent = eventAggregator.GetEvent<SampleUpdatedEvent>();
+
             samplesChangedEvent = eventAggregator.GetEvent<SamplesChangedEvent>();
             samplesOrderedEvent = eventAggregator.GetEvent<SamplesOrderedEvent>();
             sampleSelectedEvent = eventAggregator.GetEvent<SampleSelectedEvent>();
@@ -56,9 +59,9 @@ namespace Score2Stream.SampleService
 
         #region Public Properties
 
-        public Sample Active { get; private set; }
-
         public bool IsDetection { get; set; }
+
+        public Sample Sample { get; private set; }
 
         public List<Sample> Samples { get; private set; } = new List<Sample>();
 
@@ -128,7 +131,7 @@ namespace Score2Stream.SampleService
         {
             try
             {
-                AddClip(
+                AddSample(
                     clip: clip,
                     select: true);
             }
@@ -149,7 +152,7 @@ namespace Score2Stream.SampleService
         public void Next(bool backward)
         {
             var next = Samples.GetNext(
-                active: Active,
+                active: Sample,
                 backward: backward);
 
             if (next != default)
@@ -187,11 +190,11 @@ namespace Score2Stream.SampleService
 
         public async Task RemoveAsync()
         {
-            if (Active != default)
+            if (Sample != default)
             {
                 var result = ButtonResult.Yes;
 
-                if (Active.IsVerified)
+                if (Sample.IsVerified)
                 {
                     result = await dialogService.GetMessageBoxResultAsync(
                         contentMessage: "Shall the selected sample be removed?",
@@ -200,9 +203,9 @@ namespace Score2Stream.SampleService
 
                 if (result == ButtonResult.Yes)
                 {
-                    var next = Samples.GetNext(Active);
+                    var next = Samples.GetNext(Sample);
 
-                    RemoveSample(Active);
+                    RemoveSample(Sample);
 
                     Select(next);
 
@@ -213,13 +216,13 @@ namespace Score2Stream.SampleService
 
         public void Select(Sample sample)
         {
-            if (Active != sample)
+            if (Sample != sample)
             {
-                Active = Active != sample
+                Sample = Sample != sample
                     ? sample
                     : default;
 
-                sampleSelectedEvent.Publish(Active);
+                sampleSelectedEvent.Publish(Sample);
             }
         }
 
@@ -227,20 +230,25 @@ namespace Score2Stream.SampleService
         {
             if (clip != default)
             {
-                var relevant = GetSimilar(clip);
+                SetSimilarities(clip);
 
                 if (IsDetection
-                    && (relevant == default || relevant.Type == SampleType.None)
                     && Samples.Count < Constants.MaxCountAreas)
                 {
-                    try
+                    var relevant = Samples
+                        .OrderByDescending(c => c.Similarity).FirstOrDefault();
+
+                    if (relevant == default || relevant.Type == SampleType.None)
                     {
-                        AddClip(
-                            clip: clip,
-                            select: false);
+                        try
+                        {
+                            AddSample(
+                                clip: clip,
+                                select: false);
+                        }
+                        catch (MaxCountExceededException)
+                        { }
                     }
-                    catch (MaxCountExceededException)
-                    { }
                 }
             }
         }
@@ -249,7 +257,7 @@ namespace Score2Stream.SampleService
 
         #region Private Methods
 
-        private void AddClip(Clip clip, bool select)
+        private void AddSample(Clip clip, bool select)
         {
             var sample = GetSample(clip);
 
@@ -295,32 +303,6 @@ namespace Score2Stream.SampleService
             return result;
         }
 
-        private Sample GetSimilar(Clip clip)
-        {
-            var result = default(Sample);
-
-            if (Samples?.Any() == true)
-            {
-                var thresholdDetecting = Math.Abs(settingsService.Contents.Detection.ThresholdDetecting) / Constants.ThresholdDivider;
-
-                foreach (var sample in Samples)
-                {
-                    sample.Similarity = sample.Mat.GetSimilarityTo(
-                        template: clip.Mat,
-                        preventMultipleComparison: settingsService.Contents.Detection.NoMultiComparison);
-
-                    sample.Type = sample.Similarity < thresholdDetecting
-                        ? SampleType.None
-                        : SampleType.Match;
-                }
-
-                result = Samples
-                    .OrderByDescending(c => c.Similarity).FirstOrDefault();
-            }
-
-            return result;
-        }
-
         private void RemoveSample(Sample sample)
         {
             if (sample != default)
@@ -330,6 +312,34 @@ namespace Score2Stream.SampleService
                 Samples.Remove(sample);
 
                 orderDescending = false;
+            }
+        }
+
+        private void SetSimilarities(Clip clip)
+        {
+            if (Samples?.Any() == true)
+            {
+                var thresholdDetecting = Math.Abs(settingsService.Contents.Detection.ThresholdDetecting) / Constants.ThresholdDivider;
+
+                foreach (var sample in Samples)
+                {
+                    var similarity = sample.Mat.GetSimilarityTo(
+                        template: clip.Mat,
+                        preventMultipleComparison: settingsService.Contents.Detection.NoMultiComparison);
+
+                    var type = similarity < thresholdDetecting
+                        ? SampleType.None
+                        : SampleType.Match;
+
+                    if (similarity != sample.Similarity
+                        || type != sample.Type)
+                    {
+                        sample.Similarity = similarity;
+                        sample.Type = type;
+
+                        sampleUpdatedEvent.Publish(sample);
+                    }
+                }
             }
         }
 

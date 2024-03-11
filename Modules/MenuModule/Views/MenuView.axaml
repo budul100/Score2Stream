@@ -75,6 +75,24 @@
                 Height="{StaticResource IconHeight}"
                 Kind="VectorSquarePlus" />
         </ControlTemplate>
+        <ControlTemplate x:Key="IconClipAddOne">
+            <mat:MaterialIcon
+                Width="{StaticResource IconWidth}"
+                Height="{StaticResource IconHeight}"
+                Kind="Numeric1BoxMultiple" />
+        </ControlTemplate>
+        <ControlTemplate x:Key="IconClipAddTwo">
+            <mat:MaterialIcon
+                Width="{StaticResource IconWidth}"
+                Height="{StaticResource IconHeight}"
+                Kind="Numeric2BoxMultiple" />
+        </ControlTemplate>
+        <ControlTemplate x:Key="IconClipAddThree">
+            <mat:MaterialIcon
+                Width="{StaticResource IconWidth}"
+                Height="{StaticResource IconHeight}"
+                Kind="Numeric3BoxMultiple" />
+        </ControlTemplate>
         <ControlTemplate x:Key="IconClipsEmpty">
             <mat:MaterialIcon
                 Width="{StaticResource IconWidth}"
@@ -261,12 +279,27 @@
                     </rib:RibbonGroupBox>
 
                     <rib:RibbonGroupBox Header="Clips handling">
-                        <rib:RibbonButton
-                            Command="{Binding ClipAddCommand}"
-                            Content="Add new clip"
+                        <rib:RibbonDropDownButton
+                            Content="Add"
                             FontSize="{StaticResource FontSize}"
                             LargeIcon="{DynamicResource IconClipAdd}"
-                            MinSize="Large" />
+                            MinSize="Large">
+                            <rib:RibbonDropDownItem
+                                Command="{Binding ClipAddCommand}"
+                                CommandParameter="1"
+                                Icon="{DynamicResource IconClipAddOne}"
+                                Text="Single segment" />
+                            <rib:RibbonDropDownItem
+                                Command="{Binding ClipAddCommand}"
+                                CommandParameter="2"
+                                Icon="{DynamicResource IconClipAddTwo}"
+                                Text="Double segment" />
+                            <rib:RibbonDropDownItem
+                                Command="{Binding ClipAddCommand}"
+                                CommandParameter="3"
+                                Icon="{DynamicResource IconClipAddThree}"
+                                Text="Triple segment" />
+                        </rib:RibbonDropDownButton>
                         <rib:RibbonButton
                             Command="{Binding ClipRemoveCommand}"
                             Content="Remove selected"
@@ -504,11 +537,8 @@
                             FontSize="{StaticResource FontSize}"
                             IsChecked="{Binding NoMultiComparison, Mode=TwoWay}"
                             IsEnabled="{Binding IsActive}" />
-
                     </rib:RibbonGroupBox>
-
                 </rib:RibbonTab.Groups>
-
             </rib:RibbonTab>
         </rib:Ribbon.Tabs>
     </rib:Ribbon>

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using MsBox.Avalonia.Enums;
+﻿using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Score2Stream.AreaService.Extensions;
 using Score2Stream.Commons.Assets;
@@ -13,6 +8,11 @@ using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 namespace Score2Stream.AreaService
 {
@@ -48,7 +48,14 @@ namespace Score2Stream.AreaService
             areaModifiedEvent = eventAggregator.GetEvent<AreaModifiedEvent>();
             areasOrderedEvent = eventAggregator.GetEvent<AreasOrderedEvent>();
             areaSelectedEvent = eventAggregator.GetEvent<AreaSelectedEvent>();
+
             clipSelectedEvent = eventAggregator.GetEvent<ClipSelectedEvent>();
+
+            eventAggregator.GetEvent<ClipDrawnEvent>().Subscribe(
+                action: c => TemplateService?.SampleService?.Update(c),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: c => c == Clip);
         }
 
         #endregion Public Constructors
@@ -90,7 +97,7 @@ namespace Score2Stream.AreaService
 
                 area.SetClips();
 
-                scoreboardService.SetArea(
+                scoreboardService.BindArea(
                     area: area,
                     type: area.Type);
 
@@ -309,13 +316,6 @@ namespace Score2Stream.AreaService
                     paramName: nameof(size));
             }
 
-            if (size >= Constants.MaxCountClips)
-            {
-                throw new MaxCountExceededException(
-                    type: typeof(Clip),
-                    maxCount: Constants.MaxCountClips);
-            }
-
             var name = Areas.GetNextName();
 
             var result = new Area()
@@ -338,7 +338,7 @@ namespace Score2Stream.AreaService
         {
             if (area != default)
             {
-                scoreboardService.RemoveArea(area);
+                scoreboardService.ReleaseArea(area);
 
                 Areas.Remove(area);
             }

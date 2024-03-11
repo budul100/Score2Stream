@@ -2,7 +2,6 @@
 using Prism.Events;
 using Prism.Mvvm;
 using Score2Stream.Commons.Events.Clip;
-using Score2Stream.Commons.Events.Video;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Models.Contents;
 
@@ -27,9 +26,11 @@ namespace Score2Stream.AreaModule.ViewModels
                 keepSubscriberReferenceAlive: true,
                 filter: c => c == clip);
 
-            eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
-                action: () => RaisePropertyChanged(nameof(Bitmap)),
-                keepSubscriberReferenceAlive: true);
+            eventAggregator.GetEvent<ClipDrawnEvent>().Subscribe(
+                action: _ => RaisePropertyChanged(nameof(Bitmap)),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: c => c == clip);
         }
 
         #endregion Public Constructors

@@ -140,7 +140,7 @@
                 <TextBlock
                     Grid.Row="2"
                     VerticalAlignment="Center"
-                    Text="{Binding Difference}" />
+                    Text="{Binding Similarity}" />
             </Grid>
         </StackPanel>
     </Border>

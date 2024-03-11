@@ -2,9 +2,9 @@
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
+using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Events.Sample;
-using Score2Stream.Commons.Events.Video;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 
@@ -48,25 +48,17 @@ namespace Score2Stream.TemplateModule.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<SampleUpdatedEvent>().Subscribe(
-                action: _ => RaisePropertyChanged(nameof(Type)),
+                action: _ => UpdateSample(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => s == Sample);
-
-            eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
-                action: () => RaisePropertyChanged(nameof(Difference)),
-                keepSubscriberReferenceAlive: true);
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public Bitmap Bitmap => Sample?.Bitmap;
-
-        public string Difference => Sample?.Mat != default
-            ? $"Similarity: {(int)(Sample.Similarity * 100)}%"
-            : default;
+        public Bitmap Bitmap => Sample.Bitmap;
 
         public bool IsActive
         {
@@ -87,6 +79,10 @@ namespace Score2Stream.TemplateModule.ViewModels
         public DelegateCommand OnSelectionPreviousCommand { get; }
 
         public Sample Sample { get; private set; }
+
+        public string Similarity => Sample.Mat != default
+            ? $"Similarity: {(int)(Sample.Similarity * Constants.ThresholdDivider)}%"
+            : default;
 
         public SampleType Type => Sample.Type;
 
@@ -118,5 +114,15 @@ namespace Score2Stream.TemplateModule.ViewModels
         }
 
         #endregion Public Methods
+
+        #region Private Methods
+
+        private void UpdateSample()
+        {
+            RaisePropertyChanged(nameof(Similarity));
+            RaisePropertyChanged(nameof(Type));
+        }
+
+        #endregion Private Methods
     }
 }

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Score2Stream.Commons.Assets;
-using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Models.Contents;
 
@@ -12,7 +10,8 @@ namespace Score2Stream.VideoService.Extensions
     {
         #region Public Methods
 
-        public static IEnumerable<KeyValuePair<double, Sample>> GetMatches(this Clip clip, bool preventMultipleComparison)
+        public static IEnumerable<KeyValuePair<double, Sample>> GetMatches(this Clip clip,
+            bool preventMultipleComparison)
         {
             var relevants = clip?.Area?.Template?.Samples?
                 .Where(s => !string.IsNullOrWhiteSpace(s.Value)).ToArray();

@@ -38,6 +38,21 @@ public partial class SampleView
 
     #endregion Public Properties
 
+    #region Protected Methods
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
+    {
+        if (IsActive
+            && e.Property.Name == nameof(IsActive))
+        {
+            SetFocusOnTextBox();
+        }
+
+        base.OnPropertyChanged(e);
+    }
+
+    #endregion Protected Methods
+
     #region Private Methods
 
     private void OnAttachedToVisualTree()
@@ -50,15 +65,6 @@ public partial class SampleView
     private void OnDetachedFromVisualTree()
     {
         this.PropertyChanged -= (s, e) => OnPropertyChanged(e);
-    }
-
-    private void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
-    {
-        if (IsActive
-            && e.Property.Name == nameof(IsActive))
-        {
-            SetFocusOnTextBox();
-        }
     }
 
     private void SetFocusOnTextBox()

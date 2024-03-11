@@ -25,6 +25,7 @@ namespace Score2Stream.VideoService
     {
         #region Private Fields
 
+        private readonly ClipDrawnEvent clipDrawnEvent;
         private readonly ClipUpdatedEvent clipUpdatedEvent;
         private readonly IDispatcherService dispatcherService;
         private readonly SampleUpdatedEvent sampleUpdatedEvent;
@@ -58,7 +59,9 @@ namespace Score2Stream.VideoService
             videoEndedEvent = eventAggregator.GetEvent<VideoEndedEvent>();
             videoUpdatedEvent = eventAggregator.GetEvent<VideoUpdatedEvent>();
 
+            clipDrawnEvent = eventAggregator.GetEvent<ClipDrawnEvent>();
             clipUpdatedEvent = eventAggregator.GetEvent<ClipUpdatedEvent>();
+
             sampleUpdatedEvent = eventAggregator.GetEvent<SampleUpdatedEvent>();
 
             eventAggregator.GetEvent<AreaModifiedEvent>().Subscribe(
@@ -339,6 +342,8 @@ namespace Score2Stream.VideoService
                         }
                     }
 
+                    clipDrawnEvent.Publish(clip);
+
                     UpdateValue(clip);
                 }
             }
@@ -383,7 +388,7 @@ namespace Score2Stream.VideoService
             var waitingDuration = TimeSpan.FromMilliseconds(Math.Abs(settingsService.Contents.Detection.WaitingDuration));
             var thresholdMatching = Math.Abs(settingsService.Contents.Detection.ThresholdMatching) / Constants.ThresholdDivider;
 
-            var value = clip.Value;
+            var given = clip.Value;
 
             if (clip.Mat == default)
             {
@@ -426,7 +431,7 @@ namespace Score2Stream.VideoService
                 }
             }
 
-            if (clip.Value != value)
+            if (clip.Value != given)
             {
                 clipUpdatedEvent.Publish(clip);
             }

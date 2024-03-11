@@ -74,9 +74,9 @@ namespace Score2Stream.Commons.Interfaces
 
         #region Public Methods
 
-        void RemoveArea(Area area);
+        void BindArea(Area area, AreaType type);
 
-        void SetArea(Area area, AreaType type);
+        void ReleaseArea(Area area);
 
         void SetTicker(int number, string text);
 

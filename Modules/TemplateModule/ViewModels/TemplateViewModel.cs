@@ -1,17 +1,17 @@
-﻿using System.Collections.ObjectModel;
-using System.Linq;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
+using Score2Stream.Commons.Events.Clip;
 using Score2Stream.Commons.Events.Detection;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Template;
-using Score2Stream.Commons.Events.Video;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Prism;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Score2Stream.TemplateModule.ViewModels
 {
@@ -51,11 +51,11 @@ namespace Score2Stream.TemplateModule.ViewModels
                 action: () => OrderSamples(),
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
-                action: () => UpdateImage(),
+            eventAggregator.GetEvent<ClipDrawnEvent>().Subscribe(
+                action: _ => UpdateImage(),
                 keepSubscriberReferenceAlive: true);
 
-            UpdateTemplate(inputService?.TemplateService?.Active);
+            UpdateTemplate(inputService?.TemplateService?.Template);
         }
 
         #endregion Public Constructors

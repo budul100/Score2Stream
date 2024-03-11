@@ -23,7 +23,6 @@
         public const string LockFileName = ".lock";
 
         public const int MaxCountAreas = 20;
-        public const int MaxCountClips = 3;
         public const int MaxCountInputs = 5;
         public const int MaxCountSamples = 100;
         public const int MaxCountTemplates = 10;
@@ -33,6 +32,9 @@
         public const float RotateLeftMax = -10F;
         public const float RotateRightMax = 10F;
         public const float RotateStep = 0.2F;
+
+        public const int SegmentsCountMax = 3;
+        public const int SegmentsCountMin = 1;
 
         public const int SizeChangeMin = 10;
 

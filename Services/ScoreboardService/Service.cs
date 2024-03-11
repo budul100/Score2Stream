@@ -257,84 +257,86 @@ namespace Score2Stream.ScoreboardService
 
         #region Public Methods
 
-        public void RemoveArea(Area area)
+        public void BindArea(Area area, AreaType type)
         {
             if (area != default)
             {
-                area.Type = AreaType.None;
-
-                areaModifiedEvent.Publish(area);
-
-                var relevants = clips
-                    .Where(c => area.Clips.Contains(c.Value))
-                    .Distinct().ToArray();
-
-                if (relevants.Any())
-                {
-                    foreach (var relevant in relevants)
-                    {
-                        clips[relevant.Key] = default;
-
-                        if (relevant.Value.Type != ClipType.None)
-                        {
-                            relevant.Value.Type = ClipType.None;
-
-                            clipModifiedEvent.Publish(relevant.Value);
-                        }
-                    }
-                }
-            }
-        }
-
-        public void SetArea(Area area, AreaType type)
-        {
-            if (area != default
-                && area.Type != type)
-            {
                 if (type == AreaType.None)
                 {
-                    RemoveArea(area);
+                    ReleaseArea(area);
                 }
                 else
                 {
-                    area.Type = type;
+                    if (area.Type != type)
+                    {
+                        area.Type = type;
 
-                    areaModifiedEvent.Publish(area);
+                        areaModifiedEvent.Publish(area);
+                    }
 
-                    var currentTypes = type
+                    var clipTypes = type
                         .GetClipTypes().ToArray();
 
-                    if (area.Size != currentTypes.Length)
+                    if (area.Size != clipTypes.Length)
                     {
                         throw new ArgumentException(
                             message: $"The area type {type} does not fit the area size {area.Size}.",
                             paramName: nameof(type));
                     }
 
-                    var currentAreas = clips
-                        .Where(c => c.Value != default
-                            && c.Value?.Area != area
-                            && currentTypes.Contains(c.Key))
-                        .Select(c => c.Value.Area)
-                        .Distinct().ToArray();
-
-                    foreach (var currentArea in currentAreas)
-                    {
-                        RemoveArea(currentArea);
-                    }
-
                     for (var index = 0; index < area.Size; index++)
                     {
                         var clip = area.Clips.ElementAt(index);
 
-                        clips[currentTypes[index]] = clip;
+                        clips[clipTypes[index]] = clip;
 
-                        if (clip.Type != currentTypes[index])
+                        if (clip.Type != clipTypes[index])
                         {
-                            clip.Type = currentTypes[index];
+                            clip.Type = clipTypes[index];
 
                             clipModifiedEvent.Publish(clip);
                         }
+                    }
+
+                    var releasedAreas = clips
+                        .Where(c => c.Value != default
+                            && c.Value?.Area != area
+                            && clipTypes.Contains(c.Key))
+                        .Select(c => c.Value.Area)
+                        .Distinct().ToArray();
+
+                    foreach (var unusedArea in releasedAreas)
+                    {
+                        ReleaseArea(unusedArea);
+                    }
+                }
+            }
+        }
+
+        public void ReleaseArea(Area area)
+        {
+            if (area != default)
+            {
+                if (area.Type != AreaType.None)
+                {
+                    area.Type = AreaType.None;
+
+                    areaModifiedEvent.Publish(area);
+                }
+
+                var releasedClips = clips
+                    .Where(c => area.Clips.Contains(c.Value))
+                    .Distinct().ToArray();
+
+                foreach (var releasedClip in releasedClips)
+                {
+                    clips[releasedClip.Key] = default;
+
+                    if (releasedClip.Value.Type != ClipType.None)
+                    {
+                        releasedClip.Value.Type = ClipType.None;
+
+                        clipModifiedEvent.Publish(releasedClip.Value);
                     }
                 }
             }

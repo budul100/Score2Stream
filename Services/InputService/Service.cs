@@ -93,7 +93,7 @@ namespace Score2Stream.InputService
 
         public bool IsActive => VideoService?.IsActive ?? false;
 
-        public ISampleService SampleService => TemplateService?.Active?.SampleService;
+        public ISampleService SampleService => TemplateService?.Template?.SampleService;
 
         public ITemplateService TemplateService => Active?.TemplateService;
 

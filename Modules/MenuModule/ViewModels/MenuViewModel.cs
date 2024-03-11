@@ -75,9 +75,9 @@ namespace Score2Stream.MenuModule.ViewModels
                 executeMethod: () => ChangeInputRotate(false),
                 canExecuteMethod: () => CanRotateRight());
 
-            this.ClipAddCommand = new DelegateCommand(
-                executeMethod: () => inputService.AreaService?.Create(2),
-                canExecuteMethod: () => inputService.IsActive);
+            this.ClipAddCommand = new DelegateCommand<string>(
+                executeMethod: n => AddSegments(n),
+                canExecuteMethod: _ => inputService.IsActive);
             this.ClipRemoveCommand = new DelegateCommand(
                 executeMethod: () => inputService.AreaService?.RemoveAsync(),
                 canExecuteMethod: () => inputService.AreaService?.Area != default);
@@ -98,14 +98,14 @@ namespace Score2Stream.MenuModule.ViewModels
                 executeMethod: t => SelectTemplate(t));
             this.TemplateRemoveCommand = new DelegateCommand(
                 executeMethod: () => inputService.TemplateService.RemoveAsync(),
-                canExecuteMethod: () => inputService?.TemplateService?.Active != default);
+                canExecuteMethod: () => inputService?.TemplateService?.Template != default);
 
             this.SampleAddCommand = new DelegateCommand(
                 executeMethod: () => inputService.SampleService?.Create(inputService.AreaService.Clip),
                 canExecuteMethod: () => inputService?.AreaService?.Area != default);
             this.SampleRemoveCommand = new DelegateCommand(
                 executeMethod: () => inputService.SampleService.RemoveAsync(),
-                canExecuteMethod: () => inputService?.SampleService?.Active != default);
+                canExecuteMethod: () => inputService?.SampleService?.Sample != default);
             this.SamplesRemoveAllCommand = new DelegateCommand(
                 executeMethod: () => inputService.SampleService.ClearAsync(),
                 canExecuteMethod: () => inputService?.SampleService?.Samples?.Any() == true);
@@ -192,7 +192,7 @@ namespace Score2Stream.MenuModule.ViewModels
             }
         }
 
-        public DelegateCommand ClipAddCommand { get; }
+        public DelegateCommand<string> ClipAddCommand { get; }
 
         public DelegateCommand ClipRemoveCommand { get; }
 
@@ -426,6 +426,17 @@ namespace Score2Stream.MenuModule.ViewModels
 
         #region Private Methods
 
+        private void AddSegments(string number)
+        {
+            if (inputService.AreaService != default
+                && int.TryParse(number, out var size)
+                && size >= Constants.SegmentsCountMin
+                && size <= Constants.SegmentsCountMax)
+            {
+                inputService.AreaService.Create(size);
+            }
+        }
+
         private bool CanRotateLeft()
         {
             var result = inputService.IsActive
@@ -545,13 +556,6 @@ namespace Score2Stream.MenuModule.ViewModels
 
                 case Constants.TabSamples:
 
-                    if (inputService?.IsActive == true
-                        && inputService?.AreaService?.Areas?.Any() == true
-                        && inputService?.AreaService?.Area == default)
-                    {
-                        inputService.AreaService.Select(inputService.AreaService.Areas[0]);
-                    }
-
                     TabIndex = IndexSamples;
                     regionManager.RequestNavigate(
                         regionName: nameof(RegionType.EditRegion),
@@ -646,7 +650,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
                 foreach (var ordered in ordereds)
                 {
-                    var isChecked = ordered == inputService.TemplateService.Active;
+                    var isChecked = ordered == inputService.TemplateService.Template;
 
                     var template = new RibbonDropDownItem
                     {

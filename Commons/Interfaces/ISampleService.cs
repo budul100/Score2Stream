@@ -8,9 +8,9 @@ namespace Score2Stream.Commons.Interfaces
     {
         #region Public Properties
 
-        Sample Active { get; }
-
         bool IsDetection { get; set; }
+
+        Sample Sample { get; }
 
         List<Sample> Samples { get; }
 

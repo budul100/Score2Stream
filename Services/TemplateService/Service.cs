@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using MsBox.Avalonia.Enums;
+﻿using MsBox.Avalonia.Enums;
 using OpenCvSharp;
 using Prism.Events;
 using Prism.Ioc;
@@ -11,6 +8,9 @@ using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Score2Stream.TemplateService
 {
@@ -42,9 +42,9 @@ namespace Score2Stream.TemplateService
 
         #region Public Properties
 
-        public Template Active { get; private set; }
+        public ISampleService SampleService => Template?.SampleService;
 
-        public ISampleService SampleService => Active?.SampleService;
+        public Template Template { get; private set; }
 
         public List<Template> Templates { get; } = new List<Template>();
 
@@ -102,7 +102,7 @@ namespace Score2Stream.TemplateService
 
         public async Task RemoveAsync()
         {
-            if (Active != default)
+            if (Template != default)
             {
                 var result = await dialogService.GetMessageBoxResultAsync(
                     contentMessage: "Shall the selected template be removed?",
@@ -110,10 +110,10 @@ namespace Score2Stream.TemplateService
 
                 if (result == ButtonResult.Yes)
                 {
-                    var next = Templates.GetNext(Active);
+                    var next = Templates.GetNext(Template);
 
-                    Active.SampleService.Clear();
-                    Templates.Remove(Active);
+                    Template.SampleService.Clear();
+                    Templates.Remove(Template);
 
                     if (Templates.Any())
                     {
@@ -136,12 +136,12 @@ namespace Score2Stream.TemplateService
 
         public void Select(Template template)
         {
-            if (template != Active || template == default)
+            if (template != Template || template == default)
             {
-                Active = template
+                Template = template
                     ?? Templates.FirstOrDefault();
 
-                templateSelectedEvent.Publish(Active);
+                templateSelectedEvent.Publish(Template);
             }
         }
 
