@@ -26,32 +26,6 @@
 
     <Panel>
 
-        <ItemsControl ItemsSource="{Binding Clips}">
-
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-
-                    <Grid
-                        Width="{Binding Width, Mode=TwoWay}"
-                        Height="{Binding Height, Mode=TwoWay}"
-                        gd:GridDefinitionBehavior.ColumnCount="{Binding Segments}"
-                        gd:GridDefinitionBehavior.StarColumns=".*" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-
-            <ItemsControl.Styles>
-                <Style Selector="ItemsControl > ContentPresenter">
-                    <Setter Property="Grid.Column" Value="{Binding Index}" />
-                </Style>
-            </ItemsControl.Styles>
-
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <v:ClipView />
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-
         <TextBlock
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
@@ -84,6 +58,34 @@
             <i:Interaction.Behaviors>
                 <bv:SizeChangeBehavior Width="{Binding WidthName, Mode=TwoWay}" Height="{Binding HeightName, Mode=TwoWay}" />
             </i:Interaction.Behaviors>
+
         </TextBlock>
+
+        <ItemsControl ItemsSource="{Binding Clips}">
+
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+
+                    <Grid
+                        Width="{Binding Width, Mode=TwoWay}"
+                        Height="{Binding Height, Mode=TwoWay}"
+                        gd:GridDefinitionBehavior.ColumnCount="{Binding Segments}"
+                        gd:GridDefinitionBehavior.StarColumns=".*" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.Styles>
+                <Style Selector="ItemsControl > ContentPresenter">
+                    <Setter Property="Grid.Column" Value="{Binding Index}" />
+                </Style>
+            </ItemsControl.Styles>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <v:ClipView />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
     </Panel>
 </UserControl>
