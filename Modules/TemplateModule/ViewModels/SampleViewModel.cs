@@ -4,6 +4,7 @@ using Prism.Events;
 using Prism.Mvvm;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
+using Score2Stream.Commons.Events.Clip;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
@@ -17,7 +18,8 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         private readonly SampleModifiedEvent sampleModifiedEvent;
 
-        private bool isActive;
+        private IAreaService areaService;
+        private bool isSelected;
         private ISampleService sampleService;
 
         #endregion Private Fields
@@ -43,12 +45,16 @@ namespace Score2Stream.TemplateModule.ViewModels
 
             sampleModifiedEvent = eventAggregator.GetEvent<SampleModifiedEvent>();
 
+            eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
+                action: _ => UpdateValues(),
+                keepSubscriberReferenceAlive: true);
+
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
-                action: s => IsActive = s == Sample,
+                action: s => IsSelected = s == Sample,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<SampleUpdatedEvent>().Subscribe(
-                action: _ => UpdateSample(),
+                action: _ => UpdateValues(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => s == Sample);
@@ -60,10 +66,10 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         public Bitmap Bitmap => Sample.Bitmap;
 
-        public bool IsActive
+        public bool IsSelected
         {
-            get { return isActive; }
-            set { SetProperty(ref isActive, value); }
+            get { return isSelected; }
+            set { SetProperty(ref isSelected, value); }
         }
 
         public DelegateCommand OnFocusGotCommand { get; }
@@ -80,11 +86,13 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         public Sample Sample { get; private set; }
 
-        public string Similarity => Sample.Mat != default
+        public string Similarity => areaService?.Segment != default
             ? $"Similarity: {(int)(Sample.Similarity * Constants.ThresholdDivider)}%"
             : default;
 
-        public SampleType Type => Sample.Type;
+        public SampleType Type => areaService?.Segment != default
+            ? Sample.Type
+            : SampleType.None;
 
         public string Value
         {
@@ -103,10 +111,11 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         #region Public Methods
 
-        public void Initialize(Sample sample, ISampleService sampleService)
+        public void Initialize(Sample sample, IInputService inputService)
         {
             this.Sample = sample;
-            this.sampleService = sampleService;
+            this.areaService = inputService.AreaService;
+            this.sampleService = inputService.SampleService;
 
             Value = sample.Value;
 
@@ -117,7 +126,7 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         #region Private Methods
 
-        private void UpdateSample()
+        private void UpdateValues()
         {
             RaisePropertyChanged(nameof(Similarity));
             RaisePropertyChanged(nameof(Type));

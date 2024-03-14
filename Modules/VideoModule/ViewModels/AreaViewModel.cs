@@ -48,8 +48,6 @@ namespace Score2Stream.VideoModule.ViewModels
             ? Top.Value + Height
             : default;
 
-        public ObservableCollection<ClipViewModel> Clips { get; } = new ObservableCollection<ClipViewModel>();
-
         public string Description => HasValue && !IsEditing && IsVisible
             ? Area?.Description
             : default;
@@ -128,7 +126,9 @@ namespace Score2Stream.VideoModule.ViewModels
             ? Left.Value + Width
             : default;
 
-        public int Segments => Clips.Count;
+        public ObservableCollection<SegmentViewModel> Segments { get; } = new ObservableCollection<SegmentViewModel>();
+
+        public int Size => Segments.Count;
 
         public double? Top
         {
@@ -198,7 +198,7 @@ namespace Score2Stream.VideoModule.ViewModels
                 {
                     SetProperty(ref zoom, value);
 
-                    foreach (var clip in Clips)
+                    foreach (var clip in Segments)
                     {
                         clip.Zoom = zoom;
                     }
@@ -230,7 +230,7 @@ namespace Score2Stream.VideoModule.ViewModels
 
             RaisePropertyChanged(nameof(Description));
 
-            UpdateClips(
+            UpdateSegments(
                 area: area,
                 areaService: areaService);
         }
@@ -239,23 +239,23 @@ namespace Score2Stream.VideoModule.ViewModels
 
         #region Private Methods
 
-        private void UpdateClips(Area area, IAreaService areaService)
+        private void UpdateSegments(Area area, IAreaService areaService)
         {
-            Clips.Clear();
+            Segments.Clear();
 
-            foreach (var clip in area.Segments)
+            foreach (var segment in area.Segments)
             {
-                var current = containerProvider.Resolve<ClipViewModel>();
+                var current = containerProvider.Resolve<SegmentViewModel>();
 
                 current.Initialize(
-                    clip: clip,
+                    clip: segment,
                     zoom: zoom,
                     areaService: areaService);
 
-                Clips.Add(current);
+                Segments.Add(current);
             }
 
-            RaisePropertyChanged(nameof(Clips));
+            RaisePropertyChanged(nameof(Segments));
             RaisePropertyChanged(nameof(Segments));
         }
 

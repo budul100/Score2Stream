@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:en="using:Score2Stream.Commons.Enums"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mat="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -34,7 +35,7 @@
 
                 <i:Interaction.Behaviors>
                     <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="BoardTab">
-                        <a:InvokeCommandAction Command="{Binding OnTabSelectionCommand}" CommandParameter="{Binding TabBoard}" />
+                        <a:InvokeCommandAction Command="{Binding SelectTabCommand}" CommandParameter="{x:Static en:ViewType.Board}" />
                     </a:EventTriggerBehavior>
                 </i:Interaction.Behaviors>
 
@@ -99,11 +100,11 @@
                 </rib:RibbonTab.Groups>
             </rib:RibbonTab>
 
-            <rib:RibbonTab Name="SegmentsTab" Header="Segments">
+            <rib:RibbonTab Name="AreasTab" Header="Segments">
 
                 <i:Interaction.Behaviors>
-                    <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="SegmentsTab">
-                        <a:InvokeCommandAction Command="{Binding OnTabSelectionCommand}" CommandParameter="{Binding TabSegments}" />
+                    <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="AreasTab">
+                        <a:InvokeCommandAction Command="{Binding SelectTabCommand}" CommandParameter="{x:Static en:ViewType.Areas}" />
                     </a:EventTriggerBehavior>
                 </i:Interaction.Behaviors>
 
@@ -369,11 +370,11 @@
                 </rib:RibbonTab.Groups>
             </rib:RibbonTab>
 
-            <rib:RibbonTab Name="SamplesTab" Header="Samples">
+            <rib:RibbonTab Name="TemplatesTab" Header="Samples">
 
                 <i:Interaction.Behaviors>
-                    <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="SamplesTab">
-                        <a:InvokeCommandAction Command="{Binding OnTabSelectionCommand}" CommandParameter="{Binding TabSamples}" />
+                    <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="TemplatesTab">
+                        <a:InvokeCommandAction Command="{Binding SelectTabCommand}" CommandParameter="{x:Static en:ViewType.Templates}" />
                     </a:EventTriggerBehavior>
                 </i:Interaction.Behaviors>
 

@@ -60,7 +60,7 @@
             </i:Interaction.Behaviors>
         </TextBlock>
 
-        <ItemsControl ItemsSource="{Binding Clips}">
+        <ItemsControl ItemsSource="{Binding Segments}">
 
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -68,7 +68,7 @@
                     <Grid
                         Width="{Binding Width, Mode=TwoWay}"
                         Height="{Binding Height, Mode=TwoWay}"
-                        gd:GridDefinitionBehavior.ColumnCount="{Binding Segments}"
+                        gd:GridDefinitionBehavior.ColumnCount="{Binding Size}"
                         gd:GridDefinitionBehavior.StarColumns=".*" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
@@ -81,7 +81,7 @@
 
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <v:ClipView />
+                    <v:SegmentView />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>

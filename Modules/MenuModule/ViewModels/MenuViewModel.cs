@@ -6,13 +6,14 @@ using AvaloniaUI.Ribbon;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Regions;
+using ReactiveUI;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Clip;
-using Score2Stream.Commons.Events.Detection;
 using Score2Stream.Commons.Events.Graphics;
 using Score2Stream.Commons.Events.Input;
+using Score2Stream.Commons.Events.Menu;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Scoreboard;
 using Score2Stream.Commons.Events.Template;
@@ -29,14 +30,11 @@ namespace Score2Stream.MenuModule.ViewModels
     {
         #region Private Fields
 
-        private const int IndexBoard = 0;
-        private const int IndexSamples = 2;
-        private const int IndexSegments = 1;
-        private readonly IEventAggregator eventAggregator;
+        private readonly DetectionChangedEvent detectionChangedEvent;
         private readonly IInputService inputService;
         private readonly IRegionManager regionManager;
         private readonly ISettingsService<Session> settingsService;
-
+        private readonly TabChangedEvent tabChangedEvent;
         private int tabIndex;
 
         #endregion Private Fields
@@ -51,10 +49,9 @@ namespace Score2Stream.MenuModule.ViewModels
             this.settingsService = settingsService;
             this.inputService = inputService;
             this.regionManager = regionManager;
-            this.eventAggregator = eventAggregator;
 
-            this.OnTabSelectionCommand = new DelegateCommand<string>(
-                executeMethod: n => SelectTab(n));
+            this.SelectTabCommand = new DelegateCommand<ViewType?>(
+                executeMethod: t => TabIndex = (int?)t);
 
             this.GraphicsReloadCommand = new DelegateCommand(
                 executeMethod: async () => await webService.ReloadAsync());
@@ -74,7 +71,7 @@ namespace Score2Stream.MenuModule.ViewModels
                 canExecuteMethod: () => inputService.IsActive);
 
             this.InputCenterCommand = new DelegateCommand(
-                executeMethod: ChangeInputCentred,
+                executeMethod: () => eventAggregator.GetEvent<CenteringRequestedEvent>().Publish(),
                 canExecuteMethod: () => inputService.IsActive);
             this.InputRotateLeftCommand = new DelegateCommand(
                 executeMethod: () => ChangeInputRotate(true),
@@ -120,6 +117,9 @@ namespace Score2Stream.MenuModule.ViewModels
             this.SamplesOrderAllCommand = new DelegateCommand(
                 executeMethod: () => inputService.SampleService.Order(),
                 canExecuteMethod: () => inputService?.SampleService?.Samples?.Any() == true);
+
+            tabChangedEvent = eventAggregator.GetEvent<TabChangedEvent>();
+            detectionChangedEvent = eventAggregator.GetEvent<DetectionChangedEvent>();
 
             eventAggregator.GetEvent<ServerStartedEvent>().Subscribe(
                 action: OnGraphicsUpdated);
@@ -254,7 +254,7 @@ namespace Score2Stream.MenuModule.ViewModels
                 {
                     inputService.SampleService.IsDetection = value;
 
-                    eventAggregator.GetEvent<DetectionChangedEvent>().Publish();
+                    detectionChangedEvent.Publish();
 
                     RaisePropertyChanged(nameof(IsSampleDetection));
                 }
@@ -309,8 +309,6 @@ namespace Score2Stream.MenuModule.ViewModels
             }
         }
 
-        public DelegateCommand<string> OnTabSelectionCommand { get; }
-
         public int ProcessingDelay
         {
             get { return settingsService.Contents.Video.ProcessingDelay; }
@@ -341,14 +339,56 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public DelegateCommand ScoreboardUpdateCommand { get; }
 
-        public int TabIndex
+        public DelegateCommand<ViewType?> SelectTabCommand { get; }
+
+        public int? TabIndex
         {
             get { return tabIndex; }
             set
             {
-                if (TabIndex != value)
+                if (value.HasValue
+                    && TabIndex != value)
                 {
-                    SetProperty(ref tabIndex, value);
+                    SetProperty(ref tabIndex, value.Value);
+
+                    switch (tabIndex)
+                    {
+                        case (int)ViewType.Board:
+
+                            IsSampleDetection = false;
+
+                            regionManager.RequestNavigate(
+                                regionName: nameof(RegionType.EditRegion),
+                                source: nameof(ViewType.Board));
+
+                            tabChangedEvent.Publish(ViewType.Board);
+
+                            break;
+
+                        case (int)ViewType.Areas:
+
+                            IsSampleDetection = false;
+
+                            regionManager.RequestNavigate(
+                                regionName: nameof(RegionType.EditRegion),
+                                source: nameof(ViewType.Areas));
+
+                            tabChangedEvent.Publish(ViewType.Areas);
+
+                            break;
+
+                        case (int)ViewType.Templates:
+
+                            regionManager.RequestNavigate(
+                                regionName: nameof(RegionType.EditRegion),
+                                source: nameof(ViewType.Templates));
+
+                            tabChangedEvent.Publish(ViewType.Templates);
+
+                            UpdateSamples();
+
+                            break;
+                    }
                 }
             }
         }
@@ -451,11 +491,6 @@ namespace Score2Stream.MenuModule.ViewModels
             return result;
         }
 
-        private void ChangeInputCentred()
-        {
-            eventAggregator.GetEvent<VideoCenteredEvent>().Publish();
-        }
-
         private void ChangeInputRotate(bool toLeft)
         {
             if (toLeft)
@@ -525,44 +560,6 @@ namespace Score2Stream.MenuModule.ViewModels
             InputRotateRightCommand.RaiseCanExecuteChanged();
 
             ClipAddCommand.RaiseCanExecuteChanged();
-        }
-
-        private void SelectTab(string tabName)
-        {
-            switch (tabName)
-            {
-                case Constants.TabBoard:
-
-                    IsSampleDetection = false;
-
-                    TabIndex = IndexBoard;
-                    regionManager.RequestNavigate(
-                        regionName: nameof(RegionType.EditRegion),
-                        source: nameof(ViewType.Board));
-                    break;
-
-                case Constants.TabSegments:
-
-                    IsSampleDetection = false;
-
-                    TabIndex = IndexSegments;
-                    regionManager.RequestNavigate(
-                        regionName: nameof(RegionType.EditRegion),
-                        source: nameof(ViewType.Areas));
-
-                    break;
-
-                case Constants.TabSamples:
-
-                    TabIndex = IndexSamples;
-                    regionManager.RequestNavigate(
-                        regionName: nameof(RegionType.EditRegion),
-                        source: nameof(ViewType.Templates));
-
-                    UpdateSamples();
-
-                    break;
-            }
         }
 
         private void SelectTemplate(Template template)

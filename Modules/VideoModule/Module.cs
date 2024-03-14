@@ -30,19 +30,10 @@ namespace Score2Stream.VideoModule
         {
             regionManager.RegisterViewWithRegion<InputView>(
                 regionName: nameof(RegionType.OutputRegion));
-
-            regionManager.RequestNavigate(
-                regionName: nameof(RegionType.OutputRegion),
-                source: nameof(ViewType.Inputs));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
-        {
-            containerRegistry.RegisterForNavigation<InputView>(
-                name: nameof(ViewType.Inputs));
-
-            containerRegistry.RegisterForNavigation<AreaView>();
-        }
+        { }
 
         #endregion Public Methods
     }

@@ -37,8 +37,6 @@ namespace Score2Stream.AreaModule
         {
             containerRegistry.RegisterForNavigation<AreasView>(
                 name: nameof(ViewType.Areas));
-
-            containerRegistry.RegisterForNavigation<AreaView>();
         }
 
         #endregion Public Methods

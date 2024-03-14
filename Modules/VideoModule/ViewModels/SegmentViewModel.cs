@@ -9,7 +9,7 @@ using Score2Stream.Commons.Models.Contents;
 
 namespace Score2Stream.VideoModule.ViewModels
 {
-    public class ClipViewModel
+    public class SegmentViewModel
         : BindableBase
     {
         #region Private Fields
@@ -19,14 +19,13 @@ namespace Score2Stream.VideoModule.ViewModels
         private IAreaService areaService;
         private bool isActive;
         private bool isSelected;
-
         private double zoom;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public ClipViewModel(INavigationService navigationService, IEventAggregator eventAggregator)
+        public SegmentViewModel(INavigationService navigationService, IEventAggregator eventAggregator)
         {
             this.navigationService = navigationService;
 

@@ -30,17 +30,10 @@ namespace Score2Stream.MenuModule
         {
             regionManager.RegisterViewWithRegion<MenuView>(
                 regionName: nameof(RegionType.MenuRegion));
-
-            regionManager.RequestNavigate(
-                regionName: nameof(RegionType.MenuRegion),
-                source: nameof(ViewType.Menu));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
-        {
-            containerRegistry.RegisterForNavigation<MenuView>(
-                name: nameof(ViewType.Menu));
-        }
+        { }
 
         #endregion Public Methods
     }

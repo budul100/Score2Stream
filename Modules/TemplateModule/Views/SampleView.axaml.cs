@@ -8,8 +8,8 @@ public partial class SampleView
 {
     #region Public Fields
 
-    public static readonly StyledProperty<bool> IsActiveProperty = AvaloniaProperty.Register<SampleView, bool>(
-        name: nameof(IsActive));
+    public static readonly StyledProperty<bool> IsSelectedProperty = AvaloniaProperty.Register<SampleView, bool>(
+        name: nameof(IsSelected));
 
     #endregion Public Fields
 
@@ -30,10 +30,10 @@ public partial class SampleView
 
     #region Public Properties
 
-    public bool IsActive
+    public bool IsSelected
     {
-        get => GetValue(IsActiveProperty);
-        set => SetValue(IsActiveProperty, value);
+        get => GetValue(IsSelectedProperty);
+        set => SetValue(IsSelectedProperty, value);
     }
 
     #endregion Public Properties
@@ -42,8 +42,8 @@ public partial class SampleView
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
     {
-        if (IsActive
-            && e.Property.Name == nameof(IsActive))
+        if (IsSelected
+            && e.Property.Name == nameof(IsSelected))
         {
             SetFocusOnTextBox();
         }
@@ -69,7 +69,7 @@ public partial class SampleView
 
     private void SetFocusOnTextBox()
     {
-        if (IsActive
+        if (IsSelected
             && ValueTextBox != default)
         {
             ValueTextBox.Focus();

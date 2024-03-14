@@ -40,8 +40,6 @@ namespace Score2Stream.ScoreboardModule
         {
             containerRegistry.RegisterForNavigation<ContentView>(
                 name: nameof(ViewType.Board));
-
-            containerRegistry.RegisterForNavigation<TickerView>();
         }
 
         #endregion Public Methods

@@ -1,17 +1,17 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System.Collections.ObjectModel;
+using System.Linq;
+using Avalonia.Media.Imaging;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
 using Score2Stream.Commons.Events.Clip;
-using Score2Stream.Commons.Events.Detection;
+using Score2Stream.Commons.Events.Menu;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Template;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Prism;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace Score2Stream.TemplateModule.ViewModels
 {
@@ -47,13 +47,26 @@ namespace Score2Stream.TemplateModule.ViewModels
             eventAggregator.GetEvent<SamplesChangedEvent>().Subscribe(
                 action: () => UpdateSamples(),
                 keepSubscriberReferenceAlive: true);
+
             eventAggregator.GetEvent<SamplesOrderedEvent>().Subscribe(
                 action: () => OrderSamples(),
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<ClipDrawnEvent>().Subscribe(
+            eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
                 action: _ => UpdateImage(),
                 keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
+                action: _ => UpdateImage(),
+                threadOption: ThreadOption.UIThread,
+                keepSubscriberReferenceAlive: true,
+                filter: s => s == inputService.AreaService?.Segment);
+
+            eventAggregator.GetEvent<ClipDrawnEvent>().Subscribe(
+                action: _ => UpdateImage(),
+                threadOption: ThreadOption.UIThread,
+                keepSubscriberReferenceAlive: true,
+                filter: s => s == inputService.AreaService?.Segment);
 
             UpdateTemplate(inputService?.TemplateService?.Template);
         }
@@ -125,7 +138,7 @@ namespace Score2Stream.TemplateModule.ViewModels
 
                     current.Initialize(
                         sample: toBeAdded,
-                        sampleService: inputService.SampleService);
+                        inputService: inputService);
 
                     Samples.Add(current);
                 }

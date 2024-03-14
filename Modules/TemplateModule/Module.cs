@@ -17,8 +17,6 @@ namespace Score2Stream.TemplateModule
         {
             containerRegistry.RegisterForNavigation<TemplateView>(
                 name: nameof(ViewType.Templates));
-
-            containerRegistry.RegisterForNavigation<SampleView>();
         }
 
         #endregion Public Methods

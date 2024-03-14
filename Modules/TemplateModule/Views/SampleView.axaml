@@ -11,7 +11,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="80"
     d:DesignWidth="200"
-    IsActive="{Binding IsActive, Mode=TwoWay}"
+    IsSelected="{Binding IsSelected, Mode=TwoWay}"
     mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -61,7 +61,7 @@
             <i:Interaction.Behaviors>
 
                 <a:DataTriggerBehavior
-                    Binding="{Binding IsActive}"
+                    Binding="{Binding IsSelected}"
                     ComparisonCondition="Equal"
                     Value="True">
                     <a:ChangePropertyAction
@@ -70,7 +70,7 @@
                         Value="LightBlue" />
                 </a:DataTriggerBehavior>
                 <a:DataTriggerBehavior
-                    Binding="{Binding IsActive}"
+                    Binding="{Binding IsSelected}"
                     ComparisonCondition="NotEqual"
                     Value="True">
                     <a:ChangePropertyAction
@@ -126,7 +126,7 @@
                                 <a:InvokeCommandAction Command="{Binding OnFocusLostCommand}" />
                             </a:EventTriggerBehavior>
 
-                            <b:FocusOnActivationBehavior IsActive="{Binding IsActive, Mode=TwoWay}" />
+                            <b:FocusOnSelectionBehavior IsSelected="{Binding IsSelected, Mode=TwoWay}" />
                         </i:Interaction.Behaviors>
 
                         <TextBox.KeyBindings>

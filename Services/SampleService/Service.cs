@@ -1,4 +1,8 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Score2Stream.Commons.Assets;
@@ -10,10 +14,6 @@ using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Score2Stream.SampleService
 {
@@ -22,6 +22,7 @@ namespace Score2Stream.SampleService
     {
         #region Private Fields
 
+        private readonly object detectionLock = new();
         private readonly IDialogService dialogService;
         private readonly IRecognitionService recognitionService;
         private readonly SamplesChangedEvent samplesChangedEvent;
@@ -230,24 +231,27 @@ namespace Score2Stream.SampleService
         {
             if (clip != default)
             {
-                SetSimilarities(clip);
-
-                if (IsDetection
-                    && Samples.Count < Constants.MaxCountAreas)
+                lock (detectionLock)
                 {
-                    var relevant = Samples
-                        .OrderByDescending(c => c.Similarity).FirstOrDefault();
+                    SetSimilarities(clip);
 
-                    if (relevant == default || relevant.Type == SampleType.None)
+                    if (IsDetection
+                        && Samples.Count < Constants.MaxCountAreas)
                     {
-                        try
+                        var relevant = Samples
+                            .OrderByDescending(c => c.Similarity).FirstOrDefault();
+
+                        if (relevant == default || relevant.Type == SampleType.None)
                         {
-                            AddSample(
-                                clip: clip,
-                                select: false);
+                            try
+                            {
+                                AddSample(
+                                    clip: clip,
+                                    select: false);
+                            }
+                            catch (MaxCountExceededException)
+                            { }
                         }
-                        catch (MaxCountExceededException)
-                        { }
                     }
                 }
             }
