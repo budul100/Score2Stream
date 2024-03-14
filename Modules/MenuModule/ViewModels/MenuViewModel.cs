@@ -535,6 +535,8 @@ namespace Score2Stream.MenuModule.ViewModels
 
         private void OnClipsChanged()
         {
+            RaisePropertyChanged(nameof(IsDetectionAvailable));
+
             ClipRemoveCommand.RaiseCanExecuteChanged();
             ClipsRemoveAllCommand.RaiseCanExecuteChanged();
             ClipsOrderAllCommand.RaiseCanExecuteChanged();

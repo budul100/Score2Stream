@@ -118,10 +118,10 @@
                 </rib:RibbonTab.Groups>
             </rib:RibbonTab>
 
-            <rib:RibbonTab Name="AreasTab" Header="Segments">
+            <rib:RibbonTab Name="InputTab" Header="Input">
 
                 <i:Interaction.Behaviors>
-                    <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="AreasTab">
+                    <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="InputTab">
                         <a:InvokeCommandAction Command="{Binding SelectTabCommand}" CommandParameter="{x:Static en:ViewType.Areas}" />
                     </a:EventTriggerBehavior>
                 </i:Interaction.Behaviors>
@@ -247,6 +247,7 @@
                         <rib:RibbonDropDownButton
                             Content="Add"
                             FontSize="{StaticResource FontSize}"
+                            IsEnabled="{Binding IsActive}"
                             MinSize="Large">
                             <rib:RibbonDropDownButton.LargeIcon>
                                 <ControlTemplate>
@@ -402,6 +403,7 @@
                         <rib:RibbonDropDownButton
                             Content="Template"
                             FontSize="{StaticResource FontSize}"
+                            IsEnabled="{Binding IsActive}"
                             ItemsSource="{Binding Templates}"
                             MinSize="Large">
                             <rib:RibbonDropDownButton.LargeIcon>
