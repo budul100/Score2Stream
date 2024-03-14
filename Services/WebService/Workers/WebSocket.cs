@@ -21,7 +21,7 @@ namespace Score2Stream.WebService.Workers
 
         #region Public Constructors
 
-        public WebSocket(string urlHttp, string urlHttps, int requestDelay = 1000)
+        public WebSocket(string urlHttp, string urlHttps, int requestDelay = 100)
         {
             UrlHttp = urlHttp;
             UrlHttps = urlHttps;
