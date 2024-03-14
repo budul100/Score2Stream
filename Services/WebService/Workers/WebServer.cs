@@ -60,11 +60,13 @@ namespace Score2Stream.WebService.Workers
 
         public void Open(bool openHttps = false)
         {
-            Process.Start(new ProcessStartInfo
+            var startInfo = new ProcessStartInfo
             {
                 FileName = openHttps ? UrlHttps : UrlHttp,
                 UseShellExecute = true
-            });
+            };
+
+            Process.Start(startInfo);
         }
 
         public async Task RunAsync()

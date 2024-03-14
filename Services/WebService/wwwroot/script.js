@@ -9,9 +9,10 @@ $(document).ready(
         var ellog = null;
 
         window.onload = function () {
-            var wsuri;
 
             ellog = document.getElementById('log');
+
+            var wsuri;
 
             if (window.location.protocol === "file:") {
                 wsuri = "ws://localhost:9000";

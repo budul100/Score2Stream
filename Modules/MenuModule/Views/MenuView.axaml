@@ -58,6 +58,24 @@
                         </rib:RibbonButton>
                     </rib:RibbonGroupBox>
 
+                    <rib:RibbonGroupBox Header="Server options">
+                        <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
+                            <TextBlock
+                                Width="100"
+                                Margin="0,0,4,0"
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource FontSize}"
+                                Text="Websocket delay [ms]" />
+                            <NumericUpDown
+                                Width="130"
+                                MaxHeight="5"
+                                Increment="10"
+                                Maximum="{Binding DurationMax}"
+                                Minimum="{Binding DurationMin}"
+                                Value="{Binding WebSocketDelay, Mode=TwoWay}" />
+                        </StackPanel>
+                    </rib:RibbonGroupBox>
+
                     <rib:RibbonGroupBox Header="Scoreboard control">
                         <rib:RibbonButton
                             Command="{Binding ScoreboardOpenCommand}"
@@ -186,6 +204,45 @@
                         </rib:RibbonButton>
                     </rib:RibbonGroupBox>
 
+                    <rib:RibbonGroupBox Header="Video options">
+                        <StackPanel
+                            Margin="0,0,4,4"
+                            IsEnabled="{Binding IsActive}"
+                            Orientation="Horizontal">
+                            <TextBlock
+                                Width="100"
+                                Margin="0,0,4,0"
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource FontSize}"
+                                Text="Processing delay [ms]" />
+                            <NumericUpDown
+                                Width="130"
+                                MaxHeight="5"
+                                Increment="10"
+                                Maximum="{Binding DurationMax}"
+                                Minimum="0"
+                                Value="{Binding ProcessingDelay, Mode=TwoWay}" />
+                        </StackPanel>
+                        <StackPanel
+                            Margin="0,0,4,4"
+                            IsEnabled="{Binding IsActive}"
+                            Orientation="Horizontal">
+                            <TextBlock
+                                Width="100"
+                                Margin="0,0,4,0"
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource FontSize}"
+                                Text="Image queue size" />
+                            <NumericUpDown
+                                Width="130"
+                                MaxHeight="5"
+                                Increment="1"
+                                Maximum="{Binding QueueSizeMax}"
+                                Minimum="{Binding QueueSizeMin}"
+                                Value="{Binding ImagesQueueSize, Mode=TwoWay}" />
+                        </StackPanel>
+                    </rib:RibbonGroupBox>
+
                     <rib:RibbonGroupBox Header="Segments handling">
                         <rib:RibbonDropDownButton
                             Content="Add"
@@ -312,45 +369,6 @@
                         </rib:RibbonButton>-->
                     </rib:RibbonGroupBox>
 
-                    <rib:RibbonGroupBox Header="Video options">
-                        <StackPanel
-                            Margin="0,0,4,4"
-                            IsEnabled="{Binding IsActive}"
-                            Orientation="Horizontal">
-                            <TextBlock
-                                Width="100"
-                                Margin="0,0,4,0"
-                                VerticalAlignment="Center"
-                                FontSize="{StaticResource FontSize}"
-                                Text="Processing delay" />
-                            <NumericUpDown
-                                Width="130"
-                                MaxHeight="5"
-                                Increment="10"
-                                Maximum="{Binding MaxDuration}"
-                                Minimum="{Binding MinDelay}"
-                                Value="{Binding ProcessingDelay, Mode=TwoWay}" />
-                        </StackPanel>
-                        <StackPanel
-                            Margin="0,0,4,4"
-                            IsEnabled="{Binding IsActive}"
-                            Orientation="Horizontal">
-                            <TextBlock
-                                Width="100"
-                                Margin="0,0,4,0"
-                                VerticalAlignment="Center"
-                                FontSize="{StaticResource FontSize}"
-                                Text="Image queue size" />
-                            <NumericUpDown
-                                Width="130"
-                                MaxHeight="5"
-                                Increment="1"
-                                Maximum="{Binding MaxQueueSize}"
-                                Minimum="1"
-                                Value="{Binding ImagesQueueSize, Mode=TwoWay}" />
-                        </StackPanel>
-                    </rib:RibbonGroupBox>
-
                     <rib:RibbonGroupBox Header="Segment options">
                         <!--<CheckBox
                             Margin="0,0,4,4"
@@ -466,7 +484,7 @@
                                 Width="130"
                                 MaxHeight="5"
                                 Increment="5"
-                                Maximum="{Binding MaxThreshold}"
+                                Maximum="{Binding ThresholdMax}"
                                 Minimum="0"
                                 Value="{Binding ThresholdDetecting, Mode=TwoWay}" />
                         </StackPanel>
@@ -546,7 +564,7 @@
                                 Width="130"
                                 MaxHeight="5"
                                 Increment="5"
-                                Maximum="{Binding MaxThreshold}"
+                                Maximum="{Binding ThresholdMax}"
                                 Minimum="0"
                                 Value="{Binding ThresholdMatching, Mode=TwoWay}" />
                         </StackPanel>
@@ -564,7 +582,7 @@
                                 Width="130"
                                 MaxHeight="5"
                                 Increment="10"
-                                Maximum="{Binding MaxDuration}"
+                                Maximum="{Binding DurationMax}"
                                 Minimum="0"
                                 Value="{Binding WaitingDuration, Mode=TwoWay}" />
                         </StackPanel>

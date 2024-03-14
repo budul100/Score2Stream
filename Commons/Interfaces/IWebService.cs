@@ -8,14 +8,6 @@ namespace Score2Stream.Commons.Interfaces
 
         bool IsActive { get; }
 
-        int PortServerHttp { get; set; }
-
-        int PortServerHttps { get; set; }
-
-        int PortSocketHttp { get; set; }
-
-        int PortSocketHttps { get; set; }
-
         #endregion Public Properties
 
         #region Public Methods

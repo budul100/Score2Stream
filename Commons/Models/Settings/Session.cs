@@ -14,6 +14,8 @@ namespace Score2Stream.Commons.Models.Settings
 
         public Scoreboard Scoreboard { get; set; } = new Scoreboard();
 
+        public Server Server { get; set; } = new Server();
+
         public Video Video { get; set; } = new Video();
 
         #endregion Public Properties

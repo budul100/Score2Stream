@@ -8,6 +8,7 @@ using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Events.Graphics;
 using Score2Stream.Commons.Events.Scoreboard;
 using Score2Stream.Commons.Interfaces;
+using Score2Stream.Commons.Models.Settings;
 using Score2Stream.WebService.Workers;
 
 namespace Score2Stream.WebService
@@ -19,8 +20,9 @@ namespace Score2Stream.WebService
 
         private readonly IDispatcherService dispatcherService;
         private readonly IEventAggregator eventAggregator;
-        private CancellationTokenSource cancellationTokenSource;
+        private readonly ISettingsService<Session> settingsService;
 
+        private CancellationTokenSource cancellationTokenSource;
         private WebServer webServer;
         private Task webServerTask;
         private WebSocket webSocket;
@@ -30,8 +32,10 @@ namespace Score2Stream.WebService
 
         #region Public Constructors
 
-        public Service(IDispatcherService dispatcherService, IEventAggregator eventAggregator)
+        public Service(ISettingsService<Session> settingsService, IDispatcherService dispatcherService,
+            IEventAggregator eventAggregator)
         {
+            this.settingsService = settingsService;
             this.dispatcherService = dispatcherService;
             this.eventAggregator = eventAggregator;
 
@@ -48,14 +52,6 @@ namespace Score2Stream.WebService
 
         public bool IsActive => webSocket != default
             && webServer != default;
-
-        public int PortServerHttp { get; set; } = Defaults.PortServerHttpDefault;
-
-        public int PortServerHttps { get; set; }
-
-        public int PortSocketHttp { get; set; } = Defaults.PortSocketHttpDefault;
-
-        public int PortSocketHttps { get; set; }
 
         #endregion Public Properties
 
@@ -88,7 +84,7 @@ namespace Score2Stream.WebService
 
             var ipAddress = GetLocalIPAddress();
 
-            var urlWebSocket = $"http://{ipAddress}:{PortSocketHttp}";
+            var urlWebSocket = $"http://{ipAddress}:{settingsService.Contents.Server.PortSocketHttp}";
 
             webSocket = new WebSocket(
                 urlHttp: urlWebSocket,
@@ -98,7 +94,7 @@ namespace Score2Stream.WebService
                 function: async () => await dispatcherService.InvokeAsync(() => webSocket.RunAsync()),
                 cancellationToken: cancellationTokenSource.Token);
 
-            var urlWebServer = $"http://{ipAddress}:{PortServerHttp}";
+            var urlWebServer = $"http://{ipAddress}:{settingsService.Contents.Server.PortServerHttp}";
 
             webServer = new WebServer(
                 urlHttp: urlWebServer,
@@ -108,9 +104,7 @@ namespace Score2Stream.WebService
                 function: async () => await dispatcherService.InvokeAsync(() => webServer.RunAsync()),
                 cancellationToken: cancellationTokenSource.Token);
 
-            eventAggregator
-                .GetEvent<ServerStartedEvent>()
-                .Publish();
+            eventAggregator.GetEvent<ServerStartedEvent>().Publish();
 
             if (webServerTask.IsFaulted)
             {
@@ -134,9 +128,7 @@ namespace Score2Stream.WebService
 
             cancellationTokenSource?.Cancel();
 
-            eventAggregator
-                .GetEvent<ServerStoppedEvent>()
-                .Publish();
+            eventAggregator.GetEvent<ServerStoppedEvent>().Publish();
 
             if (webServerTask != default)
             {
@@ -174,7 +166,9 @@ namespace Score2Stream.WebService
         {
             if (IsActive)
             {
-                webSocket.Set(message);
+                webSocket.Set(
+                    message: message,
+                    requestDelay: settingsService.Contents.Server.WebSocketDelay);
             }
         }
 

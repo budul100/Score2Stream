@@ -163,21 +163,21 @@ namespace Score2Stream.MenuModule.ViewModels
 
         #region Public Properties
 
-        public static int MaxDuration => Constants.DurationMax;
+        public static int DurationMax => Constants.DurationMax;
 
-        public static int MaxQueueSize => Constants.ImageQueueSizeMax;
+        public static int DurationMin => Constants.DurationMin;
 
-        public static int MaxThreshold => Constants.ThresholdMax;
+        public static int QueueSizeMax => Constants.ImageQueueSizeMax;
 
-        public static int MinDelay => Constants.DelayMin;
-
-        public static int MinQueueSize => Constants.ImageQueueSizeMin;
+        public static int QueueSizeMin => Constants.ImageQueueSizeMin;
 
         public static string TabBoard => Constants.TabBoard;
 
         public static string TabSamples => Constants.TabSamples;
 
         public static string TabSegments => Constants.TabSegments;
+
+        public static int ThresholdMax => Constants.ThresholdMax;
 
         public bool AllowMultipleInstances
         {
@@ -214,8 +214,8 @@ namespace Score2Stream.MenuModule.ViewModels
             set
             {
                 if (IsActive
-                    && value >= MinQueueSize
-                    && value <= MaxQueueSize
+                    && value >= QueueSizeMin
+                    && value <= QueueSizeMax
                     && value != settingsService.Contents.Video.ImagesQueueSize)
                 {
                     settingsService.Contents.Video.ImagesQueueSize = value;
@@ -319,8 +319,8 @@ namespace Score2Stream.MenuModule.ViewModels
             set
             {
                 if (IsActive
-                    && value >= MinDelay
-                    && value <= MaxDuration
+                    && value >= 0
+                    && value <= DurationMax
                     && settingsService.Contents.Video.ProcessingDelay != value)
                 {
                     settingsService.Contents.Video.ProcessingDelay = value;
@@ -410,7 +410,7 @@ namespace Score2Stream.MenuModule.ViewModels
             {
                 if (IsActive
                     && value >= 0
-                    && value <= MaxThreshold
+                    && value <= ThresholdMax
                     && settingsService.Contents.Detection.ThresholdDetecting != value)
                 {
                     settingsService.Contents.Detection.ThresholdDetecting = value;
@@ -428,7 +428,7 @@ namespace Score2Stream.MenuModule.ViewModels
             {
                 if (IsActive
                     && value >= 0
-                    && value <= MaxThreshold
+                    && value <= ThresholdMax
                     && settingsService.Contents.Detection.ThresholdMatching != value)
                 {
                     settingsService.Contents.Detection.ThresholdMatching = value;
@@ -446,13 +446,31 @@ namespace Score2Stream.MenuModule.ViewModels
             {
                 if (IsActive
                     && value >= 0
-                    && value <= MaxDuration
+                    && value <= DurationMax
                     && settingsService.Contents.Detection.WaitingDuration != value)
                 {
                     settingsService.Contents.Detection.WaitingDuration = value;
                     settingsService.Save();
 
                     RaisePropertyChanged(nameof(WaitingDuration));
+                }
+            }
+        }
+
+        public int WebSocketDelay
+        {
+            get { return settingsService.Contents.Server.WebSocketDelay; }
+            set
+            {
+                if (IsActive
+                    && value >= DurationMin
+                    && value <= DurationMax
+                    && settingsService.Contents.Server.WebSocketDelay != value)
+                {
+                    settingsService.Contents.Server.WebSocketDelay = value;
+                    settingsService.Save();
+
+                    RaisePropertyChanged(nameof(WebSocketDelay));
                 }
             }
         }

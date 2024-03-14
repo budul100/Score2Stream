@@ -441,7 +441,7 @@ namespace Score2Stream.VideoService
         {
             videoUpdatedEvent.Publish();
 
-            var delay = settingsService.Contents.Video.ProcessingDelay + Constants.DelayUpdate;
+            var delay = settingsService.Contents.Video.ProcessingDelay + Constants.DelayUpdateMin;
 
             await Task.Delay(delay);
 

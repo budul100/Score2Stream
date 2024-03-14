@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 
 namespace Score2Stream.WebService.Workers
 {
@@ -16,16 +16,16 @@ namespace Score2Stream.WebService.Workers
 
         private readonly WebApplication server;
         private string message;
+        private int requestDelay;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public WebSocket(string urlHttp, string urlHttps, int requestDelay = 100)
+        public WebSocket(string urlHttp, string urlHttps)
         {
             UrlHttp = urlHttp;
             UrlHttps = urlHttps;
-            RequestDelay = requestDelay;
 
             var builder = WebApplication.CreateBuilder();
 
@@ -47,8 +47,6 @@ namespace Score2Stream.WebService.Workers
 
         #region Public Properties
 
-        public int RequestDelay { get; }
-
         public string UrlHttp { get; }
 
         public string UrlHttps { get; }
@@ -62,9 +60,10 @@ namespace Score2Stream.WebService.Workers
             await server.RunAsync();
         }
 
-        public void Set(string message)
+        public void Set(string message, int requestDelay = 100)
         {
             this.message = message;
+            this.requestDelay = requestDelay;
         }
 
         #endregion Public Methods
@@ -87,7 +86,7 @@ namespace Score2Stream.WebService.Workers
                             endOfMessage: true,
                             cancellationToken: CancellationToken.None);
 
-                        await Task.Delay(RequestDelay);
+                        await Task.Delay(requestDelay);
                     }
                 }
                 else

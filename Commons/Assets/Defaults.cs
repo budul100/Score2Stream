@@ -24,6 +24,8 @@
         public const int VideoDelayProcessingDefault = 0;
         public const int VideoImageQueueSizeDefault = 3;
 
+        public const int WebSocketDelayDefault = 50;
+
         #endregion Public Fields
     }
 }
