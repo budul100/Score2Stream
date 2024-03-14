@@ -267,13 +267,6 @@ namespace Score2Stream.ScoreboardService
                 }
                 else
                 {
-                    if (area.Type != type)
-                    {
-                        area.Type = type;
-
-                        areaModifiedEvent.Publish(area);
-                    }
-
                     var clipTypes = type
                         .GetClipTypes().ToArray();
 
@@ -282,6 +275,25 @@ namespace Score2Stream.ScoreboardService
                         throw new ArgumentException(
                             message: $"The area type {type} does not fit the area size {area.Size}.",
                             paramName: nameof(type));
+                    }
+
+                    if (area.Type != type)
+                    {
+                        area.Type = type;
+
+                        areaModifiedEvent.Publish(area);
+                    }
+
+                    var releasedAreas = clips
+                        .Where(c => c.Value != default
+                            && c.Value?.Area != area
+                            && clipTypes.Contains(c.Key))
+                        .Select(c => c.Value.Area)
+                        .Distinct().ToArray();
+
+                    foreach (var releasedArea in releasedAreas)
+                    {
+                        ReleaseArea(releasedArea);
                     }
 
                     for (var index = 0; index < area.Size; index++)
@@ -296,18 +308,6 @@ namespace Score2Stream.ScoreboardService
 
                             clipModifiedEvent.Publish(clip);
                         }
-                    }
-
-                    var releasedAreas = clips
-                        .Where(c => c.Value != default
-                            && c.Value?.Area != area
-                            && clipTypes.Contains(c.Key))
-                        .Select(c => c.Value.Area)
-                        .Distinct().ToArray();
-
-                    foreach (var unusedArea in releasedAreas)
-                    {
-                        ReleaseArea(unusedArea);
                     }
                 }
             }

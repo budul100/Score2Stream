@@ -41,7 +41,7 @@ namespace Score2Stream.Commons.Interfaces
 
         void Select(Area area);
 
-        void Select(Clip clip);
+        void Select(Clip clip = default);
 
         void Undo();
 

@@ -58,7 +58,6 @@
             <i:Interaction.Behaviors>
                 <bv:SizeChangeBehavior Width="{Binding WidthName, Mode=TwoWay}" Height="{Binding HeightName, Mode=TwoWay}" />
             </i:Interaction.Behaviors>
-
         </TextBlock>
 
         <ItemsControl ItemsSource="{Binding Clips}">
@@ -86,6 +85,5 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
-
     </Panel>
 </UserControl>
