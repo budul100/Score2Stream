@@ -266,7 +266,8 @@ namespace Score2Stream.AreaService
 
             areaSelectedEvent.Publish(Area);
 
-            if (Segment.Area != Area)
+            if (Segment != default
+                && Segment.Area != Area)
             {
                 Select();
             }

@@ -137,8 +137,11 @@ namespace Score2Stream.MenuModule.ViewModels
 
             eventAggregator.GetEvent<AreasChangedEvent>().Subscribe(
                 action: OnClipsChanged);
+            eventAggregator.GetEvent<AreaSelectedEvent>().Subscribe(
+                action: _ => OnClipsChanged());
             eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
                 action: _ => OnClipsChanged());
+
             eventAggregator.GetEvent<AreaModifiedEvent>().Subscribe(
                 action: _ => OnClipsUpdated());
 
