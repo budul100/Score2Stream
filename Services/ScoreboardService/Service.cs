@@ -27,7 +27,7 @@ namespace Score2Stream.ScoreboardService
 
         private readonly AreaModifiedEvent areaModifiedEvent;
         private readonly ClipModifiedEvent clipModifiedEvent;
-        private readonly Dictionary<ClipType, Clip> clips = new();
+        private readonly Dictionary<ClipType, Segment> clips = new();
         private readonly ScoreboardUpdatedEvent scoreboardUpdatedEvent;
         private readonly JsonSerializerOptions serializeOptions;
         private readonly ISettingsService<Session> settingsService;
@@ -78,7 +78,7 @@ namespace Score2Stream.ScoreboardService
             clips = Commons.Extensions.EnumExtensions.GetValues<ClipType>()
                 .Where(t => t != ClipType.None).ToDictionary(
                     keySelector: t => t,
-                    elementSelector: _ => default(Clip));
+                    elementSelector: _ => default(Segment));
 
             Update();
         }
@@ -298,7 +298,7 @@ namespace Score2Stream.ScoreboardService
 
                     for (var index = 0; index < area.Size; index++)
                     {
-                        var clip = area.Clips.ElementAt(index);
+                        var clip = area.Segments.ElementAt(index);
 
                         clips[clipTypes[index]] = clip;
 
@@ -325,7 +325,7 @@ namespace Score2Stream.ScoreboardService
                 }
 
                 var releasedClips = clips
-                    .Where(c => area.Clips.Contains(c.Value))
+                    .Where(c => area.Segments.Contains(c.Value))
                     .Distinct().ToArray();
 
                 foreach (var releasedClip in releasedClips)

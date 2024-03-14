@@ -24,7 +24,7 @@ namespace Score2Stream.Commons.Interfaces
 
         Task ClearAsync();
 
-        void Create(Clip clip);
+        void Create(Segment clip);
 
         void Initialize(Template template);
 
@@ -36,7 +36,7 @@ namespace Score2Stream.Commons.Interfaces
 
         void Select(Sample sample);
 
-        void Update(Clip clip);
+        void Update(Segment clip);
 
         #endregion Public Methods
     }

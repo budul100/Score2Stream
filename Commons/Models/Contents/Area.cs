@@ -12,9 +12,6 @@ namespace Score2Stream.Commons.Models.Contents
         #region Public Properties
 
         [JsonIgnore]
-        public IEnumerable<Clip> Clips { get; set; }
-
-        [JsonIgnore]
         public string Description => Type != AreaType.None
             ? Type.GetDescription()
             : Name;
@@ -24,6 +21,9 @@ namespace Score2Stream.Commons.Models.Contents
         public int Index { get; set; }
 
         public int NoiseRemoval { get; set; } = Defaults.AreaNoiseRemovalDefault;
+
+        [JsonIgnore]
+        public IEnumerable<Segment> Segments { get; set; }
 
         public int Size { get; set; }
 

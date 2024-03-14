@@ -201,7 +201,7 @@ namespace Score2Stream.VideoService
                 }
 
                 var clips = AreaService?.Areas?
-                    .SelectMany(a => a.Clips)
+                    .SelectMany(a => a.Segments)
                     .Where(c => c.Rect.HasValue).ToArray();
 
                 if (clips?.Any() == true)
@@ -289,7 +289,7 @@ namespace Score2Stream.VideoService
             }
         }
 
-        private void UpdateImage(Clip clip)
+        private void UpdateImage(Segment clip)
         {
             if (!frame.Empty())
             {
@@ -363,14 +363,14 @@ namespace Score2Stream.VideoService
                 var areaX1 = area.X1 * size.Width;
                 var areaX2 = area.X2 * size.Width;
 
-                var width = (areaX2 - areaX1) / (double)area.Clips.Count();
+                var width = (areaX2 - areaX1) / (double)area.Segments.Count();
 
                 var index = 0;
 
-                foreach (var clip in area.Clips)
+                foreach (var clip in area.Segments)
                 {
                     var clipX1 = areaX1 + (width * index);
-                    var clipX2 = clip != area.Clips.Last()
+                    var clipX2 = clip != area.Segments.Last()
                         ? areaX1 + (width * ++index)
                         : areaX2;
 
@@ -383,7 +383,7 @@ namespace Score2Stream.VideoService
             }
         }
 
-        private void UpdateValue(Clip clip)
+        private void UpdateValue(Segment clip)
         {
             var waitingDuration = TimeSpan.FromMilliseconds(Math.Abs(settingsService.Contents.Detection.WaitingDuration));
             var thresholdMatching = Math.Abs(settingsService.Contents.Detection.ThresholdMatching) / Constants.ThresholdDivider;
@@ -414,7 +414,7 @@ namespace Score2Stream.VideoService
                         similarity: similarity,
                         waitingDuration: waitingDuration);
 
-                    if (AreaService.Clip == clip
+                    if (AreaService.Segment == clip
                         && match.Value.Type != SampleType.Similar)
                     {
                         match.Value.Type = SampleType.Similar;

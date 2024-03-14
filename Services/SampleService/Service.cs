@@ -127,7 +127,7 @@ namespace Score2Stream.SampleService
             }
         }
 
-        public void Create(Clip clip)
+        public void Create(Segment clip)
         {
             try
             {
@@ -226,7 +226,7 @@ namespace Score2Stream.SampleService
             }
         }
 
-        public void Update(Clip clip)
+        public void Update(Segment clip)
         {
             if (clip != default)
             {
@@ -257,7 +257,7 @@ namespace Score2Stream.SampleService
 
         #region Private Methods
 
-        private void AddSample(Clip clip, bool select)
+        private void AddSample(Segment clip, bool select)
         {
             var sample = GetSample(clip);
 
@@ -282,7 +282,7 @@ namespace Score2Stream.SampleService
             }
         }
 
-        private Sample GetSample(Clip clip)
+        private Sample GetSample(Segment clip)
         {
             var result = default(Sample);
 
@@ -315,7 +315,7 @@ namespace Score2Stream.SampleService
             }
         }
 
-        private void SetSimilarities(Clip clip)
+        private void SetSimilarities(Segment clip)
         {
             if (Samples?.Any() == true)
             {

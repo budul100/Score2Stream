@@ -10,7 +10,7 @@ namespace Score2Stream.VideoService.Extensions
     {
         #region Public Methods
 
-        public static IEnumerable<KeyValuePair<double, Sample>> GetMatches(this Clip clip,
+        public static IEnumerable<KeyValuePair<double, Sample>> GetMatches(this Segment clip,
             bool preventMultipleComparison)
         {
             var relevants = clip?.Area?.Template?.Samples?
@@ -36,7 +36,7 @@ namespace Score2Stream.VideoService.Extensions
             }
         }
 
-        public static void SetValue(this Clip clip, string value, int similarity,
+        public static void SetValue(this Segment clip, string value, int similarity,
             TimeSpan waitingDuration)
         {
             if (clip.ValueCurrent != value)

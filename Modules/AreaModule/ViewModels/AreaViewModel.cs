@@ -212,7 +212,7 @@ namespace Score2Stream.AreaModule.ViewModels
 
         private void UpdateClips(Area area)
         {
-            foreach (var clip in area.Clips)
+            foreach (var clip in area.Segments)
             {
                 var current = containerProvider.Resolve<ClipViewModel>();
 

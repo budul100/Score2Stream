@@ -62,9 +62,9 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         #region Public Properties
 
-        public Bitmap Bitmap => inputService.AreaService?.Clip?.Bitmap;
+        public Bitmap Bitmap => inputService.AreaService?.Segment?.Bitmap;
 
-        public string Description => inputService.AreaService?.Clip?.GetDescription(true);
+        public string Description => inputService.AreaService?.Segment?.GetDescription(true);
 
         public string Empty
         {

@@ -7,7 +7,7 @@ namespace Score2Stream.Commons.Extensions
     {
         #region Public Methods
 
-        public static string GetDescription(this Clip clip, bool includeType = false)
+        public static string GetDescription(this Segment clip, bool includeType = false)
         {
             var result = default(string);
 

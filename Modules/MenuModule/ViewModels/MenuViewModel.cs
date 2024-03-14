@@ -30,9 +30,8 @@ namespace Score2Stream.MenuModule.ViewModels
         #region Private Fields
 
         private const int IndexBoard = 0;
-        private const int IndexClips = 1;
         private const int IndexSamples = 2;
-
+        private const int IndexSegments = 1;
         private readonly IEventAggregator eventAggregator;
         private readonly IInputService inputService;
         private readonly IRegionManager regionManager;
@@ -56,6 +55,15 @@ namespace Score2Stream.MenuModule.ViewModels
 
             this.OnTabSelectionCommand = new DelegateCommand<string>(
                 executeMethod: n => SelectTab(n));
+
+            this.GraphicsReloadCommand = new DelegateCommand(
+                executeMethod: async () => await webService.ReloadAsync());
+            this.ScoreboardOpenCommand = new DelegateCommand(
+                executeMethod: () => webService.Open(),
+                canExecuteMethod: () => webService.IsActive);
+            this.ScoreboardUpdateCommand = new DelegateCommand(
+                executeMethod: () => scoreboardService.Update(),
+                canExecuteMethod: () => !scoreboardService.UpToDate);
 
             this.InputsUpdateCommand = new DelegateCommand(
                 executeMethod: UpdateInputs);
@@ -101,8 +109,8 @@ namespace Score2Stream.MenuModule.ViewModels
                 canExecuteMethod: () => inputService?.TemplateService?.Template != default);
 
             this.SampleAddCommand = new DelegateCommand(
-                executeMethod: () => inputService.SampleService?.Create(inputService.AreaService.Clip),
-                canExecuteMethod: () => inputService?.AreaService?.Area != default);
+                executeMethod: () => inputService.SampleService?.Create(inputService.AreaService.Segment),
+                canExecuteMethod: () => inputService?.AreaService?.Segment != default);
             this.SampleRemoveCommand = new DelegateCommand(
                 executeMethod: () => inputService.SampleService.RemoveAsync(),
                 canExecuteMethod: () => inputService?.SampleService?.Sample != default);
@@ -112,16 +120,6 @@ namespace Score2Stream.MenuModule.ViewModels
             this.SamplesOrderAllCommand = new DelegateCommand(
                 executeMethod: () => inputService.SampleService.Order(),
                 canExecuteMethod: () => inputService?.SampleService?.Samples?.Any() == true);
-
-            this.GraphicsReloadCommand = new DelegateCommand(
-                executeMethod: async () => await webService.ReloadAsync());
-            this.ScoreboardOpenCommand = new DelegateCommand(
-                executeMethod: () => webService.Open(),
-                canExecuteMethod: () => webService.IsActive);
-
-            this.ScoreboardUpdateCommand = new DelegateCommand(
-                executeMethod: () => scoreboardService.Update(),
-                canExecuteMethod: () => !scoreboardService.UpToDate);
 
             eventAggregator.GetEvent<ServerStartedEvent>().Subscribe(
                 action: OnGraphicsUpdated);
@@ -173,9 +171,9 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public static string TabBoard => Constants.TabBoard;
 
-        public static string TabClips => Constants.TabClips;
-
         public static string TabSamples => Constants.TabSamples;
+
+        public static string TabSegments => Constants.TabSegments;
 
         public bool AllowMultipleInstances
         {
@@ -241,7 +239,7 @@ namespace Score2Stream.MenuModule.ViewModels
         public bool IsActive => inputService.IsActive;
 
         public bool IsDetectionAvailable => IsActive
-            && inputService?.AreaService?.Area != default;
+            && inputService?.AreaService?.Segment != default;
 
         public bool IsSampleDetection
         {
@@ -543,11 +541,11 @@ namespace Score2Stream.MenuModule.ViewModels
                         source: nameof(ViewType.Board));
                     break;
 
-                case Constants.TabClips:
+                case Constants.TabSegments:
 
                     IsSampleDetection = false;
 
-                    TabIndex = IndexClips;
+                    TabIndex = IndexSegments;
                     regionManager.RequestNavigate(
                         regionName: nameof(RegionType.EditRegion),
                         source: nameof(ViewType.Areas));

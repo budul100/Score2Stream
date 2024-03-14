@@ -55,7 +55,7 @@ namespace Score2Stream.AreaService
                 action: c => TemplateService?.SampleService?.Update(c),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: c => c == Clip);
+                filter: c => c == Segment);
         }
 
         #endregion Public Constructors
@@ -71,7 +71,7 @@ namespace Score2Stream.AreaService
             && Area.Y1Last.HasValue
             && Area.Y2Last.HasValue;
 
-        public Clip Clip { get; private set; }
+        public Segment Segment { get; private set; }
 
         public ITemplateService TemplateService { get; }
 
@@ -92,7 +92,7 @@ namespace Score2Stream.AreaService
 
                 orderDescending = false;
 
-                area.Clips = area
+                area.Segments = area
                     .GetClips().ToArray();
 
                 area.SetClips();
@@ -267,15 +267,15 @@ namespace Score2Stream.AreaService
             areaSelectedEvent.Publish(Area);
         }
 
-        public void Select(Clip clip = default)
+        public void Select(Segment clip = default)
         {
-            Clip = Clip != clip
+            Segment = Segment != clip
                 ? clip
                 : default;
 
-            clipSelectedEvent.Publish(Clip);
+            clipSelectedEvent.Publish(Segment);
 
-            Area = Clip?.Area;
+            Area = Segment?.Area;
 
             areaSelectedEvent.Publish(Area);
         }

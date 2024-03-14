@@ -14,7 +14,7 @@ namespace Score2Stream.Commons.Interfaces
 
         bool CanUndo { get; }
 
-        Clip Clip { get; }
+        Segment Segment { get; }
 
         ITemplateService TemplateService { get; }
 
@@ -41,7 +41,7 @@ namespace Score2Stream.Commons.Interfaces
 
         void Select(Area area);
 
-        void Select(Clip clip = default);
+        void Select(Segment clip = default);
 
         void Undo();
 

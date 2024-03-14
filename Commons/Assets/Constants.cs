@@ -42,8 +42,8 @@
         public const char SplitterVersion = '.';
 
         public const string TabBoard = "Board";
-        public const string TabClips = "Clips";
         public const string TabSamples = "Samples";
+        public const string TabSegments = "Segments";
 
         public const double ThresholdDivider = 100;
         public const int ThresholdMax = 100;

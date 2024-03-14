@@ -46,7 +46,7 @@ namespace Score2Stream.VideoModule.ViewModels
 
         #region Public Properties
 
-        public Clip Clip { get; private set; }
+        public Segment Clip { get; private set; }
 
         public int? Index => Clip?.Index;
 
@@ -80,7 +80,7 @@ namespace Score2Stream.VideoModule.ViewModels
 
         #region Public Methods
 
-        public void Initialize(Clip clip, double zoom, IAreaService areaService)
+        public void Initialize(Segment clip, double zoom, IAreaService areaService)
         {
             this.areaService = areaService;
 

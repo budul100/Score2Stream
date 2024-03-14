@@ -8,11 +8,11 @@ namespace Score2Stream.AreaService.Extensions
     {
         #region Public Methods
 
-        public static IEnumerable<Clip> GetClips(this Area area)
+        public static IEnumerable<Segment> GetClips(this Area area)
         {
             for (var index = 0; index < area.Size; index++)
             {
-                var result = new Clip
+                var result = new Segment
                 {
                     Area = area,
                     Index = index,
@@ -24,16 +24,16 @@ namespace Score2Stream.AreaService.Extensions
 
         public static void SetClips(this Area area)
         {
-            if (area.Clips?.Any() == true)
+            if (area.Segments?.Any() == true)
             {
-                var width = (area.X2 - area.X1) / (double)area.Clips.Count();
+                var width = (area.X2 - area.X1) / (double)area.Segments.Count();
 
                 var index = 0;
 
-                foreach (var clip in area.Clips)
+                foreach (var clip in area.Segments)
                 {
                     clip.X1 = area.X1 + (width * index);
-                    clip.X2 = clip != area.Clips.Last()
+                    clip.X2 = clip != area.Segments.Last()
                         ? area.X1 + (width * ++index)
                         : area.X2;
                 }

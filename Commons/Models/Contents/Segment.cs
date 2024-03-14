@@ -6,7 +6,7 @@ using Score2Stream.Commons.Enums;
 
 namespace Score2Stream.Commons.Models.Contents
 {
-    public class Clip
+    public class Segment
     {
         #region Public Properties
 

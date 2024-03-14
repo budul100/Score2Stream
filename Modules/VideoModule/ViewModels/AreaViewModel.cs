@@ -1,11 +1,11 @@
-﻿using Prism.Events;
+﻿using System.Collections.ObjectModel;
+using Prism.Events;
 using Prism.Ioc;
 using Prism.Mvvm;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
-using System.Collections.ObjectModel;
 
 namespace Score2Stream.VideoModule.ViewModels
 {
@@ -243,7 +243,7 @@ namespace Score2Stream.VideoModule.ViewModels
         {
             Clips.Clear();
 
-            foreach (var clip in area.Clips)
+            foreach (var clip in area.Segments)
             {
                 var current = containerProvider.Resolve<ClipViewModel>();
 

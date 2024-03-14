@@ -12,7 +12,7 @@ namespace Score2Stream.AreaModule.ViewModels
     {
         #region Private Fields
 
-        private Clip clip;
+        private Segment clip;
 
         #endregion Private Fields
 
@@ -45,7 +45,7 @@ namespace Score2Stream.AreaModule.ViewModels
 
         #region Public Methods
 
-        public void Initialize(Clip clip)
+        public void Initialize(Segment clip)
         {
             this.clip = clip;
         }
