@@ -16,6 +16,7 @@ using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Events.Menu;
 using Score2Stream.Commons.Events.Video;
 using Score2Stream.Commons.Interfaces;
+using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Prism;
 
 namespace Score2Stream.VideoModule.ViewModels
@@ -68,19 +69,22 @@ namespace Score2Stream.VideoModule.ViewModels
                 action: _ => UpdateAreas(),
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
-                action: () => Bitmap = inputService.VideoService?.Bitmap,
-                keepSubscriberReferenceAlive: true);
             eventAggregator.GetEvent<CenteringRequestedEvent>().Subscribe(
                 action: () => OnVideoCentred(),
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<AreaSelectedEvent>().Subscribe(
-                action: a => area = Areas.SingleOrDefault(m => a == m.Area),
+            eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
+                action: () => Bitmap = inputService.VideoService?.Bitmap,
                 keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<AreaSelectedEvent>().Subscribe(
+                action: a => SelectArea(a),
+                keepSubscriberReferenceAlive: true);
+
             eventAggregator.GetEvent<AreasChangedEvent>().Subscribe(
                 action: UpdateAreas,
                 keepSubscriberReferenceAlive: true);
+
             eventAggregator.GetEvent<AreaModifiedEvent>().Subscribe(
                 action: _ => UpdateAreas(),
                 keepSubscriberReferenceAlive: true);
@@ -320,6 +324,11 @@ namespace Score2Stream.VideoModule.ViewModels
             {
                 area.Zoom = zoom;
             }
+        }
+
+        private void SelectArea(Area area)
+        {
+            this.area = Areas.SingleOrDefault(a => area == a.Area);
         }
 
         private void SetDimensions()

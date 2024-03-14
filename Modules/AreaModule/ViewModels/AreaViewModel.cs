@@ -46,10 +46,10 @@ namespace Score2Stream.AreaModule.ViewModels
             areaModifiedEvent = eventAggregator.GetEvent<AreaModifiedEvent>();
 
             eventAggregator.GetEvent<AreaSelectedEvent>().Subscribe(
-                action: a => IsActive = a == area,
+                action: a => UpdateStatus(),
                 keepSubscriberReferenceAlive: true);
             eventAggregator.GetEvent<AreaModifiedEvent>().Subscribe(
-                action: _ => UpdateType(),
+                action: _ => UpdateValues(),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<TemplateSelectedEvent>().Subscribe(
@@ -169,24 +169,18 @@ namespace Score2Stream.AreaModule.ViewModels
             this.areaService = areaService;
             this.area = area;
 
-            IsActive = areaService.Area == area;
-
             Type = area.Type;
             Types = area.Size
                 .GetAreaTypes().ToArray();
 
             RaisePropertyChanged(nameof(Types));
 
-            UpdateType();
-
-            UpdateClips(area);
+            UpdateValues();
+            UpdateClips();
 
             isInitializing = false;
 
-            if (areaService.Area == area)
-            {
-                ActivateArea();
-            }
+            UpdateStatus();
         }
 
         #endregion Public Methods
@@ -195,8 +189,7 @@ namespace Score2Stream.AreaModule.ViewModels
 
         private void ActivateArea()
         {
-            if (!isInitializing
-                && areaService?.Area != area)
+            if (!isInitializing)
             {
                 areaService?.Select(area);
             }
@@ -210,7 +203,7 @@ namespace Score2Stream.AreaModule.ViewModels
             RaisePropertyChanged(nameof(Templates));
         }
 
-        private void UpdateClips(Area area)
+        private void UpdateClips()
         {
             foreach (var clip in area.Segments)
             {
@@ -220,6 +213,11 @@ namespace Score2Stream.AreaModule.ViewModels
 
                 Clips.Add(current);
             }
+        }
+
+        private void UpdateStatus()
+        {
+            IsActive = areaService.Area == area;
         }
 
         private void UpdateTemplates()
@@ -250,7 +248,7 @@ namespace Score2Stream.AreaModule.ViewModels
             RaisePropertyChanged(nameof(Templates));
         }
 
-        private void UpdateType()
+        private void UpdateValues()
         {
             UpdateTemplates();
 

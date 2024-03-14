@@ -4,6 +4,7 @@ using Prism.Mvvm;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Clip;
+using Score2Stream.Commons.Events.Menu;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 
@@ -29,25 +30,27 @@ namespace Score2Stream.VideoModule.ViewModels
         {
             this.navigationService = navigationService;
 
+            OnPressedCommand = new DelegateCommand(
+                executeMethod: () => OnPressed());
+
             eventAggregator.GetEvent<AreaSelectedEvent>().Subscribe(
-                action: a => OnAreaSelected(a),
+                action: _ => UpdateStatus(),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
-                action: c => IsSelected = c == Clip,
+                action: _ => UpdateStatus(),
                 keepSubscriberReferenceAlive: true);
 
-            OnPressedCommand = new DelegateCommand(
-                executeMethod: () => OnPressed());
+            eventAggregator.GetEvent<TabSelectedEvent>().Subscribe(
+                action: _ => UpdateStatus(),
+                keepSubscriberReferenceAlive: true);
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public Segment Clip { get; private set; }
-
-        public int? Index => Clip?.Index;
+        public int? Index => Segment?.Index;
 
         public bool IsActive
         {
@@ -69,6 +72,8 @@ namespace Score2Stream.VideoModule.ViewModels
 
         public DelegateCommand OnPressedCommand { get; }
 
+        public Segment Segment { get; private set; }
+
         public double Zoom
         {
             get { return zoom; }
@@ -79,35 +84,52 @@ namespace Score2Stream.VideoModule.ViewModels
 
         #region Public Methods
 
-        public void Initialize(Segment clip, double zoom, IAreaService areaService)
+        public void Initialize(Segment segment, double zoom, IAreaService areaService)
         {
             this.areaService = areaService;
 
-            Clip = clip;
+            this.Segment = segment;
             Zoom = zoom;
 
-            IsActive = areaService.Area == Clip.Area;
+            UpdateStatus();
         }
 
         #endregion Public Methods
 
         #region Private Methods
 
-        private void OnAreaSelected(Area area)
+        private void OnPressed()
         {
-            IsActive = area == Clip?.Area;
-
-            if (!IsActive)
+            if (navigationService.EditView == ViewType.Templates)
             {
-                IsSelected = false;
+                areaService.Select(Segment);
             }
         }
 
-        private void OnPressed()
+        private void UpdateStatus()
         {
-            if (navigationService.EditView != ViewType.Areas)
+            switch (navigationService.EditView)
             {
-                areaService.Select(Clip);
+                case ViewType.Board:
+
+                    IsActive = false;
+                    IsSelected = false;
+
+                    break;
+
+                case ViewType.Areas:
+
+                    IsActive = areaService.Area == Segment.Area;
+                    IsSelected = false;
+
+                    break;
+
+                case ViewType.Templates:
+
+                    IsActive = areaService.Area == Segment.Area;
+                    IsSelected = areaService.Segment == Segment;
+
+                    break;
             }
         }
 

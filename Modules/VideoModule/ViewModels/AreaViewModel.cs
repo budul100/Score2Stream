@@ -3,7 +3,10 @@ using Prism.Events;
 using Prism.Ioc;
 using Prism.Mvvm;
 using Score2Stream.Commons.Assets;
+using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Events.Area;
+using Score2Stream.Commons.Events.Clip;
+using Score2Stream.Commons.Events.Menu;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 
@@ -15,7 +18,9 @@ namespace Score2Stream.VideoModule.ViewModels
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
+        private readonly INavigationService navigationService;
 
+        private IAreaService areaService;
         private double? height;
         private double? heightName;
         private bool isActive;
@@ -29,12 +34,22 @@ namespace Score2Stream.VideoModule.ViewModels
 
         #region Public Constructors
 
-        public AreaViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator)
+        public AreaViewModel(IContainerProvider containerProvider, INavigationService navigationService,
+            IEventAggregator eventAggregator)
         {
             this.containerProvider = containerProvider;
+            this.navigationService = navigationService;
 
             eventAggregator.GetEvent<AreaSelectedEvent>().Subscribe(
-                action: a => IsActive = a == Area,
+                action: _ => UpdateStatus(),
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
+                action: _ => UpdateStatus(),
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<TabSelectedEvent>().Subscribe(
+                action: _ => UpdateStatus(),
                 keepSubscriberReferenceAlive: true);
         }
 
@@ -213,50 +228,66 @@ namespace Score2Stream.VideoModule.ViewModels
         public void Initialize(Area area, double zoom, double? actualLeft, double? actualTop, double? actualWidth,
             double? actualHeight, IAreaService areaService)
         {
-            Area = area;
+            this.areaService = areaService;
+
+            this.Area = area;
             Zoom = zoom;
-
-            IsActive = areaService.Area == area;
-
-            if (actualWidth.HasValue
-                && actualHeight.HasValue)
-            {
-                Width = (area.X2 - area.X1) * actualWidth;
-                Height = (area.Y2 - area.Y1) * actualHeight;
-
-                Left = actualLeft + (area.X1 * actualWidth);
-                Top = actualTop + (area.Y1 * actualHeight);
-            }
 
             RaisePropertyChanged(nameof(Description));
 
+            UpdateSize(
+                actualLeft: actualLeft,
+                actualTop: actualTop,
+                actualWidth: actualWidth,
+                actualHeight: actualHeight);
+
             UpdateSegments(
-                area: area,
                 areaService: areaService);
+
+            UpdateStatus();
         }
 
         #endregion Public Methods
 
         #region Private Methods
 
-        private void UpdateSegments(Area area, IAreaService areaService)
+        private void UpdateSegments(IAreaService areaService)
         {
             Segments.Clear();
 
-            foreach (var segment in area.Segments)
+            foreach (var segment in Area.Segments)
             {
                 var current = containerProvider.Resolve<SegmentViewModel>();
 
                 current.Initialize(
-                    clip: segment,
+                    segment: segment,
                     zoom: zoom,
                     areaService: areaService);
 
                 Segments.Add(current);
             }
 
+            RaisePropertyChanged(nameof(Size));
             RaisePropertyChanged(nameof(Segments));
-            RaisePropertyChanged(nameof(Segments));
+        }
+
+        private void UpdateSize(double? actualLeft, double? actualTop, double? actualWidth, double? actualHeight)
+        {
+            if (actualWidth.HasValue
+                && actualHeight.HasValue)
+            {
+                Width = (Area.X2 - Area.X1) * actualWidth;
+                Height = (Area.Y2 - Area.Y1) * actualHeight;
+
+                Left = actualLeft + (Area.X1 * actualWidth);
+                Top = actualTop + (Area.Y1 * actualHeight);
+            }
+        }
+
+        private void UpdateStatus()
+        {
+            IsActive = navigationService.EditView != ViewType.Board
+                && areaService.Area == Area;
         }
 
         #endregion Private Methods

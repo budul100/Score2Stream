@@ -265,12 +265,17 @@ namespace Score2Stream.AreaService
                 : default;
 
             areaSelectedEvent.Publish(Area);
+
+            if (Segment.Area != Area)
+            {
+                Select();
+            }
         }
 
-        public void Select(Segment clip = default)
+        public void Select(Segment segment = default)
         {
-            Segment = Segment != clip
-                ? clip
+            Segment = Segment != segment
+                ? segment
                 : default;
 
             clipSelectedEvent.Publish(Segment);

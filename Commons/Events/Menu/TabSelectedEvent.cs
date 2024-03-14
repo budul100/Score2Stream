@@ -3,7 +3,7 @@ using Score2Stream.Commons.Enums;
 
 namespace Score2Stream.Commons.Events.Menu
 {
-    public class TabChangedEvent
+    public class TabSelectedEvent
         : PubSubEvent<ViewType>
     { }
 }

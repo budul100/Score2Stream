@@ -34,13 +34,13 @@ namespace NavigationService
 
                 return viewName switch
                 {
-                    nameof(ViewType.Board) => (ViewType?)ViewType.Board,
-
                     nameof(ViewType.Areas) => (ViewType?)ViewType.Areas,
 
                     nameof(ViewType.Templates) => (ViewType?)ViewType.Templates,
 
-                    _ => default,
+                    nameof(ViewType.Board) => (ViewType?)ViewType.Board,
+
+                    _ => (ViewType?)ViewType.Board,
                 };
             }
         }

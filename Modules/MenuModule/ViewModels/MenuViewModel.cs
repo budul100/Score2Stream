@@ -34,7 +34,8 @@ namespace Score2Stream.MenuModule.ViewModels
         private readonly IInputService inputService;
         private readonly IRegionManager regionManager;
         private readonly ISettingsService<Session> settingsService;
-        private readonly TabChangedEvent tabChangedEvent;
+        private readonly TabSelectedEvent tabSelectedEvent;
+
         private int tabIndex;
 
         #endregion Private Fields
@@ -118,7 +119,7 @@ namespace Score2Stream.MenuModule.ViewModels
                 executeMethod: () => inputService.SampleService.Order(),
                 canExecuteMethod: () => inputService?.SampleService?.Samples?.Any() == true);
 
-            tabChangedEvent = eventAggregator.GetEvent<TabChangedEvent>();
+            tabSelectedEvent = eventAggregator.GetEvent<TabSelectedEvent>();
             detectionChangedEvent = eventAggregator.GetEvent<DetectionChangedEvent>();
 
             eventAggregator.GetEvent<ServerStartedEvent>().Subscribe(
@@ -361,7 +362,7 @@ namespace Score2Stream.MenuModule.ViewModels
                                 regionName: nameof(RegionType.EditRegion),
                                 source: nameof(ViewType.Board));
 
-                            tabChangedEvent.Publish(ViewType.Board);
+                            tabSelectedEvent.Publish(ViewType.Board);
 
                             break;
 
@@ -373,7 +374,7 @@ namespace Score2Stream.MenuModule.ViewModels
                                 regionName: nameof(RegionType.EditRegion),
                                 source: nameof(ViewType.Areas));
 
-                            tabChangedEvent.Publish(ViewType.Areas);
+                            tabSelectedEvent.Publish(ViewType.Areas);
 
                             break;
 
@@ -383,7 +384,7 @@ namespace Score2Stream.MenuModule.ViewModels
                                 regionName: nameof(RegionType.EditRegion),
                                 source: nameof(ViewType.Templates));
 
-                            tabChangedEvent.Publish(ViewType.Templates);
+                            tabSelectedEvent.Publish(ViewType.Templates);
 
                             UpdateSamples();
 

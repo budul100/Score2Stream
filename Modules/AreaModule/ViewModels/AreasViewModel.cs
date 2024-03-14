@@ -30,22 +30,22 @@ namespace Score2Stream.AreaModule.ViewModels
             this.containerProvider = containerProvider;
 
             eventAggregator.GetEvent<InputSelectedEvent>().Subscribe(
-                action: _ => UpdateClips(),
+                action: _ => UpdateAreas(),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<InputsChangedEvent>().Subscribe(
-                action: UpdateClips,
+                action: UpdateAreas,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<AreasChangedEvent>().Subscribe(
-                action: UpdateClips,
+                action: UpdateAreas,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<AreasOrderedEvent>().Subscribe(
                 action: () => OrderAreas(),
                 keepSubscriberReferenceAlive: true);
 
-            UpdateClips();
+            UpdateAreas();
         }
 
         #endregion Public Constructors
@@ -72,7 +72,7 @@ namespace Score2Stream.AreaModule.ViewModels
             RaisePropertyChanged(nameof(Areas));
         }
 
-        private void UpdateClips()
+        private void UpdateAreas()
         {
             Areas.Clear();
 
