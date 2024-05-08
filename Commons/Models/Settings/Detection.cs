@@ -16,6 +16,8 @@ namespace Score2Stream.Commons.Models.Settings
 
         public int ThresholdMatching { get; set; } = Defaults.DetectionMatchingDefault;
 
+        public int UnverifiedsCount { get; set; } = Defaults.UnverifiedsCountDefault;
+
         public int WaitingDuration { get; set; } = Defaults.DetectionWaitingDefault;
 
         #endregion Public Properties

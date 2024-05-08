@@ -1,4 +1,8 @@
-﻿using AvaloniaUI.Ribbon;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using AvaloniaUI.Ribbon;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Regions;
@@ -18,10 +22,6 @@ using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
 using Score2Stream.Commons.Prism;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace Score2Stream.MenuModule.ViewModels
 {
@@ -178,6 +178,8 @@ namespace Score2Stream.MenuModule.ViewModels
         public static string TabSegments => Constants.TabSegments;
 
         public static int ThresholdMax => Constants.ThresholdMax;
+
+        public static int UnverifiedsCountMax => Constants.MaxCountSamples;
 
         public bool AllowMultipleInstances
         {
@@ -435,6 +437,24 @@ namespace Score2Stream.MenuModule.ViewModels
                     settingsService.Save();
 
                     RaisePropertyChanged(nameof(ThresholdMatching));
+                }
+            }
+        }
+
+        public int UnverifiedsCount
+        {
+            get { return settingsService.Contents.Detection.UnverifiedsCount; }
+            set
+            {
+                if (IsActive
+                    && value >= 0
+                    && value <= UnverifiedsCountMax
+                    && settingsService.Contents.Detection.UnverifiedsCount != value)
+                {
+                    settingsService.Contents.Detection.UnverifiedsCount = value;
+                    settingsService.Save();
+
+                    RaisePropertyChanged(nameof(UnverifiedsCount));
                 }
             }
         }

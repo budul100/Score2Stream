@@ -1,3 +1,5 @@
+using System.Threading;
+using System.Threading.Tasks;
 using Avalonia.Headless;
 using EventAggregatorMocker;
 using Moq;
@@ -17,8 +19,6 @@ using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
 using Score2Stream.MenuModule.ViewModels;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Tests.Modules.MenuModuleTests

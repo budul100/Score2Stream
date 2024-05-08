@@ -1,4 +1,8 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Score2Stream.Commons.Assets;
@@ -10,10 +14,6 @@ using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Score2Stream.SampleService
 {
@@ -34,6 +34,7 @@ namespace Score2Stream.SampleService
 
         private int index;
         private bool orderDescending;
+        private int position;
         private Template template;
 
         #endregion Private Fields
@@ -94,9 +95,10 @@ namespace Score2Stream.SampleService
                     sample.Value = recognitionService.Recognize(centeredImage);
                 }
 
-                Samples.Add(sample);
+                sample.Index = index++;
+                sample.Position = position++;
 
-                orderDescending = false;
+                Samples.Add(sample);
             }
         }
 
@@ -164,27 +166,34 @@ namespace Score2Stream.SampleService
 
         public void Order()
         {
+            var samples = default(IEnumerable<Sample>);
+
             if (orderDescending)
             {
-                Samples = Samples
-                    .OrderByDescending(s => string.IsNullOrWhiteSpace(s.Value))
-                    .ThenByDescending(s => s.Value).ToList();
+                samples = Samples
+                    .OrderByDescending(s => !s.IsVerified)
+                    .ThenBy(s => !s.IsVerified ? s.Index : int.MaxValue)
+                    .ThenByDescending(s => s.Value).ToArray();
             }
             else
             {
-                Samples = Samples
-                    .OrderByDescending(s => string.IsNullOrWhiteSpace(s.Value))
-                    .ThenBy(s => s.Value).ToList();
+                samples = Samples
+                    .OrderByDescending(s => !s.IsVerified)
+                    .ThenBy(s => !s.IsVerified ? s.Index : int.MaxValue)
+                    .ThenBy(s => s.Value).ToArray();
             }
 
             orderDescending = !orderDescending;
 
-            index = 0;
+            position = 0;
 
-            foreach (var sample in Samples)
+            foreach (var sample in samples)
             {
-                sample.Index = index++;
+                sample.Position = position++;
             }
+
+            Samples = samples
+                .OrderBy(s => s.Position).ToList();
 
             samplesOrderedEvent.Publish();
         }
@@ -235,8 +244,7 @@ namespace Score2Stream.SampleService
                 {
                     SetSimilarities(segment);
 
-                    if (IsDetection
-                        && Samples.Count < Constants.MaxCountSamples)
+                    if (IsDetection)
                     {
                         var relevant = Samples
                             .OrderByDescending(c => c.Similarity).FirstOrDefault();
@@ -267,6 +275,18 @@ namespace Score2Stream.SampleService
 
             if (sample != default)
             {
+                var unverifieds = Samples
+                    .Where(s => !s.IsVerified).ToArray();
+
+                if (unverifieds.Length >= settingsService.Contents.Detection.UnverifiedsCount)
+                {
+                    var relevant = unverifieds
+                        .Where(s => s != Sample)
+                        .OrderBy(s => s.Index).FirstOrDefault();
+
+                    RemoveSample(relevant);
+                }
+
                 Add(sample);
 
                 samplesChangedEvent.Publish();
@@ -297,7 +317,6 @@ namespace Score2Stream.SampleService
                     Height = segment.Bitmap?.Size.Height ?? 0,
                     Width = segment.Bitmap?.Size.Width ?? 0,
                     Mat = segment.Mat,
-                    Index = index++,
                     Template = template,
                 };
 
@@ -314,8 +333,6 @@ namespace Score2Stream.SampleService
                 sample.Template?.Samples.Remove(sample);
 
                 Samples.Remove(sample);
-
-                orderDescending = false;
             }
         }
 

@@ -34,7 +34,7 @@ namespace Score2Stream.TemplateModule.ViewModels
             OnFocusGotCommand = new DelegateCommand(
                 executeMethod: () => sampleService.Select(Sample));
             OnFocusLostCommand = new DelegateCommand(
-                executeMethod: () => Sample.IsVerified = true);
+                executeMethod: () => SetVerified());
 
             OnSelectionCommand = new DelegateCommand(
                 executeMethod: () => sampleService.Select(Sample));
@@ -69,8 +69,14 @@ namespace Score2Stream.TemplateModule.ViewModels
         public bool IsSelected
         {
             get { return isSelected; }
-            set { SetProperty(ref isSelected, value); }
+            set
+            {
+                SetProperty(ref isSelected, value);
+                RaisePropertyChanged(nameof(IsUnverified));
+            }
         }
+
+        public bool IsUnverified => !Sample.IsVerified;
 
         public DelegateCommand OnFocusGotCommand { get; }
 
@@ -125,6 +131,16 @@ namespace Score2Stream.TemplateModule.ViewModels
         #endregion Public Methods
 
         #region Private Methods
+
+        private void SetVerified()
+        {
+            if (!Sample.IsVerified)
+            {
+                Sample.IsVerified = true;
+
+                RaisePropertyChanged(nameof(IsUnverified));
+            }
+        }
 
         private void UpdateValues()
         {

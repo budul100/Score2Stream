@@ -481,6 +481,25 @@
                                 Margin="0,0,4,0"
                                 VerticalAlignment="Center"
                                 FontSize="{StaticResource FontSize}"
+                                Text="Max unverifieds" />
+                            <NumericUpDown
+                                Width="130"
+                                MaxHeight="5"
+                                Increment="1"
+                                Maximum="{Binding UnverifiedsCountMax}"
+                                Minimum="0"
+                                Value="{Binding UnverifiedsCount, Mode=TwoWay}" />
+                        </StackPanel>
+
+                        <StackPanel
+                            Margin="0,0,4,4"
+                            IsEnabled="{Binding IsActive}"
+                            Orientation="Horizontal">
+                            <TextBlock
+                                Width="100"
+                                Margin="0,0,4,0"
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource FontSize}"
                                 Text="New sample to [%]" />
                             <NumericUpDown
                                 Width="130"

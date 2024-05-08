@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Score2Stream.Commons.Models.Contents;
+using System.Collections.Generic;
 using System.Linq;
-using Score2Stream.Commons.Models.Contents;
 
 namespace Score2Stream.AreaService.Extensions
 {
@@ -8,21 +8,21 @@ namespace Score2Stream.AreaService.Extensions
     {
         #region Public Methods
 
-        public static IEnumerable<Segment> GetClips(this Area area)
+        public static IEnumerable<Segment> GetSegments(this Area area)
         {
-            for (var index = 0; index < area.Size; index++)
+            for (var position = 0; position < area.Size; position++)
             {
                 var result = new Segment
                 {
                     Area = area,
-                    Index = index,
+                    Position = position,
                 };
 
                 yield return result;
             }
         }
 
-        public static void SetClips(this Area area)
+        public static void SetSegments(this Area area)
         {
             if (area.Segments?.Any() == true)
             {
@@ -30,10 +30,11 @@ namespace Score2Stream.AreaService.Extensions
 
                 var index = 0;
 
-                foreach (var clip in area.Segments)
+                foreach (var segment in area.Segments)
                 {
-                    clip.X1 = area.X1 + (width * index);
-                    clip.X2 = clip != area.Segments.Last()
+                    segment.X1 = area.X1 + (width * index);
+
+                    segment.X2 = segment != area.Segments.Last()
                         ? area.X1 + (width * ++index)
                         : area.X2;
                 }

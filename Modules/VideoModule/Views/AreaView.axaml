@@ -75,7 +75,7 @@
 
             <ItemsControl.Styles>
                 <Style Selector="ItemsControl > ContentPresenter">
-                    <Setter Property="Grid.Column" Value="{Binding Index}" />
+                    <Setter Property="Grid.Column" Value="{Binding Position}" />
                 </Style>
             </ItemsControl.Styles>
 

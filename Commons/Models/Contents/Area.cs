@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Text.Json.Serialization;
-using Score2Stream.Commons.Assets;
+﻿using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Extensions;
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Score2Stream.Commons.Models.Contents
 {
@@ -18,9 +18,9 @@ namespace Score2Stream.Commons.Models.Contents
 
         public bool HasDimensions { get; set; }
 
-        public int Index { get; set; }
-
         public int NoiseRemoval { get; set; } = Defaults.AreaNoiseRemovalDefault;
+
+        public int Position { get; set; }
 
         [JsonIgnore]
         public IEnumerable<Segment> Segments { get; set; }

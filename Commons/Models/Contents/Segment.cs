@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using OpenCvSharp;
 using Score2Stream.Commons.Enums;
+using System;
+using System.Collections.Generic;
 
 namespace Score2Stream.Commons.Models.Contents
 {
@@ -16,9 +16,9 @@ namespace Score2Stream.Commons.Models.Contents
 
         public Queue<Mat> Images { get; set; } = new Queue<Mat>();
 
-        public int Index { get; set; }
-
         public Mat Mat { get; set; }
+
+        public int Position { get; set; }
 
         public Rect? Rect { get; set; }
 

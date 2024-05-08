@@ -1,4 +1,7 @@
-﻿using MsBox.Avalonia.Enums;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using MsBox.Avalonia.Enums;
 using OpenCvSharp;
 using Prism.Events;
 using Prism.Ioc;
@@ -8,9 +11,6 @@ using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Score2Stream.TemplateService
 {
@@ -75,18 +75,24 @@ namespace Score2Stream.TemplateService
                 if (template.Samples?.Any() == true)
                 {
                     template.Samples = template.Samples
-                        .Where(s => s.Image != default).ToList();
+                        .Where(s => s.Image != default)
+                        .OrderBy(s => s.Position).ToList();
 
-                    foreach (var sample in template.Samples)
+                    try
                     {
-                        sample.Mat = Mat.FromImageData(
-                            imageBytes: sample.Image,
-                            mode: ImreadModes.Unchanged);
+                        foreach (var sample in template.Samples)
+                        {
+                            sample.Mat = Mat.FromImageData(
+                                imageBytes: sample.Image,
+                                mode: ImreadModes.Unchanged);
 
-                        sample.Template = template;
+                            sample.Template = template;
 
-                        template.SampleService.Add(sample);
+                            template.SampleService.Add(sample);
+                        }
                     }
+                    catch (MaxCountExceededException)
+                    { }
 
                     template.SampleService.Order();
                 }

@@ -1,4 +1,6 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System.Collections.ObjectModel;
+using System.Linq;
+using Avalonia.Media.Imaging;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
@@ -10,8 +12,6 @@ using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Prism;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace Score2Stream.TemplateModule.ViewModels
 {
@@ -106,7 +106,7 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         private void OrderSamples()
         {
-            Samples = new ObservableCollection<SampleViewModel>(Samples.OrderBy(s => s.Sample.Index));
+            Samples = new ObservableCollection<SampleViewModel>(Samples.OrderBy(s => s.Sample.Position));
 
             RaisePropertyChanged(nameof(Samples));
         }
@@ -130,7 +130,8 @@ namespace Score2Stream.TemplateModule.ViewModels
             if (Template?.Samples?.Any() == true)
             {
                 var toBeAddeds = Template.Samples
-                    .Where(t => !Samples.Any(s => s.Sample == t)).ToArray();
+                    .Where(s => s.Mat != default
+                        && !Samples.Any(m => m.Sample == s)).ToArray();
 
                 foreach (var toBeAdded in toBeAddeds)
                 {

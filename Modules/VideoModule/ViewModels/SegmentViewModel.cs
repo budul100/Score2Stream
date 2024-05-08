@@ -50,8 +50,6 @@ namespace Score2Stream.VideoModule.ViewModels
 
         #region Public Properties
 
-        public int? Index => Segment?.Index;
-
         public bool IsActive
         {
             get { return isActive; }
@@ -71,6 +69,8 @@ namespace Score2Stream.VideoModule.ViewModels
         }
 
         public DelegateCommand OnPressedCommand { get; }
+
+        public int? Position => Segment?.Position;
 
         public Segment Segment { get; private set; }
 

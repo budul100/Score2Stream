@@ -2,7 +2,7 @@
 
 ## Version 1.6.0
 
-* ...
+* Number of unverified samples can be restricted now
 
 ## Version 1.5.1
 

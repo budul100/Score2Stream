@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using Prism.Commands;
+﻿using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Mvvm;
@@ -12,6 +9,9 @@ using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Template;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Score2Stream.AreaModule.ViewModels
 {
@@ -66,8 +66,6 @@ namespace Score2Stream.AreaModule.ViewModels
 
         public ObservableCollection<ClipViewModel> Clips { get; } = new ObservableCollection<ClipViewModel>();
 
-        public int Index => area.Index;
-
         public bool IsActive
         {
             get { return isActive; }
@@ -95,6 +93,8 @@ namespace Score2Stream.AreaModule.ViewModels
         }
 
         public DelegateCommand OnSelectionCommand { get; }
+
+        public int Position => area.Position;
 
         public Template Template
         {

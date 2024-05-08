@@ -16,12 +16,15 @@ namespace Score2Stream.Commons.Models.Contents
 
         public byte[] Image { get; set; }
 
+        [JsonIgnore]
         public int Index { get; set; }
 
         public bool IsVerified { get; set; }
 
         [JsonIgnore]
         public Mat Mat { get; set; }
+
+        public int Position { get; set; }
 
         [JsonIgnore]
         public double Similarity { get; set; }

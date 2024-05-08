@@ -1,4 +1,9 @@
-﻿using MsBox.Avalonia.Enums;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Score2Stream.AreaService.Extensions;
 using Score2Stream.Commons.Assets;
@@ -8,11 +13,6 @@ using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
 
 namespace Score2Stream.AreaService
 {
@@ -29,8 +29,8 @@ namespace Score2Stream.AreaService
         private readonly IDialogService dialogService;
         private readonly IScoreboardService scoreboardService;
 
-        private int index;
         private bool orderDescending;
+        private int position;
 
         #endregion Private Fields
 
@@ -90,16 +90,14 @@ namespace Score2Stream.AreaService
                         maxCount: Constants.MaxCountAreas);
                 }
 
-                area.Segments = area
-                    .GetClips().ToArray();
+                area.Segments = area.GetSegments().ToArray();
+                area.SetSegments();
 
-                area.SetClips();
+                Areas.Add(area);
 
                 scoreboardService.BindArea(
                     area: area,
                     type: area.Type);
-
-                Areas.Add(area);
 
                 orderDescending = false;
             }
@@ -168,27 +166,32 @@ namespace Score2Stream.AreaService
 
         public void Order()
         {
+            var areas = default(IEnumerable<Area>);
+
             if (orderDescending)
             {
-                Areas = Areas
+                areas = Areas
                     .OrderByDescending(c => (int)(c.Y1 * Constants.ClipPositionFactor))
                     .ThenByDescending(c => (int)(c.X1 * Constants.ClipPositionFactor)).ToList();
             }
             else
             {
-                Areas = Areas
+                areas = Areas
                     .OrderBy(c => (int)(c.Y1 * Constants.ClipPositionFactor))
                     .ThenBy(c => (int)(c.X1 * Constants.ClipPositionFactor)).ToList();
             }
 
             orderDescending = !orderDescending;
 
-            index = 0;
+            position = 0;
 
             foreach (var area in Areas)
             {
-                area.Index = index++;
+                area.Position = position++;
             }
+
+            Areas = areas
+                .OrderBy(a => a.Position).ToList();
 
             areasOrderedEvent.Publish();
         }
@@ -252,7 +255,7 @@ namespace Score2Stream.AreaService
 
             if (isModified)
             {
-                Area.SetClips();
+                Area.SetSegments();
 
                 areaModifiedEvent.Publish(Area);
             }
@@ -302,7 +305,7 @@ namespace Score2Stream.AreaService
 
                 if (isModified)
                 {
-                    Area.SetClips();
+                    Area.SetSegments();
 
                     areaModifiedEvent.Publish(Area);
                 }
@@ -327,7 +330,6 @@ namespace Score2Stream.AreaService
             var result = new Area()
             {
                 Name = name,
-                Index = index++,
                 Size = size,
             };
 

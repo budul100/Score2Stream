@@ -21,6 +21,8 @@
 
         public const int TickersFrequencyDefault = 10;
 
+        public const int UnverifiedsCountDefault = 30;
+
         public const int VideoDelayProcessingDefault = 0;
         public const int VideoImageQueueSizeDefault = 3;
 

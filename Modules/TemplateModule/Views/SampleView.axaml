@@ -23,30 +23,28 @@
         VerticalAlignment="Center"
         BorderBrush="LightGray"
         BorderThickness="4"
+        Classes.IsSelected="{Binding IsSelected}"
+        Classes.IsUnverified="{Binding IsUnverified}"
         CornerRadius="3">
+
+        <Border.Styles>
+
+            <Style Selector="Border.IsUnverified">
+                <Setter Property="Background" Value="Bisque" />
+            </Style>
+
+            <Style Selector="Border.IsSelected">
+                <Setter Property="Background" Value="LightBlue" />
+            </Style>
+
+            <Style Selector="Border">
+                <Setter Property="Background" Value="Gainsboro" />
+            </Style>
+        </Border.Styles>
 
         <StackPanel Name="SamplePanel" Orientation="Horizontal">
 
             <i:Interaction.Behaviors>
-
-                <a:DataTriggerBehavior
-                    Binding="{Binding IsSelected}"
-                    ComparisonCondition="Equal"
-                    Value="True">
-                    <a:ChangePropertyAction
-                        PropertyName="Background"
-                        TargetObject="SamplePanel"
-                        Value="LightBlue" />
-                </a:DataTriggerBehavior>
-                <a:DataTriggerBehavior
-                    Binding="{Binding IsSelected}"
-                    ComparisonCondition="NotEqual"
-                    Value="True">
-                    <a:ChangePropertyAction
-                        PropertyName="Background"
-                        TargetObject="SamplePanel"
-                        Value="Gainsboro" />
-                </a:DataTriggerBehavior>
 
                 <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="SamplePanel">
                     <a:InvokeCommandAction Command="{Binding OnSelectionCommand}" />
@@ -57,7 +55,6 @@
                 Name="SampleBorder"
                 Margin="2"
                 VerticalAlignment="Center"
-                Background="LightGray"
                 BorderBrush="LightSlateGray"
                 BorderThickness="3">
 
