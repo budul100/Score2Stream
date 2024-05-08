@@ -4,9 +4,9 @@ using OpenCvSharp;
 using Score2Stream.Commons.Extensions;
 using Xunit;
 
-namespace RecognitionTests
+namespace Tests.Services.RecognitionServiceTests
 {
-    public class RecognitionTests
+    public class Tests
     {
         #region Private Fields
 

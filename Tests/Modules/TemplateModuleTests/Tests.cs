@@ -1,8 +1,8 @@
 using Xunit;
 
-namespace ModuleTests
+namespace Tests.Modules.TemplateModuleTests
 {
-    public class UnitTest1
+    public class Tests
     {
         [Fact]
         public void Test1()
