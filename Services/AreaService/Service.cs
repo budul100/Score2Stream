@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using MsBox.Avalonia.Enums;
+﻿using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Score2Stream.AreaService.Extensions;
 using Score2Stream.Commons.Assets;
@@ -13,6 +8,11 @@ using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 namespace Score2Stream.AreaService
 {
@@ -25,7 +25,7 @@ namespace Score2Stream.AreaService
         private readonly AreasChangedEvent areasChangedEvent;
         private readonly AreaSelectedEvent areaSelectedEvent;
         private readonly AreasOrderedEvent areasOrderedEvent;
-        private readonly ClipSelectedEvent clipSelectedEvent;
+        private readonly SegmentSelectedEvent clipSelectedEvent;
         private readonly IDialogService dialogService;
         private readonly IScoreboardService scoreboardService;
 
@@ -49,10 +49,10 @@ namespace Score2Stream.AreaService
             areasOrderedEvent = eventAggregator.GetEvent<AreasOrderedEvent>();
             areaSelectedEvent = eventAggregator.GetEvent<AreaSelectedEvent>();
 
-            clipSelectedEvent = eventAggregator.GetEvent<ClipSelectedEvent>();
+            clipSelectedEvent = eventAggregator.GetEvent<SegmentSelectedEvent>();
 
-            eventAggregator.GetEvent<ClipDrawnEvent>().Subscribe(
-                action: c => TemplateService?.SampleService?.Update(c),
+            eventAggregator.GetEvent<SegmentDrawnEvent>().Subscribe(
+                action: s => TemplateService?.SampleService?.Update(s),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: c => c == Segment);
@@ -90,8 +90,6 @@ namespace Score2Stream.AreaService
                         maxCount: Constants.MaxCountAreas);
                 }
 
-                orderDescending = false;
-
                 area.Segments = area
                     .GetClips().ToArray();
 
@@ -102,6 +100,8 @@ namespace Score2Stream.AreaService
                     type: area.Type);
 
                 Areas.Add(area);
+
+                orderDescending = false;
             }
         }
 

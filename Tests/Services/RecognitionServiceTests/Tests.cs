@@ -10,7 +10,7 @@ namespace Tests.Services.RecognitionServiceTests
     {
         #region Private Fields
 
-        private const string SamplesPath = @"..\..\..\Samples";
+        private const string SamplesPath = @"..\..\..\..\..\Samples\Images";
 
         #endregion Private Fields
 

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using AvaloniaUI.Ribbon;
+﻿using AvaloniaUI.Ribbon;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Regions;
@@ -22,6 +18,10 @@ using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
 using Score2Stream.Commons.Prism;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Score2Stream.MenuModule.ViewModels
 {
@@ -139,7 +139,7 @@ namespace Score2Stream.MenuModule.ViewModels
                 action: OnClipsChanged);
             eventAggregator.GetEvent<AreaSelectedEvent>().Subscribe(
                 action: _ => OnClipsChanged());
-            eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
+            eventAggregator.GetEvent<SegmentSelectedEvent>().Subscribe(
                 action: _ => OnClipsChanged());
 
             eventAggregator.GetEvent<AreaModifiedEvent>().Subscribe(

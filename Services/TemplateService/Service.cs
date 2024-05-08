@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using MsBox.Avalonia.Enums;
+﻿using MsBox.Avalonia.Enums;
 using OpenCvSharp;
 using Prism.Events;
 using Prism.Ioc;
@@ -11,6 +8,9 @@ using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Score2Stream.TemplateService
 {
@@ -56,7 +56,21 @@ namespace Score2Stream.TemplateService
         {
             if (template != default)
             {
-                AddTemplate(template);
+                if (Templates.Count >= Constants.MaxCountTemplates)
+                {
+                    throw new MaxCountExceededException(
+                        type: typeof(Template),
+                        maxCount: Constants.MaxCountTemplates);
+                }
+
+                if (template.SampleService == default)
+                {
+                    template.SampleService = containerProvider
+                        .Resolve<ISampleService>();
+
+                    template.SampleService.Initialize(
+                        template: template);
+                }
 
                 if (template.Samples?.Any() == true)
                 {
@@ -76,6 +90,8 @@ namespace Score2Stream.TemplateService
 
                     template.SampleService.Order();
                 }
+
+                Templates.Add(template);
             }
         }
 
@@ -85,7 +101,7 @@ namespace Score2Stream.TemplateService
             {
                 var template = GetTemplate();
 
-                AddTemplate(template);
+                Add(template);
 
                 templatesChangedEvent.Publish();
 
@@ -148,30 +164,6 @@ namespace Score2Stream.TemplateService
         #endregion Public Methods
 
         #region Private Methods
-
-        private void AddTemplate(Template template)
-        {
-            if (template != default)
-            {
-                if (Templates.Count >= Constants.MaxCountTemplates)
-                {
-                    throw new MaxCountExceededException(
-                        type: typeof(Template),
-                        maxCount: Constants.MaxCountTemplates);
-                }
-
-                if (template.SampleService == default)
-                {
-                    template.SampleService = containerProvider
-                        .Resolve<ISampleService>();
-
-                    template.SampleService.Initialize(
-                        template: template);
-                }
-
-                Templates.Add(template);
-            }
-        }
 
         private Template GetTemplate()
         {

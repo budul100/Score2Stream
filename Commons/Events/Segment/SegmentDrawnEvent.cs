@@ -2,7 +2,7 @@
 
 namespace Score2Stream.Commons.Events.Clip
 {
-    public class ClipDrawnEvent
+    public class SegmentDrawnEvent
         : PubSubEvent<Models.Contents.Segment>
     { }
 }

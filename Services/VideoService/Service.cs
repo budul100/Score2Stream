@@ -1,9 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using OpenCvSharp;
 using Prism.Events;
 using Score2Stream.Commons.Assets;
@@ -17,6 +12,11 @@ using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
 using Score2Stream.VideoService.Extensions;
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Score2Stream.VideoService
 {
@@ -25,10 +25,10 @@ namespace Score2Stream.VideoService
     {
         #region Private Fields
 
-        private readonly ClipDrawnEvent clipDrawnEvent;
-        private readonly ClipUpdatedEvent clipUpdatedEvent;
         private readonly IDispatcherService dispatcherService;
         private readonly SampleUpdatedEvent sampleUpdatedEvent;
+        private readonly SegmentDrawnEvent segmentDrawnEvent;
+        private readonly SegmentUpdatedEvent segmentUpdatedEvent;
         private readonly ISettingsService<Session> settingsService;
         private readonly VideoEndedEvent videoEndedEvent;
         private readonly VideoStartedEvent videoStartedEvent;
@@ -59,8 +59,8 @@ namespace Score2Stream.VideoService
             videoEndedEvent = eventAggregator.GetEvent<VideoEndedEvent>();
             videoUpdatedEvent = eventAggregator.GetEvent<VideoUpdatedEvent>();
 
-            clipDrawnEvent = eventAggregator.GetEvent<ClipDrawnEvent>();
-            clipUpdatedEvent = eventAggregator.GetEvent<ClipUpdatedEvent>();
+            segmentDrawnEvent = eventAggregator.GetEvent<SegmentDrawnEvent>();
+            segmentUpdatedEvent = eventAggregator.GetEvent<SegmentUpdatedEvent>();
 
             sampleUpdatedEvent = eventAggregator.GetEvent<SampleUpdatedEvent>();
 
@@ -342,7 +342,7 @@ namespace Score2Stream.VideoService
                         }
                     }
 
-                    clipDrawnEvent.Publish(clip);
+                    segmentDrawnEvent.Publish(clip);
 
                     UpdateValue(clip);
                 }
@@ -433,7 +433,7 @@ namespace Score2Stream.VideoService
 
             if (clip.Value != given)
             {
-                clipUpdatedEvent.Publish(clip);
+                segmentUpdatedEvent.Publish(clip);
             }
         }
 

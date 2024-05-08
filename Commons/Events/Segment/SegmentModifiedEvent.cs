@@ -2,7 +2,7 @@
 
 namespace Score2Stream.Commons.Events.Clip
 {
-    public class ClipModifiedEvent
+    public class SegmentModifiedEvent
         : PubSubEvent<Models.Contents.Segment>
     { }
 }

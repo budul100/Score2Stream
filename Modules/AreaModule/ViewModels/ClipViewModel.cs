@@ -20,13 +20,13 @@ namespace Score2Stream.AreaModule.ViewModels
 
         public ClipViewModel(IEventAggregator eventAggregator)
         {
-            eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
+            eventAggregator.GetEvent<SegmentUpdatedEvent>().Subscribe(
                 action: _ => RaisePropertyChanged(nameof(Description)),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: c => c == clip);
 
-            eventAggregator.GetEvent<ClipDrawnEvent>().Subscribe(
+            eventAggregator.GetEvent<SegmentDrawnEvent>().Subscribe(
                 action: _ => RaisePropertyChanged(nameof(Bitmap)),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,

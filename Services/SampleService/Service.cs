@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Score2Stream.Commons.Assets;
@@ -14,6 +10,10 @@ using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Score2Stream.SampleService
 {
@@ -128,12 +128,12 @@ namespace Score2Stream.SampleService
             }
         }
 
-        public void Create(Segment clip)
+        public void Create(Segment segment)
         {
             try
             {
                 AddSample(
-                    clip: clip,
+                    segment: segment,
                     select: true);
             }
             catch (MaxCountExceededException exception)
@@ -227,16 +227,16 @@ namespace Score2Stream.SampleService
             }
         }
 
-        public void Update(Segment clip)
+        public void Update(Segment segment)
         {
-            if (clip != default)
+            if (segment != default)
             {
                 lock (detectionLock)
                 {
-                    SetSimilarities(clip);
+                    SetSimilarities(segment);
 
                     if (IsDetection
-                        && Samples.Count < Constants.MaxCountAreas)
+                        && Samples.Count < Constants.MaxCountSamples)
                     {
                         var relevant = Samples
                             .OrderByDescending(c => c.Similarity).FirstOrDefault();
@@ -246,7 +246,7 @@ namespace Score2Stream.SampleService
                             try
                             {
                                 AddSample(
-                                    clip: clip,
+                                    segment: segment,
                                     select: false);
                             }
                             catch (MaxCountExceededException)
@@ -261,9 +261,9 @@ namespace Score2Stream.SampleService
 
         #region Private Methods
 
-        private void AddSample(Segment clip, bool select)
+        private void AddSample(Segment segment, bool select)
         {
-            var sample = GetSample(clip);
+            var sample = GetSample(segment);
 
             if (sample != default)
             {
@@ -271,10 +271,10 @@ namespace Score2Stream.SampleService
 
                 samplesChangedEvent.Publish();
 
-                if (clip.Area.Template == default)
+                if (segment.Area.Template == default)
                 {
-                    clip.Area.Template = sample.Template;
-                    clip.Area.TemplateName = sample.Template.Name;
+                    segment.Area.Template = sample.Template;
+                    segment.Area.TemplateName = sample.Template.Name;
 
                     templateSelectedEvent.Publish(sample.Template);
                 }
@@ -286,17 +286,17 @@ namespace Score2Stream.SampleService
             }
         }
 
-        private Sample GetSample(Segment clip)
+        private Sample GetSample(Segment segment)
         {
             var result = default(Sample);
 
-            if (clip != default)
+            if (segment != default)
             {
                 result = new Sample
                 {
-                    Height = clip.Bitmap.Size.Height,
-                    Width = clip.Bitmap.Size.Width,
-                    Mat = clip.Mat,
+                    Height = segment.Bitmap?.Size.Height ?? 0,
+                    Width = segment.Bitmap?.Size.Width ?? 0,
+                    Mat = segment.Mat,
                     Index = index++,
                     Template = template,
                 };

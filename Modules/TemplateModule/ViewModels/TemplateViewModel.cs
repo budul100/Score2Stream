@@ -1,6 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Linq;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
@@ -12,6 +10,8 @@ using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Prism;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Score2Stream.TemplateModule.ViewModels
 {
@@ -52,17 +52,17 @@ namespace Score2Stream.TemplateModule.ViewModels
                 action: () => OrderSamples(),
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
+            eventAggregator.GetEvent<SegmentSelectedEvent>().Subscribe(
                 action: _ => UpdateImage(),
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<ClipUpdatedEvent>().Subscribe(
+            eventAggregator.GetEvent<SegmentUpdatedEvent>().Subscribe(
                 action: _ => UpdateImage(),
                 threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => s == inputService.AreaService?.Segment);
 
-            eventAggregator.GetEvent<ClipDrawnEvent>().Subscribe(
+            eventAggregator.GetEvent<SegmentDrawnEvent>().Subscribe(
                 action: _ => UpdateImage(),
                 threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,

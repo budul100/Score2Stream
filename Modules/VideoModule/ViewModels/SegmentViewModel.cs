@@ -37,7 +37,7 @@ namespace Score2Stream.VideoModule.ViewModels
                 action: _ => UpdateStatus(),
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
+            eventAggregator.GetEvent<SegmentSelectedEvent>().Subscribe(
                 action: _ => UpdateStatus(),
                 keepSubscriberReferenceAlive: true);
 

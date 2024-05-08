@@ -45,7 +45,7 @@ namespace Score2Stream.TemplateModule.ViewModels
 
             sampleModifiedEvent = eventAggregator.GetEvent<SampleModifiedEvent>();
 
-            eventAggregator.GetEvent<ClipSelectedEvent>().Subscribe(
+            eventAggregator.GetEvent<SegmentSelectedEvent>().Subscribe(
                 action: _ => UpdateValues(),
                 keepSubscriberReferenceAlive: true);
 

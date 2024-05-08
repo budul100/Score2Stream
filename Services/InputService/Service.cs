@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia.Platform.Storage;
+﻿using Avalonia.Platform.Storage;
 using Hompus.VideoInputDevices;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
@@ -18,6 +13,11 @@ using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Score2Stream.InputService
 {
@@ -231,8 +231,7 @@ namespace Score2Stream.InputService
                         maxCount: Constants.MaxCountInputs);
                 }
 
-                result = Inputs
-                    .SingleOrDefault(i => i.FileName == fileName);
+                result = Inputs.SingleOrDefault(i => i.FileName == fileName);
 
                 if (result == default)
                 {
@@ -272,34 +271,30 @@ namespace Score2Stream.InputService
 
         private async Task<Input> GetInputAsync()
         {
-            if (Inputs.Count >= Constants.MaxCountInputs)
-            {
-                throw new MaxCountExceededException(
-                    type: typeof(Input),
-                    maxCount: Constants.MaxCountInputs);
-            }
-
             var result = default(Input);
 
-            var paths = await dialogService.OpenFilePickerAsync(
-                title: Texts.MenuInputFileText,
-                allowMultiple: false,
-                startLocation: startLocation);
-
-            if (paths?.Any() == true)
+            if (Inputs.Count < Constants.MaxCountInputs)
             {
-                var fileName = paths
-                    .Select(p => p.Path.LocalPath)
-                    .FirstOrDefault(p => File.Exists(p));
+                var paths = await dialogService.OpenFilePickerAsync(
+                    title: Texts.MenuInputFileText,
+                    allowMultiple: false,
+                    startLocation: startLocation);
 
-                if (!string.IsNullOrWhiteSpace(fileName))
+                if (paths?.Any() == true)
                 {
-                    startLocation = await dialogService.GetFolderAsync(fileName);
+                    var fileName = paths
+                        .Select(p => p.Path.LocalPath)
+                        .FirstOrDefault(p => File.Exists(p));
 
-                    settingsService.Contents.Video.FilePathVideo = fileName;
-                    settingsService.Save();
+                    if (!string.IsNullOrWhiteSpace(fileName))
+                    {
+                        startLocation = await dialogService.GetFolderAsync(fileName);
 
-                    result = GetInput(fileName);
+                        settingsService.Contents.Video.FilePathVideo = fileName;
+                        settingsService.Save();
+
+                        result = GetInput(fileName);
+                    }
                 }
             }
 

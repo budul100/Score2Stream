@@ -26,7 +26,7 @@ namespace Score2Stream.ScoreboardService
         #region Private Fields
 
         private readonly AreaModifiedEvent areaModifiedEvent;
-        private readonly ClipModifiedEvent clipModifiedEvent;
+        private readonly SegmentModifiedEvent clipModifiedEvent;
         private readonly Dictionary<ClipType, Segment> clips = new();
         private readonly ScoreboardUpdatedEvent scoreboardUpdatedEvent;
         private readonly JsonSerializerOptions serializeOptions;
@@ -63,7 +63,7 @@ namespace Score2Stream.ScoreboardService
             };
 
             areaModifiedEvent = eventAggregator.GetEvent<AreaModifiedEvent>();
-            clipModifiedEvent = eventAggregator.GetEvent<ClipModifiedEvent>();
+            clipModifiedEvent = eventAggregator.GetEvent<SegmentModifiedEvent>();
             scoreboardUpdatedEvent = eventAggregator.GetEvent<ScoreboardUpdatedEvent>();
 
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
