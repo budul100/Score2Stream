@@ -1,4 +1,9 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using OpenCvSharp;
 using Prism.Events;
 using Score2Stream.Commons.Assets;
@@ -12,11 +17,6 @@ using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
 using Score2Stream.VideoService.Extensions;
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Score2Stream.VideoService
 {
@@ -135,125 +135,125 @@ namespace Score2Stream.VideoService
             var frameCount = 0.0;
             var frameIndex = 0.0;
 
-            //try
-            //{
-            //// Creation and disposal of this object should be done in the same thread
-            //// because if not it throws disconnectedContext exception
-
-            await UpdateVideoAsync();
-
-            using var video = new VideoCapture();
-
-            if (deviceId.HasValue)
+            try
             {
-                if (!video.Open(deviceId.Value))
+                //// Creation and disposal of this object should be done in the same thread
+                //// because if not it throws disconnectedContext exception
+
+                await UpdateVideoAsync();
+
+                using var video = new VideoCapture();
+
+                if (deviceId.HasValue)
                 {
-                    throw new ApplicationException(
-                        message: $"Cannot connect to camera {Name}.");
-                }
-            }
-            else
-            {
-                if (!File.Exists(fileName))
-                {
-                    throw new FileNotFoundException(
-                        message: $"The file {fileName} coud not be found.");
-                }
-                else if (!video.Open(fileName))
-                {
-                    throw new ApplicationException(
-                        message: $"Cannot open file {fileName}.");
-                }
-            }
-
-            IsActive = true;
-
-            videoStartedEvent.Publish();
-
-            var hasContent = false;
-
-            do
-            {
-                using var currentFrame = new Mat();
-                hasContent = video.Read(currentFrame);
-
-                var capturingStart = DateTime.Now;
-
-                if (!currentFrame.Empty())
-                {
-                    var clone = currentFrame.Clone();
-                    frame = clone.AsRotated(settingsService.Contents.Video.Rotation);
-
-                    var size = frame.Size();
-
-                    if (size.Width != widthLast || size.Height != heightLast)
+                    if (!video.Open(deviceId.Value))
                     {
-                        foreach (var area in AreaService.Areas)
+                        throw new ApplicationException(
+                            message: $"Cannot connect to camera {Name}.");
+                    }
+                }
+                else
+                {
+                    if (!File.Exists(fileName))
+                    {
+                        throw new FileNotFoundException(
+                            message: $"The file {fileName} coud not be found.");
+                    }
+                    else if (!video.Open(fileName))
+                    {
+                        throw new ApplicationException(
+                            message: $"Cannot open file {fileName}.");
+                    }
+                }
+
+                IsActive = true;
+
+                videoStartedEvent.Publish();
+
+                var hasContent = false;
+
+                do
+                {
+                    using var currentFrame = new Mat();
+                    hasContent = video.Read(currentFrame);
+
+                    var capturingStart = DateTime.Now;
+
+                    if (!currentFrame.Empty())
+                    {
+                        var clone = currentFrame.Clone();
+                        frame = clone.AsRotated(settingsService.Contents.Video.Rotation);
+
+                        var size = frame.Size();
+
+                        if (size.Width != widthLast || size.Height != heightLast)
                         {
-                            UpdateRectangles(area);
+                            foreach (var area in AreaService.Areas)
+                            {
+                                UpdateRectangles(area);
+                            }
+                        }
+
+                        heightLast = size.Height;
+                        widthLast = size.Width;
+
+                        Bitmap = new Bitmap(frame.ToMemoryStream());
+                    }
+
+                    var clips = AreaService?.Areas?
+                        .SelectMany(a => a.Segments)
+                        .Where(c => c.Rect.HasValue).ToArray();
+
+                    if (clips?.Any() == true)
+                    {
+                        heightMax = clips.Max(a => a.Rect.Value.Height);
+                        widthMax = clips.Max(a => a.Rect.Value.Width);
+
+                        foreach (var clip in clips)
+                        {
+                            UpdateImage(clip);
                         }
                     }
 
-                    heightLast = size.Height;
-                    widthLast = size.Width;
+                    var position = 0.0;
 
-                    Bitmap = new Bitmap(frame.ToMemoryStream());
-                }
-
-                var clips = AreaService?.Areas?
-                    .SelectMany(a => a.Segments)
-                    .Where(c => c.Rect.HasValue).ToArray();
-
-                if (clips?.Any() == true)
-                {
-                    heightMax = clips.Max(a => a.Rect.Value.Height);
-                    widthMax = clips.Max(a => a.Rect.Value.Width);
-
-                    foreach (var clip in clips)
+                    if (!deviceId.HasValue)
                     {
-                        UpdateImage(clip);
-                    }
-                }
+                        if (frameCount == 0)
+                        {
+                            frameCount = video.Get(VideoCaptureProperties.FrameCount);
+                        }
 
-                var position = 0.0;
+                        if (frameIndex++ > frameCount || !hasContent)
+                        {
+                            frameIndex = 1;
+                            hasContent = true;
 
-                if (!deviceId.HasValue)
-                {
-                    if (frameCount == 0)
-                    {
-                        frameCount = video.Get(VideoCaptureProperties.FrameCount);
+                            video.Set(
+                                propertyId: VideoCaptureProperties.PosFrames,
+                                value: frameIndex);
+                        }
+
+                        position = video.Get(VideoCaptureProperties.PosMsec);
                     }
 
-                    if (frameIndex++ > frameCount || !hasContent)
-                    {
-                        frameIndex = 1;
-                        hasContent = true;
+                    await UpdateVideoAsync(
+                        capturingStart: capturingStart);
 
+                    if (!deviceId.HasValue
+                        && settingsService.Contents.Video.ProcessingDelay > 0
+                        && ProcessingTime?.TotalMilliseconds > 0)
+                    {
                         video.Set(
-                            propertyId: VideoCaptureProperties.PosFrames,
-                            value: frameIndex);
+                            propertyId: VideoCaptureProperties.PosMsec,
+                            value: position + ProcessingTime.Value.TotalMilliseconds);
                     }
-
-                    position = video.Get(VideoCaptureProperties.PosMsec);
                 }
-
-                await UpdateVideoAsync(
-                    capturingStart: capturingStart);
-
-                if (!deviceId.HasValue
-                    && settingsService.Contents.Video.ProcessingDelay > 0
-                    && ProcessingTime?.TotalMilliseconds > 0)
-                {
-                    video.Set(
-                        propertyId: VideoCaptureProperties.PosMsec,
-                        value: position + ProcessingTime.Value.TotalMilliseconds);
-                }
+                while (hasContent
+                    && !cancellationTokenSource.IsCancellationRequested);
             }
-            while (hasContent
-                && !cancellationTokenSource.IsCancellationRequested);
-            //}
-            //catch
-            //{ }
+            catch when (!System.Diagnostics.Debugger.IsAttached)
+            { }
 
             frame = default;
             Bitmap = default;
