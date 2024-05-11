@@ -1,630 +1,669 @@
 <UserControl
-    x:Class="Score2Stream.MenuModule.Views.MenuView"
-    xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:en="using:Score2Stream.Commons.Enums"
-    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
-    xmlns:mat="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:mo="using:Score2Stream.Core.Models"
-    xmlns:prism="http://prismlibrary.com/"
-    xmlns:rib="clr-namespace:AvaloniaUI.Ribbon;assembly=AvaloniaUI.Ribbon"
-    xmlns:sys="using:System"
-    d:DesignHeight="150"
-    d:DesignWidth="500"
-    prism:ViewModelLocator.AutoWireViewModel="True"
-    mc:Ignorable="d">
+	x:Class="Score2Stream.MenuModule.Views.MenuView"
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:en="using:Score2Stream.Commons.Enums"
+	xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+	xmlns:mat="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:mo="using:Score2Stream.Core.Models"
+	xmlns:prism="http://prismlibrary.com/"
+	xmlns:rib="clr-namespace:AvaloniaUI.Ribbon;assembly=AvaloniaUI.Ribbon"
+	xmlns:sys="using:System"
+	d:DesignHeight="150"
+	d:DesignWidth="500"
+	prism:ViewModelLocator.AutoWireViewModel="True"
+	mc:Ignorable="d">
 
-    <UserControl.Resources>
-        <sys:Double x:Key="FontSize">10</sys:Double>
-        <sys:Double x:Key="IconWidth">30</sys:Double>
-        <sys:Double x:Key="IconHeight">30</sys:Double>
-    </UserControl.Resources>
+	<UserControl.Resources>
+		<sys:Double x:Key="FontSize">10</sys:Double>
+		<sys:Double x:Key="IconWidth">30</sys:Double>
+		<sys:Double x:Key="IconHeight">30</sys:Double>
+	</UserControl.Resources>
 
-    <UserControl.Styles>
-        <StyleInclude Source="avares://AvaloniaUI.Ribbon/Styles/Fluent/AvaloniaRibbon.xaml" />
-        <StyleInclude Source="avares://Material.Icons.Avalonia/MaterialIconStyles.axaml" />
-    </UserControl.Styles>
+	<UserControl.Styles>
+		<StyleInclude Source="avares://AvaloniaUI.Ribbon/Styles/Fluent/AvaloniaRibbon.xaml" />
+		<StyleInclude Source="avares://Material.Icons.Avalonia/MaterialIconStyles.axaml" />
+	</UserControl.Styles>
 
-    <rib:Ribbon SelectedIndex="{Binding TabIndex}">
-        <rib:Ribbon.Tabs>
+	<rib:Ribbon SelectedIndex="{Binding TabIndex}">
+		<rib:Ribbon.Tabs>
 
-            <rib:RibbonTab Name="BoardTab" Header="Board">
+			<rib:RibbonTab Name="BoardTab" Header="Board">
 
-                <i:Interaction.Behaviors>
-                    <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="BoardTab">
-                        <a:InvokeCommandAction Command="{Binding SelectTabCommand}" CommandParameter="{x:Static en:ViewType.Board}" />
-                    </a:EventTriggerBehavior>
-                </i:Interaction.Behaviors>
+				<i:Interaction.Behaviors>
+					<a:EventTriggerBehavior EventName="PointerPressed" SourceObject="BoardTab">
+						<a:InvokeCommandAction Command="{Binding SelectTabCommand}" CommandParameter="{x:Static en:ViewType.Board}" />
+					</a:EventTriggerBehavior>
+				</i:Interaction.Behaviors>
 
-                <rib:RibbonTab.Groups>
+				<rib:RibbonTab.Groups>
 
-                    <rib:RibbonGroupBox Header="Server control">
-                        <rib:RibbonButton
-                            Command="{Binding GraphicsReloadCommand}"
-                            Content="Restart server"
-                            FontSize="{StaticResource FontSize}"
-                            MinSize="Large">
-                            <rib:RibbonButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="BackupRestore" />
-                                </ControlTemplate>
-                            </rib:RibbonButton.LargeIcon>
-                        </rib:RibbonButton>
-                    </rib:RibbonGroupBox>
+					<rib:RibbonGroupBox Header="Server control">
+						<rib:RibbonButton
+							Command="{Binding GraphicsReloadCommand}"
+							Content="Restart server"
+							FontSize="{StaticResource FontSize}"
+							MinSize="Large">
+							<rib:RibbonButton.LargeIcon>
+								<ControlTemplate>
+									<mat:MaterialIcon
+										Width="{StaticResource IconWidth}"
+										Height="{StaticResource IconHeight}"
+										Kind="BackupRestore" />
+								</ControlTemplate>
+							</rib:RibbonButton.LargeIcon>
+						</rib:RibbonButton>
+					</rib:RibbonGroupBox>
 
-                    <rib:RibbonGroupBox Header="Server options">
-                        <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
-                            <TextBlock
-                                Width="100"
-                                Margin="0,0,4,0"
-                                VerticalAlignment="Center"
-                                FontSize="{StaticResource FontSize}"
-                                Text="Websocket delay [ms]" />
-                            <NumericUpDown
-                                Width="130"
-                                MaxHeight="5"
-                                Increment="10"
-                                Maximum="{Binding DurationMax}"
-                                Minimum="{Binding DurationMin}"
-                                Value="{Binding WebSocketDelay, Mode=TwoWay}" />
-                        </StackPanel>
-                    </rib:RibbonGroupBox>
+					<rib:RibbonGroupBox Header="Server options">
+						<StackPanel Margin="0,0,4,4" Orientation="Horizontal">
+							<TextBlock
+								Width="100"
+								Margin="0,0,4,0"
+								VerticalAlignment="Center"
+								FontSize="{StaticResource FontSize}"
+								Text="Websocket delay [ms]" />
+							<NumericUpDown
+								Width="130"
+								MaxHeight="5"
+								Increment="10"
+								Maximum="{Binding DurationMax}"
+								Minimum="{Binding DurationMin}"
+								Value="{Binding WebSocketDelay, Mode=TwoWay}" />
+						</StackPanel>
+					</rib:RibbonGroupBox>
 
-                    <rib:RibbonGroupBox Header="Scoreboard control">
-                        <rib:RibbonButton
-                            Command="{Binding ScoreboardOpenCommand}"
-                            Content="Open board"
-                            FontSize="{StaticResource FontSize}"
-                            MinSize="Large">
-                            <rib:RibbonButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="OpenInApp" />
-                                </ControlTemplate>
-                            </rib:RibbonButton.LargeIcon>
-                        </rib:RibbonButton>
-                        <rib:RibbonButton
-                            Command="{Binding ScoreboardUpdateCommand}"
-                            Content="Update board"
-                            FontSize="{StaticResource FontSize}"
-                            MinSize="Large">
-                            <rib:RibbonButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="Update" />
-                                </ControlTemplate>
-                            </rib:RibbonButton.LargeIcon>
-                        </rib:RibbonButton>
-                    </rib:RibbonGroupBox>
+					<rib:RibbonGroupBox Header="Scoreboard control">
+						<rib:RibbonButton
+							Command="{Binding ScoreboardOpenCommand}"
+							Content="Open board"
+							FontSize="{StaticResource FontSize}"
+							MinSize="Large">
+							<rib:RibbonButton.LargeIcon>
+								<ControlTemplate>
+									<mat:MaterialIcon
+										Width="{StaticResource IconWidth}"
+										Height="{StaticResource IconHeight}"
+										Kind="OpenInApp" />
+								</ControlTemplate>
+							</rib:RibbonButton.LargeIcon>
+						</rib:RibbonButton>
+						<rib:RibbonButton
+							Command="{Binding ScoreboardUpdateCommand}"
+							Content="Update board"
+							FontSize="{StaticResource FontSize}"
+							MinSize="Large">
+							<rib:RibbonButton.LargeIcon>
+								<ControlTemplate>
+									<mat:MaterialIcon
+										Width="{StaticResource IconWidth}"
+										Height="{StaticResource IconHeight}"
+										Kind="Update" />
+								</ControlTemplate>
+							</rib:RibbonButton.LargeIcon>
+						</rib:RibbonButton>
+					</rib:RibbonGroupBox>
 
-                    <rib:RibbonGroupBox Header="App options">
-                        <CheckBox
-                            Margin="0,0,4,4"
-                            VerticalAlignment="Center"
-                            Content="Allow multiple instances"
-                            FontSize="{StaticResource FontSize}"
-                            IsChecked="{Binding AllowMultipleInstances, Mode=TwoWay}" />
-                    </rib:RibbonGroupBox>
-                </rib:RibbonTab.Groups>
-            </rib:RibbonTab>
+					<rib:RibbonGroupBox Header="App options">
+						<CheckBox
+							Margin="0,0,4,4"
+							VerticalAlignment="Center"
+							Content="Allow multiple instances"
+							FontSize="{StaticResource FontSize}"
+							IsChecked="{Binding AllowMultipleInstances, Mode=TwoWay}" />
+					</rib:RibbonGroupBox>
+				</rib:RibbonTab.Groups>
+			</rib:RibbonTab>
 
-            <rib:RibbonTab Name="InputTab" Header="Input">
+			<rib:RibbonTab Name="InputTab" Header="Input">
 
-                <i:Interaction.Behaviors>
-                    <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="InputTab">
-                        <a:InvokeCommandAction Command="{Binding SelectTabCommand}" CommandParameter="{x:Static en:ViewType.Areas}" />
-                    </a:EventTriggerBehavior>
-                </i:Interaction.Behaviors>
+				<i:Interaction.Behaviors>
+					<a:EventTriggerBehavior EventName="PointerPressed" SourceObject="InputTab">
+						<a:InvokeCommandAction Command="{Binding SelectTabCommand}" CommandParameter="{x:Static en:ViewType.Areas}" />
+					</a:EventTriggerBehavior>
+				</i:Interaction.Behaviors>
 
-                <rib:RibbonTab.Groups>
+				<rib:RibbonTab.Groups>
 
-                    <rib:RibbonGroupBox Header="Video control">
-                        <rib:RibbonDropDownButton
-                            Content="Source"
-                            FontSize="{StaticResource FontSize}"
-                            ItemsSource="{Binding Inputs}"
-                            MinSize="Large">
-                            <rib:RibbonDropDownButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="VideocamOutline" />
-                                </ControlTemplate>
-                            </rib:RibbonDropDownButton.LargeIcon>
-                        </rib:RibbonDropDownButton>
-                        <rib:RibbonButton
-                            Command="{Binding InputStopAllCommand}"
-                            Content="Stop sources"
-                            FontSize="{StaticResource FontSize}"
-                            MinSize="Large">
-                            <rib:RibbonButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="VideocamOffOutline" />
-                                </ControlTemplate>
-                            </rib:RibbonButton.LargeIcon>
-                        </rib:RibbonButton>
-                    </rib:RibbonGroupBox>
+					<rib:RibbonGroupBox Header="Video control">
+						<rib:RibbonDropDownButton
+							Content="Source"
+							FontSize="{StaticResource FontSize}"
+							ItemsSource="{Binding Inputs}"
+							MinSize="Large">
+							<rib:RibbonDropDownButton.LargeIcon>
+								<ControlTemplate>
+									<mat:MaterialIcon
+										Width="{StaticResource IconWidth}"
+										Height="{StaticResource IconHeight}"
+										Kind="Videocam" />
+								</ControlTemplate>
+							</rib:RibbonDropDownButton.LargeIcon>
+						</rib:RibbonDropDownButton>
+						<rib:RibbonButton
+							Command="{Binding InputStopAllCommand}"
+							Content="Stop sources"
+							FontSize="{StaticResource FontSize}"
+							MinSize="Large">
+							<rib:RibbonButton.LargeIcon>
+								<ControlTemplate>
+									<mat:MaterialIcon
+										Width="{StaticResource IconWidth}"
+										Height="{StaticResource IconHeight}"
+										Kind="VideocamOff" />
+								</ControlTemplate>
+							</rib:RibbonButton.LargeIcon>
+						</rib:RibbonButton>
+					</rib:RibbonGroupBox>
 
-                    <rib:RibbonGroupBox Header="Video handling">
-                        <rib:RibbonButton
-                            Command="{Binding InputCenterCommand}"
-                            Content="Center video"
-                            FontSize="{StaticResource FontSize}"
-                            MinSize="Large">
-                            <rib:RibbonButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="ImageFilterCenterFocus" />
-                                </ControlTemplate>
-                            </rib:RibbonButton.LargeIcon>
-                        </rib:RibbonButton>
-                        <rib:RibbonButton
-                            Command="{Binding InputRotateLeftCommand}"
-                            Content="Rotate to left"
-                            FontSize="{StaticResource FontSize}"
-                            MinSize="Large">
-                            <rib:RibbonButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="RotateLeft" />
-                                </ControlTemplate>
-                            </rib:RibbonButton.LargeIcon>
-                        </rib:RibbonButton>
-                        <rib:RibbonButton
-                            Command="{Binding InputRotateRightCommand}"
-                            Content="Rotate to right"
-                            FontSize="{StaticResource FontSize}"
-                            MinSize="Large">
-                            <rib:RibbonButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="RotateRight" />
-                                </ControlTemplate>
-                            </rib:RibbonButton.LargeIcon>
-                        </rib:RibbonButton>
-                    </rib:RibbonGroupBox>
+					<rib:RibbonGroupBox Header="Video handling">
+						<rib:RibbonButton
+							Command="{Binding InputCenterCommand}"
+							Content="Center video"
+							FontSize="{StaticResource FontSize}"
+							MinSize="Large">
+							<rib:RibbonButton.LargeIcon>
+								<ControlTemplate>
+									<mat:MaterialIcon
+										Width="{StaticResource IconWidth}"
+										Height="{StaticResource IconHeight}"
+										Kind="ImageFilterCenterFocus" />
+								</ControlTemplate>
+							</rib:RibbonButton.LargeIcon>
+						</rib:RibbonButton>
+						<rib:RibbonButton
+							Command="{Binding InputRotateLeftCommand}"
+							Content="Rotate to left"
+							FontSize="{StaticResource FontSize}"
+							MinSize="Large">
+							<rib:RibbonButton.LargeIcon>
+								<ControlTemplate>
+									<mat:MaterialIcon
+										Width="{StaticResource IconWidth}"
+										Height="{StaticResource IconHeight}"
+										Kind="RotateLeft" />
+								</ControlTemplate>
+							</rib:RibbonButton.LargeIcon>
+						</rib:RibbonButton>
+						<rib:RibbonButton
+							Command="{Binding InputRotateRightCommand}"
+							Content="Rotate to right"
+							FontSize="{StaticResource FontSize}"
+							MinSize="Large">
+							<rib:RibbonButton.LargeIcon>
+								<ControlTemplate>
+									<mat:MaterialIcon
+										Width="{StaticResource IconWidth}"
+										Height="{StaticResource IconHeight}"
+										Kind="RotateRight" />
+								</ControlTemplate>
+							</rib:RibbonButton.LargeIcon>
+						</rib:RibbonButton>
+					</rib:RibbonGroupBox>
 
-                    <rib:RibbonGroupBox Header="Video options">
-                        <StackPanel
-                            Margin="0,0,4,4"
-                            IsEnabled="{Binding IsActive}"
-                            Orientation="Horizontal">
-                            <TextBlock
-                                Width="100"
-                                Margin="0,0,4,0"
-                                VerticalAlignment="Center"
-                                FontSize="{StaticResource FontSize}"
-                                Text="Processing delay [ms]" />
-                            <NumericUpDown
-                                Width="130"
-                                MaxHeight="5"
-                                Increment="10"
-                                Maximum="{Binding DurationMax}"
-                                Minimum="0"
-                                Value="{Binding ProcessingDelay, Mode=TwoWay}" />
-                        </StackPanel>
-                        <StackPanel
-                            Margin="0,0,4,4"
-                            IsEnabled="{Binding IsActive}"
-                            Orientation="Horizontal">
-                            <TextBlock
-                                Width="100"
-                                Margin="0,0,4,0"
-                                VerticalAlignment="Center"
-                                FontSize="{StaticResource FontSize}"
-                                Text="Image queue size" />
-                            <NumericUpDown
-                                Width="130"
-                                MaxHeight="5"
-                                Increment="1"
-                                Maximum="{Binding QueueSizeMax}"
-                                Minimum="{Binding QueueSizeMin}"
-                                Value="{Binding ImagesQueueSize, Mode=TwoWay}" />
-                        </StackPanel>
-                    </rib:RibbonGroupBox>
+					<rib:RibbonGroupBox Header="Video options">
+						<StackPanel
+							Margin="0,0,4,4"
+							IsEnabled="{Binding IsActive}"
+							Orientation="Horizontal">
+							<TextBlock
+								Width="100"
+								Margin="0,0,4,0"
+								VerticalAlignment="Center"
+								FontSize="{StaticResource FontSize}"
+								Text="Processing delay [ms]" />
+							<NumericUpDown
+								Width="130"
+								MaxHeight="5"
+								Increment="10"
+								Maximum="{Binding DurationMax}"
+								Minimum="0"
+								Value="{Binding ProcessingDelay, Mode=TwoWay}" />
+						</StackPanel>
+						<StackPanel
+							Margin="0,0,4,4"
+							IsEnabled="{Binding IsActive}"
+							Orientation="Horizontal">
+							<TextBlock
+								Width="100"
+								Margin="0,0,4,0"
+								VerticalAlignment="Center"
+								FontSize="{StaticResource FontSize}"
+								Text="Image queue size" />
+							<NumericUpDown
+								Width="130"
+								MaxHeight="5"
+								Increment="1"
+								Maximum="{Binding QueueSizeMax}"
+								Minimum="{Binding QueueSizeMin}"
+								Value="{Binding ImagesQueueSize, Mode=TwoWay}" />
+						</StackPanel>
+					</rib:RibbonGroupBox>
 
-                    <rib:RibbonGroupBox Header="Segments handling">
-                        <rib:RibbonDropDownButton
-                            Content="Add"
-                            FontSize="{StaticResource FontSize}"
-                            IsEnabled="{Binding IsActive}"
-                            MinSize="Large">
-                            <rib:RibbonDropDownButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="VectorSquarePlus" />
-                                </ControlTemplate>
-                            </rib:RibbonDropDownButton.LargeIcon>
+					<rib:RibbonGroupBox Header="Segments handling">
+						<rib:RibbonDropDownButton
+							Content="Add"
+							FontSize="{StaticResource FontSize}"
+							IsEnabled="{Binding IsActive}"
+							MinSize="Large">
+							<rib:RibbonDropDownButton.LargeIcon>
+								<ControlTemplate>
+									<mat:MaterialIcon
+										Width="{StaticResource IconWidth}"
+										Height="{StaticResource IconHeight}"
+										Kind="VectorSquarePlus" />
+								</ControlTemplate>
+							</rib:RibbonDropDownButton.LargeIcon>
 
-                            <rib:RibbonDropDownItem
-                                Command="{Binding ClipAddCommand}"
-                                CommandParameter="1"
-                                Text="Single segment">
-                                <rib:RibbonDropDownItem.Icon>
-                                    <ControlTemplate>
-                                        <mat:MaterialIcon
-                                            Width="{StaticResource IconWidth}"
-                                            Height="{StaticResource IconHeight}"
-                                            Kind="Numeric1BoxMultiple" />
-                                    </ControlTemplate>
-                                </rib:RibbonDropDownItem.Icon>
-                            </rib:RibbonDropDownItem>
-                            <rib:RibbonDropDownItem
-                                Command="{Binding ClipAddCommand}"
-                                CommandParameter="2"
-                                Text="Double segment">
-                                <rib:RibbonDropDownItem.Icon>
-                                    <ControlTemplate>
-                                        <mat:MaterialIcon
-                                            Width="{StaticResource IconWidth}"
-                                            Height="{StaticResource IconHeight}"
-                                            Kind="Numeric2BoxMultiple" />
-                                    </ControlTemplate>
-                                </rib:RibbonDropDownItem.Icon>
-                            </rib:RibbonDropDownItem>
-                            <rib:RibbonDropDownItem
-                                Command="{Binding ClipAddCommand}"
-                                CommandParameter="3"
-                                Text="Triple segment">
-                                <rib:RibbonDropDownItem.Icon>
-                                    <ControlTemplate>
-                                        <mat:MaterialIcon
-                                            Width="{StaticResource IconWidth}"
-                                            Height="{StaticResource IconHeight}"
-                                            Kind="Numeric3BoxMultiple" />
-                                    </ControlTemplate>
-                                </rib:RibbonDropDownItem.Icon>
-                            </rib:RibbonDropDownItem>
-                        </rib:RibbonDropDownButton>
-                        <rib:RibbonButton
-                            Command="{Binding ClipRemoveCommand}"
-                            Content="Remove selected"
-                            FontSize="{StaticResource FontSize}"
-                            MinSize="Large">
-                            <rib:RibbonButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="VectorSquareMinus" />
-                                </ControlTemplate>
-                            </rib:RibbonButton.LargeIcon>
-                        </rib:RibbonButton>
-                        <rib:RibbonButton
-                            Command="{Binding ClipsRemoveAllCommand}"
-                            Content="Remove all"
-                            FontSize="{StaticResource FontSize}"
-                            MinSize="Large">
-                            <rib:RibbonButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="VectorSquareRemove" />
-                                </ControlTemplate>
-                            </rib:RibbonButton.LargeIcon>
-                        </rib:RibbonButton>
-                        <rib:RibbonButton
-                            Command="{Binding ClipUndoSizeCommand}"
-                            Content="Undo resizing"
-                            FontSize="{StaticResource FontSize}"
-                            MinSize="Large">
-                            <rib:RibbonButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="Undo" />
-                                </ControlTemplate>
-                            </rib:RibbonButton.LargeIcon>
-                        </rib:RibbonButton>
-                        <rib:RibbonButton
-                            Command="{Binding ClipsOrderAllCommand}"
-                            Content="Order all"
-                            FontSize="{StaticResource FontSize}"
-                            MinSize="Large">
-                            <rib:RibbonButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="Sort" />
-                                </ControlTemplate>
-                            </rib:RibbonButton.LargeIcon>
-                        </rib:RibbonButton>
-                        <!--<rib:RibbonButton
-                            Command="{Binding ClipsEmptyCommand}"
-                            Content="Empty neighbours"
-                            FontSize="{StaticResource FontSize}"
-                            MinSize="Large">
-                            <rib:RibbonButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="DeleteVariant" />
-                                </ControlTemplate>
-                            </rib:RibbonButton.LargeIcon>
-                        </rib:RibbonButton>-->
-                    </rib:RibbonGroupBox>
+							<rib:RibbonDropDownItem
+								Command="{Binding AreaAddCommand}"
+								CommandParameter="1"
+								Text="Single segment">
+								<rib:RibbonDropDownItem.Icon>
+									<ControlTemplate>
+										<mat:MaterialIcon
+											Width="{StaticResource IconWidth}"
+											Height="{StaticResource IconHeight}"
+											Kind="Numeric1BoxMultiple" />
+									</ControlTemplate>
+								</rib:RibbonDropDownItem.Icon>
+							</rib:RibbonDropDownItem>
+							<rib:RibbonDropDownItem
+								Command="{Binding AreaAddCommand}"
+								CommandParameter="2"
+								Text="Double segment">
+								<rib:RibbonDropDownItem.Icon>
+									<ControlTemplate>
+										<mat:MaterialIcon
+											Width="{StaticResource IconWidth}"
+											Height="{StaticResource IconHeight}"
+											Kind="Numeric2BoxMultiple" />
+									</ControlTemplate>
+								</rib:RibbonDropDownItem.Icon>
+							</rib:RibbonDropDownItem>
+							<rib:RibbonDropDownItem
+								Command="{Binding AreaAddCommand}"
+								CommandParameter="3"
+								Text="Triple segment">
+								<rib:RibbonDropDownItem.Icon>
+									<ControlTemplate>
+										<mat:MaterialIcon
+											Width="{StaticResource IconWidth}"
+											Height="{StaticResource IconHeight}"
+											Kind="Numeric3BoxMultiple" />
+									</ControlTemplate>
+								</rib:RibbonDropDownItem.Icon>
+							</rib:RibbonDropDownItem>
+						</rib:RibbonDropDownButton>
+						<rib:RibbonButton
+							Command="{Binding AreaRemoveCommand}"
+							Content="Remove selected"
+							FontSize="{StaticResource FontSize}"
+							MinSize="Large">
+							<rib:RibbonButton.LargeIcon>
+								<ControlTemplate>
+									<mat:MaterialIcon
+										Width="{StaticResource IconWidth}"
+										Height="{StaticResource IconHeight}"
+										Kind="VectorSquareMinus" />
+								</ControlTemplate>
+							</rib:RibbonButton.LargeIcon>
+						</rib:RibbonButton>
+						<rib:RibbonButton
+							Command="{Binding AreaRemoveAllCommand}"
+							Content="Remove all"
+							FontSize="{StaticResource FontSize}"
+							MinSize="Large">
+							<rib:RibbonButton.LargeIcon>
+								<ControlTemplate>
+									<mat:MaterialIcon
+										Width="{StaticResource IconWidth}"
+										Height="{StaticResource IconHeight}"
+										Kind="VectorSquareRemove" />
+								</ControlTemplate>
+							</rib:RibbonButton.LargeIcon>
+						</rib:RibbonButton>
+						<rib:RibbonButton
+							Command="{Binding AreaUndoCommand}"
+							Content="Undo resizing"
+							FontSize="{StaticResource FontSize}"
+							MinSize="Large">
+							<rib:RibbonButton.LargeIcon>
+								<ControlTemplate>
+									<mat:MaterialIcon
+										Width="{StaticResource IconWidth}"
+										Height="{StaticResource IconHeight}"
+										Kind="Undo" />
+								</ControlTemplate>
+							</rib:RibbonButton.LargeIcon>
+						</rib:RibbonButton>
+						<rib:RibbonButton
+							Command="{Binding AreaOrderAllCommand}"
+							Content="Order all"
+							FontSize="{StaticResource FontSize}"
+							MinSize="Large">
+							<rib:RibbonButton.LargeIcon>
+								<ControlTemplate>
+									<mat:MaterialIcon
+										Width="{StaticResource IconWidth}"
+										Height="{StaticResource IconHeight}"
+										Kind="Sort" />
+								</ControlTemplate>
+							</rib:RibbonButton.LargeIcon>
+						</rib:RibbonButton>
+						<!--<rib:RibbonButton
+							Command="{Binding AreaEmptyCommand}"
+							Content="Empty neighbours"
+							FontSize="{StaticResource FontSize}"
+							MinSize="Large">
+							<rib:RibbonButton.LargeIcon>
+								<ControlTemplate>
+									<mat:MaterialIcon
+										Width="{StaticResource IconWidth}"
+										Height="{StaticResource IconHeight}"
+										Kind="DeleteVariant" />
+								</ControlTemplate>
+							</rib:RibbonButton.LargeIcon>
+						</rib:RibbonButton>-->
+					</rib:RibbonGroupBox>
 
-                    <rib:RibbonGroupBox Header="Segment options">
-                        <!--<CheckBox
-                            Margin="0,0,4,4"
-                            VerticalAlignment="Center"
-                            Content="Deactivate neighbour detection"
-                            FontSize="{StaticResource FontSize}"
-                            IsChecked="{Binding NoNeighboring, Mode=TwoWay}"
-                            IsEnabled="{Binding IsActive}" />-->
-                        <CheckBox
-                            Margin="0,0,4,4"
-                            VerticalAlignment="Center"
-                            Content="Deactivate cropping"
-                            FontSize="{StaticResource FontSize}"
-                            IsChecked="{Binding NoCropping, Mode=TwoWay}"
-                            IsEnabled="{Binding IsActive}" />
-                    </rib:RibbonGroupBox>
-                </rib:RibbonTab.Groups>
-            </rib:RibbonTab>
+					<rib:RibbonGroupBox Header="Segment options">
+						<!--<CheckBox
+							Margin="0,0,4,4"
+							VerticalAlignment="Center"
+							Content="Deactivate neighbour detection"
+							FontSize="{StaticResource FontSize}"
+							IsChecked="{Binding NoNeighboring, Mode=TwoWay}"
+							IsEnabled="{Binding IsActive}" />-->
+						<CheckBox
+							Margin="0,0,4,4"
+							VerticalAlignment="Center"
+							Content="Deactivate cropping"
+							FontSize="{StaticResource FontSize}"
+							IsChecked="{Binding NoCropping, Mode=TwoWay}"
+							IsEnabled="{Binding IsActive}" />
+					</rib:RibbonGroupBox>
+				</rib:RibbonTab.Groups>
+			</rib:RibbonTab>
 
-            <rib:RibbonTab Name="TemplatesTab" Header="Samples">
+			<rib:RibbonTab Name="TemplatesTab" Header="Samples">
 
-                <i:Interaction.Behaviors>
-                    <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="TemplatesTab">
-                        <a:InvokeCommandAction Command="{Binding SelectTabCommand}" CommandParameter="{x:Static en:ViewType.Templates}" />
-                    </a:EventTriggerBehavior>
-                </i:Interaction.Behaviors>
+				<i:Interaction.Behaviors>
+					<a:EventTriggerBehavior EventName="PointerPressed" SourceObject="TemplatesTab">
+						<a:InvokeCommandAction Command="{Binding SelectTabCommand}" CommandParameter="{x:Static en:ViewType.Templates}" />
+					</a:EventTriggerBehavior>
+				</i:Interaction.Behaviors>
 
-                <rib:RibbonTab.Groups>
+				<rib:RibbonTab.Groups>
 
-                    <rib:RibbonGroupBox Header="Templates selection">
-                        <rib:RibbonDropDownButton
-                            Content="Template"
-                            FontSize="{StaticResource FontSize}"
-                            IsEnabled="{Binding IsActive}"
-                            ItemsSource="{Binding Templates}"
-                            MinSize="Large">
-                            <rib:RibbonDropDownButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="Movie" />
-                                </ControlTemplate>
-                            </rib:RibbonDropDownButton.LargeIcon>
-                        </rib:RibbonDropDownButton>
-                        <rib:RibbonButton
-                            Command="{Binding TemplateRemoveCommand}"
-                            Content="Remove current"
-                            FontSize="{StaticResource FontSize}"
-                            MinSize="Large">
-                            <rib:RibbonButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="MovieMinus" />
-                                </ControlTemplate>
-                            </rib:RibbonButton.LargeIcon>
-                        </rib:RibbonButton>
-                    </rib:RibbonGroupBox>
+					<rib:RibbonGroupBox Header="Templates selection">
+						<rib:RibbonDropDownButton
+							Content="Template"
+							FontSize="{StaticResource FontSize}"
+							IsEnabled="{Binding IsActive}"
+							ItemsSource="{Binding Templates}"
+							MinSize="Large">
+							<rib:RibbonDropDownButton.LargeIcon>
+								<ControlTemplate>
+									<mat:MaterialIcon
+										Width="{StaticResource IconWidth}"
+										Height="{StaticResource IconHeight}"
+										Kind="Movie" />
+								</ControlTemplate>
+							</rib:RibbonDropDownButton.LargeIcon>
+						</rib:RibbonDropDownButton>
+						<rib:RibbonButton
+							Command="{Binding TemplateRemoveCommand}"
+							Content="Remove current"
+							FontSize="{StaticResource FontSize}"
+							MinSize="Large">
+							<rib:RibbonButton.LargeIcon>
+								<ControlTemplate>
+									<mat:MaterialIcon
+										Width="{StaticResource IconWidth}"
+										Height="{StaticResource IconHeight}"
+										Kind="MovieMinus" />
+								</ControlTemplate>
+							</rib:RibbonButton.LargeIcon>
+						</rib:RibbonButton>
+					</rib:RibbonGroupBox>
 
-                    <rib:RibbonGroupBox Header="Samples detection" IsEnabled="{Binding IsActive}">
-                        <rib:RibbonToggleButton
-                            Classes.IsActive="{Binding IsSampleDetection}"
-                            Classes.IsNotActive="{Binding !IsSampleDetection}"
-                            Content="Detect samples"
-                            FontSize="{StaticResource FontSize}"
-                            IsChecked="{Binding IsSampleDetection}"
-                            IsEnabled="{Binding IsDetectionAvailable}"
-                            MinSize="Large">
-                            <rib:RibbonToggleButton.Styles>
-                                <Style Selector="RibbonToggleButton.IsActive">
-                                    <Style.Setters>
-                                        <Setter Property="LargeIcon">
-                                            <Setter.Value>
-                                                <ControlTemplate>
-                                                    <mat:MaterialIcon
-                                                        Width="{StaticResource IconWidth}"
-                                                        Height="{StaticResource IconHeight}"
-                                                        Kind="ImageSearch" />
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style.Setters>
-                                </Style>
-                                <Style Selector="RibbonToggleButton.IsNotActive">
-                                    <Style.Setters>
-                                        <Setter Property="LargeIcon">
-                                            <Setter.Value>
-                                                <ControlTemplate>
-                                                    <mat:MaterialIcon
-                                                        Width="{StaticResource IconWidth}"
-                                                        Height="{StaticResource IconHeight}"
-                                                        Kind="ImageSearchOutline" />
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style.Setters>
-                                </Style>
-                            </rib:RibbonToggleButton.Styles>
-                        </rib:RibbonToggleButton>
+					<rib:RibbonGroupBox Header="Samples detection" IsEnabled="{Binding IsActive}">
+						<rib:RibbonToggleButton
+							Classes.IsActive="{Binding IsSampleDetection}"
+							Classes.IsNotActive="{Binding !IsSampleDetection}"
+							Content="Detect samples"
+							FontSize="{StaticResource FontSize}"
+							IsChecked="{Binding IsSampleDetection}"
+							MinSize="Large">
+							<rib:RibbonToggleButton.Styles>
+								<Style Selector="RibbonToggleButton.IsActive">
+									<Style.Setters>
+										<Setter Property="LargeIcon">
+											<Setter.Value>
+												<ControlTemplate>
+													<mat:MaterialIcon
+														Width="{StaticResource IconWidth}"
+														Height="{StaticResource IconHeight}"
+														Kind="ImageSearchOutline" />
+												</ControlTemplate>
+											</Setter.Value>
+										</Setter>
+									</Style.Setters>
+								</Style>
+								<Style Selector="RibbonToggleButton.IsNotActive">
+									<Style.Setters>
+										<Setter Property="LargeIcon">
+											<Setter.Value>
+												<ControlTemplate>
+													<mat:MaterialIcon
+														Width="{StaticResource IconWidth}"
+														Height="{StaticResource IconHeight}"
+														Kind="ImageSearch" />
+												</ControlTemplate>
+											</Setter.Value>
+										</Setter>
+									</Style.Setters>
+								</Style>
+							</rib:RibbonToggleButton.Styles>
+						</rib:RibbonToggleButton>
 
-                        <StackPanel
-                            Margin="0,0,4,4"
-                            IsEnabled="{Binding IsActive}"
-                            Orientation="Horizontal">
-                            <TextBlock
-                                Width="100"
-                                Margin="0,0,4,0"
-                                VerticalAlignment="Center"
-                                FontSize="{StaticResource FontSize}"
-                                Text="Max unverifieds" />
-                            <NumericUpDown
-                                Width="130"
-                                MaxHeight="5"
-                                Increment="1"
-                                Maximum="{Binding UnverifiedsCountMax}"
-                                Minimum="0"
-                                Value="{Binding UnverifiedsCount, Mode=TwoWay}" />
-                        </StackPanel>
+						<StackPanel
+							Margin="0,0,4,4"
+							IsEnabled="{Binding IsActive}"
+							Orientation="Horizontal">
+							<TextBlock
+								Width="100"
+								Margin="0,0,4,0"
+								VerticalAlignment="Center"
+								FontSize="{StaticResource FontSize}"
+								Text="Max unverifieds" />
+							<NumericUpDown
+								Width="130"
+								MaxHeight="5"
+								Increment="1"
+								Maximum="{Binding UnverifiedsCountMax}"
+								Minimum="0"
+								Value="{Binding UnverifiedsCount, Mode=TwoWay}" />
+						</StackPanel>
 
-                        <StackPanel
-                            Margin="0,0,4,4"
-                            IsEnabled="{Binding IsActive}"
-                            Orientation="Horizontal">
-                            <TextBlock
-                                Width="100"
-                                Margin="0,0,4,0"
-                                VerticalAlignment="Center"
-                                FontSize="{StaticResource FontSize}"
-                                Text="New sample to [%]" />
-                            <NumericUpDown
-                                Width="130"
-                                MaxHeight="5"
-                                Increment="5"
-                                Maximum="{Binding ThresholdMax}"
-                                Minimum="0"
-                                Value="{Binding ThresholdDetecting, Mode=TwoWay}" />
-                        </StackPanel>
-                    </rib:RibbonGroupBox>
+						<StackPanel
+							Margin="0,0,4,4"
+							IsEnabled="{Binding IsActive}"
+							Orientation="Horizontal">
+							<TextBlock
+								Width="100"
+								Margin="0,0,4,0"
+								VerticalAlignment="Center"
+								FontSize="{StaticResource FontSize}"
+								Text="New sample to [%]" />
+							<NumericUpDown
+								Width="130"
+								MaxHeight="5"
+								Increment="5"
+								Maximum="{Binding ThresholdMax}"
+								Minimum="0"
+								Value="{Binding ThresholdDetecting, Mode=TwoWay}" />
+						</StackPanel>
+					</rib:RibbonGroupBox>
 
-                    <rib:RibbonGroupBox Header="Samples handling" IsEnabled="{Binding IsActive}">
-                        <rib:RibbonButton
-                            Command="{Binding SampleAddCommand}"
-                            Content="Add as sample"
-                            FontSize="{StaticResource FontSize}"
-                            MinSize="Large">
-                            <rib:RibbonButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="ImagePlus" />
-                                </ControlTemplate>
-                            </rib:RibbonButton.LargeIcon>
-                        </rib:RibbonButton>
-                        <rib:RibbonButton
-                            Command="{Binding SampleRemoveCommand}"
-                            Content="Remove selected"
-                            FontSize="{StaticResource FontSize}"
-                            MinSize="Large">
-                            <rib:RibbonButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="ImageMinus" />
-                                </ControlTemplate>
-                            </rib:RibbonButton.LargeIcon>
-                        </rib:RibbonButton>
-                        <rib:RibbonButton
-                            Command="{Binding SamplesRemoveAllCommand}"
-                            Content="Remove all"
-                            FontSize="{StaticResource FontSize}"
-                            MinSize="Large">
-                            <rib:RibbonButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="ImageRemove" />
-                                </ControlTemplate>
-                            </rib:RibbonButton.LargeIcon>
-                        </rib:RibbonButton>
-                        <rib:RibbonButton
-                            Command="{Binding SamplesOrderAllCommand}"
-                            Content="Order all"
-                            FontSize="{StaticResource FontSize}"
-                            MinSize="Large">
-                            <rib:RibbonButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="SortNumericVariant" />
-                                </ControlTemplate>
-                            </rib:RibbonButton.LargeIcon>
-                        </rib:RibbonButton>
-                    </rib:RibbonGroupBox>
+					<rib:RibbonGroupBox Header="Samples handling" IsEnabled="{Binding IsActive}">
+						<rib:RibbonButton
+							Command="{Binding SampleAddCommand}"
+							Content="Add as sample"
+							FontSize="{StaticResource FontSize}"
+							MinSize="Large">
+							<rib:RibbonButton.LargeIcon>
+								<ControlTemplate>
+									<mat:MaterialIcon
+										Width="{StaticResource IconWidth}"
+										Height="{StaticResource IconHeight}"
+										Kind="ImagePlus" />
+								</ControlTemplate>
+							</rib:RibbonButton.LargeIcon>
+						</rib:RibbonButton>
+						<rib:RibbonButton
+							Command="{Binding SampleRemoveCommand}"
+							Content="Remove selected"
+							FontSize="{StaticResource FontSize}"
+							MinSize="Large">
+							<rib:RibbonButton.LargeIcon>
+								<ControlTemplate>
+									<mat:MaterialIcon
+										Width="{StaticResource IconWidth}"
+										Height="{StaticResource IconHeight}"
+										Kind="ImageMinus" />
+								</ControlTemplate>
+							</rib:RibbonButton.LargeIcon>
+						</rib:RibbonButton>
+						<rib:RibbonButton
+							Command="{Binding SampleRemoveAllCommand}"
+							Content="Remove all"
+							FontSize="{StaticResource FontSize}"
+							MinSize="Large">
+							<rib:RibbonButton.LargeIcon>
+								<ControlTemplate>
+									<mat:MaterialIcon
+										Width="{StaticResource IconWidth}"
+										Height="{StaticResource IconHeight}"
+										Kind="ImageRemove" />
+								</ControlTemplate>
+							</rib:RibbonButton.LargeIcon>
+						</rib:RibbonButton>
 
-                    <rib:RibbonGroupBox Header="Sample options" IsEnabled="{Binding IsActive}">
-                        <StackPanel
-                            Margin="0,0,4,4"
-                            IsEnabled="{Binding IsActive}"
-                            Orientation="Horizontal">
-                            <TextBlock
-                                Width="100"
-                                Margin="0,0,4,0"
-                                VerticalAlignment="Center"
-                                FontSize="{StaticResource FontSize}"
-                                Text="Empty value to [%]" />
-                            <NumericUpDown
-                                Width="130"
-                                MaxHeight="5"
-                                Increment="5"
-                                Maximum="{Binding ThresholdMax}"
-                                Minimum="0"
-                                Value="{Binding ThresholdMatching, Mode=TwoWay}" />
-                        </StackPanel>
-                        <StackPanel
-                            Margin="0,0,4,4"
-                            IsEnabled="{Binding IsActive}"
-                            Orientation="Horizontal">
-                            <TextBlock
-                                Width="100"
-                                Margin="0,0,4,0"
-                                VerticalAlignment="Center"
-                                FontSize="{StaticResource FontSize}"
-                                Text="Wait to match [ms]" />
-                            <NumericUpDown
-                                Width="130"
-                                MaxHeight="5"
-                                Increment="10"
-                                Maximum="{Binding DurationMax}"
-                                Minimum="0"
-                                Value="{Binding WaitingDuration, Mode=TwoWay}" />
-                        </StackPanel>
+						<rib:RibbonButton
+							Command="{Binding SampleOrderAllCommand}"
+							Content="Order all"
+							FontSize="{StaticResource FontSize}"
+							MinSize="Large">
+							<rib:RibbonButton.LargeIcon>
+								<ControlTemplate>
+									<mat:MaterialIcon
+										Width="{StaticResource IconWidth}"
+										Height="{StaticResource IconHeight}"
+										Kind="SortNumericVariant" />
+								</ControlTemplate>
+							</rib:RibbonButton.LargeIcon>
+						</rib:RibbonButton>
 
-                        <CheckBox
-                            Margin="0,0,4,4"
-                            VerticalAlignment="Center"
-                            Content="Deactivate auto recognition"
-                            FontSize="{StaticResource FontSize}"
-                            IsChecked="{Binding NoRecognition, Mode=TwoWay}"
-                            IsEnabled="{Binding IsActive}" />
-                        <CheckBox
-                            Margin="0,0,4,4"
-                            VerticalAlignment="Center"
-                            Content="Deactivate multi comparison"
-                            FontSize="{StaticResource FontSize}"
-                            IsChecked="{Binding NoMultiComparison, Mode=TwoWay}"
-                            IsEnabled="{Binding IsActive}" />
-                    </rib:RibbonGroupBox>
-                </rib:RibbonTab.Groups>
-            </rib:RibbonTab>
-        </rib:Ribbon.Tabs>
-    </rib:Ribbon>
+						<rib:RibbonToggleButton
+							Classes.IsActive="{Binding IsVerifiedsFiltered}"
+							Classes.IsNotActive="{Binding !IsVerifiedsFiltered}"
+							Content="Filter verifieds"
+							FontSize="{StaticResource FontSize}"
+							IsChecked="{Binding IsVerifiedsFiltered}"
+							MinSize="Large">
+							<rib:RibbonToggleButton.Styles>
+								<Style Selector="RibbonToggleButton.IsActive">
+									<Style.Setters>
+										<Setter Property="LargeIcon">
+											<Setter.Value>
+												<ControlTemplate>
+													<mat:MaterialIcon
+														Width="{StaticResource IconWidth}"
+														Height="{StaticResource IconHeight}"
+														Kind="FilterOutline" />
+												</ControlTemplate>
+											</Setter.Value>
+										</Setter>
+									</Style.Setters>
+								</Style>
+								<Style Selector="RibbonToggleButton.IsNotActive">
+									<Style.Setters>
+										<Setter Property="LargeIcon">
+											<Setter.Value>
+												<ControlTemplate>
+													<mat:MaterialIcon
+														Width="{StaticResource IconWidth}"
+														Height="{StaticResource IconHeight}"
+														Kind="Filter" />
+												</ControlTemplate>
+											</Setter.Value>
+										</Setter>
+									</Style.Setters>
+								</Style>
+							</rib:RibbonToggleButton.Styles>
+						</rib:RibbonToggleButton>
+					</rib:RibbonGroupBox>
+
+					<rib:RibbonGroupBox Header="Sample options" IsEnabled="{Binding IsActive}">
+						<StackPanel
+							Margin="0,0,4,4"
+							IsEnabled="{Binding IsActive}"
+							Orientation="Horizontal">
+							<TextBlock
+								Width="100"
+								Margin="0,0,4,0"
+								VerticalAlignment="Center"
+								FontSize="{StaticResource FontSize}"
+								Text="Empty value to [%]" />
+							<NumericUpDown
+								Width="130"
+								MaxHeight="5"
+								Increment="5"
+								Maximum="{Binding ThresholdMax}"
+								Minimum="0"
+								Value="{Binding ThresholdMatching, Mode=TwoWay}" />
+						</StackPanel>
+						<StackPanel
+							Margin="0,0,4,4"
+							IsEnabled="{Binding IsActive}"
+							Orientation="Horizontal">
+							<TextBlock
+								Width="100"
+								Margin="0,0,4,0"
+								VerticalAlignment="Center"
+								FontSize="{StaticResource FontSize}"
+								Text="Wait to match [ms]" />
+							<NumericUpDown
+								Width="130"
+								MaxHeight="5"
+								Increment="10"
+								Maximum="{Binding DurationMax}"
+								Minimum="0"
+								Value="{Binding WaitingDuration, Mode=TwoWay}" />
+						</StackPanel>
+
+						<CheckBox
+							Margin="0,0,4,4"
+							VerticalAlignment="Center"
+							Content="Deactivate auto recognition"
+							FontSize="{StaticResource FontSize}"
+							IsChecked="{Binding NoRecognition, Mode=TwoWay}"
+							IsEnabled="{Binding IsActive}" />
+						<CheckBox
+							Margin="0,0,4,4"
+							VerticalAlignment="Center"
+							Content="Deactivate multi comparison"
+							FontSize="{StaticResource FontSize}"
+							IsChecked="{Binding NoMultiComparison, Mode=TwoWay}"
+							IsEnabled="{Binding IsActive}" />
+					</rib:RibbonGroupBox>
+				</rib:RibbonTab.Groups>
+			</rib:RibbonTab>
+		</rib:Ribbon.Tabs>
+	</rib:Ribbon>
 </UserControl>

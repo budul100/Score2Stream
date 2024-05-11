@@ -11,6 +11,7 @@ using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Clip;
 using Score2Stream.Commons.Events.Graphics;
 using Score2Stream.Commons.Events.Input;
+using Score2Stream.Commons.Events.Menu;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Scoreboard;
 using Score2Stream.Commons.Events.Template;
@@ -66,20 +67,22 @@ namespace Tests.Modules.MenuModuleTests
 
             var eventAggregatorMock = new Mock<IEventAggregator>();
 
-            eventAggregatorMock.RegisterNewMockedEvent<ServerStartedEvent>();
-            eventAggregatorMock.RegisterNewMockedEvent<InputsChangedEvent>();
-            eventAggregatorMock.RegisterNewMockedEvent<VideoStartedEvent>();
-            eventAggregatorMock.RegisterNewMockedEvent<VideoEndedEvent>();
-            eventAggregatorMock.RegisterNewMockedEvent<VideoUpdatedEvent>();
+            eventAggregatorMock.RegisterNewMockedEvent<AreaModifiedEvent, Area>();
             eventAggregatorMock.RegisterNewMockedEvent<AreasChangedEvent>();
             eventAggregatorMock.RegisterNewMockedEvent<AreaSelectedEvent, Area>();
-            eventAggregatorMock.RegisterNewMockedEvent<SegmentSelectedEvent, Segment>();
-            eventAggregatorMock.RegisterNewMockedEvent<AreaModifiedEvent, Area>();
-            eventAggregatorMock.RegisterNewMockedEvent<TemplatesChangedEvent>();
-            eventAggregatorMock.RegisterNewMockedEvent<TemplateSelectedEvent, Template>();
+            eventAggregatorMock.RegisterNewMockedEvent<FilterChangedEvent>();
+            eventAggregatorMock.RegisterNewMockedEvent<InputsChangedEvent>();
             eventAggregatorMock.RegisterNewMockedEvent<SamplesChangedEvent>();
             eventAggregatorMock.RegisterNewMockedEvent<SampleSelectedEvent, Sample>();
             eventAggregatorMock.RegisterNewMockedEvent<ScoreboardModifiedEvent>();
+            eventAggregatorMock.RegisterNewMockedEvent<SegmentSelectedEvent, Segment>();
+            eventAggregatorMock.RegisterNewMockedEvent<SegmentUpdatedEvent, Segment>();
+            eventAggregatorMock.RegisterNewMockedEvent<ServerStartedEvent>();
+            eventAggregatorMock.RegisterNewMockedEvent<TemplatesChangedEvent>();
+            eventAggregatorMock.RegisterNewMockedEvent<TemplateSelectedEvent, Template>();
+            eventAggregatorMock.RegisterNewMockedEvent<VideoEndedEvent>();
+            eventAggregatorMock.RegisterNewMockedEvent<VideoStartedEvent>();
+            eventAggregatorMock.RegisterNewMockedEvent<VideoUpdatedEvent>();
 
             var session = new Session
             {

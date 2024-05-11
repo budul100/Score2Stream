@@ -19,21 +19,16 @@ namespace Score2Stream.Commons.Models.Contents
         [JsonIgnore]
         public int Index { get; set; }
 
+        [JsonIgnore]
+        public bool IsFiltered { get; set; }
+
         public bool IsVerified { get; set; }
 
         [JsonIgnore]
         public Mat Mat { get; set; }
 
-        public int Position { get; set; }
-
-        [JsonIgnore]
-        public double Similarity { get; set; }
-
         [JsonIgnore]
         public Template Template { get; set; }
-
-        [JsonIgnore]
-        public SampleType Type { get; set; }
 
         public string Value { get; set; }
 

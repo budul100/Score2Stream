@@ -7,47 +7,47 @@ using Score2Stream.Commons.Models.Contents;
 
 namespace Score2Stream.AreaModule.ViewModels
 {
-    public class ClipViewModel
+    public class SegmentViewModel
         : BindableBase
     {
         #region Private Fields
 
-        private Segment clip;
+        private Segment segment;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public ClipViewModel(IEventAggregator eventAggregator)
+        public SegmentViewModel(IEventAggregator eventAggregator)
         {
             eventAggregator.GetEvent<SegmentUpdatedEvent>().Subscribe(
                 action: _ => RaisePropertyChanged(nameof(Description)),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: c => c == clip);
+                filter: c => c == segment);
 
             eventAggregator.GetEvent<SegmentDrawnEvent>().Subscribe(
                 action: _ => RaisePropertyChanged(nameof(Bitmap)),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: c => c == clip);
+                filter: c => c == segment);
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public Bitmap Bitmap => clip.Bitmap;
+        public Bitmap Bitmap => segment.Bitmap;
 
-        public string Description => clip.GetDescription();
+        public string Description => segment.GetDescription();
 
         #endregion Public Properties
 
         #region Public Methods
 
-        public void Initialize(Segment clip)
+        public void Initialize(Segment segment)
         {
-            this.clip = clip;
+            this.segment = segment;
         }
 
         #endregion Public Methods

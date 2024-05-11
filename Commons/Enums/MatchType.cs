@@ -1,11 +1,11 @@
 ﻿namespace Score2Stream.Commons.Enums
 {
-    public enum SampleType
+    public enum MatchType
     {
         None,
 
-        Match,
-
         Similar,
+
+        Match,
     }
 }

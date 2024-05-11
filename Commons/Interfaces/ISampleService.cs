@@ -30,13 +30,11 @@ namespace Score2Stream.Commons.Interfaces
 
         void Next(bool backward);
 
-        void Order();
+        void Order(bool reverseOrder = false);
 
         Task RemoveAsync();
 
         void Select(Sample sample);
-
-        void Update(Segment clip);
 
         #endregion Public Methods
     }

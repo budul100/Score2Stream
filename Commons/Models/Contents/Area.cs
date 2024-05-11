@@ -18,9 +18,9 @@ namespace Score2Stream.Commons.Models.Contents
 
         public bool HasDimensions { get; set; }
 
-        public int NoiseRemoval { get; set; } = Defaults.AreaNoiseRemovalDefault;
+        public int Index { get; set; }
 
-        public int Position { get; set; }
+        public int NoiseRemoval { get; set; } = Defaults.AreaNoiseRemovalDefault;
 
         [JsonIgnore]
         public IEnumerable<Segment> Segments { get; set; }

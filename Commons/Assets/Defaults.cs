@@ -12,7 +12,8 @@
 
         public const int DetectionMatchingDefault = 40;
         public const int DetectionThresholdDefault = 90;
-        public const int DetectionWaitingDefault = 50;
+        public const int DetectionUnverifiedsDefault = 40;
+        public const int DetectionWaitDefault = 50;
 
         public const string FileNameSettingsDefault = "userSettings.json";
 
@@ -20,8 +21,6 @@
         public const int PortSocketHttpDefault = 9000;
 
         public const int TickersFrequencyDefault = 10;
-
-        public const int UnverifiedsCountDefault = 30;
 
         public const int VideoDelayProcessingDefault = 0;
         public const int VideoImageQueueSizeDefault = 3;

@@ -36,6 +36,10 @@
         public const int SegmentsCountMax = 3;
         public const int SegmentsCountMin = 1;
 
+        public const double SimilarityMax = 1;
+        public const double SimilarityMin = 0;
+        public const double SimilarityStep = 0;
+
         public const int SizeChangeMin = 10;
 
         public const string SplitterTitle = " | ";

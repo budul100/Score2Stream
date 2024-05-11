@@ -19,13 +19,15 @@
     </UserControl.Resources>
 
     <Border
+        Name="SampleBorder"
         Margin="2"
         VerticalAlignment="Center"
         BorderBrush="LightGray"
         BorderThickness="4"
         Classes.IsSelected="{Binding IsSelected}"
         Classes.IsUnverified="{Binding IsUnverified}"
-        CornerRadius="3">
+        CornerRadius="3"
+        IsVisible="{Binding IsVisible}">
 
         <Border.Styles>
 
@@ -42,17 +44,16 @@
             </Style>
         </Border.Styles>
 
-        <StackPanel Name="SamplePanel" Orientation="Horizontal">
+        <i:Interaction.Behaviors>
+            <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="SampleBorder">
+                <a:InvokeCommandAction Command="{Binding OnSelectionCommand}" />
+            </a:EventTriggerBehavior>
+        </i:Interaction.Behaviors>
 
-            <i:Interaction.Behaviors>
-
-                <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="SamplePanel">
-                    <a:InvokeCommandAction Command="{Binding OnSelectionCommand}" />
-                </a:EventTriggerBehavior>
-            </i:Interaction.Behaviors>
+        <StackPanel Orientation="Horizontal">
 
             <Border
-                Name="SampleBorder"
+                Name="ImageBorder"
                 Margin="2"
                 VerticalAlignment="Center"
                 BorderBrush="LightSlateGray"
@@ -62,28 +63,28 @@
                     <a:DataTriggerBehavior
                         Binding="{Binding Type, Converter={StaticResource EnumToStringConverter}}"
                         ComparisonCondition="Equal"
-                        Value="{x:Static en:SampleType.Similar}">
+                        Value="{x:Static en:MatchType.Match}">
                         <a:ChangePropertyAction
                             PropertyName="BorderBrush"
-                            TargetObject="SampleBorder"
+                            TargetObject="ImageBorder"
                             Value="GreenYellow" />
                     </a:DataTriggerBehavior>
                     <a:DataTriggerBehavior
                         Binding="{Binding Type, Converter={StaticResource EnumToStringConverter}}"
                         ComparisonCondition="Equal"
-                        Value="{x:Static en:SampleType.Match}">
+                        Value="{x:Static en:MatchType.Similar}">
                         <a:ChangePropertyAction
                             PropertyName="BorderBrush"
-                            TargetObject="SampleBorder"
+                            TargetObject="ImageBorder"
                             Value="LightPink" />
                     </a:DataTriggerBehavior>
                     <a:DataTriggerBehavior
                         Binding="{Binding Type, Converter={StaticResource EnumToStringConverter}}"
                         ComparisonCondition="Equal"
-                        Value="{x:Static en:SampleType.None}">
+                        Value="{x:Static en:MatchType.None}">
                         <a:ChangePropertyAction
                             PropertyName="BorderBrush"
-                            TargetObject="SampleBorder"
+                            TargetObject="ImageBorder"
                             Value="LightSlateGray" />
                     </a:DataTriggerBehavior>
                 </i:Interaction.Behaviors>

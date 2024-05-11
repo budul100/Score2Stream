@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using MsBox.Avalonia.Enums;
+﻿using MsBox.Avalonia.Enums;
 using OpenCvSharp;
 using Prism.Events;
 using Prism.Ioc;
@@ -11,6 +8,9 @@ using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Score2Stream.TemplateService
 {
@@ -76,7 +76,7 @@ namespace Score2Stream.TemplateService
                 {
                     template.Samples = template.Samples
                         .Where(s => s.Image != default)
-                        .OrderBy(s => s.Position).ToList();
+                        .OrderBy(s => s.Index).ToList();
 
                     try
                     {

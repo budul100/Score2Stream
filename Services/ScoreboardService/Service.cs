@@ -27,7 +27,7 @@ namespace Score2Stream.ScoreboardService
 
         private readonly AreaModifiedEvent areaModifiedEvent;
         private readonly SegmentModifiedEvent clipModifiedEvent;
-        private readonly Dictionary<ClipType, Segment> clips = new();
+        private readonly Dictionary<SegmentType, Segment> clips = new();
         private readonly ScoreboardUpdatedEvent scoreboardUpdatedEvent;
         private readonly JsonSerializerOptions serializeOptions;
         private readonly ISettingsService<Session> settingsService;
@@ -75,8 +75,8 @@ namespace Score2Stream.ScoreboardService
                 action: UpdateBoard,
                 keepSubscriberReferenceAlive: true);
 
-            clips = Commons.Extensions.EnumExtensions.GetValues<ClipType>()
-                .Where(t => t != ClipType.None).ToDictionary(
+            clips = Commons.Extensions.EnumExtensions.GetValues<SegmentType>()
+                .Where(t => t != SegmentType.None).ToDictionary(
                     keySelector: t => t,
                     elementSelector: _ => default(Segment));
 
@@ -332,9 +332,9 @@ namespace Score2Stream.ScoreboardService
                 {
                     clips[releasedClip.Key] = default;
 
-                    if (releasedClip.Value.Type != ClipType.None)
+                    if (releasedClip.Value.Type != SegmentType.None)
                     {
-                        releasedClip.Value.Type = ClipType.None;
+                        releasedClip.Value.Type = SegmentType.None;
 
                         clipModifiedEvent.Publish(releasedClip.Value);
                     }
@@ -374,18 +374,18 @@ namespace Score2Stream.ScoreboardService
             this.colorGuest = ColorGuest;
 
             if (PeriodNotFromClip
-                || clips[ClipType.Period] == default)
+                || clips[SegmentType.Period] == default)
             {
                 period = Period;
             }
 
             if (ScoreNotFromClip
-                || clips[ClipType.ScoreHome1] == default
-                || clips[ClipType.ScoreHome2] == default
-                || clips[ClipType.ScoreHome3] == default
-                || clips[ClipType.ScoreGuest1] == default
-                || clips[ClipType.ScoreGuest2] == default
-                || clips[ClipType.ScoreGuest3] == default)
+                || clips[SegmentType.ScoreHome1] == default
+                || clips[SegmentType.ScoreHome2] == default
+                || clips[SegmentType.ScoreHome3] == default
+                || clips[SegmentType.ScoreGuest1] == default
+                || clips[SegmentType.ScoreGuest2] == default
+                || clips[SegmentType.ScoreGuest3] == default)
             {
                 scoreHome = ScoreHome;
                 scoreGuest = ScoreGuest;
@@ -448,20 +448,20 @@ namespace Score2Stream.ScoreboardService
         {
             var result = new StringBuilder();
 
-            if (clips[ClipType.ClockGameMin1] != default)
+            if (clips[SegmentType.ClockGameMin1] != default)
             {
-                result.Append(clips[ClipType.ClockGameMin1].Value);
+                result.Append(clips[SegmentType.ClockGameMin1].Value);
             }
-            if (clips[ClipType.ClockGameMin2] != default)
+            if (clips[SegmentType.ClockGameMin2] != default)
             {
-                result.Append(clips[ClipType.ClockGameMin2].Value);
+                result.Append(clips[SegmentType.ClockGameMin2].Value);
             }
 
             if (result.Length > 0)
             {
-                if (clips[ClipType.ClockGameSplit] != default)
+                if (clips[SegmentType.ClockGameSplit] != default)
                 {
-                    result.Append(clips[ClipType.ClockGameSplit].Value);
+                    result.Append(clips[SegmentType.ClockGameSplit].Value);
                 }
                 else
                 {
@@ -469,13 +469,13 @@ namespace Score2Stream.ScoreboardService
                 }
             }
 
-            if (clips[ClipType.ClockGameSec1] != default)
+            if (clips[SegmentType.ClockGameSec1] != default)
             {
-                result.Append(clips[ClipType.ClockGameSec1].Value);
+                result.Append(clips[SegmentType.ClockGameSec1].Value);
             }
-            if (clips[ClipType.ClockGameSec2] != default)
+            if (clips[SegmentType.ClockGameSec2] != default)
             {
-                result.Append(clips[ClipType.ClockGameSec2].Value);
+                result.Append(clips[SegmentType.ClockGameSec2].Value);
             }
 
             return result.ToString();
@@ -485,14 +485,14 @@ namespace Score2Stream.ScoreboardService
         {
             var result = new StringBuilder();
 
-            if (clips[ClipType.ClockShot1] != default)
+            if (clips[SegmentType.ClockShot1] != default)
             {
-                result.Append(clips[ClipType.ClockShot1].Value);
+                result.Append(clips[SegmentType.ClockShot1].Value);
             }
 
-            if (clips[ClipType.ClockShot2] != default)
+            if (clips[SegmentType.ClockShot2] != default)
             {
-                result.Append(clips[ClipType.ClockShot2].Value);
+                result.Append(clips[SegmentType.ClockShot2].Value);
             }
 
             return result.ToString();
@@ -502,19 +502,19 @@ namespace Score2Stream.ScoreboardService
         {
             var result = new StringBuilder();
 
-            if (clips[ClipType.ScoreGuest1] != default)
+            if (clips[SegmentType.ScoreGuest1] != default)
             {
-                result.Append(clips[ClipType.ScoreGuest1].Value);
+                result.Append(clips[SegmentType.ScoreGuest1].Value);
             }
 
-            if (clips[ClipType.ScoreGuest2] != default)
+            if (clips[SegmentType.ScoreGuest2] != default)
             {
-                result.Append(clips[ClipType.ScoreGuest2].Value);
+                result.Append(clips[SegmentType.ScoreGuest2].Value);
             }
 
-            if (clips[ClipType.ScoreGuest3] != default)
+            if (clips[SegmentType.ScoreGuest3] != default)
             {
-                result.Append(clips[ClipType.ScoreGuest3].Value);
+                result.Append(clips[SegmentType.ScoreGuest3].Value);
             }
 
             return result.ToString();
@@ -524,19 +524,19 @@ namespace Score2Stream.ScoreboardService
         {
             var result = new StringBuilder();
 
-            if (clips[ClipType.ScoreHome1] != default)
+            if (clips[SegmentType.ScoreHome1] != default)
             {
-                result.Append(clips[ClipType.ScoreHome1].Value);
+                result.Append(clips[SegmentType.ScoreHome1].Value);
             }
 
-            if (clips[ClipType.ScoreHome2] != default)
+            if (clips[SegmentType.ScoreHome2] != default)
             {
-                result.Append(clips[ClipType.ScoreHome2].Value);
+                result.Append(clips[SegmentType.ScoreHome2].Value);
             }
 
-            if (clips[ClipType.ScoreHome3] != default)
+            if (clips[SegmentType.ScoreHome3] != default)
             {
-                result.Append(clips[ClipType.ScoreHome3].Value);
+                result.Append(clips[SegmentType.ScoreHome3].Value);
             }
 
             return result.ToString();
@@ -570,9 +570,9 @@ namespace Score2Stream.ScoreboardService
                 : default;
 
             if (!PeriodNotFromClip
-                && clips[ClipType.Period] != default)
+                && clips[SegmentType.Period] != default)
             {
-                Period = clips[ClipType.Period]?.Value;
+                Period = clips[SegmentType.Period]?.Value;
                 period = Period;
             }
 

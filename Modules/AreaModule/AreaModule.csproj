@@ -22,6 +22,9 @@
 	  <Compile Update="Views\AreaView.axaml.cs">
 	    <DependentUpon>AreaView.axaml</DependentUpon>
 	  </Compile>
+	  <Compile Update="Views\SegmentView.axaml.cs">
+	    <DependentUpon>SegmentView.axaml</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 
 </Project>

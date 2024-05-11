@@ -1,6 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Linq;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
@@ -12,6 +10,8 @@ using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Prism;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Score2Stream.TemplateModule.ViewModels
 {
@@ -29,8 +29,8 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         #region Public Constructors
 
-        public TemplateViewModel(IInputService inputService, IContainerProvider containerProvider,
-            IRegionManager regionManager, IEventAggregator eventAggregator)
+        public TemplateViewModel(IInputService inputService,
+            IContainerProvider containerProvider, IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
             this.inputService = inputService;
@@ -41,7 +41,7 @@ namespace Score2Stream.TemplateModule.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<TemplateSelectedEvent>().Subscribe(
-                action: t => UpdateTemplate(t),
+                action: t => SetTemplate(t),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<SamplesChangedEvent>().Subscribe(
@@ -53,22 +53,22 @@ namespace Score2Stream.TemplateModule.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<SegmentSelectedEvent>().Subscribe(
-                action: _ => UpdateImage(),
+                action: _ => UpdateTemplate(),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<SegmentUpdatedEvent>().Subscribe(
-                action: _ => UpdateImage(),
+                action: _ => RaisePropertyChanged(nameof(Description)),
                 threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => s == inputService.AreaService?.Segment);
 
             eventAggregator.GetEvent<SegmentDrawnEvent>().Subscribe(
-                action: _ => UpdateImage(),
+                action: _ => RaisePropertyChanged(nameof(Bitmap)),
                 threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => s == inputService.AreaService?.Segment);
 
-            UpdateTemplate(inputService?.TemplateService?.Template);
+            SetTemplate(inputService?.TemplateService?.Template);
         }
 
         #endregion Public Constructors
@@ -85,7 +85,6 @@ namespace Score2Stream.TemplateModule.ViewModels
             set
             {
                 Template.Empty = value;
-
                 RaisePropertyChanged(nameof(Empty));
             }
         }
@@ -106,15 +105,17 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         private void OrderSamples()
         {
-            Samples = new ObservableCollection<SampleViewModel>(Samples.OrderBy(s => s.Sample.Position));
+            Samples = new ObservableCollection<SampleViewModel>(Samples.OrderBy(s => s.Sample.Index));
 
             RaisePropertyChanged(nameof(Samples));
         }
 
-        private void UpdateImage()
+        private void SetTemplate(Template template)
         {
-            RaisePropertyChanged(nameof(Bitmap));
-            RaisePropertyChanged(nameof(Description));
+            this.Template = template;
+
+            UpdateTemplate();
+            UpdateSamples();
         }
 
         private void UpdateSamples()
@@ -143,19 +144,13 @@ namespace Score2Stream.TemplateModule.ViewModels
 
                     Samples.Add(current);
                 }
-
-                OrderSamples();
             }
-
-            RaisePropertyChanged(nameof(Samples));
         }
 
-        private void UpdateTemplate(Template template)
+        private void UpdateTemplate()
         {
-            this.Template = template;
-
-            UpdateImage();
-            UpdateSamples();
+            RaisePropertyChanged(nameof(Description));
+            RaisePropertyChanged(nameof(Bitmap));
         }
 
         #endregion Private Methods

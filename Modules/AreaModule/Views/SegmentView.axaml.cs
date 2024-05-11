@@ -2,12 +2,12 @@ using Avalonia.Controls;
 
 namespace Score2Stream.AreaModule.Views;
 
-public partial class ClipView
+public partial class SegmentView
     : UserControl
 {
     #region Public Constructors
 
-    public ClipView()
+    public SegmentView()
     {
         InitializeComponent();
     }

@@ -1,22 +1,20 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using OpenCvSharp;
 using Prism.Events;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Clip;
-using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Video;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
 using Score2Stream.VideoService.Extensions;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Score2Stream.VideoService
 {
@@ -26,7 +24,6 @@ namespace Score2Stream.VideoService
         #region Private Fields
 
         private readonly IDispatcherService dispatcherService;
-        private readonly SampleUpdatedEvent sampleUpdatedEvent;
         private readonly SegmentDrawnEvent segmentDrawnEvent;
         private readonly SegmentUpdatedEvent segmentUpdatedEvent;
         private readonly ISettingsService<Session> settingsService;
@@ -61,8 +58,6 @@ namespace Score2Stream.VideoService
 
             segmentDrawnEvent = eventAggregator.GetEvent<SegmentDrawnEvent>();
             segmentUpdatedEvent = eventAggregator.GetEvent<SegmentUpdatedEvent>();
-
-            sampleUpdatedEvent = eventAggregator.GetEvent<SampleUpdatedEvent>();
 
             eventAggregator.GetEvent<AreaModifiedEvent>().Subscribe(
                 action: a => UpdateRectangles(a),
@@ -154,9 +149,9 @@ namespace Score2Stream.VideoService
                 }
                 else
                 {
-                    if (!File.Exists(fileName))
+                    if (!System.IO.File.Exists(fileName))
                     {
-                        throw new FileNotFoundException(
+                        throw new System.IO.FileNotFoundException(
                             message: $"The file {fileName} coud not be found.");
                     }
                     else if (!video.Open(fileName))
@@ -383,58 +378,40 @@ namespace Score2Stream.VideoService
             }
         }
 
-        private void UpdateValue(Segment clip)
+        private void UpdateValue(Segment segment)
         {
-            var waitingDuration = TimeSpan.FromMilliseconds(Math.Abs(settingsService.Contents.Detection.WaitingDuration));
+            var given = segment.Value;
+
             var thresholdMatching = Math.Abs(settingsService.Contents.Detection.ThresholdMatching) / Constants.ThresholdDivider;
+            var waitingDuration = TimeSpan.FromMilliseconds(Math.Abs(settingsService.Contents.Detection.DurationDetectionWait));
 
-            var given = clip.Value;
+            segment.Matches = segment.GetMatches(
+                preventMultipleComparison: settingsService.Contents.Detection.NoMultiComparison,
+                thresholdMatching: thresholdMatching).ToArray();
 
-            if (clip.Mat == default)
+            var relevant = segment.Matches
+                .OrderByDescending(m => m.Similarity).FirstOrDefault();
+
+            var similarity = Convert.ToInt32((relevant?.Similarity ?? 0) * Constants.ThresholdDivider);
+
+            if (relevant?.Type == MatchType.Similar)
             {
-                clip.SetValue(
-                    value: clip.Area.Template?.Empty,
-                    similarity: 0,
+                relevant.Type = MatchType.Match;
+
+                segment.SetValue(
+                    value: relevant.Sample.Value,
+                    similarity: similarity,
                     waitingDuration: waitingDuration);
             }
-            else if (clip.Area.Template != default)
+            else
             {
-                var match = clip
-                    .GetMatches(settingsService.Contents.Detection.NoMultiComparison)
-                    .OrderByDescending(m => m.Key >= thresholdMatching)
-                    .ThenByDescending(m => m.Key).FirstOrDefault();
-
-                var similarity = Convert.ToInt32(match.Key * Constants.ThresholdDivider);
-
-                if (match.Value != default
-                    && match.Key >= thresholdMatching)
-                {
-                    clip.SetValue(
-                        value: match.Value.Value,
-                        similarity: similarity,
-                        waitingDuration: waitingDuration);
-
-                    if (AreaService.Segment == clip
-                        && match.Value.Type != SampleType.Similar)
-                    {
-                        match.Value.Type = SampleType.Similar;
-
-                        sampleUpdatedEvent.Publish(match.Value);
-                    }
-                }
-                else
-                {
-                    clip.SetValue(
-                        value: clip.Area.Template.Empty,
-                        similarity: similarity,
-                        waitingDuration: waitingDuration);
-                }
+                segment.SetValue(
+                    value: segment.Area?.Template?.Empty,
+                    similarity: similarity,
+                    waitingDuration: waitingDuration);
             }
 
-            if (clip.Value != given)
-            {
-                segmentUpdatedEvent.Publish(clip);
-            }
+            segmentUpdatedEvent.Publish(segment);
         }
 
         private async Task UpdateVideoAsync(DateTime? capturingStart = default)

@@ -1,8 +1,8 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System;
+using System.Collections.Generic;
+using Avalonia.Media.Imaging;
 using OpenCvSharp;
 using Score2Stream.Commons.Enums;
-using System;
-using System.Collections.Generic;
 
 namespace Score2Stream.Commons.Models.Contents
 {
@@ -18,6 +18,8 @@ namespace Score2Stream.Commons.Models.Contents
 
         public Mat Mat { get; set; }
 
+        public IEnumerable<Match> Matches { get; set; }
+
         public int Position { get; set; }
 
         public Rect? Rect { get; set; }
@@ -28,9 +30,7 @@ namespace Score2Stream.Commons.Models.Contents
 
         public DateTime TimeCurrent { get; set; }
 
-        public DateTime TimeDetection { get; set; }
-
-        public ClipType Type { get; set; } = ClipType.None;
+        public SegmentType Type { get; set; } = SegmentType.None;
 
         public string Value { get; set; }
 

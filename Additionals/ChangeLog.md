@@ -1,6 +1,12 @@
 # Change log
 
-## Version 1.6.0
+## Version 1.7.0
+
+* Verified samples can be filtered
+* Number of unverified samples is restricted
+* Auto-detection improved
+
+* ## Version 1.6.0
 
 * Number of unverified samples can be restricted now
 

@@ -1,4 +1,7 @@
-﻿using Prism.Commands;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Mvvm;
@@ -9,9 +12,6 @@ using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Template;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace Score2Stream.AreaModule.ViewModels
 {
@@ -24,7 +24,6 @@ namespace Score2Stream.AreaModule.ViewModels
         private readonly IContainerProvider containerProvider;
         private readonly IScoreboardService scoreboardService;
 
-        private Area area;
         private IAreaService areaService;
         private bool isActive;
         private bool isInitializing;
@@ -46,7 +45,7 @@ namespace Score2Stream.AreaModule.ViewModels
             areaModifiedEvent = eventAggregator.GetEvent<AreaModifiedEvent>();
 
             eventAggregator.GetEvent<AreaSelectedEvent>().Subscribe(
-                action: a => UpdateStatus(),
+                action: _ => UpdateStatus(),
                 keepSubscriberReferenceAlive: true);
             eventAggregator.GetEvent<AreaModifiedEvent>().Subscribe(
                 action: _ => UpdateValues(),
@@ -64,7 +63,9 @@ namespace Score2Stream.AreaModule.ViewModels
 
         #region Public Properties
 
-        public ObservableCollection<ClipViewModel> Clips { get; } = new ObservableCollection<ClipViewModel>();
+        public Area Area { get; private set; }
+
+        public ObservableCollection<SegmentViewModel> Clips { get; } = new ObservableCollection<SegmentViewModel>();
 
         public bool IsActive
         {
@@ -74,40 +75,38 @@ namespace Score2Stream.AreaModule.ViewModels
 
         public int NoiseRemoval
         {
-            get { return area?.NoiseRemoval ?? 0; }
+            get { return Area?.NoiseRemoval ?? 0; }
             set
             {
                 if (value >= 0
                     && value <= 10
-                    && area?.NoiseRemoval != value)
+                    && Area?.NoiseRemoval != value)
                 {
                     ActivateArea();
 
-                    area.NoiseRemoval = value;
+                    Area.NoiseRemoval = value;
 
                     RaisePropertyChanged(nameof(NoiseRemoval));
 
-                    areaModifiedEvent.Publish(area);
+                    areaModifiedEvent.Publish(Area);
                 }
             }
         }
 
         public DelegateCommand OnSelectionCommand { get; }
 
-        public int Position => area.Position;
-
         public Template Template
         {
-            get { return area?.Template; }
+            get { return Area?.Template; }
             set
             {
                 if (value != default
-                    && area.Template != value)
+                    && Area.Template != value)
                 {
                     ActivateArea();
 
-                    area.Template = value;
-                    area.TemplateName = value.Name;
+                    Area.Template = value;
+                    Area.TemplateName = value.Name;
 
                     RaisePropertyChanged(nameof(Template));
                 }
@@ -118,27 +117,27 @@ namespace Score2Stream.AreaModule.ViewModels
 
         public int ThresholdMonochrome
         {
-            get { return area?.ThresholdMonochrome ?? 0; }
+            get { return Area?.ThresholdMonochrome ?? 0; }
             set
             {
                 if (value >= 0
                     && value <= Constants.ThresholdMax
-                    && area?.ThresholdMonochrome != value)
+                    && Area?.ThresholdMonochrome != value)
                 {
                     ActivateArea();
 
-                    area.ThresholdMonochrome = value;
+                    Area.ThresholdMonochrome = value;
 
                     RaisePropertyChanged(nameof(ThresholdMonochrome));
 
-                    areaModifiedEvent.Publish(area);
+                    areaModifiedEvent.Publish(Area);
                 }
             }
         }
 
         public AreaType Type
         {
-            get { return area?.Type ?? AreaType.None; }
+            get { return Area?.Type ?? AreaType.None; }
             set
             {
                 if (!isUpdatingType)
@@ -148,7 +147,7 @@ namespace Score2Stream.AreaModule.ViewModels
                     isUpdatingType = true;
 
                     scoreboardService.BindArea(
-                        area: area,
+                        area: Area,
                         type: value);
 
                     isUpdatingType = false;
@@ -166,8 +165,8 @@ namespace Score2Stream.AreaModule.ViewModels
         {
             isInitializing = true;
 
+            Area = area;
             this.areaService = areaService;
-            this.area = area;
 
             Type = area.Type;
             Types = area.Size
@@ -191,13 +190,13 @@ namespace Score2Stream.AreaModule.ViewModels
         {
             if (!isInitializing)
             {
-                areaService?.Select(area);
+                areaService?.Select(Area);
             }
         }
 
         private void SelectTemplate()
         {
-            Template = area.Template;
+            Template = Area.Template;
 
             RaisePropertyChanged(nameof(Template));
             RaisePropertyChanged(nameof(Templates));
@@ -205,9 +204,9 @@ namespace Score2Stream.AreaModule.ViewModels
 
         private void UpdateClips()
         {
-            foreach (var clip in area.Segments)
+            foreach (var clip in Area.Segments)
             {
-                var current = containerProvider.Resolve<ClipViewModel>();
+                var current = containerProvider.Resolve<SegmentViewModel>();
 
                 current.Initialize(clip);
 
@@ -217,12 +216,12 @@ namespace Score2Stream.AreaModule.ViewModels
 
         private void UpdateStatus()
         {
-            IsActive = areaService.Area == area;
+            IsActive = areaService.Area == Area;
         }
 
         private void UpdateTemplates()
         {
-            var template = area.Template;
+            var template = Area.Template;
 
             Template = default;
 

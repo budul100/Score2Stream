@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using MsBox.Avalonia.Enums;
+﻿using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Score2Stream.AreaService.Extensions;
 using Score2Stream.Commons.Assets;
@@ -13,6 +8,11 @@ using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 namespace Score2Stream.AreaService
 {
@@ -29,8 +29,8 @@ namespace Score2Stream.AreaService
         private readonly IDialogService dialogService;
         private readonly IScoreboardService scoreboardService;
 
+        private int index;
         private bool orderDescending;
-        private int position;
 
         #endregion Private Fields
 
@@ -50,12 +50,6 @@ namespace Score2Stream.AreaService
             areaSelectedEvent = eventAggregator.GetEvent<AreaSelectedEvent>();
 
             clipSelectedEvent = eventAggregator.GetEvent<SegmentSelectedEvent>();
-
-            eventAggregator.GetEvent<SegmentDrawnEvent>().Subscribe(
-                action: s => TemplateService?.SampleService?.Update(s),
-                threadOption: ThreadOption.PublisherThread,
-                keepSubscriberReferenceAlive: true,
-                filter: c => c == Segment);
         }
 
         #endregion Public Constructors
@@ -64,7 +58,7 @@ namespace Score2Stream.AreaService
 
         public Area Area { get; private set; }
 
-        public List<Area> Areas { get; private set; } = new List<Area>();
+        public List<Area> Areas { get; } = new List<Area>();
 
         public bool CanUndo => Area?.X1Last.HasValue == true
             && Area.X2Last.HasValue
@@ -164,7 +158,7 @@ namespace Score2Stream.AreaService
             }
         }
 
-        public void Order()
+        public void Order(bool reverseOrder = false)
         {
             var areas = default(IEnumerable<Area>);
 
@@ -183,15 +177,12 @@ namespace Score2Stream.AreaService
 
             orderDescending = !orderDescending;
 
-            position = 0;
+            index = 0;
 
-            foreach (var area in Areas)
+            foreach (var area in areas)
             {
-                area.Position = position++;
+                area.Index = index++;
             }
-
-            Areas = areas
-                .OrderBy(a => a.Position).ToList();
 
             areasOrderedEvent.Publish();
         }

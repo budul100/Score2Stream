@@ -2,7 +2,7 @@
 
 namespace Score2Stream.Commons.Enums
 {
-    public enum ClipType
+    public enum SegmentType
     {
         [Description("[Clip]")]
         None,

@@ -3,23 +3,23 @@ using Score2Stream.Commons.Models.Contents;
 
 namespace Score2Stream.Commons.Extensions
 {
-    public static class ClipExtensions
+    public static class SegmentExtensions
     {
         #region Public Methods
 
-        public static string GetDescription(this Segment clip, bool includeType = false)
+        public static string GetDescription(this Segment segment, bool includeType = false)
         {
             var result = default(string);
 
-            if (clip != default)
+            if (segment != default)
             {
                 string value;
 
-                if (clip.Area.Template != default)
+                if (segment.Area.Template != default)
                 {
-                    value = !string.IsNullOrWhiteSpace(clip.Value)
-                        ? $"{clip.Value} ({clip.Similarity}%)"
-                        : $"-/- ({clip.Similarity}%)";
+                    value = !string.IsNullOrWhiteSpace(segment.Value)
+                        ? $"{segment.Value} ({segment.Similarity}%)"
+                        : $"-/- ({segment.Similarity}%)";
                 }
                 else
                 {
@@ -28,9 +28,9 @@ namespace Score2Stream.Commons.Extensions
 
                 if (includeType)
                 {
-                    result = clip.Type != ClipType.None
-                        ? $"{clip.Type.GetDescription()} => {value}"
-                        : $"{clip.Area.Name} => {value}";
+                    result = segment.Type != SegmentType.None
+                        ? $"{segment.Type.GetDescription()} => {value}"
+                        : $"{segment.Area.Name} => {value}";
                 }
                 else
                 {

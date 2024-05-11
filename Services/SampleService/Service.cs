@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Score2Stream.Commons.Assets;
-using Score2Stream.Commons.Enums;
+using Score2Stream.Commons.Events.Clip;
+using Score2Stream.Commons.Events.Menu;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Template;
 using Score2Stream.Commons.Exceptions;
@@ -14,6 +11,10 @@ using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Score2Stream.SampleService
 {
@@ -22,19 +23,16 @@ namespace Score2Stream.SampleService
     {
         #region Private Fields
 
-        private readonly object detectionLock = new();
         private readonly IDialogService dialogService;
         private readonly IRecognitionService recognitionService;
         private readonly SamplesChangedEvent samplesChangedEvent;
         private readonly SampleSelectedEvent sampleSelectedEvent;
         private readonly SamplesOrderedEvent samplesOrderedEvent;
-        private readonly SampleUpdatedEvent sampleUpdatedEvent;
         private readonly ISettingsService<Session> settingsService;
         private readonly TemplateSelectedEvent templateSelectedEvent;
 
         private int index;
         private bool orderDescending;
-        private int position;
         private Template template;
 
         #endregion Private Fields
@@ -48,13 +46,21 @@ namespace Score2Stream.SampleService
             this.recognitionService = recognitionService;
             this.dialogService = dialogService;
 
-            sampleUpdatedEvent = eventAggregator.GetEvent<SampleUpdatedEvent>();
-
             samplesChangedEvent = eventAggregator.GetEvent<SamplesChangedEvent>();
             samplesOrderedEvent = eventAggregator.GetEvent<SamplesOrderedEvent>();
             sampleSelectedEvent = eventAggregator.GetEvent<SampleSelectedEvent>();
 
             templateSelectedEvent = eventAggregator.GetEvent<TemplateSelectedEvent>();
+
+            eventAggregator.GetEvent<FilterChangedEvent>().Subscribe(
+                action: () => Order(),
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<SegmentUpdatedEvent>().Subscribe(
+                action: s => DetectSegment(s),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: _ => IsDetection);
         }
 
         #endregion Public Constructors
@@ -65,7 +71,7 @@ namespace Score2Stream.SampleService
 
         public Sample Sample { get; private set; }
 
-        public List<Sample> Samples { get; private set; } = new List<Sample>();
+        public List<Sample> Samples { get; } = new List<Sample>();
 
         #endregion Public Properties
 
@@ -96,7 +102,6 @@ namespace Score2Stream.SampleService
                 }
 
                 sample.Index = index++;
-                sample.Position = position++;
 
                 Samples.Add(sample);
             }
@@ -154,9 +159,12 @@ namespace Score2Stream.SampleService
 
         public void Next(bool backward)
         {
-            var next = Samples.GetNext(
-                active: Sample,
-                backward: backward);
+            var next = Samples
+                .OrderBy(s => s.Index)
+                .GetUnfiltereds()
+                .GetNext(
+                    active: Sample,
+                    backward: backward);
 
             if (next != default)
             {
@@ -164,36 +172,39 @@ namespace Score2Stream.SampleService
             }
         }
 
-        public void Order()
+        public void Order(bool reverseOrder = false)
         {
             var samples = default(IEnumerable<Sample>);
 
             if (orderDescending)
             {
                 samples = Samples
-                    .OrderByDescending(s => !s.IsVerified)
-                    .ThenBy(s => !s.IsVerified ? s.Index : int.MaxValue)
-                    .ThenByDescending(s => s.Value).ToArray();
+                    .OrderByDescending(s => s.IsVerified)
+                    .ThenBy(s => s.GetIndex())
+                    .ThenByDescending(s => s.GetValue()).ToArray();
             }
             else
             {
                 samples = Samples
-                    .OrderByDescending(s => !s.IsVerified)
-                    .ThenBy(s => !s.IsVerified ? s.Index : int.MaxValue)
-                    .ThenBy(s => s.Value).ToArray();
+                    .OrderByDescending(s => s.IsVerified)
+                    .ThenBy(s => s.GetIndex())
+                    .ThenBy(s => s.GetValue()).ToArray();
             }
 
-            orderDescending = !orderDescending;
+            if (reverseOrder)
+            {
+                orderDescending = !orderDescending;
+            }
 
-            position = 0;
+            index = 0;
 
             foreach (var sample in samples)
             {
-                sample.Position = position++;
-            }
+                sample.Index = index++;
 
-            Samples = samples
-                .OrderBy(s => s.Position).ToList();
+                sample.IsFiltered = settingsService.Contents.Detection.FilterVerifieds
+                    && sample.IsVerified;
+            }
 
             samplesOrderedEvent.Publish();
         }
@@ -236,35 +247,6 @@ namespace Score2Stream.SampleService
             }
         }
 
-        public void Update(Segment segment)
-        {
-            if (segment != default)
-            {
-                lock (detectionLock)
-                {
-                    SetSimilarities(segment);
-
-                    if (IsDetection)
-                    {
-                        var relevant = Samples
-                            .OrderByDescending(c => c.Similarity).FirstOrDefault();
-
-                        if (relevant == default || relevant.Type == SampleType.None)
-                        {
-                            try
-                            {
-                                AddSample(
-                                    segment: segment,
-                                    select: false);
-                            }
-                            catch (MaxCountExceededException)
-                            { }
-                        }
-                    }
-                }
-            }
-        }
-
         #endregion Public Methods
 
         #region Private Methods
@@ -278,7 +260,7 @@ namespace Score2Stream.SampleService
                 var unverifieds = Samples
                     .Where(s => !s.IsVerified).ToArray();
 
-                if (unverifieds.Length >= settingsService.Contents.Detection.UnverifiedsCount)
+                if (unverifieds.Length >= settingsService.Contents.Detection.MaxCountUnverifieds)
                 {
                     var relevant = unverifieds
                         .Where(s => s != Sample)
@@ -306,11 +288,33 @@ namespace Score2Stream.SampleService
             }
         }
 
+        private void DetectSegment(Segment segment)
+        {
+            if (segment != default)
+            {
+                var thresholdDetecting = Math.Abs(settingsService.Contents.Detection.ThresholdDetecting) / Constants.ThresholdDivider;
+
+                if (segment.Matches?.Any() != true
+                    || (segment.Matches.Any(m => m.Similarity > Constants.SimilarityMin)
+                    && segment.Matches.All(m => m.Similarity < thresholdDetecting)))
+                {
+                    try
+                    {
+                        AddSample(
+                            segment: segment,
+                            select: false);
+                    }
+                    catch (MaxCountExceededException)
+                    { }
+                }
+            }
+        }
+
         private Sample GetSample(Segment segment)
         {
             var result = default(Sample);
 
-            if (segment != default)
+            if (segment?.Mat != default)
             {
                 result = new Sample
                 {
@@ -333,34 +337,6 @@ namespace Score2Stream.SampleService
                 sample.Template?.Samples.Remove(sample);
 
                 Samples.Remove(sample);
-            }
-        }
-
-        private void SetSimilarities(Segment clip)
-        {
-            if (Samples?.Any() == true)
-            {
-                var thresholdDetecting = Math.Abs(settingsService.Contents.Detection.ThresholdDetecting) / Constants.ThresholdDivider;
-
-                foreach (var sample in Samples)
-                {
-                    var similarity = sample.Mat.GetSimilarityTo(
-                        template: clip.Mat,
-                        preventMultipleComparison: settingsService.Contents.Detection.NoMultiComparison);
-
-                    var type = similarity < thresholdDetecting
-                        ? SampleType.None
-                        : SampleType.Match;
-
-                    if (similarity != sample.Similarity
-                        || type != sample.Type)
-                    {
-                        sample.Similarity = similarity;
-                        sample.Type = type;
-
-                        sampleUpdatedEvent.Publish(sample);
-                    }
-                }
             }
         }
 

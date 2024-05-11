@@ -159,8 +159,8 @@
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="vm:ClipViewModel">
-                        <v:ClipView />
+                    <DataTemplate DataType="vm:SegmentViewModel">
+                        <v:SegmentView />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
