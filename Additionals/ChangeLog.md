@@ -1,14 +1,43 @@
 # Change log
 
-## Version 1.7.0
+## Version 1.8.1
 
-* Verified samples can be filtered
-* Number of unverified samples is restricted
+* ...
+
+## Version 1.8.0
+
 * Auto-detection improved
-
-* ## Version 1.6.0
-
+* Verified samples can be filtered
 * Number of unverified samples can be restricted now
+
+# 1.7.0
+
+* Multiple clips can be created at once (#20)
+* State color set around images (#28)
+* Multiple comparison algorithms used by default (#27)
+* Area and segment selection improved
+* Element order changed to improve element selection
+* Sample determination corrected
+* Segment type selection corrected
+* Web socket delay can be set optionally
+
+
+# 1.6.2
+
+* Possible exception solved if a sample without clip is selected (#24)
+* Opening multiple instances is optional (#23)
+* Templates and clips made independent (#21)
+* Neighbor detection corrected
+
+## 1.6.1
+
+* Neighbor detection corrected
+
+# 1.6.0
+
+* Splash screen implemented
+* Dialog service improved
+* Neighbor value detection is optional and can be reset
 
 ## Version 1.5.1
 
