@@ -49,8 +49,7 @@ namespace Score2Stream.Commons.Extensions
 
                 result = new Mat(
                     size: size,
-                    type: image.Depth(),
-                    s: image.Channels());
+                    type: image.Depth());
 
                 var cornersImage = new Point2f[]
                 {
@@ -61,8 +60,8 @@ namespace Score2Stream.Commons.Extensions
                 };
 
                 var center = new Point2f(
-                    x: Convert.ToSingle(image.Width) / 2,
-                    y: Convert.ToSingle(image.Height) / 2);
+                    X: Convert.ToSingle(image.Width) / 2,
+                    Y: Convert.ToSingle(image.Height) / 2);
 
                 var rotated = new RotatedRect(
                     center: center,
@@ -141,8 +140,7 @@ namespace Score2Stream.Commons.Extensions
                     bottom: vertical,
                     left: horizontal,
                     right: horizontal,
-                    borderType: BorderTypes.Constant,
-                    value: 0);
+                    borderType: BorderTypes.Constant);
             }
 
             return result;
