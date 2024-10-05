@@ -1,5 +1,9 @@
 # Change log
 
+## Version 1.8.2
+
+* ...
+
 ## Version 1.8.1
 
 * Tenth of seconds shown optionally only
