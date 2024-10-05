@@ -1,4 +1,8 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Score2Stream.Commons.Assets;
@@ -11,10 +15,6 @@ using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Score2Stream.SampleService
 {

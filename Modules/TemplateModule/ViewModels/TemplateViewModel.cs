@@ -1,4 +1,6 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System.Collections.ObjectModel;
+using System.Linq;
+using Avalonia.Media.Imaging;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
@@ -10,8 +12,6 @@ using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Prism;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace Score2Stream.TemplateModule.ViewModels
 {
@@ -132,7 +132,8 @@ namespace Score2Stream.TemplateModule.ViewModels
             {
                 var toBeAddeds = Template.Samples
                     .Where(s => s.Mat != default
-                        && !Samples.Any(m => m.Sample == s)).ToArray();
+                        && !Samples.Any(m => m.Sample == s))
+                    .OrderBy(s => s.Index).ToArray();
 
                 foreach (var toBeAdded in toBeAddeds)
                 {

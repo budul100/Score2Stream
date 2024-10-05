@@ -1,4 +1,9 @@
-﻿using Avalonia.Platform.Storage;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Platform.Storage;
 using Hompus.VideoInputDevices;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
@@ -13,11 +18,6 @@ using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Score2Stream.InputService
 {
