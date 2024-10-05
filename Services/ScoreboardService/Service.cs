@@ -41,12 +41,14 @@ namespace Score2Stream.ScoreboardService
         private string periods;
         private string scoreGuest;
         private string scoreHome;
+        private string secondsLast;
+        private DateTime secondsUpdate;
         private string teamGuest;
         private string teamHome;
         private string ticker;
-        private DateTime? tickerLastUpdate;
         private IEnumerable<(string, bool)> tickers;
         private int tickersInd;
+        private DateTime? tickersUpdate;
 
         #endregion Private Fields
 
@@ -193,6 +195,20 @@ namespace Score2Stream.ScoreboardService
         public bool ScoreNotFromClip { get; set; }
 
         public bool ShotNotFromClip { get; set; }
+
+        public bool ShowTenthOfSecs
+        {
+            get { return settingsService.Contents?.Scoreboard.ShowTenthOfSecs ?? false; }
+            set
+            {
+                if (settingsService.Contents.Scoreboard.ShowTenthOfSecs != value)
+                {
+                    settingsService.Contents.Scoreboard.ShowTenthOfSecs = value;
+
+                    settingsService.Save();
+                }
+            }
+        }
 
         public string TeamGuest
         {
@@ -448,11 +464,11 @@ namespace Score2Stream.ScoreboardService
         {
             var result = new StringBuilder();
 
-            if (clips[SegmentType.ClockGameMin1] != default)
+            if (!string.IsNullOrWhiteSpace(clips[SegmentType.ClockGameMin1]?.Value))
             {
                 result.Append(clips[SegmentType.ClockGameMin1].Value);
             }
-            if (clips[SegmentType.ClockGameMin2] != default)
+            if (!string.IsNullOrWhiteSpace(clips[SegmentType.ClockGameMin2]?.Value))
             {
                 result.Append(clips[SegmentType.ClockGameMin2].Value);
             }
@@ -469,14 +485,34 @@ namespace Score2Stream.ScoreboardService
                 }
             }
 
-            if (clips[SegmentType.ClockGameSec1] != default)
+            var seconds = new StringBuilder();
+
+            if (!string.IsNullOrWhiteSpace(clips[SegmentType.ClockGameSec1]?.Value))
             {
-                result.Append(clips[SegmentType.ClockGameSec1].Value);
+                seconds.Append(clips[SegmentType.ClockGameSec1].Value);
             }
-            if (clips[SegmentType.ClockGameSec2] != default)
+            if (!string.IsNullOrWhiteSpace(clips[SegmentType.ClockGameSec2]?.Value))
             {
-                result.Append(clips[SegmentType.ClockGameSec2].Value);
+                seconds.Append(clips[SegmentType.ClockGameSec2].Value);
             }
+
+            var currentTime = DateTime.Now;
+
+            if (ShowTenthOfSecs
+                || seconds.Length > 1
+                || currentTime >= secondsUpdate.AddSeconds(1))
+            {
+                result.Append(seconds);
+            }
+
+            if (string.IsNullOrWhiteSpace(secondsLast)
+                || seconds.Length == 0
+                || secondsLast != seconds.ToString())
+            {
+                secondsUpdate = currentTime;
+            }
+
+            secondsLast = seconds.ToString();
 
             return result.ToString();
         }
@@ -592,8 +628,8 @@ namespace Score2Stream.ScoreboardService
 
             if ((ticker == default && tickers?.Any() == true)
                 || (ticker != default && tickers?.Any() != true)
-                || !tickerLastUpdate.HasValue
-                || tickerLastUpdate.Value.Add(frequencyTime) < DateTime.Now)
+                || !tickersUpdate.HasValue
+                || tickersUpdate.Value.Add(frequencyTime) < DateTime.Now)
             {
                 UpdateTicker();
             }
@@ -631,7 +667,7 @@ namespace Score2Stream.ScoreboardService
                     ticker = current;
                 }
 
-                tickerLastUpdate = DateTime.Now;
+                tickersUpdate = DateTime.Now;
             }
         }
 

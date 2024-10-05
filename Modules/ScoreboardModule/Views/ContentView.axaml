@@ -373,6 +373,38 @@
                     VerticalAlignment="Center"
                     IsEnabled="False"
                     Text="{Binding ClockGame, Mode=OneWay}" />
+
+                <CheckBox
+                    x:Name="ShowTenthOfSecsCheckbox"
+                    Grid.Row="5"
+                    Grid.Column="2"
+                    Grid.ColumnSpan="2"
+                    Margin="5"
+                    VerticalAlignment="Center"
+                    Content="Show tenth of seconds"
+                    IsChecked="{Binding ShowTenthOfSecs}">
+                    <i:Interaction.Behaviors>
+                        <a:DataTriggerBehavior
+                            Binding="{Binding #ClockNotFromClip.IsChecked}"
+                            ComparisonCondition="Equal"
+                            Value="False">
+                            <a:ChangePropertyAction
+                                PropertyName="IsEnabled"
+                                TargetObject="ShowTenthOfSecsCheckbox"
+                                Value="True" />
+                        </a:DataTriggerBehavior>
+                        <a:DataTriggerBehavior
+                            Binding="{Binding #ClockNotFromClip.IsChecked}"
+                            ComparisonCondition="Equal"
+                            Value="True">
+                            <a:ChangePropertyAction
+                                PropertyName="IsEnabled"
+                                TargetObject="ShowTenthOfSecsCheckbox"
+                                Value="False" />
+                        </a:DataTriggerBehavior>
+                    </i:Interaction.Behaviors>
+                </CheckBox>
+
                 <CheckBox
                     x:Name="ClockNotFromClip"
                     Grid.Row="5"

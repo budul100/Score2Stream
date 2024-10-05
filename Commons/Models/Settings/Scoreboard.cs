@@ -31,6 +31,8 @@ namespace Score2Stream.Commons.Models.Settings
 
         public string Periods { get; set; }
 
+        public bool ShowTenthOfSecs { get; set; }
+
         public string TeamGuest { get; set; }
 
         public string TeamHome { get; set; }

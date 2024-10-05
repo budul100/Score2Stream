@@ -54,6 +54,8 @@ namespace Score2Stream.Commons.Interfaces
 
         bool ShotNotFromClip { get; set; }
 
+        bool ShowTenthOfSecs { get; set; }
+
         string TeamGuest { get; set; }
 
         bool TeamGuestUpToDate { get; }

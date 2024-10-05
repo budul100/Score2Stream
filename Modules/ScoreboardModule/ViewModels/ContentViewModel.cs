@@ -236,6 +236,20 @@ namespace Score2Stream.ScoreboardModule.ViewModels
             }
         }
 
+        public bool ShowTenthOfSecs
+        {
+            get { return scoreboardService.ShowTenthOfSecs; }
+            set
+            {
+                if (scoreboardService.ShowTenthOfSecs != value)
+                {
+                    scoreboardService.ShowTenthOfSecs = value;
+
+                    RaisePropertyChanged(nameof(ShowTenthOfSecs));
+                }
+            }
+        }
+
         public string TeamGuest
         {
             get { return scoreboardService.TeamGuest; }
