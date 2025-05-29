@@ -2,6 +2,10 @@
 
 pushd %~dp0..\..
 
+ECHO.
+ECHO Hide dot files in %cd%
+ECHO.
+
 call :treeProcess
 goto :eof
 
