@@ -71,10 +71,13 @@ namespace Score2Stream.App
             {
                 desktop.Startup += OnStartup;
 
-                splashWindow = Container.Resolve<SplashView>();
+                if (!Debugger.IsAttached)
+                {
+                    splashWindow = Container.Resolve<SplashView>();
 
-                desktop.MainWindow = splashWindow;
-                splashWindow.Show();
+                    desktop.MainWindow = splashWindow;
+                    splashWindow.Show();
+                }
 
                 var dispatcherService = Container.Resolve<IDispatcherService>();
                 Task.Run(() => dispatcherService.InvokeAsync(InitializeApp));
@@ -156,13 +159,13 @@ namespace Score2Stream.App
                     window: mainWindow,
                     iconUri: iconUri);
 
-                splashWindow.Close();
+                splashWindow?.Close();
             }
             catch (TaskCanceledException)
             {
                 desktop.MainWindow = default;
 
-                splashWindow.Close();
+                splashWindow?.Close();
             }
         }
 
