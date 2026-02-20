@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using OpenCvSharp;
-using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Models.Contents;
@@ -13,32 +12,30 @@ namespace Score2Stream.VideoService.Extensions
     {
         #region Public Methods
 
-        public static IEnumerable<Match> GetMatches(this Segment segment,
-            bool preventMultipleComparison, double thresholdMatching)
+        public static IEnumerable<Match> GetMatches(this Segment segment, double thresholdMatching)
         {
-            var relevants = segment?.Area?.Template?.Samples?.ToArray();
+            if (segment?.Mat == null || segment.Mat == default || segment.Mat.IsEmpty())
+                yield break;
 
-            if (segment.Mat != default
-                && relevants?.Length > 0)
+            var relevants = segment.Area?.Template?.Samples?
+                .Where(s => s.Mat.HasValue() && !s.Mat.IsEmpty()).ToArray();
+
+            if (relevants?.Length > 0)
             {
                 foreach (var relevant in relevants)
                 {
-                    var similarity = relevant.Mat.GetSimilarityTo(
-                        template: segment.Mat,
-                        preventMultipleComparison: preventMultipleComparison);
+                    var similarity = relevant.Mat.GetSimilarityTo(segment.Mat);
 
-                    var type = similarity >= thresholdMatching && similarity < Constants.SimilarityMax
+                    var type = similarity >= thresholdMatching
                         ? MatchType.Similar
                         : MatchType.None;
 
-                    var result = new Match
+                    yield return new Match
                     {
                         Sample = relevant,
                         Type = type,
                         Similarity = similarity,
                     };
-
-                    yield return result;
                 }
             }
         }
@@ -65,65 +62,24 @@ namespace Score2Stream.VideoService.Extensions
 
         #region Private Methods
 
-        private static double GetSimilarityTo(this Mat image, Mat template, bool preventMultipleComparison)
+        private static double GetSimilarityTo(this Mat image, Mat template)
         {
-            var result = default(double);
+            if (!image.HasValue() || !template.HasValue())
+                return default;
 
-            if (image.HasValue()
-                && template.HasValue())
-            {
-                var compare = image.Resize(
-                    dsize: template.Size(),
-                    interpolation: InterpolationFlags.Nearest);
+            var compare = image.Resize(
+                dsize: template.Size(),
+                interpolation: InterpolationFlags.Nearest);
 
-                var matchSqDiff = compare.MatchTemplate(
-                    templ: template,
-                    method: TemplateMatchModes.SqDiffNormed);
+            var matchCCoeff = compare.MatchTemplate(
+                templ: template,
+                method: TemplateMatchModes.CCoeffNormed);
 
-                matchSqDiff.MinMaxLoc(
-                    minVal: out double minSqDiff,
-                    maxVal: out double _);
+            matchCCoeff.MinMaxLoc(
+                minVal: out double _,
+                maxVal: out double maxCCoeff);
 
-                var absMinSqDiff = 1 - Math.Abs(minSqDiff);
-
-                if (preventMultipleComparison)
-                {
-                    result = absMinSqDiff;
-                }
-                else
-                {
-                    var matchCCoeff = compare.MatchTemplate(
-                        templ: template,
-                        method: TemplateMatchModes.CCoeffNormed);
-
-                    matchCCoeff.MinMaxLoc(
-                        minVal: out double _,
-                        maxVal: out double maxCCoeff);
-
-                    var matchCCorr = compare.MatchTemplate(
-                        templ: template,
-                        method: TemplateMatchModes.CCorrNormed);
-
-                    matchCCorr.MinMaxLoc(
-                        minVal: out double _,
-                        maxVal: out double maxCCorr);
-
-                    var absMaxCCoeff = Math.Abs(maxCCoeff);
-                    var absMaxCCorr = Math.Abs(maxCCorr);
-
-                    result = absMinSqDiff * absMaxCCoeff * absMaxCCorr;
-
-                    if (result == 0
-                        && ((absMinSqDiff > Constants.SimilarityMin && absMinSqDiff < Constants.SimilarityMax)
-                        || (absMaxCCoeff > Constants.SimilarityMin && absMaxCCoeff < Constants.SimilarityMax)
-                        || (absMaxCCorr > Constants.SimilarityMin && absMaxCCorr < Constants.SimilarityMax)))
-                    {
-                        result = Constants.SimilarityStep;
-                    }
-                }
-            }
-
-            return result;
+            return Math.Abs(maxCCoeff);
         }
 
         #endregion Private Methods

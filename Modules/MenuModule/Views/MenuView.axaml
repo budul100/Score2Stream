@@ -654,13 +654,6 @@
                             FontSize="{StaticResource FontSize}"
                             IsChecked="{Binding NoRecognition, Mode=TwoWay}"
                             IsEnabled="{Binding IsActive}" />
-                        <CheckBox
-                            Margin="0,0,4,4"
-                            VerticalAlignment="Center"
-                            Content="Deactivate multi comparison"
-                            FontSize="{StaticResource FontSize}"
-                            IsChecked="{Binding NoMultiComparison, Mode=TwoWay}"
-                            IsEnabled="{Binding IsActive}" />
                     </rib:RibbonGroupBox>
                 </rib:RibbonTab.Groups>
             </rib:RibbonTab>

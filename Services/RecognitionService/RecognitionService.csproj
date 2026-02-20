@@ -20,8 +20,8 @@
 			<Link>TrainedData\digit_model.onnx</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Include="..\..\Training\digit_model.onnx.data">
-			<Link>TrainedData\digit_model.onnx.data</Link>
+		<None Include="..\..\Training\digit_model.onnx">
+			<Link>TrainedData\digit_features.onnx</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="TrainedData\letsgodigital.charset">

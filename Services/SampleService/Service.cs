@@ -88,17 +88,13 @@ namespace Score2Stream.SampleService
                         maxCount: Constants.MaxCountSamples);
                 }
 
-                var centeredImage = sample.Mat.ToCentered(
-                    fullWidth: sample.Width,
-                    fullHeight: sample.Height);
-
-                sample.Bitmap = new Bitmap(centeredImage.ToMemoryStream());
+                sample.Bitmap = new Bitmap(sample.Mat.ToMemoryStream());
 
                 if (sample.Value == default
                     && recognitionService != default
                     && !settingsService.Contents.Detection.NoRecognition)
                 {
-                    sample.Value = recognitionService.Recognize(centeredImage);
+                    sample.Value = recognitionService.Recognize(sample.Mat).Value;
                 }
 
                 sample.Index = index++;

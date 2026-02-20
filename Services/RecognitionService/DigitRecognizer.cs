@@ -1,35 +1,50 @@
 ﻿using System;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using OpenCvSharp;
+using Score2Stream.Commons.Interfaces;
 
 namespace Score2Stream.RecognitionService
 {
-    public class DigitPrediction
-    {
-        #region Public Properties
-
-        public float Confidence { get; init; }
-
-        public int Digit { get; init; }
-
-        #endregion Public Properties
-    }
-
-    public class DigitRecognizer(string modelPath)
-        : IDisposable
+    public class DigitRecognizer
+        : IRecognitionService, IDisposable
     {
         #region Private Fields
 
-        private const int H = 96;
-        private const int W = 64;
+        private const int SampleHeight = 96;
+        private const int SampleWidth = 64;
 
-        private readonly InferenceSession session = new(modelPath);
+        private const string TrainedDataFile = "digit_model.onnx";
+        private const string TrainedDataFolder = "TrainedData";
 
+        private readonly InferenceSession session;
         private bool isDisposed;
 
         #endregion Private Fields
+
+        #region Public Constructors
+
+        public DigitRecognizer()
+        {
+            var modelPath = Path.Combine(
+                path1: Environment.CurrentDirectory,
+                path2: TrainedDataFolder,
+                path3: TrainedDataFile);
+
+            if (!File.Exists(modelPath))
+            {
+                throw new FileNotFoundException(
+                    message: $"The trained data file '{modelPath}' was not found.",
+                    fileName: modelPath);
+            }
+
+            session = new(modelPath);
+        }
+
+        #endregion Public Constructors
 
         #region Public Methods
 
@@ -42,25 +57,42 @@ namespace Score2Stream.RecognitionService
                 obj: this);
         }
 
-        public DigitPrediction Predict(Mat image)
+        public (string, float) Recognize(Mat image)
         {
-            float[] input = Preprocess(image);
-            var tensor = new DenseTensor<float>(input, [1, 1, H, W]);
-            var inputs = new[] { NamedOnnxValue.CreateFromTensor("image", tensor) };
+            var preprocessed = GetPreprocessed(image);
+
+            var tensor = new DenseTensor<float>(
+                memory: preprocessed,
+                dimensions: [1, 1, SampleHeight, SampleWidth]);
+
+            var value = NamedOnnxValue.CreateFromTensor(
+                name: "image",
+                value: tensor);
+
+            var inputs = new[] { value };
 
             using var outputs = session.Run(inputs);
-            var logits = outputs[0].AsEnumerable<float>().ToArray();
 
-            // Softmax → Wahrscheinlichkeiten
-            float max = logits.Max(); // numerische Stabilität
-            float[] exps = logits.Select(x => MathF.Exp(x - max)).ToArray();
-            float sum = exps.Sum();
-            float[] probs = exps.Select(x => x / sum).ToArray();
+            var logits = outputs[0]
+                .AsEnumerable<float>().ToArray();
 
-            float confidence = probs.Max();
-            int digit = Array.IndexOf(probs, confidence);
+            var max = logits.Max();
+            var exps = logits
+                .Select(x => MathF.Exp(x - max)).ToArray();
 
-            return new DigitPrediction { Digit = digit, Confidence = confidence };
+            var sum = exps.Sum();
+            var probs = exps
+                .Select(x => x / sum).ToArray();
+
+            var confidence = probs.Max();
+
+            var predicted = Array.IndexOf(
+                array: probs,
+                value: confidence);
+
+            var result = (predicted.ToString(), confidence);
+
+            return result;
         }
 
         #endregion Public Methods
@@ -84,27 +116,40 @@ namespace Score2Stream.RecognitionService
 
         #region Private Methods
 
-        private static float[] Preprocess(Mat image)
+        private static float[] GetPreprocessed(Mat image)
         {
-            // Graustufe
-            Mat gray = new Mat();
+            var gray = new Mat();
+
             if (image.Channels() > 1)
-                Cv2.CvtColor(image, gray, ColorConversionCodes.BGR2GRAY);
+            {
+                Cv2.CvtColor(
+                    src: image,
+                    dst: gray,
+                    code: ColorConversionCodes.BGR2GRAY);
+            }
             else
+            {
                 gray = image.Clone();
+            }
 
-            // Auf Modellgröße skalieren
-            Mat resized = new Mat();
-            Cv2.Resize(gray, resized, new Size(W, H));
+            var resized = new Mat();
+            var size = new Size(SampleWidth, SampleHeight);
 
-            // Pixel als float-Array, normalisiert auf [-1, 1]
-            float[] result = new float[H * W];
-            for (int y = 0; y < H; y++)
-                for (int x = 0; x < W; x++)
+            Cv2.Resize(
+                src: gray,
+                dst: resized,
+                dsize: size);
+
+            var result = new float[SampleHeight * SampleWidth];
+
+            for (var y = 0; y < SampleHeight; y++)
+            {
+                for (var x = 0; x < SampleWidth; x++)
                 {
-                    float pixel = resized.At<byte>(y, x) / 255f;
-                    result[y * W + x] = (pixel - 0.5f) / 0.5f;
+                    var pixel = resized.At<byte>(y, x) / 255f;
+                    result[y * SampleWidth + x] = (pixel - 0.5f) / 0.5f;
                 }
+            }
 
             return result;
         }

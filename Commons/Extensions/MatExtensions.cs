@@ -39,6 +39,74 @@ namespace Score2Stream.Commons.Extensions
             return result;
         }
 
+        public static Mat AsCentered(this Mat image, double fullWidth, double fullHeight)
+        {
+            var result = image;
+
+            if (image.HasValue())
+            {
+                var horizontal = (int)Math.Ceiling((double)Math.Abs(fullWidth - image.Width) / 2);
+                var vertical = (int)Math.Ceiling((double)Math.Abs(fullHeight - image.Height) / 2);
+
+                result = image.CopyMakeBorder(
+                    top: vertical,
+                    bottom: vertical,
+                    left: horizontal,
+                    right: horizontal,
+                    borderType: BorderTypes.Constant);
+            }
+
+            return result;
+        }
+
+        public static Mat AsCropped(this Mat image, Rect contourRectangle)
+        {
+            var result = image
+                .Clone(contourRectangle);
+
+            return result;
+        }
+
+        public static Mat AsInverted(this Mat image)
+        {
+            var result = image;
+
+            if (image.HasValue())
+            {
+                result = new Mat(
+                    rows: image.Rows,
+                    cols: image.Cols,
+                    type: image.Type());
+
+                Cv2.BitwiseNot(
+                    src: image,
+                    dst: result);
+            }
+
+            return result;
+        }
+
+        public static Mat AsMonochrome(this Mat image, double threshold)
+        {
+            var result = image;
+
+            if (image.HasValue())
+            {
+                var monochromeImage = image.Channels() > 1
+                    ? image.CvtColor(ColorConversionCodes.BGR2GRAY)
+                    : image;
+
+                var thresh = threshold * 255;
+
+                result = monochromeImage.Threshold(
+                    thresh: thresh,
+                    maxval: 255,
+                    type: ThresholdTypes.Binary);
+            }
+
+            return result;
+        }
+
         public static Mat AsRotated(this Mat image, float angle)
         {
             var result = image;
@@ -126,70 +194,9 @@ namespace Score2Stream.Commons.Extensions
             return result;
         }
 
-        public static Mat ToCentered(this Mat image, double fullWidth, double fullHeight)
+        public static bool IsEmpty(this Mat image)
         {
-            var result = image;
-
-            if (image.HasValue())
-            {
-                var horizontal = (int)Math.Ceiling((double)Math.Abs(fullWidth - image.Width) / 2);
-                var vertical = (int)Math.Ceiling((double)Math.Abs(fullHeight - image.Height) / 2);
-
-                result = image.CopyMakeBorder(
-                    top: vertical,
-                    bottom: vertical,
-                    left: horizontal,
-                    right: horizontal,
-                    borderType: BorderTypes.Constant);
-            }
-
-            return result;
-        }
-
-        public static Mat ToCropped(this Mat image, Rect contourRectangle)
-        {
-            var result = image
-                .Clone(contourRectangle);
-
-            return result;
-        }
-
-        public static Mat ToInverted(this Mat image)
-        {
-            var result = image;
-
-            if (image.HasValue())
-            {
-                result = new Mat(
-                    rows: image.Rows,
-                    cols: image.Cols,
-                    type: image.Type());
-
-                Cv2.BitwiseNot(
-                    src: image,
-                    dst: result);
-            }
-
-            return result;
-        }
-
-        public static Mat ToMonochrome(this Mat image, double threshold)
-        {
-            var result = image;
-
-            if (image.HasValue())
-            {
-                var monochromeImage = image.Channels() > 1
-                    ? image.CvtColor(ColorConversionCodes.BGR2GRAY)
-                    : image;
-
-                var thresh = threshold * 255;
-
-                result = monochromeImage.Threshold(
-                    thresh: thresh,
-                    maxval: 255,
-                    type: ThresholdTypes.Binary);
-            }
+            var result = image.Rows == 0 || image.Cols == 0 || image.CountNonZero() == 0;
 
             return result;
         }

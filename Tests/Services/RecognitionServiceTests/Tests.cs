@@ -19,7 +19,7 @@ namespace Tests.Services.RecognitionServiceTests
         [Fact]
         public void RecognizeNumbers()
         {
-            var recognitionService = new Score2Stream.RecognitionService.Service();
+            var recognitionService = new Score2Stream.RecognitionService.TesseractRecognizer();
 
             //var path0 = Path.Combine(SamplesPath, "SevenSegment-0.png");
             //var bytes0 = GetBytes(path0);
@@ -75,13 +75,13 @@ namespace Tests.Services.RecognitionServiceTests
             using var frame = new Mat();
             video.Read(frame);
 
-            var monochromeFrame = frame.ToMonochrome(0.6);
+            var monochromeFrame = frame.AsMonochrome(0.6);
 
             var noiselessFrame = monochromeFrame.WithoutNoise(
                 erodeIterations: 2,
                 dilateIterations: 2);
 
-            var centeredFrame = noiselessFrame.ToCentered(
+            var centeredFrame = noiselessFrame.AsCentered(
                 fullWidth: noiselessFrame.Width + 10,
                 fullHeight: noiselessFrame.Height + 10);
 

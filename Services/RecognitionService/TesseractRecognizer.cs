@@ -8,14 +8,15 @@ using TesseractOCR.Pix;
 
 namespace Score2Stream.RecognitionService
 {
-    public class Service
+    public class TesseractRecognizer
         : IRecognitionService
     {
         #region Private Fields
 
         private const PageSegMode PageModeDefault = PageSegMode.SingleChar;
+
         private const string TesseractLanguages = "letsgodigital";
-        private const string TesseractTrainedData = "TrainedData";
+        private const string TrainedDataFolder = "TrainedData";
 
         private readonly Engine engine;
 
@@ -23,11 +24,11 @@ namespace Score2Stream.RecognitionService
 
         #region Public Constructors
 
-        public Service()
+        public TesseractRecognizer()
         {
             var dataPath = Path.Combine(
                 path1: Environment.CurrentDirectory,
-                path2: TesseractTrainedData);
+                path2: TrainedDataFolder);
 
             if (Directory.Exists(dataPath))
             {
@@ -41,17 +42,19 @@ namespace Score2Stream.RecognitionService
 
         #region Public Methods
 
-        public string Recognize(Mat image)
+        public (string, float) Recognize(Mat image)
         {
             var text = GetText(image);
 
-            var result = text?.Trim()
+            var trimmed = text?.Trim()
                 .Replace(
                     oldValue: "\r",
                     newValue: string.Empty)
                 .Replace(
                     oldValue: "\n",
                     newValue: string.Empty);
+
+            var result = (trimmed, 1f);
 
             return result;
         }

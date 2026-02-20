@@ -244,7 +244,7 @@ namespace Score2Stream.MenuModule.ViewModels
             set
             {
                 if (IsActive
-                    && inputService?.SampleService.IsDetection != value)
+                    && inputService?.SampleService?.IsDetection != value)
                 {
                     inputService.SampleService.IsDetection = value;
 
@@ -285,21 +285,6 @@ namespace Score2Stream.MenuModule.ViewModels
                     settingsService.Save();
 
                     RaisePropertyChanged(nameof(NoCropping));
-                }
-            }
-        }
-
-        public bool NoMultiComparison
-        {
-            get { return settingsService.Contents.Detection.NoMultiComparison; }
-            set
-            {
-                if (settingsService.Contents.Detection.NoMultiComparison != value)
-                {
-                    settingsService.Contents.Detection.NoMultiComparison = value;
-                    settingsService.Save();
-
-                    RaisePropertyChanged(nameof(NoMultiComparison));
                 }
             }
         }

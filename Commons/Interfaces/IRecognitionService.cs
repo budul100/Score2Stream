@@ -6,7 +6,7 @@ namespace Score2Stream.Commons.Interfaces
     {
         #region Public Methods
 
-        string Recognize(Mat image);
+        (string Value, float Confidence) Recognize(Mat image);
 
         #endregion Public Methods
     }

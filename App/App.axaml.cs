@@ -120,7 +120,7 @@ namespace Score2Stream.App
             var dispatcherService = new DispatcherService.Service();
             containerRegistry.RegisterInstance<IDispatcherService>(dispatcherService);
 
-            var recognitionService = new RecognitionService.Service();
+            var recognitionService = new RecognitionService.DigitRecognizer();
             containerRegistry.RegisterInstance<IRecognitionService>(recognitionService);
 
             containerRegistry.RegisterSingleton<IDialogService, DialogService.Service>();

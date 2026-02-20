@@ -125,6 +125,44 @@ namespace Score2Stream.VideoService
 
         #region Private Methods
 
+        private Mat GetImage(Segment clip)
+        {
+            var clipImage = frame
+                .Clone(clip.Rect.Value);
+
+            var noiselessImage = clip.Area.NoiseRemoval == 0
+                ? clipImage
+                : clipImage.WithoutNoise(
+                    erodeIterations: clip.Area.NoiseRemoval,
+                    dilateIterations: clip.Area.NoiseRemoval);
+
+            var thresholdMonochrome = clip.Area.ThresholdMonochrome / Constants.ThresholdDivider;
+
+            var monochromeImage = noiselessImage
+                .AsMonochrome(thresholdMonochrome);
+
+            var contourRectangle = !settingsService.Contents.Video.NoCropping
+                ? monochromeImage.GetContour()
+                : default;
+
+            var contourImage = contourRectangle.HasValue
+                ? monochromeImage.AsCropped(contourRectangle.Value)
+                : monochromeImage;
+
+            var centeredImage = default(Mat);
+
+            if (contourImage.HasValue()
+                && widthMax > 0
+                && heightMax > 0)
+            {
+                centeredImage = contourImage.AsCentered(
+                    fullWidth: widthMax,
+                    fullHeight: heightMax);
+            }
+
+            return centeredImage;
+        }
+
         private async void RunAsync(int? deviceId, string fileName)
         {
             var frameCount = 0.0;
@@ -206,7 +244,7 @@ namespace Score2Stream.VideoService
 
                         foreach (var clip in clips)
                         {
-                            UpdateImage(clip);
+                            UpdateBitmap(clip);
                         }
                     }
 
@@ -284,62 +322,38 @@ namespace Score2Stream.VideoService
             }
         }
 
-        private void UpdateImage(Segment clip)
+        private void UpdateBitmap(Segment clip)
         {
             if (!frame.Empty())
             {
-                var current = frame
-                    .Clone(clip.Rect.Value);
+                var current = GetImage(clip);
 
-                clip.Images.Enqueue(current);
-
-                if (clip.Images.Count >= settingsService.Contents.Video.ImagesQueueSize)
+                if (current.HasValue())
                 {
-                    if (clip.Images.Count > settingsService.Contents.Video.ImagesQueueSize)
+                    clip.Images.Enqueue(current);
+
+                    if (clip.Images.Count >= settingsService.Contents.Video.ImagesQueueSize)
                     {
-                        clip.Images.Dequeue();
-                    }
-
-                    var blendedImage = clip.Images.AsBlended();
-
-                    var noiselessImage = clip.Area.NoiseRemoval == 0
-                        ? blendedImage
-                        : blendedImage.WithoutNoise(
-                            erodeIterations: clip.Area.NoiseRemoval,
-                            dilateIterations: clip.Area.NoiseRemoval);
-
-                    var thresholdMonochrome = clip.Area.ThresholdMonochrome / Constants.ThresholdDivider;
-
-                    var monochromeImage = noiselessImage
-                        .ToMonochrome(thresholdMonochrome);
-
-                    var contourRectangle = !settingsService.Contents.Video.NoCropping
-                        ? monochromeImage.GetContour()
-                        : default;
-
-                    clip.Mat = contourRectangle.HasValue
-                        ? monochromeImage.ToCropped(contourRectangle.Value)
-                        : monochromeImage;
-
-                    if (clip.Mat != default
-                        && widthMax > 0
-                        && heightMax > 0)
-                    {
-                        var centeredImage = clip.Mat.ToCentered(
-                            fullWidth: widthMax,
-                            fullHeight: heightMax);
-
-                        if (centeredImage.HasValue())
+                        if (clip.Images.Count > settingsService.Contents.Video.ImagesQueueSize)
                         {
-                            var bitmapStream = centeredImage.ToMemoryStream();
+                            clip.Images.Dequeue();
+                        }
+
+                        var blendedImage = clip.Images.AsBlended();
+
+                        clip.Mat = blendedImage;
+
+                        if (blendedImage.HasValue())
+                        {
+                            var bitmapStream = blendedImage.ToMemoryStream();
 
                             clip.Bitmap = new Bitmap(bitmapStream);
+
+                            segmentDrawnEvent.Publish(clip);
                         }
+
+                        UpdateValue(clip);
                     }
-
-                    segmentDrawnEvent.Publish(clip);
-
-                    UpdateValue(clip);
                 }
             }
         }
@@ -386,7 +400,6 @@ namespace Score2Stream.VideoService
             var waitingDuration = TimeSpan.FromMilliseconds(Math.Abs(settingsService.Contents.Detection.DurationDetectionWait));
 
             segment.Matches = segment.GetMatches(
-                preventMultipleComparison: settingsService.Contents.Detection.NoMultiComparison,
                 thresholdMatching: thresholdMatching).ToArray();
 
             var relevant = segment.Matches

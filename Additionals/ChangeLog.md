@@ -1,7 +1,8 @@
 # Change log
 
-## Version 1.8.2
+## Version 1.9.0
 
+* Refactor: switch to ONNX digit recognition
 * Training data for 7 segment displays added
 * Updated to NET 8.0
 
