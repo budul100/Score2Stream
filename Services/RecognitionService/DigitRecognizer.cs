@@ -57,7 +57,7 @@ namespace Score2Stream.RecognitionService
                 obj: this);
         }
 
-        public (string, float) Recognize(Mat image)
+        public (string Value, float Confidence) Recognize(Mat image)
         {
             var preprocessed = GetPreprocessed(image);
 

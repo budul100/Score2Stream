@@ -22,7 +22,7 @@ using Score2Stream.Commons.Models.Settings;
 using Score2Stream.MenuModule.ViewModels;
 using Xunit;
 
-namespace Tests.Modules.MenuModuleTests
+namespace Score2Stream.Tests.MenuModuleTests
 {
     public class SampleServiceTests
     {
@@ -31,7 +31,7 @@ namespace Tests.Modules.MenuModuleTests
         [Fact]
         public async Task SamplesAddAsync()
         {
-            using var session = HeadlessUnitTestSession.StartNew(typeof(TestApp.App));
+            using var session = HeadlessUnitTestSession.StartNew(typeof(Score2Stream.Tests.TestApp.App));
 
             await session.Dispatch(() =>
             {
@@ -62,7 +62,7 @@ namespace Tests.Modules.MenuModuleTests
             var segment = new Segment
             {
                 Area = area,
-                Mat = new Mat(new OpenCvSharp.Size(10, 10), MatType.CV_16SC1),
+                Mat = new Mat(new Size(10, 10), MatType.CV_16SC1),
             };
 
             var eventAggregatorMock = new Mock<IEventAggregator>();
@@ -100,7 +100,7 @@ namespace Tests.Modules.MenuModuleTests
             var recognitionServiceMock = new Mock<IRecognitionService>();
             var dialogServiceMock = new Mock<IDialogService>();
 
-            var sampleService = new Score2Stream.SampleService.Service(
+            var sampleService = new SampleService.Service(
                 settingsService: sessionSettingsServiceMock.Object,
                 recognitionService: recognitionServiceMock.Object,
                 dialogService: dialogServiceMock.Object,

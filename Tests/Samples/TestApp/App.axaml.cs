@@ -2,7 +2,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 
-namespace TestApp
+namespace Score2Stream.Tests.TestApp
 {
     public partial class App
         : Application

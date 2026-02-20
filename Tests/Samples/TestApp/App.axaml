@@ -1,5 +1,5 @@
 <Application
-    x:Class="TestApp.App"
+    x:Class="Score2Stream.Tests.TestApp.App"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Application.Styles>

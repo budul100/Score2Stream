@@ -1,7 +1,7 @@
 ﻿using System;
 using Avalonia;
 
-namespace TestApp
+namespace Score2Stream.Tests.TestApp
 {
     internal static class Program
     {

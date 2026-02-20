@@ -23,7 +23,7 @@ set /a deleted_count=0
 set /a error_count=0
 
 echo.
-echo Searching for bin and obj folders...
+echo Searching for bin, obj and wwwroot folders...
 echo.
 
 :: Delete bin folders
@@ -50,6 +50,21 @@ for /f "tokens=*" %%G in ('dir /b /ad /s obj 2^>nul') do (
         echo [ERROR] Could not delete: %%G
         set /a error_count+=1
     )
+)
+
+:: Delete wwwroot in the root directory
+echo [INFO] Deleting wwwroot folder in root directory...
+if exist "wwwroot\" (
+    echo Deleting: wwwroot
+    rmdir /s /q "wwwroot" 2>nul
+    if !errorlevel! equ 0 (
+        set /a deleted_count+=1
+    ) else (
+        echo [ERROR] Could not delete: wwwroot
+        set /a error_count+=1
+    )
+) else (
+    echo [INFO] wwwroot not found, skipping.
 )
 
 :: Optional: Delete other temporary files
@@ -87,8 +102,9 @@ echo ================================================
 echo Successfully deleted folders: !deleted_count!
 if !error_count! gtr 0 (
     echo Errors during deletion: !error_count!
+    echo.
+    pause
 )
 echo.
 
 :end
-pause

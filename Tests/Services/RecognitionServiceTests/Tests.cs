@@ -4,7 +4,7 @@ using OpenCvSharp;
 using Score2Stream.Commons.Extensions;
 using Xunit;
 
-namespace Tests.Services.RecognitionServiceTests
+namespace Score2Stream.Tests.RecognitionServiceTests
 {
     public class Tests
     {
@@ -19,21 +19,21 @@ namespace Tests.Services.RecognitionServiceTests
         [Fact]
         public void RecognizeNumbers()
         {
-            var recognitionService = new Score2Stream.RecognitionService.TesseractRecognizer();
+            var recognitionService = new RecognitionService.DigitRecognizer();
 
-            //var path0 = Path.Combine(SamplesPath, "SevenSegment-0.png");
-            //var bytes0 = GetBytes(path0);
-            //var result0 = recognitionService.Recognize(bytes0);
+            var path0 = Path.Combine(SamplesPath, "SevenSegment-0.png");
+            var bytes0 = GetBytes(path0);
+            var result0 = recognitionService.Recognize(bytes0).Value;
 
-            //Assert.Equal(
-            //    "0",
-            //    result0);
+            Assert.Equal(
+                "0",
+                result0);
 
             var samplesPath = Path.GetFullPath(SamplesPath);
 
             var path3 = Path.Combine(samplesPath, "SevenSegment-3.png");
             var bytes3 = GetBytes(path3);
-            var result3 = recognitionService.Recognize(bytes3);
+            var result3 = recognitionService.Recognize(bytes3).Value;
 
             Assert.Equal(
                 "3",
@@ -41,7 +41,7 @@ namespace Tests.Services.RecognitionServiceTests
 
             var path4 = Path.Combine(samplesPath, "SevenSegment-4.png");
             var bytes4 = GetBytes(path4);
-            var result4 = recognitionService.Recognize(bytes4);
+            var result4 = recognitionService.Recognize(bytes4).Value;
 
             Assert.Equal(
                 "4",
@@ -49,11 +49,11 @@ namespace Tests.Services.RecognitionServiceTests
 
             var path5 = Path.Combine(samplesPath, "SevenSegment-5.png");
             var bytes5 = GetBytes(path5);
-            var result5 = recognitionService.Recognize(bytes5);
+            var result5 = recognitionService.Recognize(bytes5).Value;
 
-            //Assert.Equal(
-            //    "5",
-            //    result5);
+            Assert.Equal(
+                "5",
+                result5);
         }
 
         #endregion Public Methods
