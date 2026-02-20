@@ -5,40 +5,49 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<RootNamespace>Score2Stream.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
 	</PropertyGroup>
-
+	
 	<ItemGroup>
-	  <PackageReference Include="TesseractOCR" Version="5.5.1" />
+		<PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.24.2"/>
+		<PackageReference Include="TesseractOCR" Version="5.5.1"/>
 	</ItemGroup>
-
+	
 	<ItemGroup>
-		<ProjectReference Include="..\..\Commons\Commons.csproj" />
+		<ProjectReference Include="..\..\Commons\Commons.csproj"/>
 	</ItemGroup>
-
+	
 	<ItemGroup>
-	  <None Update="TrainedData\letsgodigital.charset">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="TrainedData\letsgodigital.inttemp">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="TrainedData\letsgodigital.normproto">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="TrainedData\letsgodigital.pffmtable">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="TrainedData\letsgodigital.shapetable">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="TrainedData\letsgodigital.traineddata">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="TrainedData\letsgodigital.unicharset">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="TrainedData\ssd.traineddata">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	</ItemGroup>
+		<None Include="..\..\Training\digit_model.onnx">
+			<Link>TrainedData\digit_model.onnx</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="..\..\Training\digit_model.onnx.data">
+			<Link>TrainedData\digit_model.onnx.data</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TrainedData\letsgodigital.charset">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TrainedData\letsgodigital.inttemp">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TrainedData\letsgodigital.normproto">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TrainedData\letsgodigital.pffmtable">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TrainedData\letsgodigital.shapetable">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TrainedData\letsgodigital.traineddata">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TrainedData\letsgodigital.unicharset">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TrainedData\ssd.traineddata">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 
+	</ItemGroup>
 </Project>
