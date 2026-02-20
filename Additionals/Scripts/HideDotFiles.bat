@@ -1,25 +1,28 @@
-@ECHO off
+@echo off
+setlocal
 
-pushd %~dp0..\..
+rem Start in the parent of the script folder
+pushd "%~dp0.."
 
-ECHO.
-ECHO Hide dot files in %cd%
-ECHO.
+echo.
+echo Hiding dot-files and dot-folders under: "%cd%"
+echo.
 
-call :treeProcess
-goto :eof
+rem /b  = bare names
+rem /s  = recurse
+rem /a  = include all (including hidden/system)
+rem ".*" pattern includes names that start with a dot
 
-:treeProcess
+for /f "delims=" %%F in ('dir /b /s /a .*') do (
 
-FOR %%X IN (.*.*) DO ATTRIB +H %%X
-FOR /D %%X IN (.*.*) DO ATTRIB +H %%X
+    rem Skip the special entries . and ..
+    if /i not "%%~nxF"=="." if /i not "%%~nxF"==".." (
+        attrib +h "%%~fF"
+    )
 
-for /D %%d in (*) do (
-    cd %%d
-    call :treeProcess
-    cd ..
 )
 
-POPD
+popd
+endlocal
 
-exit /b
+pause
