@@ -2,6 +2,7 @@
 
 ## Version 1.8.2
 
+* Training data for 7 segment displays added
 * Updated to NET 8.0
 
 ## Version 1.8.1
