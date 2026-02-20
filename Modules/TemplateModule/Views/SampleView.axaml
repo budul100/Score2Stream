@@ -2,12 +2,12 @@
     x:Class="Score2Stream.TemplateModule.Views.SampleView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:i="using:Avalonia.Xaml.Interactivity"
+    xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
     xmlns:b="using:Score2Stream.TemplateModule.Behaviors"
     xmlns:co="clr-namespace:Score2Stream.Commons.Converters;assembly=Commons"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:en="clr-namespace:Score2Stream.Commons.Enums;assembly=Commons"
-    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="80"
     d:DesignWidth="200"
@@ -45,9 +45,9 @@
         </Border.Styles>
 
         <i:Interaction.Behaviors>
-            <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="SampleBorder">
-                <a:InvokeCommandAction Command="{Binding OnSelectionCommand}" />
-            </a:EventTriggerBehavior>
+            <ia:EventTriggerBehavior EventName="PointerPressed" SourceObject="SampleBorder">
+                <ia:InvokeCommandAction Command="{Binding OnSelectionCommand}" />
+            </ia:EventTriggerBehavior>
         </i:Interaction.Behaviors>
 
         <StackPanel Orientation="Horizontal">
@@ -60,33 +60,33 @@
                 BorderThickness="3">
 
                 <i:Interaction.Behaviors>
-                    <a:DataTriggerBehavior
+                    <ia:DataTriggerBehavior
                         Binding="{Binding Type, Converter={StaticResource EnumToStringConverter}}"
                         ComparisonCondition="Equal"
                         Value="{x:Static en:MatchType.Match}">
-                        <a:ChangePropertyAction
+                        <ia:ChangePropertyAction
                             PropertyName="BorderBrush"
                             TargetObject="ImageBorder"
                             Value="GreenYellow" />
-                    </a:DataTriggerBehavior>
-                    <a:DataTriggerBehavior
+                    </ia:DataTriggerBehavior>
+                    <ia:DataTriggerBehavior
                         Binding="{Binding Type, Converter={StaticResource EnumToStringConverter}}"
                         ComparisonCondition="Equal"
                         Value="{x:Static en:MatchType.Similar}">
-                        <a:ChangePropertyAction
+                        <ia:ChangePropertyAction
                             PropertyName="BorderBrush"
                             TargetObject="ImageBorder"
                             Value="LightPink" />
-                    </a:DataTriggerBehavior>
-                    <a:DataTriggerBehavior
+                    </ia:DataTriggerBehavior>
+                    <ia:DataTriggerBehavior
                         Binding="{Binding Type, Converter={StaticResource EnumToStringConverter}}"
                         ComparisonCondition="Equal"
                         Value="{x:Static en:MatchType.None}">
-                        <a:ChangePropertyAction
+                        <ia:ChangePropertyAction
                             PropertyName="BorderBrush"
                             TargetObject="ImageBorder"
                             Value="LightSlateGray" />
-                    </a:DataTriggerBehavior>
+                    </ia:DataTriggerBehavior>
                 </i:Interaction.Behaviors>
 
                 <Image
@@ -118,12 +118,12 @@
                         Text="{Binding Value, Mode=TwoWay}">
 
                         <i:Interaction.Behaviors>
-                            <a:EventTriggerBehavior EventName="GotFocus" SourceObject="ValueTextBox">
-                                <a:InvokeCommandAction Command="{Binding OnFocusGotCommand}" />
-                            </a:EventTriggerBehavior>
-                            <a:EventTriggerBehavior EventName="LostFocus" SourceObject="ValueTextBox">
-                                <a:InvokeCommandAction Command="{Binding OnFocusLostCommand}" />
-                            </a:EventTriggerBehavior>
+                            <ia:EventTriggerBehavior EventName="GotFocus" SourceObject="ValueTextBox">
+                                <ia:InvokeCommandAction Command="{Binding OnFocusGotCommand}" />
+                            </ia:EventTriggerBehavior>
+                            <ia:EventTriggerBehavior EventName="LostFocus" SourceObject="ValueTextBox">
+                                <ia:InvokeCommandAction Command="{Binding OnFocusLostCommand}" />
+                            </ia:EventTriggerBehavior>
 
                             <b:FocusOnSelectionBehavior IsSelected="{Binding IsSelected, Mode=TwoWay}" />
                         </i:Interaction.Behaviors>

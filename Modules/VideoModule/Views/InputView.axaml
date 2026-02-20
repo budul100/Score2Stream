@@ -2,11 +2,11 @@
     x:Class="Score2Stream.VideoModule.Views.InputView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:i="using:Avalonia.Xaml.Interactivity"
+    xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
     xmlns:bv="using:Score2Stream.VideoModule.Behaviors"
     xmlns:co="using:Score2Stream.VideoModule.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:paz="using:Avalonia.Controls.PanAndZoom"
     xmlns:prism="http://prismlibrary.com/"
@@ -41,9 +41,9 @@
 
             <i:Interaction.Behaviors>
 
-                <a:EventTriggerBehavior EventName="ZoomChanged" SourceObject="InputBorder">
-                    <a:InvokeCommandAction Command="{Binding ZoomChangedCommand}" PassEventArgsToCommand="True" />
-                </a:EventTriggerBehavior>
+                <ia:EventTriggerBehavior EventName="ZoomChanged" SourceObject="InputBorder">
+                    <ia:InvokeCommandAction Command="{Binding ZoomChangedCommand}" PassEventArgsToCommand="True" />
+                </ia:EventTriggerBehavior>
 
                 <bv:SizeChangeBehavior Width="{Binding FullWidth, Mode=TwoWay}" Height="{Binding FullHeight, Mode=TwoWay}" />
             </i:Interaction.Behaviors>
@@ -52,12 +52,12 @@
 
                 <i:Interaction.Behaviors>
 
-                    <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="VideoPanel">
-                        <a:InvokeCommandAction Command="{Binding MousePressedCommand}" PassEventArgsToCommand="True" />
-                    </a:EventTriggerBehavior>
-                    <a:EventTriggerBehavior EventName="PointerReleased" SourceObject="VideoPanel">
-                        <a:InvokeCommandAction Command="{Binding MouseReleasedCommand}" PassEventArgsToCommand="True" />
-                    </a:EventTriggerBehavior>
+                    <ia:EventTriggerBehavior EventName="PointerPressed" SourceObject="VideoPanel">
+                        <ia:InvokeCommandAction Command="{Binding MousePressedCommand}" PassEventArgsToCommand="True" />
+                    </ia:EventTriggerBehavior>
+                    <ia:EventTriggerBehavior EventName="PointerReleased" SourceObject="VideoPanel">
+                        <ia:InvokeCommandAction Command="{Binding MouseReleasedCommand}" PassEventArgsToCommand="True" />
+                    </ia:EventTriggerBehavior>
 
                     <bv:PointerPositionBehavior PointerX="{Binding MouseX, Mode=TwoWay}" PointerY="{Binding MouseY, Mode=TwoWay}" />
                 </i:Interaction.Behaviors>

@@ -2,9 +2,9 @@
     x:Class="Score2Stream.ScoreboardModule.Views.TickerView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:i="using:Avalonia.Xaml.Interactivity"
+    xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="50"
     d:DesignWidth="500"
@@ -17,43 +17,43 @@
 
         <i:Interaction.Behaviors>
 
-            <a:DataTriggerBehavior
+            <ia:DataTriggerBehavior
                 Binding="{Binding IsActive}"
                 ComparisonCondition="Equal"
                 Value="True">
-                <a:ChangePropertyAction
+                <ia:ChangePropertyAction
                     PropertyName="IsEnabled"
                     TargetObject="TickerTextBox"
                     Value="False" />
-            </a:DataTriggerBehavior>
-            <a:DataTriggerBehavior
+            </ia:DataTriggerBehavior>
+            <ia:DataTriggerBehavior
                 Binding="{Binding IsActive}"
                 ComparisonCondition="Equal"
                 Value="False">
-                <a:ChangePropertyAction
+                <ia:ChangePropertyAction
                     PropertyName="IsEnabled"
                     TargetObject="TickerTextBox"
                     Value="True" />
-            </a:DataTriggerBehavior>
+            </ia:DataTriggerBehavior>
 
-            <a:DataTriggerBehavior
+            <ia:DataTriggerBehavior
                 Binding="{Binding Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
                 ComparisonCondition="Equal"
                 Value="True">
-                <a:ChangePropertyAction
+                <ia:ChangePropertyAction
                     PropertyName="IsEnabled"
                     TargetObject="IsActiveCheckBox"
                     Value="True" />
-            </a:DataTriggerBehavior>
-            <a:DataTriggerBehavior
+            </ia:DataTriggerBehavior>
+            <ia:DataTriggerBehavior
                 Binding="{Binding Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
                 ComparisonCondition="Equal"
                 Value="False">
-                <a:ChangePropertyAction
+                <ia:ChangePropertyAction
                     PropertyName="IsEnabled"
                     TargetObject="IsActiveCheckBox"
                     Value="False" />
-            </a:DataTriggerBehavior>
+            </ia:DataTriggerBehavior>
         </i:Interaction.Behaviors>
 
         <Grid
@@ -61,24 +61,24 @@
             Grid.Column="0"
             Grid.ColumnSpan="2">
             <i:Interaction.Behaviors>
-                <a:DataTriggerBehavior
+                <ia:DataTriggerBehavior
                     Binding="{Binding UpToDate}"
                     ComparisonCondition="Equal"
                     Value="True">
-                    <a:ChangePropertyAction
+                    <ia:ChangePropertyAction
                         PropertyName="Background"
                         TargetObject="TickerGrid"
                         Value="Transparent" />
-                </a:DataTriggerBehavior>
-                <a:DataTriggerBehavior
+                </ia:DataTriggerBehavior>
+                <ia:DataTriggerBehavior
                     Binding="{Binding UpToDate}"
                     ComparisonCondition="NotEqual"
                     Value="True">
-                    <a:ChangePropertyAction
+                    <ia:ChangePropertyAction
                         PropertyName="Background"
                         TargetObject="TickerGrid"
                         Value="Orange" />
-                </a:DataTriggerBehavior>
+                </ia:DataTriggerBehavior>
             </i:Interaction.Behaviors>
         </Grid>
 

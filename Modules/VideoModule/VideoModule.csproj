@@ -10,9 +10,9 @@
 		<PackageReference Include="Avalonia" Version="11.3.12" />
 		<PackageReference Include="Avalonia.Desktop" Version="11.3.12" />
 		<PackageReference Include="Avalonia.LinuxFramebuffer" Version="11.3.12" />
-		<PackageReference Include="Avalonia.Xaml.Interactions.Custom" Version="11.1.0.4" />
 		<PackageReference Include="budul.AvaloniaGridDefinitionBehavoir" Version="1.1.1" />
 		<PackageReference Include="PanAndZoom" Version="11.3.9.1" />
+		<PackageReference Include="Xaml.Behaviors.Interactions.Custom" Version="11.3.9.5" />
 	</ItemGroup>
 
 	<ItemGroup>

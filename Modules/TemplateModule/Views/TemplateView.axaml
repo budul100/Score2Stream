@@ -2,9 +2,9 @@
     x:Class="Score2Stream.TemplateModule.Views.TemplateView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:i="using:Avalonia.Xaml.Interactivity"
+    xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:v="using:Score2Stream.TemplateModule.Views"
@@ -36,7 +36,7 @@
                     Width="40"
                     Height="60"
                     VerticalAlignment="Center"
-                    Source="{Binding Bitmap}}"
+                    Source="{Binding Bitmap}"
                     Stretch="Uniform" />
             </Border>
 
@@ -82,24 +82,24 @@
             VerticalScrollBarVisibility="Auto">
 
             <i:Interaction.Behaviors>
-                <a:DataTriggerBehavior
+                <ia:DataTriggerBehavior
                     Binding="{Binding IsDetection}"
                     ComparisonCondition="Equal"
                     Value="False">
-                    <a:ChangePropertyAction
+                    <ia:ChangePropertyAction
                         PropertyName="Background"
                         TargetObject="SamplesViewer"
                         Value="Transparent" />
-                </a:DataTriggerBehavior>
-                <a:DataTriggerBehavior
+                </ia:DataTriggerBehavior>
+                <ia:DataTriggerBehavior
                     Binding="{Binding IsDetection}"
                     ComparisonCondition="Equal"
                     Value="True">
-                    <a:ChangePropertyAction
+                    <ia:ChangePropertyAction
                         PropertyName="Background"
                         TargetObject="SamplesViewer"
                         Value="Orange" />
-                </a:DataTriggerBehavior>
+                </ia:DataTriggerBehavior>
             </i:Interaction.Behaviors>
 
             <ItemsControl ItemsSource="{Binding Samples}">

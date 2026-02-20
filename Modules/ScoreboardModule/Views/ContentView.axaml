@@ -2,10 +2,10 @@
     x:Class="Score2Stream.ScoreboardModule.Views.ContentView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:i="using:Avalonia.Xaml.Interactivity"
+    xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
     xmlns:cl="clr-namespace:AvaloniaColorPicker;assembly=AvaloniaColorPicker"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:v="using:Score2Stream.ScoreboardModule.Views"
@@ -56,24 +56,24 @@
                     Grid.Row="0"
                     Grid.Column="1">
                     <i:Interaction.Behaviors>
-                        <a:DataTriggerBehavior
+                        <ia:DataTriggerBehavior
                             Binding="{Binding ColorHomeUpToDate}"
                             ComparisonCondition="Equal"
                             Value="True">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="Background"
                                 TargetObject="ColorHomeGrid"
                                 Value="Transparent" />
-                        </a:DataTriggerBehavior>
-                        <a:DataTriggerBehavior
+                        </ia:DataTriggerBehavior>
+                        <ia:DataTriggerBehavior
                             Binding="{Binding ColorHomeUpToDate}"
                             ComparisonCondition="NotEqual"
                             Value="True">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="Background"
                                 TargetObject="ColorHomeGrid"
                                 Value="Orange" />
-                        </a:DataTriggerBehavior>
+                        </ia:DataTriggerBehavior>
                     </i:Interaction.Behaviors>
                 </Grid>
                 <cl:ColorButton
@@ -98,24 +98,24 @@
                     Grid.Row="0"
                     Grid.Column="3">
                     <i:Interaction.Behaviors>
-                        <a:DataTriggerBehavior
+                        <ia:DataTriggerBehavior
                             Binding="{Binding ColorGuestUpToDate}"
                             ComparisonCondition="Equal"
                             Value="True">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="Background"
                                 TargetObject="ColorGuestGrid"
                                 Value="Transparent" />
-                        </a:DataTriggerBehavior>
-                        <a:DataTriggerBehavior
+                        </ia:DataTriggerBehavior>
+                        <ia:DataTriggerBehavior
                             Binding="{Binding ColorGuestUpToDate}"
                             ComparisonCondition="NotEqual"
                             Value="True">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="Background"
                                 TargetObject="ColorGuestGrid"
                                 Value="Orange" />
-                        </a:DataTriggerBehavior>
+                        </ia:DataTriggerBehavior>
                     </i:Interaction.Behaviors>
                 </Grid>
                 <cl:ColorButton
@@ -133,24 +133,24 @@
                     Grid.Column="0"
                     Grid.ColumnSpan="2">
                     <i:Interaction.Behaviors>
-                        <a:DataTriggerBehavior
+                        <ia:DataTriggerBehavior
                             Binding="{Binding TeamHomeUpToDate}"
                             ComparisonCondition="Equal"
                             Value="True">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="Background"
                                 TargetObject="TeamHomeGrid"
                                 Value="Transparent" />
-                        </a:DataTriggerBehavior>
-                        <a:DataTriggerBehavior
+                        </ia:DataTriggerBehavior>
+                        <ia:DataTriggerBehavior
                             Binding="{Binding TeamHomeUpToDate}"
                             ComparisonCondition="NotEqual"
                             Value="True">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="Background"
                                 TargetObject="TeamHomeGrid"
                                 Value="Orange" />
-                        </a:DataTriggerBehavior>
+                        </ia:DataTriggerBehavior>
                     </i:Interaction.Behaviors>
                 </Grid>
                 <TextBlock
@@ -175,24 +175,24 @@
                     Grid.Column="2"
                     Grid.ColumnSpan="2">
                     <i:Interaction.Behaviors>
-                        <a:DataTriggerBehavior
+                        <ia:DataTriggerBehavior
                             Binding="{Binding TeamGuestUpToDate}"
                             ComparisonCondition="Equal"
                             Value="True">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="Background"
                                 TargetObject="TeamGuestGrid"
                                 Value="Transparent" />
-                        </a:DataTriggerBehavior>
-                        <a:DataTriggerBehavior
+                        </ia:DataTriggerBehavior>
+                        <ia:DataTriggerBehavior
                             Binding="{Binding TeamGuestUpToDate}"
                             ComparisonCondition="NotEqual"
                             Value="True">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="Background"
                                 TargetObject="TeamGuestGrid"
                                 Value="Orange" />
-                        </a:DataTriggerBehavior>
+                        </ia:DataTriggerBehavior>
                     </i:Interaction.Behaviors>
                 </Grid>
                 <TextBlock
@@ -217,24 +217,24 @@
                     Grid.Column="0"
                     Grid.ColumnSpan="2">
                     <i:Interaction.Behaviors>
-                        <a:DataTriggerBehavior
+                        <ia:DataTriggerBehavior
                             Binding="{Binding ScoreHomeUpToDate}"
                             ComparisonCondition="Equal"
                             Value="True">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="Background"
                                 TargetObject="ScoreHomeGrid"
                                 Value="Transparent" />
-                        </a:DataTriggerBehavior>
-                        <a:DataTriggerBehavior
+                        </ia:DataTriggerBehavior>
+                        <ia:DataTriggerBehavior
                             Binding="{Binding ScoreHomeUpToDate}"
                             ComparisonCondition="NotEqual"
                             Value="True">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="Background"
                                 TargetObject="ScoreHomeGrid"
                                 Value="Orange" />
-                        </a:DataTriggerBehavior>
+                        </ia:DataTriggerBehavior>
                     </i:Interaction.Behaviors>
                 </Grid>
                 <TextBlock
@@ -254,24 +254,24 @@
                     MaxLength="{Binding MaxLengthScore}"
                     Text="{Binding ScoreHome}">
                     <i:Interaction.Behaviors>
-                        <a:DataTriggerBehavior
+                        <ia:DataTriggerBehavior
                             Binding="{Binding #ScoreNotFromClip.IsChecked}"
                             ComparisonCondition="Equal"
                             Value="True">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="IsEnabled"
                                 TargetObject="ScoreHomeTextBox"
                                 Value="True" />
-                        </a:DataTriggerBehavior>
-                        <a:DataTriggerBehavior
+                        </ia:DataTriggerBehavior>
+                        <ia:DataTriggerBehavior
                             Binding="{Binding #ScoreNotFromClip.IsChecked}"
                             ComparisonCondition="Equal"
                             Value="False">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="IsEnabled"
                                 TargetObject="ScoreHomeTextBox"
                                 Value="False" />
-                        </a:DataTriggerBehavior>
+                        </ia:DataTriggerBehavior>
                     </i:Interaction.Behaviors>
                 </TextBox>
 
@@ -281,24 +281,24 @@
                     Grid.Column="2"
                     Grid.ColumnSpan="2">
                     <i:Interaction.Behaviors>
-                        <a:DataTriggerBehavior
+                        <ia:DataTriggerBehavior
                             Binding="{Binding ScoreGuestUpToDate}"
                             ComparisonCondition="Equal"
                             Value="True">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="Background"
                                 TargetObject="ScoreGuestGrid"
                                 Value="Transparent" />
-                        </a:DataTriggerBehavior>
-                        <a:DataTriggerBehavior
+                        </ia:DataTriggerBehavior>
+                        <ia:DataTriggerBehavior
                             Binding="{Binding ScoreGuestUpToDate}"
                             ComparisonCondition="NotEqual"
                             Value="True">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="Background"
                                 TargetObject="ScoreGuestGrid"
                                 Value="Orange" />
-                        </a:DataTriggerBehavior>
+                        </ia:DataTriggerBehavior>
                     </i:Interaction.Behaviors>
                 </Grid>
                 <TextBlock
@@ -318,24 +318,24 @@
                     MaxLength="{Binding MaxLengthScore}"
                     Text="{Binding ScoreGuest}">
                     <i:Interaction.Behaviors>
-                        <a:DataTriggerBehavior
+                        <ia:DataTriggerBehavior
                             Binding="{Binding #ScoreNotFromClip.IsChecked}"
                             ComparisonCondition="Equal"
                             Value="True">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="IsEnabled"
                                 TargetObject="ScoreGuestTextBox"
                                 Value="True" />
-                        </a:DataTriggerBehavior>
-                        <a:DataTriggerBehavior
+                        </ia:DataTriggerBehavior>
+                        <ia:DataTriggerBehavior
                             Binding="{Binding #ScoreNotFromClip.IsChecked}"
                             ComparisonCondition="Equal"
                             Value="False">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="IsEnabled"
                                 TargetObject="ScoreGuestTextBox"
                                 Value="False" />
-                        </a:DataTriggerBehavior>
+                        </ia:DataTriggerBehavior>
                     </i:Interaction.Behaviors>
                 </TextBox>
 
@@ -384,24 +384,24 @@
                     Content="Show tenth of seconds"
                     IsChecked="{Binding ShowTenthOfSecs}">
                     <i:Interaction.Behaviors>
-                        <a:DataTriggerBehavior
+                        <ia:DataTriggerBehavior
                             Binding="{Binding #ClockNotFromClip.IsChecked}"
                             ComparisonCondition="Equal"
                             Value="False">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="IsEnabled"
                                 TargetObject="ShowTenthOfSecsCheckbox"
                                 Value="True" />
-                        </a:DataTriggerBehavior>
-                        <a:DataTriggerBehavior
+                        </ia:DataTriggerBehavior>
+                        <ia:DataTriggerBehavior
                             Binding="{Binding #ClockNotFromClip.IsChecked}"
                             ComparisonCondition="Equal"
                             Value="True">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="IsEnabled"
                                 TargetObject="ShowTenthOfSecsCheckbox"
                                 Value="False" />
-                        </a:DataTriggerBehavior>
+                        </ia:DataTriggerBehavior>
                     </i:Interaction.Behaviors>
                 </CheckBox>
 
@@ -445,24 +445,24 @@
                     Grid.Column="0"
                     Grid.ColumnSpan="2">
                     <i:Interaction.Behaviors>
-                        <a:DataTriggerBehavior
+                        <ia:DataTriggerBehavior
                             Binding="{Binding PeriodUpToDate}"
                             ComparisonCondition="Equal"
                             Value="True">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="Background"
                                 TargetObject="PeriodGrid"
                                 Value="Transparent" />
-                        </a:DataTriggerBehavior>
-                        <a:DataTriggerBehavior
+                        </ia:DataTriggerBehavior>
+                        <ia:DataTriggerBehavior
                             Binding="{Binding PeriodUpToDate}"
                             ComparisonCondition="NotEqual"
                             Value="True">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="Background"
                                 TargetObject="PeriodGrid"
                                 Value="Orange" />
-                        </a:DataTriggerBehavior>
+                        </ia:DataTriggerBehavior>
                     </i:Interaction.Behaviors>
                 </Grid>
                 <TextBlock
@@ -482,24 +482,24 @@
                     MaxLength="{Binding MaxLengthPeriod}"
                     Text="{Binding Period}">
                     <i:Interaction.Behaviors>
-                        <a:DataTriggerBehavior
+                        <ia:DataTriggerBehavior
                             Binding="{Binding #PeriodNotFromClip.IsChecked}"
                             ComparisonCondition="Equal"
                             Value="True">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="IsEnabled"
                                 TargetObject="PeriodTextBox"
                                 Value="True" />
-                        </a:DataTriggerBehavior>
-                        <a:DataTriggerBehavior
+                        </ia:DataTriggerBehavior>
+                        <ia:DataTriggerBehavior
                             Binding="{Binding #PeriodNotFromClip.IsChecked}"
                             ComparisonCondition="Equal"
                             Value="False">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="IsEnabled"
                                 TargetObject="PeriodTextBox"
                                 Value="False" />
-                        </a:DataTriggerBehavior>
+                        </ia:DataTriggerBehavior>
                     </i:Interaction.Behaviors>
                 </TextBox>
 
@@ -509,24 +509,24 @@
                     Grid.Column="2"
                     Grid.ColumnSpan="2">
                     <i:Interaction.Behaviors>
-                        <a:DataTriggerBehavior
+                        <ia:DataTriggerBehavior
                             Binding="{Binding PeriodsUpToDate}"
                             ComparisonCondition="Equal"
                             Value="True">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="Background"
                                 TargetObject="PeriodsGrid"
                                 Value="Transparent" />
-                        </a:DataTriggerBehavior>
-                        <a:DataTriggerBehavior
+                        </ia:DataTriggerBehavior>
+                        <ia:DataTriggerBehavior
                             Binding="{Binding PeriodsUpToDate}"
                             ComparisonCondition="NotEqual"
                             Value="True">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="Background"
                                 TargetObject="PeriodsGrid"
                                 Value="Orange" />
-                        </a:DataTriggerBehavior>
+                        </ia:DataTriggerBehavior>
                     </i:Interaction.Behaviors>
                 </Grid>
                 <TextBlock
@@ -560,24 +560,24 @@
                     Grid.Column="0"
                     Grid.ColumnSpan="4">
                     <i:Interaction.Behaviors>
-                        <a:DataTriggerBehavior
+                        <ia:DataTriggerBehavior
                             Binding="{Binding IsGameOverUpToDate}"
                             ComparisonCondition="Equal"
                             Value="True">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="Background"
                                 TargetObject="IsGameOverGrid"
                                 Value="Transparent" />
-                        </a:DataTriggerBehavior>
-                        <a:DataTriggerBehavior
+                        </ia:DataTriggerBehavior>
+                        <ia:DataTriggerBehavior
                             Binding="{Binding IsGameOverUpToDate}"
                             ComparisonCondition="NotEqual"
                             Value="True">
-                            <a:ChangePropertyAction
+                            <ia:ChangePropertyAction
                                 PropertyName="Background"
                                 TargetObject="IsGameOverGrid"
                                 Value="Orange" />
-                        </a:DataTriggerBehavior>
+                        </ia:DataTriggerBehavior>
                     </i:Interaction.Behaviors>
                 </Grid>
                 <CheckBox

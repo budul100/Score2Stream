@@ -2,10 +2,10 @@
     x:Class="Score2Stream.VideoModule.Views.SegmentView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:i="using:Avalonia.Xaml.Interactivity"
+    xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
     xmlns:co="using:Score2Stream.VideoModule.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="using:System"
     d:DesignHeight="50"
@@ -71,9 +71,9 @@
         </Rectangle.Styles>
 
         <i:Interaction.Behaviors>
-            <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="ClipRectangle">
-                <a:InvokeCommandAction Command="{Binding OnPressedCommand}" />
-            </a:EventTriggerBehavior>
+            <ia:EventTriggerBehavior EventName="PointerPressed" SourceObject="ClipRectangle">
+                <ia:InvokeCommandAction Command="{Binding OnPressedCommand}" />
+            </ia:EventTriggerBehavior>
         </i:Interaction.Behaviors>
     </Rectangle>
 </UserControl>

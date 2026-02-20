@@ -2,10 +2,10 @@
     x:Class="Score2Stream.AreaModule.Views.AreaView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:i="using:Avalonia.Xaml.Interactivity"
+    xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
     xmlns:co="clr-namespace:Score2Stream.Commons.Converters;assembly=Commons"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="using:System"
     xmlns:v="using:Score2Stream.AreaModule.Views"
@@ -29,28 +29,28 @@
         CornerRadius="3">
 
         <i:Interaction.Behaviors>
-            <a:DataTriggerBehavior
+            <ia:DataTriggerBehavior
                 Binding="{Binding IsActive}"
                 ComparisonCondition="Equal"
                 Value="True">
-                <a:ChangePropertyAction
+                <ia:ChangePropertyAction
                     PropertyName="Background"
-                    TargetObject="AreaBorder"
+                    TargetObject="{Binding #AreaBorder}"
                     Value="LightBlue" />
-            </a:DataTriggerBehavior>
-            <a:DataTriggerBehavior
+            </ia:DataTriggerBehavior>
+            <ia:DataTriggerBehavior
                 Binding="{Binding IsActive}"
                 ComparisonCondition="NotEqual"
                 Value="True">
-                <a:ChangePropertyAction
+                <ia:ChangePropertyAction
                     PropertyName="Background"
-                    TargetObject="AreaBorder"
+                    TargetObject="{Binding #AreaBorder}"
                     Value="Gainsboro" />
-            </a:DataTriggerBehavior>
+            </ia:DataTriggerBehavior>
 
-            <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="AreaBorder">
-                <a:InvokeCommandAction Command="{Binding OnSelectionCommand}" />
-            </a:EventTriggerBehavior>
+            <ia:EventTriggerBehavior EventName="PointerPressed" SourceObject="{Binding #AreaBorder}">
+                <ia:InvokeCommandAction Command="{Binding OnSelectionCommand}" />
+            </ia:EventTriggerBehavior>
         </i:Interaction.Behaviors>
 
         <Grid
