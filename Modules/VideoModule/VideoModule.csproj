@@ -16,6 +16,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Avalonia.ReactiveUI" Version="11.3.9" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\..\Commons\Commons.csproj" />
 	</ItemGroup>
 

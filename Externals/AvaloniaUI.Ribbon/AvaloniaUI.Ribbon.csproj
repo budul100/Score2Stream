@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<RootNamespace>AvaloniaUI.Ribbon</RootNamespace>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<Version>2.0.1-beta</Version>
@@ -34,8 +34,11 @@
 	<ItemGroup>
 		<PackageReference Include="Avalonia" Version="11.3.12" />
 		<PackageReference Include="Avalonia.Desktop" Version="11.3.12" />
-		<PackageReference Include="ReactiveUI.Avalonia" Version="11.3.8" />
 		<PackageReference Include="System.Drawing.Common" Version="10.0.3" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<PackageReference Include="Avalonia.ReactiveUI" Version="11.3.9" />
+	</ItemGroup>
+	
 </Project>
