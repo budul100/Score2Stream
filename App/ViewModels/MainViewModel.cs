@@ -53,6 +53,8 @@ namespace Score2Stream.App.ViewModels
 
             LoadSettings();
 
+            scoreboardService.Update();
+
             UpdateTitle();
         }
 
