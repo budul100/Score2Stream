@@ -2,7 +2,7 @@
 setlocal
 
 rem Start in the parent of the script folder
-pushd "%~dp0.."
+pushd "%~dp0..\.."
 
 echo.
 echo Hiding dot-files and dot-folders under: "%cd%"

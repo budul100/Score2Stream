@@ -2,7 +2,7 @@
 setlocal
 
 rem Start in the parent of the script folder
-pushd "%~dp0.."
+pushd "%~dp0..\.."
 
 echo.
 echo License check based on: https://github.com/tomchavakis/nuget-license
