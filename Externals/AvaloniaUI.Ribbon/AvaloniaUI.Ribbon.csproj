@@ -13,7 +13,7 @@
 		<Description>Ribbon UI for Avalonia</Description>
 		<RepositoryType>Git</RepositoryType>
 		<RepositoryUrl>https://github.com/Splitwirez/AvaloniaRibbon.git</RepositoryUrl>
-		<PackageLicenseUrl/>
+		<PackageLicenseUrl />
 		<AssemblyName>AvaloniaUI.Ribbon</AssemblyName>
 		<LangVersion>11</LangVersion>
 		<PackageTags>ribbon;avalonia;avaloniaui;avalonia ui;ribbon;ribbonui;ribbon ui;crossplat;crossplatform;cross platform;xplat;xplatform</PackageTags>
@@ -28,14 +28,14 @@
 		<AvaloniaResource Include="**\*.xaml">
 			<SubType>Designer</SubType>
 		</AvaloniaResource>
-		<AvaloniaResource Include="Assets\**"/>
+		<AvaloniaResource Include="Assets\**" />
 	</ItemGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="Avalonia" Version="11.3.12"/>
-		<PackageReference Include="Avalonia.Desktop" Version="11.3.12"/>
-		<PackageReference Include="Avalonia.ReactiveUI" Version="11.3.8"/>
-		<PackageReference Include="System.Drawing.Common" Version="8.0.8"/>
+		<PackageReference Include="Avalonia" Version="11.3.12" />
+		<PackageReference Include="Avalonia.Desktop" Version="11.3.12" />
+		<PackageReference Include="Avalonia.ReactiveUI" Version="11.3.8" />
+		<PackageReference Include="System.Drawing.Common" Version="10.0.3" />
 	</ItemGroup>
 
 </Project>
