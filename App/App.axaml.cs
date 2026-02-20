@@ -15,6 +15,7 @@ using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Settings;
+using Score2Stream.NavigationService;
 using Splat;
 
 namespace Score2Stream.App
@@ -123,7 +124,7 @@ namespace Score2Stream.App
             containerRegistry.RegisterInstance<IRecognitionService>(recognitionService);
 
             containerRegistry.RegisterSingleton<IDialogService, DialogService.Service>();
-            containerRegistry.RegisterSingleton<INavigationService, NavigationService.Service>();
+            containerRegistry.RegisterSingleton<INavigationService, Service>();
             containerRegistry.RegisterSingleton<ISettingsService<Session>, SettingsService.Service<Session>>();
             containerRegistry.RegisterSingleton<IScoreboardService, ScoreboardService.Service>();
             containerRegistry.RegisterSingleton<IWebService, WebService.Service>();

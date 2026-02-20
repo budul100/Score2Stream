@@ -1,9 +1,9 @@
-﻿using Score2Stream.Commons.Interfaces;
-using System;
+﻿using System;
 using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Score2Stream.Commons.Interfaces;
 
 namespace Score2Stream.SettingsService
 {
@@ -14,6 +14,16 @@ namespace Score2Stream.SettingsService
         #region Private Fields
 
         private const int WaitingPositions = 2;
+
+        private static readonly JsonSerializerOptions DeserializeOptions = new()
+        {
+            PropertyNameCaseInsensitive = true,
+        };
+
+        private static readonly JsonSerializerOptions SerializeOptions = new()
+        {
+            WriteIndented = true
+        };
 
         private readonly object saveLock = new();
 
@@ -109,16 +119,11 @@ namespace Score2Stream.SettingsService
                 mode: FileMode.Open,
                 access: FileAccess.Read);
 
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-            };
-
             try
             {
                 Contents = JsonSerializer.Deserialize<T>(
                     utf8Json: settingsFileStream,
-                    options: options);
+                    options: DeserializeOptions);
             }
             catch { }
         }
@@ -136,17 +141,12 @@ namespace Score2Stream.SettingsService
                 path: Path,
                 mode: FileMode.Create);
 
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = true
-            };
-
             try
             {
                 JsonSerializer.Serialize(
                     utf8Json: settingsFileStream,
                     value: Contents,
-                    options: options);
+                    options: SerializeOptions);
             }
             catch
             { }

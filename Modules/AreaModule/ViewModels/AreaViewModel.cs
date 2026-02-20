@@ -65,7 +65,7 @@ namespace Score2Stream.AreaModule.ViewModels
 
         public Area Area { get; private set; }
 
-        public ObservableCollection<SegmentViewModel> Clips { get; } = new ObservableCollection<SegmentViewModel>();
+        public ObservableCollection<SegmentViewModel> Clips { get; } = [];
 
         public bool IsActive
         {
@@ -113,7 +113,7 @@ namespace Score2Stream.AreaModule.ViewModels
             }
         }
 
-        public ObservableCollection<Template> Templates { get; } = new ObservableCollection<Template>();
+        public ObservableCollection<Template> Templates { get; } = [];
 
         public int ThresholdMonochrome
         {

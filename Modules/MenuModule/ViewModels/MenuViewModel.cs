@@ -90,13 +90,13 @@ namespace Score2Stream.MenuModule.ViewModels
                 canExecuteMethod: () => inputService.AreaService?.Area != default);
             this.AreaRemoveAllCommand = new DelegateCommand(
                 executeMethod: () => inputService.AreaService?.ClearAsync(),
-                canExecuteMethod: () => inputService.AreaService?.Areas?.Any() == true);
+                canExecuteMethod: () => inputService.AreaService?.Areas?.Count > 0);
             this.AreaUndoCommand = new DelegateCommand(
                 executeMethod: () => inputService.AreaService?.Undo(),
                 canExecuteMethod: () => inputService.AreaService?.CanUndo == true);
             this.AreaOrderAllCommand = new DelegateCommand(
                 executeMethod: () => inputService.AreaService?.Order(true),
-                canExecuteMethod: () => inputService.AreaService?.Areas?.Any() == true);
+                canExecuteMethod: () => inputService.AreaService?.Areas?.Count > 0);
 
             this.TemplateSelectCommand = new DelegateCommand<Template>(
                 executeMethod: t => SelectTemplate(t));
@@ -112,10 +112,10 @@ namespace Score2Stream.MenuModule.ViewModels
                 canExecuteMethod: () => inputService?.SampleService?.Sample != default);
             this.SampleRemoveAllCommand = new DelegateCommand(
                 executeMethod: () => inputService.SampleService.ClearAsync(),
-                canExecuteMethod: () => inputService?.SampleService?.Samples?.Any() == true);
+                canExecuteMethod: () => inputService?.SampleService?.Samples?.Count > 0);
             this.SampleOrderAllCommand = new DelegateCommand(
                 executeMethod: () => inputService.SampleService.Order(true),
-                canExecuteMethod: () => inputService?.SampleService?.Samples?.Any() == true);
+                canExecuteMethod: () => inputService?.SampleService?.Samples?.Count > 0);
 
             tabSelectedEvent = eventAggregator.GetEvent<TabSelectedEvent>();
             detectionChangedEvent = eventAggregator.GetEvent<DetectionChangedEvent>();
@@ -225,7 +225,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public DelegateCommand InputRotateRightCommand { get; }
 
-        public ObservableCollection<RibbonDropDownItem> Inputs { get; } = new ObservableCollection<RibbonDropDownItem>();
+        public ObservableCollection<RibbonDropDownItem> Inputs { get; } = [];
 
         public DelegateCommand<Input> InputSelectCommand { get; }
 
@@ -403,7 +403,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public DelegateCommand TemplateRemoveCommand { get; }
 
-        public ObservableCollection<RibbonDropDownItem> Templates { get; } = new ObservableCollection<RibbonDropDownItem>();
+        public ObservableCollection<RibbonDropDownItem> Templates { get; } = [];
 
         public DelegateCommand<Template> TemplateSelectCommand { get; }
 

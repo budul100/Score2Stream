@@ -141,7 +141,7 @@ namespace Score2Stream.VideoModule.ViewModels
             ? Left.Value + Width
             : default;
 
-        public ObservableCollection<SegmentViewModel> Segments { get; } = new ObservableCollection<SegmentViewModel>();
+        public ObservableCollection<SegmentViewModel> Segments { get; } = [];
 
         public int Size => Segments.Count;
 

@@ -14,31 +14,16 @@ using Score2Stream.Commons.Models.Contents;
 
 namespace Score2Stream.TemplateService
 {
-    public class Service
+    public class Service(IDialogService dialogService, IContainerProvider containerProvider,
+        IEventAggregator eventAggregator)
         : ITemplateService
     {
         #region Private Fields
 
-        private readonly IContainerProvider containerProvider;
-        private readonly IDialogService dialogService;
-        private readonly TemplatesChangedEvent templatesChangedEvent;
-        private readonly TemplateSelectedEvent templateSelectedEvent;
+        private readonly TemplatesChangedEvent templatesChangedEvent = eventAggregator.GetEvent<TemplatesChangedEvent>();
+        private readonly TemplateSelectedEvent templateSelectedEvent = eventAggregator.GetEvent<TemplateSelectedEvent>();
 
         #endregion Private Fields
-
-        #region Public Constructors
-
-        public Service(IDialogService dialogService, IContainerProvider containerProvider,
-            IEventAggregator eventAggregator)
-        {
-            this.dialogService = dialogService;
-            this.containerProvider = containerProvider;
-
-            templatesChangedEvent = eventAggregator.GetEvent<TemplatesChangedEvent>();
-            templateSelectedEvent = eventAggregator.GetEvent<TemplateSelectedEvent>();
-        }
-
-        #endregion Public Constructors
 
         #region Public Properties
 
@@ -46,7 +31,7 @@ namespace Score2Stream.TemplateService
 
         public Template Template { get; private set; }
 
-        public List<Template> Templates { get; } = new List<Template>();
+        public List<Template> Templates { get; } = [];
 
         #endregion Public Properties
 
@@ -72,7 +57,7 @@ namespace Score2Stream.TemplateService
                         template: template);
                 }
 
-                if (template.Samples?.Any() == true)
+                if (template.Samples?.Count > 0)
                 {
                     var samples = template.Samples
                         .Where(s => s.Image != default)
@@ -137,7 +122,7 @@ namespace Score2Stream.TemplateService
                     Template.SampleService.Clear();
                     Templates.Remove(Template);
 
-                    if (Templates.Any())
+                    if (Templates.Count > 0)
                     {
                         templatesChangedEvent.Publish();
 

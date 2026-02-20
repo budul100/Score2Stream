@@ -165,7 +165,7 @@ namespace Score2Stream.App.ViewModels
 
         private string GetProcessingTimes()
         {
-            if (inputService.Inputs?.Any() == true)
+            if (inputService.Inputs?.Count > 0)
             {
                 var result = new StringBuilder();
 

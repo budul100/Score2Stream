@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using Avalonia;
-using Avalonia.Dialogs;
 using Avalonia.ReactiveUI;
 
 namespace Score2Stream.App
@@ -18,23 +17,31 @@ namespace Score2Stream.App
 
         #region Public Methods
 
-        public static AppBuilder BuildAvaloniaApp() => AppBuilder
-            .Configure<App>()
-            .UsePlatformDetect()
-            .With(new SkiaOptions
-            {
-                MaxGpuResourceSizeBytes = MaxGpuResourceSizeBytes
-            })
-            .With(new X11PlatformOptions
-            {
-                EnableMultiTouch = true,
-                UseDBusMenu = true
-            })
-            .With(new Win32PlatformOptions())
-            .UseSkia()
-            .UseReactiveUI()
-            .UseManagedSystemDialogs()
-            .LogToTrace();
+        public static AppBuilder BuildAvaloniaApp()
+        {
+            var builder = AppBuilder
+                .Configure<App>()
+                .UsePlatformDetect()
+                .With(new SkiaOptions
+                {
+                    MaxGpuResourceSizeBytes = MaxGpuResourceSizeBytes
+                })
+                .With(new X11PlatformOptions
+                {
+                    EnableMultiTouch = true,
+                    UseDBusMenu = true
+                })
+                .With(new Win32PlatformOptions())
+                .UseSkia()
+                .UseReactiveUI()
+                .LogToTrace();
+
+#if WINDOWS || LINUX || OSX
+            builder = builder.UseManagedSystemDialogs();
+#endif
+
+            return builder;
+        }
 
         #endregion Public Methods
 

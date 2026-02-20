@@ -19,7 +19,7 @@ namespace Score2Stream.VideoService.Extensions
             var relevants = segment?.Area?.Template?.Samples?.ToArray();
 
             if (segment.Mat != default
-                && relevants?.Any() == true)
+                && relevants?.Length > 0)
             {
                 foreach (var relevant in relevants)
                 {

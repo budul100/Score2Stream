@@ -2,26 +2,11 @@
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Interfaces;
 
-namespace NavigationService
+namespace Score2Stream.NavigationService
 {
-    public class Service
+    public class Service(IRegionManager regionManager)
         : INavigationService
     {
-        #region Private Fields
-
-        private readonly IRegionManager regionManager;
-
-        #endregion Private Fields
-
-        #region Public Constructors
-
-        public Service(IRegionManager regionManager)
-        {
-            this.regionManager = regionManager;
-        }
-
-        #endregion Public Constructors
-
         #region Public Properties
 
         public ViewType? EditView

@@ -1,7 +1,7 @@
-﻿using Prism.Commands;
+﻿using System.Threading;
+using Prism.Commands;
 using Prism.Mvvm;
 using Score2Stream.Commons.Assets;
-using System.Threading;
 
 namespace Score2Stream.App.ViewModels
 {

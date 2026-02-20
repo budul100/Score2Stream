@@ -89,7 +89,7 @@ namespace Score2Stream.InputService
 
         public IAreaService AreaService => Active?.AreaService;
 
-        public HashSet<Input> Inputs { get; } = new HashSet<Input>();
+        public HashSet<Input> Inputs { get; } = [];
 
         public bool IsActive => VideoService?.IsActive ?? false;
 
@@ -117,7 +117,7 @@ namespace Score2Stream.InputService
                     ? settingsService.Contents.Inputs?.SingleOrDefault(i => i.DeviceId == input.DeviceId)
                     : settingsService.Contents.Inputs?.SingleOrDefault(i => i.FileName == input.FileName);
 
-                if (current?.Templates?.Any() == true)
+                if (current?.Templates?.Count > 0)
                 {
                     var templates = current.Templates.ToArray();
 
@@ -132,7 +132,7 @@ namespace Score2Stream.InputService
                     }
                 }
 
-                if (current?.Areas?.Any() == true)
+                if (current?.Areas?.Count > 0)
                 {
                     var areas = current.Areas.ToArray();
 
@@ -140,7 +140,7 @@ namespace Score2Stream.InputService
                     {
                         area.Template = input.TemplateService.Templates?
                             .FirstOrDefault(t => t.Name == area.TemplateName
-                                && t.Samples?.Any() == true);
+                                && t.Samples?.Count > 0);
 
                         try
                         {
@@ -191,7 +191,7 @@ namespace Score2Stream.InputService
             var relevants = Inputs
                 .Where(i => i.IsActive).ToArray();
 
-            if (relevants.Any())
+            if (relevants.Length > 0)
             {
                 var result = await dialogService.GetMessageBoxResultAsync(
                     contentMessage: "Shall all inputs be stopped?",
@@ -361,14 +361,14 @@ namespace Score2Stream.InputService
             {
                 Active.Templates = TemplateService?.Templates;
 
-                if (Active.Templates?.Any() == true)
+                if (Active.Templates?.Count > 0)
                 {
                     foreach (var template in Active.Templates)
                     {
                         var relevants = template.Samples?
                             .Where(s => s.Mat != default).ToArray();
 
-                        if (relevants?.Any() == true)
+                        if (relevants?.Length > 0)
                         {
                             foreach (var relevant in relevants)
                             {
@@ -394,7 +394,7 @@ namespace Score2Stream.InputService
 
                     if (TemplateService != default)
                     {
-                        if (TemplateService.Templates?.Any() != true)
+                        if (TemplateService.Templates?.Count > 0)
                         {
                             try
                             {
@@ -442,7 +442,7 @@ namespace Score2Stream.InputService
                     name: toBeAdded.Value);
             }
 
-            if (toBeRemoveds.Any() || toBeAddeds.Any())
+            if (toBeRemoveds.Length > 0 || toBeAddeds.Length > 0)
             {
                 inputsChangedEvent.Publish();
             }
@@ -452,7 +452,7 @@ namespace Score2Stream.InputService
         {
             UpdateDevices();
 
-            if (settingsService.Contents.Inputs?.Any() == true)
+            if (settingsService.Contents.Inputs?.Count > 0)
             {
                 var devices = Inputs
                     .Where(i => i.IsDevice)

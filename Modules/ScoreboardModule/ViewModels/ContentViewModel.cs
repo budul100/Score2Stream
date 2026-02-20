@@ -307,7 +307,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         #region Private Properties
 
-        private ObservableCollection<TickerViewModel> Tickers { get; } = new ObservableCollection<TickerViewModel>();
+        private ObservableCollection<TickerViewModel> Tickers { get; } = [];
 
         #endregion Private Properties
 

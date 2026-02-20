@@ -7,8 +7,8 @@ namespace Score2Stream.VideoService.Extensions
     {
         #region Public Methods
 
-        public static Rect? GetRectangle(this Size picSize, double firstX, double firstY, double secondX, double secondY,
-            Size? vizSize = default)
+        public static Rect? GetRectangle(this Size picSize, double firstX, double firstY, double secondX,
+            double secondY, Size? vizSize = default)
         {
             var result = default(Rect?);
 

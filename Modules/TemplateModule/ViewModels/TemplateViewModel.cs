@@ -95,7 +95,7 @@ namespace Score2Stream.TemplateModule.ViewModels
             set { SetProperty(ref isDetection, value); }
         }
 
-        public ObservableCollection<SampleViewModel> Samples { get; private set; } = new ObservableCollection<SampleViewModel>();
+        public ObservableCollection<SampleViewModel> Samples { get; private set; } = [];
 
         public Template Template { get; private set; }
 
@@ -128,7 +128,7 @@ namespace Score2Stream.TemplateModule.ViewModels
                 Samples.Remove(toBeRemoved);
             }
 
-            if (Template?.Samples?.Any() == true)
+            if (Template?.Samples?.Count > 0)
             {
                 var toBeAddeds = Template.Samples
                     .Where(s => s.Mat != default

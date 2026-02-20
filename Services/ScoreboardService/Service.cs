@@ -27,7 +27,7 @@ namespace Score2Stream.ScoreboardService
 
         private readonly AreaModifiedEvent areaModifiedEvent;
         private readonly SegmentModifiedEvent clipModifiedEvent;
-        private readonly Dictionary<SegmentType, Segment> clips = new();
+        private readonly Dictionary<SegmentType, Segment> clips = [];
         private readonly ScoreboardUpdatedEvent scoreboardUpdatedEvent;
         private readonly JsonSerializerOptions serializeOptions;
         private readonly ISettingsService<Session> settingsService;
@@ -652,7 +652,7 @@ namespace Score2Stream.ScoreboardService
                 var relevants = tickers
                     .Where(t => t.Item2).ToArray();
 
-                if (relevants?.Any() == true)
+                if (relevants?.Length > 0)
                 {
                     if (string.IsNullOrEmpty(ticker) || ++tickersInd >= relevants.Length)
                     {

@@ -1,4 +1,8 @@
-﻿using MsBox.Avalonia.Enums;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Score2Stream.AreaService.Extensions;
 using Score2Stream.Commons.Assets;
@@ -8,57 +12,31 @@ using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
 
 namespace Score2Stream.AreaService
 {
-    public class Service
+    public class Service(IScoreboardService scoreboardService, ITemplateService templateService,
+        IDialogService dialogService, IEventAggregator eventAggregator)
         : IAreaService
     {
         #region Private Fields
 
-        private readonly AreaModifiedEvent areaModifiedEvent;
-        private readonly AreasChangedEvent areasChangedEvent;
-        private readonly AreaSelectedEvent areaSelectedEvent;
-        private readonly AreasOrderedEvent areasOrderedEvent;
-        private readonly SegmentSelectedEvent clipSelectedEvent;
-        private readonly IDialogService dialogService;
-        private readonly IScoreboardService scoreboardService;
+        private readonly AreaModifiedEvent areaModifiedEvent = eventAggregator.GetEvent<AreaModifiedEvent>();
+        private readonly AreasChangedEvent areasChangedEvent = eventAggregator.GetEvent<AreasChangedEvent>();
+        private readonly AreaSelectedEvent areaSelectedEvent = eventAggregator.GetEvent<AreaSelectedEvent>();
+        private readonly AreasOrderedEvent areasOrderedEvent = eventAggregator.GetEvent<AreasOrderedEvent>();
+        private readonly SegmentSelectedEvent clipSelectedEvent = eventAggregator.GetEvent<SegmentSelectedEvent>();
 
         private int index;
         private bool orderDescending;
 
         #endregion Private Fields
 
-        #region Public Constructors
-
-        public Service(IScoreboardService scoreboardService, ITemplateService templateService,
-            IDialogService dialogService, IEventAggregator eventAggregator)
-        {
-            this.scoreboardService = scoreboardService;
-            this.dialogService = dialogService;
-
-            TemplateService = templateService;
-
-            areasChangedEvent = eventAggregator.GetEvent<AreasChangedEvent>();
-            areaModifiedEvent = eventAggregator.GetEvent<AreaModifiedEvent>();
-            areasOrderedEvent = eventAggregator.GetEvent<AreasOrderedEvent>();
-            areaSelectedEvent = eventAggregator.GetEvent<AreaSelectedEvent>();
-
-            clipSelectedEvent = eventAggregator.GetEvent<SegmentSelectedEvent>();
-        }
-
-        #endregion Public Constructors
-
         #region Public Properties
 
         public Area Area { get; private set; }
 
-        public List<Area> Areas { get; } = new List<Area>();
+        public List<Area> Areas { get; } = [];
 
         public bool CanUndo => Area?.X1Last.HasValue == true
             && Area.X2Last.HasValue
@@ -67,7 +45,7 @@ namespace Score2Stream.AreaService
 
         public Segment Segment { get; private set; }
 
-        public ITemplateService TemplateService { get; }
+        public ITemplateService TemplateService { get; } = templateService;
 
         #endregion Public Properties
 
@@ -99,7 +77,7 @@ namespace Score2Stream.AreaService
 
         public void Clear()
         {
-            if (Areas.Any())
+            if (Areas.Count > 0)
             {
                 for (var index = Areas.Count; index > 0; index--)
                 {

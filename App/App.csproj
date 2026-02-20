@@ -15,6 +15,7 @@
 	<PropertyGroup>
 		<AssemblyVersion>$(VersionMajor).$(VersionMinor).$(VersionBuild)</AssemblyVersion>
 		<AssemblyName>Score2Stream_$(AssemblyVersion)</AssemblyName>
+		<RootNamespace>Score2Stream.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>

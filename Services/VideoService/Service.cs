@@ -1,4 +1,8 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using OpenCvSharp;
 using Prism.Events;
 using Score2Stream.Commons.Assets;
@@ -11,10 +15,6 @@ using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
 using Score2Stream.VideoService.Extensions;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Score2Stream.VideoService
 {
@@ -199,7 +199,7 @@ namespace Score2Stream.VideoService
                         .SelectMany(a => a.Segments)
                         .Where(c => c.Rect.HasValue).ToArray();
 
-                    if (clips?.Any() == true)
+                    if (clips?.Length > 0)
                     {
                         heightMax = clips.Max(a => a.Rect.Value.Height);
                         widthMax = clips.Max(a => a.Rect.Value.Width);

@@ -1,7 +1,7 @@
-﻿using Avalonia.Threading;
-using Score2Stream.Commons.Interfaces;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Avalonia.Threading;
+using Score2Stream.Commons.Interfaces;
 
 namespace Score2Stream.DispatcherService
 {
@@ -12,10 +12,7 @@ namespace Score2Stream.DispatcherService
 
         public async Task<T> InvokeAsync<T>(Func<T> callback)
         {
-            if (callback is null)
-            {
-                throw new ArgumentNullException(nameof(callback));
-            }
+            ArgumentNullException.ThrowIfNull(callback);
 
             var result = await Dispatcher.UIThread.InvokeAsync<T>(
                 callback: callback,
@@ -26,10 +23,7 @@ namespace Score2Stream.DispatcherService
 
         public async Task InvokeAsync(Action action)
         {
-            if (action is null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
+            ArgumentNullException.ThrowIfNull(action);
 
             await Dispatcher.UIThread.InvokeAsync(
                 action,
@@ -38,10 +32,7 @@ namespace Score2Stream.DispatcherService
 
         public void Post(Action action)
         {
-            if (action is null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
+            ArgumentNullException.ThrowIfNull(action);
 
             Dispatcher.UIThread.Post(
                 action: action,

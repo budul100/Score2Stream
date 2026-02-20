@@ -6,24 +6,9 @@ using Score2Stream.MenuModule.Views;
 
 namespace Score2Stream.MenuModule
 {
-    public class Module
+    public class Module(IRegionManager regionManager)
         : IModule
     {
-        #region Private Fields
-
-        private readonly IRegionManager regionManager;
-
-        #endregion Private Fields
-
-        #region Public Constructors
-
-        public Module(IRegionManager regionManager)
-        {
-            this.regionManager = regionManager;
-        }
-
-        #endregion Public Constructors
-
         #region Public Methods
 
         public void OnInitialized(IContainerProvider containerProvider)

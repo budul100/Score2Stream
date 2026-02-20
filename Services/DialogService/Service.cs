@@ -111,10 +111,7 @@ namespace Score2Stream.DialogService
 
         public void Initialize(Window window, string iconUri = default)
         {
-            if (window is null)
-            {
-                throw new ArgumentNullException(nameof(window));
-            }
+            ArgumentNullException.ThrowIfNull(window);
 
             this.window = window;
 

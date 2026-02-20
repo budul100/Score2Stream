@@ -71,7 +71,7 @@ namespace Score2Stream.SampleService
 
         public Sample Sample { get; private set; }
 
-        public List<Sample> Samples { get; } = new List<Sample>();
+        public List<Sample> Samples { get; } = [];
 
         #endregion Public Properties
 
@@ -109,7 +109,7 @@ namespace Score2Stream.SampleService
 
         public void Clear()
         {
-            if (Samples.Any())
+            if (Samples.Count > 0)
             {
                 for (var index = Samples.Count; index > 0; index--)
                 {

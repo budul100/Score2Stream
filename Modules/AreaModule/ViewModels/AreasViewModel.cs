@@ -52,7 +52,7 @@ namespace Score2Stream.AreaModule.ViewModels
 
         #region Public Properties
 
-        public ObservableCollection<AreaViewModel> Areas { get; private set; } = new ObservableCollection<AreaViewModel>();
+        public ObservableCollection<AreaViewModel> Areas { get; private set; } = [];
 
         #endregion Public Properties
 
@@ -76,7 +76,7 @@ namespace Score2Stream.AreaModule.ViewModels
         {
             Areas.Clear();
 
-            if (inputService.AreaService?.Areas?.Any() == true)
+            if (inputService.AreaService?.Areas?.Count > 0)
             {
                 foreach (var area in inputService.AreaService.Areas)
                 {

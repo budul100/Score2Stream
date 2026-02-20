@@ -1,24 +1,15 @@
-﻿using Prism.Mvvm;
+﻿using System;
+using Prism.Mvvm;
 using Prism.Regions;
-using System;
 
 namespace Score2Stream.Commons.Prism
 {
-    public class RegionViewModelBase
+    public class RegionViewModelBase(IRegionManager regionManager)
         : BindableBase, INavigationAware, IConfirmNavigationRequest
     {
-        #region Public Constructors
-
-        public RegionViewModelBase(IRegionManager regionManager)
-        {
-            RegionManager = regionManager;
-        }
-
-        #endregion Public Constructors
-
         #region Protected Properties
 
-        protected IRegionManager RegionManager { get; }
+        protected IRegionManager RegionManager { get; } = regionManager;
 
         #endregion Protected Properties
 

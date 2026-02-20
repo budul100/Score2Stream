@@ -104,7 +104,7 @@ namespace Score2Stream.VideoModule.ViewModels
 
         public static double ZoomMin => Constants.ZoomMin;
 
-        public ObservableCollection<AreaViewModel> Areas { get; } = new ObservableCollection<AreaViewModel>();
+        public ObservableCollection<AreaViewModel> Areas { get; } = [];
 
         public Bitmap Bitmap
         {
@@ -269,8 +269,7 @@ namespace Score2Stream.VideoModule.ViewModels
 
                 if (area.IsVisible)
                 {
-                    var canBeResized = !area.Area.HasDimensions
-                        || area.Area?.Template?.Samples?.Any() != true;
+                    var canBeResized = !area.Area.HasDimensions || area.Area?.Template?.Samples?.Count > 0;
 
                     if (!canBeResized)
                     {
