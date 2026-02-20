@@ -394,7 +394,7 @@ namespace Score2Stream.InputService
 
                     if (TemplateService != default)
                     {
-                        if (TemplateService.Templates?.Count > 0)
+                        if (!(TemplateService.Templates?.Count > 0))
                         {
                             try
                             {
