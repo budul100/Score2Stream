@@ -1,12 +1,11 @@
-﻿using Avalonia;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Reactive.Linq;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Layout;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reactive.Linq;
 
 namespace AvaloniaUI.Ribbon
 {
@@ -76,8 +75,6 @@ namespace AvaloniaUI.Ribbon
 
                 ((ISetLogicalParent)tip).SetParent(element);
 
-                tip.Opened += KeyTip_Opened;
-
                 _keyTips.Add(element, tip);
                 return _keyTips[element];
             }
@@ -104,15 +101,5 @@ namespace AvaloniaUI.Ribbon
         public static void SetShowChildKeyTipKeys(Control element, bool value) => element.SetValue(ShowChildKeyTipKeysProperty, value);
 
         #endregion Public Methods
-
-        #region Private Methods
-
-        private static void KeyTip_Opened(object sender, EventArgs e)
-        {
-            var sned = sender as Popup;
-            sned.Host?.ConfigurePosition(sned.PlacementTarget, sned.Placement, new Point(sned.HorizontalOffset, sned.VerticalOffset));
-        }
-
-        #endregion Private Methods
     }
 }

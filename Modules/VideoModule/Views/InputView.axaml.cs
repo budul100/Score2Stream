@@ -2,26 +2,27 @@ using Avalonia.Controls;
 using Avalonia.Controls.PanAndZoom;
 using Score2Stream.VideoModule.ViewModels;
 
-namespace Score2Stream.VideoModule.Views;
-
-public partial class InputView
-    : UserControl
+namespace Score2Stream.VideoModule.Views
 {
-    #region Public Constructors
-
-    public InputView()
+    public partial class InputView
+        : UserControl
     {
-        InitializeComponent();
+        #region Public Constructors
 
-        var dataContext = this.DataContext as InputViewModel;
-        var zoomBorder = this.FindControl<ZoomBorder>("InputBorder");
-
-        if (dataContext != default
-            && zoomBorder != default)
+        public InputView()
         {
-            dataContext.OnVideoCentredEvent += (s, e) => zoomBorder.ResetMatrix();
-        }
-    }
+            InitializeComponent();
 
-    #endregion Public Constructors
+            var dataContext = this.DataContext as InputViewModel;
+            var zoomBorder = this.FindControl<ZoomBorder>("InputBorder");
+
+            if (dataContext != default
+                && zoomBorder != default)
+            {
+                dataContext.OnVideoCentredEvent += (s, e) => zoomBorder.ResetMatrix();
+            }
+        }
+
+        #endregion Public Constructors
+    }
 }
