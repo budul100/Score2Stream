@@ -1,5 +1,9 @@
 # Change log
 
+## Version 1.9.2
+
+* Output frozen when game is completed ([#29](https://github.com/budul100/Score2Stream/issues/29))
+
 ## Version 1.9.1
 
 * Error logging added

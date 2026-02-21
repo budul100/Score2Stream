@@ -595,30 +595,33 @@ namespace Score2Stream.ScoreboardService
 
         private void UpdateBoard()
         {
-            ClockGame = GetClockGame();
-            clockGame = !ClockNotFromClip
-                ? ClockGame
-                : default;
-
-            ClockShot = GetClockShot();
-            clockShot = !ShotNotFromClip
-                ? ClockShot
-                : default;
-
-            if (!PeriodNotFromClip
-                && clips[SegmentType.Period] != default)
+            if (!IsGameOver)
             {
-                Period = clips[SegmentType.Period]?.Value;
-                period = Period;
-            }
+                ClockGame = GetClockGame();
+                clockGame = !ClockNotFromClip
+                    ? ClockGame
+                    : default;
 
-            if (!ScoreNotFromClip)
-            {
-                ScoreHome = GetScoreHome();
-                scoreHome = ScoreHome;
+                ClockShot = GetClockShot();
+                clockShot = !ShotNotFromClip
+                    ? ClockShot
+                    : default;
 
-                ScoreGuest = GetScoreGuest();
-                scoreGuest = ScoreGuest;
+                if (!PeriodNotFromClip
+                    && clips[SegmentType.Period] != default)
+                {
+                    Period = clips[SegmentType.Period]?.Value;
+                    period = Period;
+                }
+
+                if (!ScoreNotFromClip)
+                {
+                    ScoreHome = GetScoreHome();
+                    scoreHome = ScoreHome;
+
+                    ScoreGuest = GetScoreGuest();
+                    scoreGuest = ScoreGuest;
+                }
             }
 
             var frequencyTime = new TimeSpan(
