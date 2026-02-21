@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using OpenCvSharp;
+using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Models.Contents;
@@ -40,20 +41,23 @@ namespace Score2Stream.VideoService.Extensions
             }
         }
 
-        public static void SetValue(this Segment segment, string value, int similarity,
-            TimeSpan waitingDuration)
+        public static void SetValue(this Segment segment, bool hasValue, string value,
+            float? similarity, TimeSpan waitingDuration)
         {
             if (segment.ValueCurrent != value)
             {
                 segment.ValueCurrent = value;
-                segment.SimilarityCurrent = similarity;
+                segment.HasValueCurrent = hasValue;
 
+                segment.SimilarityCurrent = Convert.ToInt32(similarity * Constants.ThresholdDivider);
                 segment.TimeCurrent = DateTime.Now;
             }
             else if (segment.Value != segment.ValueCurrent
                 && DateTime.Now > segment.TimeCurrent.Add(waitingDuration))
             {
                 segment.Value = segment.ValueCurrent;
+                segment.HasValue = segment.HasValueCurrent;
+
                 segment.Similarity = segment.SimilarityCurrent;
             }
         }

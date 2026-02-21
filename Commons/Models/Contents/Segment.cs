@@ -14,6 +14,10 @@ namespace Score2Stream.Commons.Models.Contents
 
         public Bitmap Bitmap { get; set; }
 
+        public bool HasValue { get; set; }
+
+        public bool HasValueCurrent { get; set; }
+
         public Queue<Mat> Images { get; set; } = new Queue<Mat>();
 
         public Mat Mat { get; set; }

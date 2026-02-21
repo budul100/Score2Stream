@@ -26,6 +26,7 @@ namespace Score2Stream.VideoService
 
         private readonly IDispatcherService dispatcherService;
         private readonly ILogger<Service> logger;
+        private readonly IRecognitionService recognitionService;
         private readonly SegmentDrawnEvent segmentDrawnEvent;
         private readonly SegmentUpdatedEvent segmentUpdatedEvent;
         private readonly ISettingsService<Session> settingsService;
@@ -48,11 +49,12 @@ namespace Score2Stream.VideoService
 
         public Service(ISettingsService<Session> settingsService, IAreaService areaService,
             IDispatcherService dispatcherService, IEventAggregator eventAggregator,
-            ILogger<Service> logger = default)
+            IRecognitionService recognitionService, ILogger<Service> logger = default)
         {
             this.dispatcherService = dispatcherService;
-            this.logger = logger;
+            this.recognitionService = recognitionService;
             this.settingsService = settingsService;
+            this.logger = logger;
 
             AreaService = areaService;
 
@@ -413,21 +415,38 @@ namespace Score2Stream.VideoService
             var relevant = segment.Matches
                 .OrderByDescending(m => m.Similarity).FirstOrDefault();
 
-            var similarity = Convert.ToInt32((relevant?.Similarity ?? 0) * Constants.ThresholdDivider);
-
             if (relevant?.Type == MatchType.Similar)
             {
                 relevant.Type = MatchType.Match;
 
                 segment.SetValue(
                     value: relevant.Sample.Value,
-                    similarity: similarity,
+                    hasValue: true,
+                    similarity: (float)relevant.Similarity,
                     waitingDuration: waitingDuration);
             }
             else
             {
+                var value = segment.Area?.Template?.Empty;
+                var hasValue = relevant != default;
+                var similarity = (float)(relevant?.Similarity ?? 0);
+
+                if (!settingsService.Contents.Detection.PreventAutoRecognition
+                    && relevant == default)
+                {
+                    var (Value, Confidence) = recognitionService.Recognize(segment.Mat);
+
+                    if (Confidence > thresholdMatching)
+                    {
+                        value = Value;
+                        hasValue = true;
+                        similarity = Confidence;
+                    }
+                }
+
                 segment.SetValue(
-                    value: segment.Area?.Template?.Empty,
+                    value: value,
+                    hasValue: hasValue,
                     similarity: similarity,
                     waitingDuration: waitingDuration);
             }

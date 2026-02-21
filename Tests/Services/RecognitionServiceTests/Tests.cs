@@ -19,7 +19,7 @@ namespace Score2Stream.Tests.RecognitionServiceTests
         [Fact]
         public void RecognizeNumbers()
         {
-            var recognitionService = new RecognitionService.DigitRecognizer();
+            var recognitionService = new RecognitionService.Service();
 
             var path0 = Path.Combine(SamplesPath, "SevenSegment-0.png");
             var bytes0 = GetBytes(path0);

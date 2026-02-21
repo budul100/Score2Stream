@@ -1,7 +1,8 @@
 # Change log
 
-## Version 1.9.2
+## Version 1.10.0
 
+* Auto-recognition used for values without samples
 * Output frozen when game is completed ([#29](https://github.com/budul100/Score2Stream/issues/29))
 
 ## Version 1.9.1

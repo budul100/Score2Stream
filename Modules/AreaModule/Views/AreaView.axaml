@@ -16,6 +16,7 @@
 
     <UserControl.Resources>
         <co:DescriptionToStringConverter x:Key="DescriptionToStringConverter" />
+        <co:HasItemsConverter x:Key="HasItemsConverter" />
 
         <sys:Double x:Key="LabelWidth">100</sys:Double>
         <sys:Double x:Key="ValueWidth">150</sys:Double>
@@ -71,7 +72,7 @@
                     Width="{StaticResource ValueWidth}"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
-                    IsEnabled="{Binding HasItems, RelativeSource={RelativeSource Self}}"
+                    IsEnabled="{Binding ItemsSource, RelativeSource={RelativeSource Self}, Converter={StaticResource HasItemsConverter}}"
                     ItemsSource="{Binding Types}"
                     SelectedItem="{Binding Type}">
                     <ComboBox.ItemTemplate>
@@ -96,7 +97,7 @@
                     Width="{StaticResource ValueWidth}"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
-                    IsEnabled="{Binding #TemplatesComboBox.HasItems}"
+                    IsEnabled="{Binding ItemsSource, RelativeSource={RelativeSource Self}, Converter={StaticResource HasItemsConverter}}"
                     ItemsSource="{Binding Templates}"
                     SelectedItem="{Binding Template, Mode=TwoWay}">
                     <ComboBox.ItemTemplate>

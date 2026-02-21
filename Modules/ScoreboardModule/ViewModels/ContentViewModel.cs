@@ -60,7 +60,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         public bool ClockNotFromClip
         {
-            get { return scoreboardService.ClockNotFromClip; }
+            get => scoreboardService.ClockNotFromClip;
             set
             {
                 scoreboardService.ClockNotFromClip = value;
@@ -73,7 +73,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         public Color ColorGuest
         {
-            get { return scoreboardService.ColorGuest; }
+            get => scoreboardService.ColorGuest;
             set
             {
                 if (!scoreboardService.ColorGuest.Equals(value))
@@ -91,7 +91,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         public Color ColorHome
         {
-            get { return scoreboardService.ColorHome; }
+            get => scoreboardService.ColorHome;
             set
             {
                 if (!scoreboardService.ColorHome.Equals(value))
@@ -109,7 +109,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         public bool IsGameOver
         {
-            get { return scoreboardService.IsGameOver; }
+            get => scoreboardService.IsGameOver;
             set
             {
                 if (scoreboardService.IsGameOver != value)
@@ -127,7 +127,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         public string Period
         {
-            get { return scoreboardService.Period; }
+            get => scoreboardService.Period;
             set
             {
                 if (scoreboardService.Period != value)
@@ -143,7 +143,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         public bool PeriodNotFromClip
         {
-            get { return scoreboardService.PeriodNotFromClip; }
+            get => scoreboardService.PeriodNotFromClip;
             set
             {
                 if (scoreboardService.PeriodNotFromClip != value)
@@ -157,7 +157,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         public string Periods
         {
-            get { return scoreboardService.Periods; }
+            get => scoreboardService.Periods;
             set
             {
                 if (scoreboardService.Periods != value)
@@ -177,7 +177,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         public string ScoreGuest
         {
-            get { return scoreboardService.ScoreGuest; }
+            get => scoreboardService.ScoreGuest;
             set
             {
                 if (scoreboardService.ScoreGuest != value)
@@ -195,7 +195,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         public string ScoreHome
         {
-            get { return scoreboardService.ScoreHome; }
+            get => scoreboardService.ScoreHome;
             set
             {
                 if (scoreboardService.ScoreHome != value)
@@ -213,7 +213,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         public bool ScoreNotFromClip
         {
-            get { return scoreboardService.ScoreNotFromClip; }
+            get => scoreboardService.ScoreNotFromClip;
             set
             {
                 if (scoreboardService.ScoreNotFromClip != value)
@@ -227,7 +227,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         public bool ShotNotFromClip
         {
-            get { return scoreboardService.ShotNotFromClip; }
+            get => scoreboardService.ShotNotFromClip;
             set
             {
                 scoreboardService.ShotNotFromClip = value;
@@ -238,7 +238,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         public bool ShowTenthOfSecs
         {
-            get { return scoreboardService.ShowTenthOfSecs; }
+            get => scoreboardService.ShowTenthOfSecs;
             set
             {
                 if (scoreboardService.ShowTenthOfSecs != value)
@@ -252,7 +252,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         public string TeamGuest
         {
-            get { return scoreboardService.TeamGuest; }
+            get => scoreboardService.TeamGuest;
             set
             {
                 if (scoreboardService.TeamGuest != value)
@@ -270,7 +270,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         public string TeamHome
         {
-            get { return scoreboardService.TeamHome; }
+            get => scoreboardService.TeamHome;
             set
             {
                 if (scoreboardService.TeamHome != value)
@@ -288,7 +288,7 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         public int TickersFrequency
         {
-            get { return scoreboardService.TickersFrequency; }
+            get => scoreboardService.TickersFrequency;
             set
             {
                 if (scoreboardService.TickersFrequency != value)

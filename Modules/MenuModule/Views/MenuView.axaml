@@ -652,7 +652,7 @@
                             VerticalAlignment="Center"
                             Content="Deactivate auto recognition"
                             FontSize="{StaticResource FontSize}"
-                            IsChecked="{Binding NoRecognition, Mode=TwoWay}"
+                            IsChecked="{Binding PreventAutoRecognition, Mode=TwoWay}"
                             IsEnabled="{Binding IsActive}" />
                     </rib:RibbonGroupBox>
                 </rib:RibbonTab.Groups>

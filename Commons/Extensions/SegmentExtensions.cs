@@ -15,7 +15,7 @@ namespace Score2Stream.Commons.Extensions
             {
                 string value;
 
-                if (segment.Area.Template != default)
+                if (segment.HasValue)
                 {
                     value = !string.IsNullOrWhiteSpace(segment.Value)
                         ? $"{segment.Value} ({segment.Similarity}%)"

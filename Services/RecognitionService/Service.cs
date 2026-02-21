@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using Microsoft.ML.OnnxRuntime;
@@ -9,7 +8,7 @@ using Score2Stream.Commons.Interfaces;
 
 namespace Score2Stream.RecognitionService
 {
-    public class DigitRecognizer
+    public class Service
         : IRecognitionService, IDisposable
     {
         #region Private Fields
@@ -27,10 +26,10 @@ namespace Score2Stream.RecognitionService
 
         #region Public Constructors
 
-        public DigitRecognizer()
+        public Service()
         {
             var modelPath = Path.Combine(
-                path1: Environment.CurrentDirectory,
+                path1: AppContext.BaseDirectory,
                 path2: TrainedDataFolder,
                 path3: TrainedDataFile);
 

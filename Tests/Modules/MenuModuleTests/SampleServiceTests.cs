@@ -86,7 +86,7 @@ namespace Score2Stream.Tests.MenuModuleTests
 
             var session = new Session
             {
-                Detection = new Detection { NoRecognition = true }
+                Detection = new Detection { PreventAutoRecognition = true }
             };
 
             var sessionSettingsServiceMock = new Mock<ISettingsService<Session>>();

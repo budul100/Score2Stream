@@ -92,7 +92,7 @@ namespace Score2Stream.SampleService
 
                 if (sample.Value == default
                     && recognitionService != default
-                    && !settingsService.Contents.Detection.NoRecognition)
+                    && !settingsService.Contents.Detection.PreventAutoRecognition)
                 {
                     sample.Value = recognitionService.Recognize(sample.Mat).Value;
                 }

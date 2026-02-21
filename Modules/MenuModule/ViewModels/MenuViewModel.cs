@@ -289,17 +289,17 @@ namespace Score2Stream.MenuModule.ViewModels
             }
         }
 
-        public bool NoRecognition
+        public bool PreventAutoRecognition
         {
-            get { return settingsService.Contents.Detection.NoRecognition; }
+            get { return settingsService.Contents.Detection.PreventAutoRecognition; }
             set
             {
-                if (settingsService.Contents.Detection.NoRecognition != value)
+                if (settingsService.Contents.Detection.PreventAutoRecognition != value)
                 {
-                    settingsService.Contents.Detection.NoRecognition = value;
+                    settingsService.Contents.Detection.PreventAutoRecognition = value;
                     settingsService.Save();
 
-                    RaisePropertyChanged(nameof(NoRecognition));
+                    RaisePropertyChanged(nameof(PreventAutoRecognition));
                 }
             }
         }
