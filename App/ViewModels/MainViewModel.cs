@@ -48,7 +48,7 @@ namespace Score2Stream.App.ViewModels
             assemblyTitle = GetAssemblyTitle();
 
             eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
-                action: () => UpdateTitle(),
+                action: UpdateTitle,
                 keepSubscriberReferenceAlive: true);
 
             LoadSettings();

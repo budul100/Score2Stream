@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Score2Stream.Commons.Interfaces;
 
 namespace Score2Stream.SettingsService
 {
-    public class Service<T>
+    public class Service<T>(ILogger<Service<T>> logger = default)
         : ISettingsService<T>
         where T : class
     {
@@ -125,7 +127,13 @@ namespace Score2Stream.SettingsService
                     utf8Json: settingsFileStream,
                     options: DeserializeOptions);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                logger?.LogError(
+                    ex, 
+                    "Loading of settings failed for path '{Path}'.", 
+                    Path);
+            }
         }
 
         private void SaveSettings()
@@ -148,8 +156,13 @@ namespace Score2Stream.SettingsService
                     value: Contents,
                     options: SerializeOptions);
             }
-            catch
-            { }
+            catch (Exception ex)
+            {
+                logger?.LogError(
+                    ex, 
+                    "Saving of settings failed for path '{Path}'.", 
+                    Path);
+            }
         }
 
         private async Task SaveSettingsAsync()

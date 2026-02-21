@@ -31,6 +31,7 @@
 		<PackageReference Include="Avalonia.Desktop" Version="11.3.12" />
 		<PackageReference Include="Avalonia.LinuxFramebuffer" Version="11.3.12" />
 		<PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.12" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.1" />
 		<PackageReference Include="Prism.Avalonia" Version="8.1.97.11073" />
 		<PackageReference Include="Prism.DryIoc.Avalonia" Version="8.1.97.11073" />
 		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->

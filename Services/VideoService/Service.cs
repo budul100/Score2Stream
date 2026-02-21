@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Avalonia.Media.Imaging;
 using OpenCvSharp;
 using Prism.Events;
@@ -24,6 +25,7 @@ namespace Score2Stream.VideoService
         #region Private Fields
 
         private readonly IDispatcherService dispatcherService;
+        private readonly ILogger<Service> logger;
         private readonly SegmentDrawnEvent segmentDrawnEvent;
         private readonly SegmentUpdatedEvent segmentUpdatedEvent;
         private readonly ISettingsService<Session> settingsService;
@@ -45,9 +47,11 @@ namespace Score2Stream.VideoService
         #region Public Constructors
 
         public Service(ISettingsService<Session> settingsService, IAreaService areaService,
-            IDispatcherService dispatcherService, IEventAggregator eventAggregator)
+            IDispatcherService dispatcherService, IEventAggregator eventAggregator,
+            ILogger<Service> logger = default)
         {
             this.dispatcherService = dispatcherService;
+            this.logger = logger;
             this.settingsService = settingsService;
 
             AreaService = areaService;
@@ -285,8 +289,12 @@ namespace Score2Stream.VideoService
                 while (hasContent
                     && !cancellationTokenSource.IsCancellationRequested);
             }
-            catch when (!System.Diagnostics.Debugger.IsAttached)
-            { }
+            catch (Exception ex) when (!System.Diagnostics.Debugger.IsAttached)
+            {
+                logger?.LogError(
+                    ex,
+                    "Video input failed failed.");
+            }
 
             frame = default;
             Bitmap = default;
