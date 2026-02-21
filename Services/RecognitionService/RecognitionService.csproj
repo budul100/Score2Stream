@@ -13,16 +13,18 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\Commons\Commons.csproj" />
 	</ItemGroup>
-	
+
 	<ItemGroup>
-		<None Include="..\..\Training\digit_model.onnx">
+		<Content Include="..\..\Training\digit_model.onnx">
 			<Link>TrainedData\digit_model.onnx</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="..\..\Training\digit_model.onnx">
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Content>
+		<Content Include="..\..\Training\digit_features.onnx">
 			<Link>TrainedData\digit_features.onnx</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Content>
 	</ItemGroup>
-	
+
 </Project>

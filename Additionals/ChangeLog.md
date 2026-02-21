@@ -3,6 +3,7 @@
 ## Version 1.9.1
 
 * Error logging added
+* Deployment method changed to Inno Setup
 
 ## Version 1.9.0
 
