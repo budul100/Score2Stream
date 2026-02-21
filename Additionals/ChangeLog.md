@@ -1,5 +1,9 @@
 # Change log
 
+## Version 1.9.1
+
+* Error logging added
+
 ## Version 1.9.0
 
 * Refactor: switch to ONNX digit recognition
