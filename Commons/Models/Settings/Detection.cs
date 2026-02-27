@@ -6,17 +6,17 @@ namespace Score2Stream.Commons.Models.Settings
     {
         #region Public Properties
 
-        public int DurationDetectionWait { get; set; } = Defaults.DetectionWaitDefault;
+        public int DurationDetectionWait { get; set; } = Defaults.DetectionWait;
 
         public bool FilterVerifieds { get; set; }
 
-        public int MaxCountUnverifieds { get; set; } = Defaults.DetectionUnverifiedsDefault;
+        public int MaxCountUnverifieds { get; set; } = Defaults.DetectionUnverifieds;
 
         public bool PreventAutoRecognition { get; set; }
 
-        public int ThresholdDetecting { get; set; } = Defaults.DetectionThresholdDefault;
+        public int ThresholdDetecting { get; set; } = Defaults.DetectionThreshold;
 
-        public int ThresholdMatching { get; set; } = Defaults.DetectionMatchingDefault;
+        public int ThresholdMatching { get; set; } = Defaults.DetectionMatching;
 
         #endregion Public Properties
     }

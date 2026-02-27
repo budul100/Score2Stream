@@ -51,7 +51,7 @@ namespace Score2Stream.Commons.Models.Settings
             }
         }
 
-        public int TickersFrequency { get; set; } = Defaults.TickersFrequencyDefault;
+        public int TickersFrequency { get; set; } = Defaults.TickersFrequency;
 
         public List<Tuple<string, bool>> TickersList
         {

@@ -46,7 +46,7 @@ namespace Score2Stream.MenuModule.Behaviors
 
         #region Private Methods
 
-        private void OnValueChanged(object? sender, NumericUpDownValueChangedEventArgs e)
+        private void OnValueChanged(object sender, NumericUpDownValueChangedEventArgs e)
         {
             if (AssociatedObject == null || OtherPort == null) return;
 

@@ -270,7 +270,7 @@ namespace Score2Stream.App.ViewModels
         {
             var sessionPath = settingsService.GetPath(
                 appName: Texts.AppName,
-                fileName: Defaults.FileNameSettingsDefault);
+                fileName: Defaults.FileNameSettings);
 
             settingsService.Load(sessionPath);
         }

@@ -20,7 +20,7 @@ namespace Score2Stream.Commons.Models.Contents
 
         public int Index { get; set; }
 
-        public int NoiseRemoval { get; set; } = Defaults.AreaNoiseRemovalDefault;
+        public int NoiseRemoval { get; set; } = Defaults.AreaNoiseRemoval;
 
         [JsonIgnore]
         public IEnumerable<Segment> Segments { get; set; }
@@ -32,7 +32,7 @@ namespace Score2Stream.Commons.Models.Contents
 
         public string TemplateName { get; set; }
 
-        public int ThresholdMonochrome { get; set; } = Defaults.AreaThresholdMonochromeDefault;
+        public int ThresholdMonochrome { get; set; } = Defaults.AreaThresholdMonochrome;
 
         public AreaType Type { get; set; } = AreaType.None;
 
