@@ -427,8 +427,9 @@ namespace Score2Stream.InputService
 
             foreach (var toBeRemoved in toBeRemoveds)
             {
-                toBeRemoved.AreaService.Clear();
-                toBeRemoved.VideoService?.Dispose();
+                toBeRemoved?.AreaService?.Clear();
+                toBeRemoved?.VideoService?.Dispose();
+
                 Inputs.Remove(toBeRemoved);
             }
 
