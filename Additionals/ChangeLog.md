@@ -2,7 +2,7 @@
 
 ## Version 1.11.0
 
-* Refactor input device matching by name (#30)
+* Refactor input device matching by name ([#30](https://github.com/budul100/Score2Stream/issues/30))
 
 ## Version 1.10.0
 

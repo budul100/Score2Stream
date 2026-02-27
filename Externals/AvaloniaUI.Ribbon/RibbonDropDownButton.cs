@@ -1,16 +1,26 @@
-﻿using Avalonia;
+﻿using System.Windows.Input;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 using AvaloniaUI.Ribbon.Enums;
 using AvaloniaUI.Ribbon.Interfaces;
 
 namespace AvaloniaUI.Ribbon
 {
-    public class RibbonDropDownButton : ItemsControl, IRibbonControl, ICanAddToQuickAccess
+    public class RibbonDropDownButton
+        : ItemsControl, IRibbonControl, ICanAddToQuickAccess
     {
         #region Public Fields
 
         public static readonly StyledProperty<bool> CanAddToQuickAccessProperty = RibbonButton.CanAddToQuickAccessProperty.AddOwner<RibbonDropDownButton>();
+
+        public static readonly StyledProperty<object> CommandParameterProperty = Button.CommandParameterProperty.AddOwner<RibbonDropDownButton>();
+
+        public static readonly StyledProperty<ICommand> CommandProperty = Button.CommandProperty.AddOwner<RibbonDropDownButton>();
 
         public static readonly StyledProperty<object> ContentProperty = ContentControl.ContentProperty.AddOwner<RibbonDropDownButton>();
 
@@ -47,6 +57,18 @@ namespace AvaloniaUI.Ribbon
         {
             get => GetValue(CanAddToQuickAccessProperty);
             set => SetValue(CanAddToQuickAccessProperty, value);
+        }
+
+        public ICommand Command
+        {
+            get => GetValue(CommandProperty);
+            set => SetValue(CommandProperty, value);
+        }
+
+        public object CommandParameter
+        {
+            get => GetValue(CommandParameterProperty);
+            set => SetValue(CommandParameterProperty, value);
         }
 
         public object Content
@@ -107,14 +129,29 @@ namespace AvaloniaUI.Ribbon
 
         #region Protected Methods
 
-        protected override Control CreateContainerForItemOverride(object? item, int index, object recycleKey)
+        protected override Control CreateContainerForItemOverride(object item, int index, object recycleKey)
         {
             return new RibbonDropDownItemPresenter();
         }
 
-        protected override bool NeedsContainerOverride(object? item, int index, out object recycleKey)
+        protected override bool NeedsContainerOverride(object item, int index, out object recycleKey)
         {
             return NeedsContainer<RibbonDropDownItemPresenter>(item, out recycleKey);
+        }
+
+        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+        {
+            base.OnApplyTemplate(e);
+
+            var toggle = e.NameScope.Find<ToggleButton>("toggle");
+            if (toggle != null)
+            {
+                toggle.Click += (s, args) =>
+                {
+                    if (Command?.CanExecute(CommandParameter) == true)
+                        Command.Execute(CommandParameter);
+                };
+            }
         }
 
         #endregion Protected Methods

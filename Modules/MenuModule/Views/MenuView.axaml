@@ -130,10 +130,13 @@
 
                     <rib:RibbonGroupBox Header="Video control">
                         <rib:RibbonDropDownButton
+                            Name="SourceButton"
                             Content="Source"
+                            Command="{Binding InputUpdateCommand}"
                             FontSize="{StaticResource FontSize}"
                             ItemsSource="{Binding Inputs}"
                             MinSize="Large">
+
                             <rib:RibbonDropDownButton.LargeIcon>
                                 <ControlTemplate>
                                     <mat:MaterialIcon
@@ -143,6 +146,7 @@
                                 </ControlTemplate>
                             </rib:RibbonDropDownButton.LargeIcon>
                         </rib:RibbonDropDownButton>
+
                         <rib:RibbonButton
                             Command="{Binding InputStopAllCommand}"
                             Content="Stop sources"

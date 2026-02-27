@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using static System.Net.Mime.MediaTypeNames;
 using AvaloniaUI.Ribbon;
 using Prism.Commands;
 using Prism.Events;
@@ -66,8 +67,8 @@ namespace Score2Stream.MenuModule.ViewModels
 
             this.InputUpdateCommand = new DelegateCommand(
                 executeMethod: UpdateInputs);
-            this.InputSelectCommand = new DelegateCommand<Input>(
-                executeMethod: i => inputService.SelectAsync(i));
+            this.InputSelectCommand = new DelegateCommand<object>(
+                executeMethod: param => inputService.SelectAsync(param as Input));
             this.InputStopAllCommand = new DelegateCommand(
                 executeMethod: () => inputService.StopAsync(),
                 canExecuteMethod: () => inputService.IsActive);
@@ -98,8 +99,8 @@ namespace Score2Stream.MenuModule.ViewModels
                 executeMethod: () => inputService.AreaService?.Order(true),
                 canExecuteMethod: () => inputService.AreaService?.Areas?.Count > 0);
 
-            this.TemplateSelectCommand = new DelegateCommand<Template>(
-                executeMethod: t => SelectTemplate(t));
+            this.TemplateSelectCommand = new DelegateCommand<object>(
+                executeMethod: param => SelectTemplate(param as Template));
             this.TemplateRemoveCommand = new DelegateCommand(
                 executeMethod: () => inputService.TemplateService.RemoveAsync(),
                 canExecuteMethod: () => inputService?.TemplateService?.Template != default);
@@ -125,7 +126,7 @@ namespace Score2Stream.MenuModule.ViewModels
                 action: OnGraphicsUpdated);
 
             eventAggregator.GetEvent<InputsChangedEvent>().Subscribe(
-                action: UpdateInputs);
+                action: RefreshInputs);
             eventAggregator.GetEvent<VideoStartedEvent>().Subscribe(
                 action: UpdateInputs);
             eventAggregator.GetEvent<VideoEndedEvent>().Subscribe(
@@ -145,12 +146,12 @@ namespace Score2Stream.MenuModule.ViewModels
                 action: _ => OnClipsUpdated());
 
             eventAggregator.GetEvent<TemplatesChangedEvent>().Subscribe(
-                action: UpdateTemplates);
+                action: RefreshTemplates);
             eventAggregator.GetEvent<TemplateSelectedEvent>().Subscribe(
                 action: _ => OnTemplateSelected());
 
             eventAggregator.GetEvent<SamplesChangedEvent>().Subscribe(
-                action: UpdateSamples);
+                action: RefreshSamples);
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
                 action: _ => OnSampleSelected());
 
@@ -196,10 +197,15 @@ namespace Score2Stream.MenuModule.ViewModels
         }
 
         public DelegateCommand<string> AreaAddCommand { get; }
+
         public DelegateCommand AreaOrderAllCommand { get; }
+
         public DelegateCommand AreaRemoveAllCommand { get; }
+
         public DelegateCommand AreaRemoveCommand { get; }
+
         public DelegateCommand AreaUndoCommand { get; }
+
         public DelegateCommand GraphicsReloadCommand { get; }
 
         public int ImagesQueueSize
@@ -227,7 +233,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public ObservableCollection<RibbonDropDownItem> Inputs { get; } = [];
 
-        public DelegateCommand<Input> InputSelectCommand { get; }
+        public DelegateCommand<object> InputSelectCommand { get; }
 
         public DelegateCommand InputStopAllCommand { get; }
 
@@ -332,6 +338,7 @@ namespace Score2Stream.MenuModule.ViewModels
         public DelegateCommand ScoreboardOpenCommand { get; }
 
         public DelegateCommand ScoreboardUpdateCommand { get; }
+
         public DelegateCommand<ViewType?> SelectTabCommand { get; }
 
         public int? TabIndex
@@ -378,7 +385,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
                             tabSelectedEvent.Publish(ViewType.Templates);
 
-                            UpdateSamples();
+                            RefreshSamples();
 
                             break;
                     }
@@ -390,7 +397,7 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public ObservableCollection<RibbonDropDownItem> Templates { get; } = [];
 
-        public DelegateCommand<Template> TemplateSelectCommand { get; }
+        public DelegateCommand<object> TemplateSelectCommand { get; }
 
         public int ThresholdDetecting
         {
@@ -549,7 +556,7 @@ namespace Score2Stream.MenuModule.ViewModels
             AreaUndoCommand.RaiseCanExecuteChanged();
             AreaOrderAllCommand.RaiseCanExecuteChanged();
 
-            UpdateTemplates();
+            RefreshTemplates();
         }
 
         private void OnGraphicsUpdated()
@@ -567,12 +574,12 @@ namespace Score2Stream.MenuModule.ViewModels
 
         private void OnTemplateSelected()
         {
-            UpdateTemplates();
+            RefreshTemplates();
 
             TemplateRemoveCommand.RaiseCanExecuteChanged();
             SampleAddCommand.RaiseCanExecuteChanged();
 
-            UpdateSamples();
+            RefreshSamples();
         }
 
         private void OnVideoUpdated()
@@ -586,57 +593,45 @@ namespace Score2Stream.MenuModule.ViewModels
             AreaAddCommand.RaiseCanExecuteChanged();
         }
 
-        private void SelectTemplate(Template template)
+        private void RefreshInputs()
         {
-            if (inputService?.TemplateService != default)
-            {
-                if (template == default)
-                {
-                    inputService.TemplateService.Create();
-                }
-                else
-                {
-                    inputService.TemplateService.Select(template);
-                }
-            }
-        }
+            var menuInputs = new HashSet<Input>(Inputs
+                .Where(i => i.CommandParameter != default)
+                .Select(i => (Input)i.CommandParameter));
 
-        private void UpdateInputs()
-        {
-            var menuInputs = new HashSet<Guid>(Inputs.Where(i => i.CommandParameter != default).Select(i => (i.CommandParameter as Input).Guid));
-            var serviceInputs = new HashSet<Guid>(inputService.Inputs.Select(i => i.Guid));
+            var serviceInputs = new HashSet<Input>(inputService.Inputs);
 
             if (!menuInputs.SetEquals(serviceInputs))
             {
                 Inputs.Clear();
 
-                var ordereds = inputService.Inputs
+                var orderedInputs = inputService.Inputs
                     .OrderByDescending(i => i.IsDevice)
                     .ThenBy(i => i.Name).ToArray();
 
-                foreach (var ordered in ordereds)
+                foreach (var orderedInput in orderedInputs)
                 {
-                    var isChecked = (ordered.IsDevice && ordered.IsActive)
-                        || (!ordered.IsDevice && !ordered.IsEnded);
+                    var isChecked = (orderedInput.IsDevice && orderedInput.IsActive)
+                        || (!orderedInput.IsDevice && !orderedInput.IsEnded);
 
                     var input = new RibbonDropDownItem
                     {
                         Command = InputSelectCommand,
-                        CommandParameter = ordered,
+                        CommandParameter = orderedInput,
                         IsChecked = isChecked,
-                        Text = ordered.Name
+                        Text = orderedInput.Name
                     };
 
                     Inputs.Add(input);
                 }
 
-                var selectFileInput = new RibbonDropDownItem
+                var fileInput = new RibbonDropDownItem
                 {
                     Command = InputSelectCommand,
                     Text = Texts.MenuInputFileText,
                 };
 
-                Inputs.Add(selectFileInput);
+                Inputs.Add(fileInput);
 
                 RaisePropertyChanged(nameof(Inputs));
                 RaisePropertyChanged(nameof(IsActive));
@@ -646,17 +641,32 @@ namespace Score2Stream.MenuModule.ViewModels
                 RaisePropertyChanged(nameof(ThresholdMatching));
                 RaisePropertyChanged(nameof(WaitingDuration));
 
-                UpdateSamples();
+                RefreshSamples();
+            }
+            else
+            {
+                foreach (var input in Inputs)
+                {
+                    if (input.CommandParameter is Input currentInput)
+                    {
+                        input.Text = currentInput.Name;
+                        input.IsChecked = (currentInput.IsDevice && currentInput.IsActive)
+                            || (!currentInput.IsDevice && !currentInput.IsEnded);
+                    }
+                }
+
+                RaisePropertyChanged(nameof(Inputs));
+                RaisePropertyChanged(nameof(IsActive));
             }
         }
 
-        private void UpdateSamples()
+        private void RefreshSamples()
         {
             SampleRemoveAllCommand.RaiseCanExecuteChanged();
             SampleOrderAllCommand.RaiseCanExecuteChanged();
         }
 
-        private void UpdateTemplates()
+        private void RefreshTemplates()
         {
             Templates.Clear();
 
@@ -690,6 +700,28 @@ namespace Score2Stream.MenuModule.ViewModels
 
                 RaisePropertyChanged(nameof(Templates));
             }
+        }
+
+        private void SelectTemplate(Template template)
+        {
+            if (inputService?.TemplateService != default)
+            {
+                if (template == default)
+                {
+                    inputService.TemplateService.Create();
+                }
+                else
+                {
+                    inputService.TemplateService.Select(template);
+                }
+            }
+        }
+
+        private void UpdateInputs()
+        {
+            inputService.Update();
+
+            RefreshInputs();
         }
 
         #endregion Private Methods

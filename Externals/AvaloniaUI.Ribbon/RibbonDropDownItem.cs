@@ -19,9 +19,9 @@ namespace AvaloniaUI.Ribbon
         public static readonly StyledProperty<bool> IsCheckedProperty = AvaloniaProperty.Register<RibbonDropDownItem, bool>(nameof(IsChecked));
 
         public static readonly DirectProperty<RibbonDropDownItem, string> TextProperty = AvaloniaProperty.RegisterDirect<RibbonDropDownItem, string>(
-            nameof(Text),
-            o => o.Text,
-            (o, v) => o.Text = v);
+            name: nameof(Text),
+            getter: o => o.Text,
+            setter: (o, v) => o.Text = v);
 
         #endregion Public Fields
 

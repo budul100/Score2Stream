@@ -1,5 +1,7 @@
-using Avalonia.Controls;
 using System;
+using Avalonia.Controls;
+using Avalonia.LogicalTree;
+using Avalonia.VisualTree;
 
 namespace AvaloniaUI.Ribbon
 {
@@ -23,12 +25,14 @@ namespace AvaloniaUI.Ribbon
 
         protected override void OnClick()
         {
-            if (this.Parent is RibbonDropDownButton parent)
+            base.OnClick();
+
+            var parent = this.FindLogicalAncestorOfType<RibbonDropDownButton>();
+
+            if (parent != null)
             {
                 parent.IsDropDownOpen = false;
             }
-
-            base.OnClick();
         }
 
         #endregion Protected Methods

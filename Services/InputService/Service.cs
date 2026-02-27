@@ -441,37 +441,61 @@ namespace Score2Stream.InputService
 
         private void UpdateDevices()
         {
-            var devices = inputEnumerator.GetDevices()
+            var currentDevices = inputEnumerator.GetDevices()
                 .OrderBy(d => d.Value).ToArray();
 
-            var toBeRemoveds = Inputs
+            var previousStates = Inputs
+                .ToDictionary(i => i, i => i.IsActive);
+
+            var removedDevices = Inputs
                 .Where(i => i.IsEnded
-                    || (i.IsDevice && !devices.Any(d => d.Value == i.Name))).ToArray();
+                    || (i.IsDevice && !currentDevices.Any(d => d.Value == i.Name))).ToArray();
 
-            foreach (var toBeRemoved in toBeRemoveds)
+            foreach (var removedDevice in removedDevices)
             {
-                toBeRemoved?.AreaService?.Clear();
-                toBeRemoved?.VideoService?.Dispose();
+                removedDevice?.AreaService?.Clear();
+                removedDevice?.VideoService?.Dispose();
 
-                if (toBeRemoved == Active)
+                if (removedDevice == Active)
                 {
                     Active = null;
                 }
 
-                Inputs.Remove(toBeRemoved);
+                Inputs.Remove(removedDevice);
             }
 
-            var toBeAddeds = devices
-                .Where(d => !Inputs.Any(i => d.Value == i.Name)).ToArray();
+            var hasChanges = removedDevices.Length > 0;
 
-            foreach (var toBeAdded in toBeAddeds)
+            foreach (var currentDevice in currentDevices)
             {
-                GetInput(
-                    deviceId: toBeAdded.Key,
-                    name: toBeAdded.Value);
+                var currentInput = Inputs
+                    .SingleOrDefault(i => i.IsDevice && i.Name == currentDevice.Value);
+
+                if (currentInput == default)
+                {
+                    GetInput(
+                        deviceId: currentDevice.Key,
+                        name: currentDevice.Value);
+
+                    hasChanges = true;
+                }
+                else if (currentInput.DeviceId != currentDevice.Key)
+                {
+                    currentInput.DeviceId = currentDevice.Key;
+
+                    hasChanges = true;
+                }
             }
 
-            if (toBeRemoveds.Length > 0 || toBeAddeds.Length > 0)
+            if (!hasChanges)
+            {
+                hasChanges = Inputs
+                    .Any(i => previousStates.TryGetValue(
+                        key: i,
+                        value: out var wasActive) && wasActive != i.IsActive);
+            }
+
+            if (hasChanges)
             {
                 inputsChangedEvent.Publish();
             }
@@ -485,7 +509,8 @@ namespace Score2Stream.InputService
             {
                 var devices = Inputs
                     .Where(i => i.IsDevice)
-                    .Where(d => settingsService.Contents.Inputs.Any(i => i.Name == d.Name)).ToArray();
+                    .Where(d => settingsService.Contents.Inputs
+                        .Any(i => i.Name == d.Name)).ToArray();
 
                 foreach (var device in devices)
                 {
