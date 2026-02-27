@@ -141,6 +141,8 @@ namespace Score2Stream.App
             containerRegistry.RegisterSingleton<IWebService, WebService.Service>();
 
             containerRegistry.RegisterSingleton<IInputService, InputService.Service>();
+            containerRegistry.RegisterSingleton<IInputEnumerator, InputService.Helpers.DeviceEnumerator>();
+
             containerRegistry.Register<IVideoService, VideoService.Service>();
             containerRegistry.Register<IAreaService, AreaService.Service>();
             containerRegistry.Register<ITemplateService, TemplateService.Service>();

@@ -5,17 +5,8 @@ using Score2Stream.Commons.Interfaces;
 
 namespace Score2Stream.Commons.Models.Contents
 {
-    public class Input
+    public class Input(bool isDevice)
     {
-        #region Public Constructors
-
-        public Input(bool isDevice)
-        {
-            IsDevice = isDevice;
-        }
-
-        #endregion Public Constructors
-
         #region Public Properties
 
         public List<Area> Areas { get; set; }
@@ -33,7 +24,7 @@ namespace Score2Stream.Commons.Models.Contents
         [JsonIgnore]
         public bool IsActive => VideoService?.IsActive ?? false;
 
-        public bool IsDevice { get; }
+        public bool IsDevice { get; } = isDevice;
 
         [JsonIgnore]
         public bool IsEnded => VideoService?.IsEnded ?? false;

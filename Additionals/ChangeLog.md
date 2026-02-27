@@ -1,5 +1,9 @@
 # Change log
 
+## Version 1.11.0
+
+* Refactor input device matching by name (#30)
+
 ## Version 1.10.0
 
 * Auto-recognition used for values without samples

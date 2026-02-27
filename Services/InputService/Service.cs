@@ -28,23 +28,26 @@ namespace Score2Stream.InputService
 
         private readonly IContainerProvider containerProvider;
         private readonly IDialogService dialogService;
+        private readonly IInputEnumerator inputEnumerator;
         private readonly InputsChangedEvent inputsChangedEvent;
         private readonly InputSelectedEvent inputSelectedEvent;
         private readonly ISettingsService<Session> settingsService;
 
         private bool isInitializing;
         private IStorageFolder startLocation;
+        private Task startLocationTask;
 
         #endregion Private Fields
 
         #region Public Constructors
 
         public Service(ISettingsService<Session> settingsService, IDialogService dialogService,
-            IContainerProvider containerProvider, IEventAggregator eventAggregator)
+            IContainerProvider containerProvider, IEventAggregator eventAggregator, IInputEnumerator inputEnumerator)
         {
             this.settingsService = settingsService;
             this.dialogService = dialogService;
             this.containerProvider = containerProvider;
+            this.inputEnumerator = inputEnumerator;
 
             inputsChangedEvent = eventAggregator.GetEvent<InputsChangedEvent>();
             inputSelectedEvent = eventAggregator.GetEvent<InputSelectedEvent>();
@@ -107,14 +110,14 @@ namespace Score2Stream.InputService
         {
             isInitializing = true;
 
-            Task.Run(async () => startLocation = await dialogService.GetFolderAsync(settingsService.Contents.Video.FilePathVideo));
+            startLocationTask = GetStartLocationTask();
 
             UpdateInputs();
 
             foreach (var input in Inputs)
             {
                 var current = input.IsDevice
-                    ? settingsService.Contents.Inputs?.SingleOrDefault(i => i.DeviceId == input.DeviceId)
+                    ? settingsService.Contents.Inputs?.SingleOrDefault(i => i.Name == input.Name)
                     : settingsService.Contents.Inputs?.SingleOrDefault(i => i.FileName == input.FileName);
 
                 if (current?.Templates?.Count > 0)
@@ -153,7 +156,7 @@ namespace Score2Stream.InputService
             }
 
             var relevant = Inputs.FirstOrDefault(i => !i.IsDevice
-                || settingsService.Contents.Inputs?.Any(s => s.DeviceId == i.DeviceId) == true);
+                || settingsService.Contents.Inputs?.Any(s => s.Name == i.Name) == true);
 
             SelectInput(relevant);
 
@@ -172,6 +175,11 @@ namespace Score2Stream.InputService
             {
                 try
                 {
+                    if (startLocationTask != null)
+                    {
+                        await startLocationTask;
+                    }
+
                     input = await GetInputAsync();
                 }
                 catch (MaxCountExceededException exception)
@@ -251,8 +259,7 @@ namespace Score2Stream.InputService
 
         private Input GetInput(int deviceId, string name)
         {
-            var result = Inputs
-                .SingleOrDefault(i => i.DeviceId == deviceId);
+            var result = Inputs.SingleOrDefault(i => i.Name == name);
 
             if (result == default)
             {
@@ -264,6 +271,10 @@ namespace Score2Stream.InputService
                 };
 
                 Inputs.Add(result);
+            }
+            else
+            {
+                result.DeviceId = deviceId;
             }
 
             return result;
@@ -297,6 +308,14 @@ namespace Score2Stream.InputService
                     }
                 }
             }
+
+            return result;
+        }
+
+        private Task<IStorageFolder> GetStartLocationTask()
+        {
+            var filePathVideo = settingsService.Contents.Video.FilePathVideo;
+            var result = Task.Run(async () => startLocation = await dialogService.GetFolderAsync(filePathVideo));
 
             return result;
         }
@@ -345,7 +364,13 @@ namespace Score2Stream.InputService
                     .Where(i => i.IsActive
                         && !i.IsEnded).ToList();
 
-                if (settingsService.Contents.Inputs != inputs)
+                var currentInputs = settingsService.Contents.Inputs;
+
+                var hasChanges = currentInputs == null
+                    || currentInputs.Count != inputs.Count
+                    || !inputs.All(i => currentInputs.Contains(i));
+
+                if (hasChanges)
                 {
                     settingsService.Contents.Inputs = inputs;
 
@@ -416,25 +441,28 @@ namespace Score2Stream.InputService
 
         private void UpdateDevices()
         {
-            using var deviceEnumerator = new SystemDeviceEnumerator();
-
-            var devices = deviceEnumerator.ListVideoInputDevice()
+            var devices = inputEnumerator.GetDevices()
                 .OrderBy(d => d.Value).ToArray();
 
             var toBeRemoveds = Inputs
                 .Where(i => i.IsEnded
-                    || (i.IsDevice && !devices.Any(d => d.Key == i.DeviceId))).ToArray();
+                    || (i.IsDevice && !devices.Any(d => d.Value == i.Name))).ToArray();
 
             foreach (var toBeRemoved in toBeRemoveds)
             {
                 toBeRemoved?.AreaService?.Clear();
                 toBeRemoved?.VideoService?.Dispose();
 
+                if (toBeRemoved == Active)
+                {
+                    Active = null;
+                }
+
                 Inputs.Remove(toBeRemoved);
             }
 
             var toBeAddeds = devices
-                .Where(d => !Inputs.Any(i => d.Key == i.DeviceId)).ToArray();
+                .Where(d => !Inputs.Any(i => d.Value == i.Name)).ToArray();
 
             foreach (var toBeAdded in toBeAddeds)
             {
@@ -457,7 +485,7 @@ namespace Score2Stream.InputService
             {
                 var devices = Inputs
                     .Where(i => i.IsDevice)
-                    .Where(d => settingsService.Contents.Inputs.Any(i => i.DeviceId == d.DeviceId)).ToArray();
+                    .Where(d => settingsService.Contents.Inputs.Any(i => i.Name == d.Name)).ToArray();
 
                 foreach (var device in devices)
                 {
@@ -474,7 +502,10 @@ namespace Score2Stream.InputService
                     {
                         var input = GetInput(file);
 
-                        RunInput(input);
+                        if (input != default)
+                        {
+                            RunInput(input);
+                        }
                     }
                 }
                 catch (MaxCountExceededException)
