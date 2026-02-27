@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using static System.Net.Mime.MediaTypeNames;
+using Avalonia.Threading;
 using AvaloniaUI.Ribbon;
 using Prism.Commands;
 using Prism.Events;
@@ -32,6 +33,7 @@ namespace Score2Stream.MenuModule.ViewModels
         #region Private Fields
 
         private readonly DetectionChangedEvent detectionChangedEvent;
+        private readonly IDispatcherService dispatcherService;
         private readonly FilterChangedEvent filterChangedEvent;
         private readonly IInputService inputService;
         private readonly IRegionManager regionManager;
@@ -45,12 +47,13 @@ namespace Score2Stream.MenuModule.ViewModels
         #region Public Constructors
 
         public MenuViewModel(ISettingsService<Session> settingsService, IWebService webService,
-            IScoreboardService scoreboardService, IInputService inputService, IRegionManager regionManager,
-            IEventAggregator eventAggregator)
+            IScoreboardService scoreboardService, IInputService inputService, IDispatcherService dispatcherService,
+            IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
             this.settingsService = settingsService;
             this.inputService = inputService;
+            this.dispatcherService = dispatcherService;
             this.regionManager = regionManager;
 
             this.SelectTabCommand = new DelegateCommand<ViewType?>(
@@ -59,10 +62,10 @@ namespace Score2Stream.MenuModule.ViewModels
             this.GraphicsReloadCommand = new DelegateCommand(
                 executeMethod: async () => await webService.ReloadAsync());
             this.ScoreboardOpenCommand = new DelegateCommand(
-                executeMethod: () => webService.Open(),
+                executeMethod: webService.Open,
                 canExecuteMethod: () => webService.IsActive);
             this.ScoreboardUpdateCommand = new DelegateCommand(
-                executeMethod: () => scoreboardService.Update(),
+                executeMethod: scoreboardService.Update,
                 canExecuteMethod: () => !scoreboardService.UpToDate);
 
             this.InputUpdateCommand = new DelegateCommand(
@@ -78,13 +81,13 @@ namespace Score2Stream.MenuModule.ViewModels
                 canExecuteMethod: () => inputService.IsActive);
             this.InputRotateLeftCommand = new DelegateCommand(
                 executeMethod: () => ChangeInputRotate(true),
-                canExecuteMethod: () => CanRotateLeft());
+                canExecuteMethod: CanRotateLeft);
             this.InputRotateRightCommand = new DelegateCommand(
                 executeMethod: () => ChangeInputRotate(false),
-                canExecuteMethod: () => CanRotateRight());
+                canExecuteMethod: CanRotateRight);
 
             this.AreaAddCommand = new DelegateCommand<string>(
-                executeMethod: n => AddSegments(n),
+                executeMethod: AddSegments,
                 canExecuteMethod: _ => inputService.IsActive);
             this.AreaRemoveCommand = new DelegateCommand(
                 executeMethod: () => inputService.AreaService?.RemoveAsync(),
@@ -163,9 +166,13 @@ namespace Score2Stream.MenuModule.ViewModels
 
         #region Public Properties
 
-        public static int DurationMax => Constants.DurationMax;
+        public static int DelayMax => Constants.DelayMax;
 
-        public static int DurationMin => Constants.DurationMin;
+        public static int DelayMin => Constants.DelayMin;
+
+        public static int PortMax => Constants.PortMax;
+
+        public static int PortMin => Constants.PortMin;
 
         public static int QueueSizeMax => Constants.ImageQueueSizeMax;
 
@@ -205,6 +212,23 @@ namespace Score2Stream.MenuModule.ViewModels
         public DelegateCommand AreaRemoveCommand { get; }
 
         public DelegateCommand AreaUndoCommand { get; }
+
+        public int DelaySocket
+        {
+            get { return settingsService.Contents.Server.DelaySocket; }
+            set
+            {
+                if (value >= DelayMin
+                    && value <= DelayMax
+                    && settingsService.Contents.Server.DelaySocket != value)
+                {
+                    settingsService.Contents.Server.DelaySocket = value;
+                    settingsService.Save();
+
+                    RaisePropertyChanged(nameof(DelaySocket));
+                }
+            }
+        }
 
         public DelegateCommand GraphicsReloadCommand { get; }
 
@@ -295,6 +319,40 @@ namespace Score2Stream.MenuModule.ViewModels
             }
         }
 
+        public int PortServer
+        {
+            get { return settingsService.Contents.Server.PortServer; }
+            set
+            {
+                if (value >= PortMin
+                    && value <= PortMax
+                    && settingsService.Contents.Server.PortServer != value)
+                {
+                    settingsService.Contents.Server.PortServer = value;
+                    settingsService.Save();
+
+                    RaisePropertyChanged(nameof(PortServer));
+                }
+            }
+        }
+
+        public int PortSocket
+        {
+            get { return settingsService.Contents.Server.PortSocket; }
+            set
+            {
+                if (value >= PortMin
+                    && value <= PortMax
+                    && settingsService.Contents.Server.PortSocket != value)
+                {
+                    settingsService.Contents.Server.PortSocket = value;
+                    settingsService.Save();
+
+                    RaisePropertyChanged(nameof(PortSocket));
+                }
+            }
+        }
+
         public bool PreventAutoRecognition
         {
             get { return settingsService.Contents.Detection.PreventAutoRecognition; }
@@ -316,7 +374,7 @@ namespace Score2Stream.MenuModule.ViewModels
             set
             {
                 if (value >= 0
-                    && value <= DurationMax
+                    && value <= DelayMax
                     && settingsService.Contents.Video.ProcessingDelay != value)
                 {
                     settingsService.Contents.Video.ProcessingDelay = value;
@@ -456,30 +514,13 @@ namespace Score2Stream.MenuModule.ViewModels
             set
             {
                 if (value >= 0
-                    && value <= DurationMax
+                    && value <= DelayMax
                     && settingsService.Contents.Detection.DurationDetectionWait != value)
                 {
                     settingsService.Contents.Detection.DurationDetectionWait = value;
                     settingsService.Save();
 
                     RaisePropertyChanged(nameof(WaitingDuration));
-                }
-            }
-        }
-
-        public int WebSocketDelay
-        {
-            get { return settingsService.Contents.Server.WebSocketDelay; }
-            set
-            {
-                if (value >= DurationMin
-                    && value <= DurationMax
-                    && settingsService.Contents.Server.WebSocketDelay != value)
-                {
-                    settingsService.Contents.Server.WebSocketDelay = value;
-                    settingsService.Save();
-
-                    RaisePropertyChanged(nameof(WebSocketDelay));
                 }
             }
         }

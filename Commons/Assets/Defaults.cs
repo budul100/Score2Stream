@@ -10,6 +10,8 @@
         public const int AreaNoiseRemovalDefault = 0;
         public const int AreaThresholdMonochromeDefault = 50;
 
+        public const int DelaySocket = 50;
+
         public const int DetectionMatchingDefault = 40;
         public const int DetectionThresholdDefault = 90;
         public const int DetectionUnverifiedsDefault = 40;
@@ -17,15 +19,13 @@
 
         public const string FileNameSettingsDefault = "userSettings.json";
 
-        public const int PortServerHttpDefault = 5000;
-        public const int PortSocketHttpDefault = 9000;
+        public const int PortServer = 5000;
+        public const int PortSocket = 9000;
 
         public const int TickersFrequencyDefault = 10;
 
         public const int VideoDelayProcessingDefault = 0;
         public const int VideoImageQueueSizeDefault = 3;
-
-        public const int WebSocketDelayDefault = 50;
 
         #endregion Public Fields
     }

@@ -2,10 +2,13 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
 
 namespace Score2Stream.WebService.Workers
 {
@@ -21,10 +24,9 @@ namespace Score2Stream.WebService.Workers
 
         #region Public Constructors
 
-        public WebServer(string urlHttp, string urlHttps)
+        public WebServer(string url, int socketPort, int updateInterval)
         {
-            UrlHttp = urlHttp;
-            UrlHttps = urlHttps;
+            Url = url.Trim();
 
             var urls = GetUrls().ToArray();
 
@@ -42,6 +44,10 @@ namespace Score2Stream.WebService.Workers
 
             server = builder.Build();
 
+            server.MapGet(
+                pattern: "/config.json",
+                handler: (HttpContext context) => GetConfig(socketPort, updateInterval));
+
             server.UseHttpsRedirection();
             server.UseFileServer(fileServerOptions);
         }
@@ -50,33 +56,44 @@ namespace Score2Stream.WebService.Workers
 
         #region Public Properties
 
-        public string UrlHttp { get; }
-
-        public string UrlHttps { get; }
+        public string Url { get; }
 
         #endregion Public Properties
 
         #region Public Methods
 
-        public void Open(bool openHttps = false)
+        public void Open()
         {
             var startInfo = new ProcessStartInfo
             {
-                FileName = openHttps ? UrlHttps : UrlHttp,
+                FileName = Url,
                 UseShellExecute = true
             };
 
             Process.Start(startInfo);
         }
 
-        public async Task RunAsync()
+        public async Task RunAsync(CancellationToken cancellationToken = default)
         {
-            await server.RunAsync();
+            await server.RunAsync(cancellationToken);
         }
 
         #endregion Public Methods
 
         #region Private Methods
+
+        private static IResult GetConfig(int socketPort, int updateInterval)
+        {
+            var config = new
+            {
+                socketPort,
+                updateInterval,
+            };
+
+            var result = Results.Json(config);
+
+            return result;
+        }
 
         private static PhysicalFileProvider GetFileProvider(string contentRootPath)
         {
@@ -114,14 +131,9 @@ namespace Score2Stream.WebService.Workers
 
         private IEnumerable<string> GetUrls()
         {
-            if (!string.IsNullOrWhiteSpace(UrlHttp))
+            if (!string.IsNullOrWhiteSpace(Url))
             {
-                yield return UrlHttp.Trim();
-            }
-
-            if (!string.IsNullOrWhiteSpace(UrlHttps))
-            {
-                yield return UrlHttps.Trim();
+                yield return Url.Trim();
             }
         }
 

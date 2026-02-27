@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 
 namespace Score2Stream.WebService.Workers
 {
@@ -55,9 +56,9 @@ namespace Score2Stream.WebService.Workers
 
         #region Public Methods
 
-        public async Task RunAsync()
+        public async Task RunAsync(CancellationToken cancellationToken = default)
         {
-            await server.RunAsync();
+            await server.RunAsync(cancellationToken);
         }
 
         public void Set(string message, int requestDelay = 100)

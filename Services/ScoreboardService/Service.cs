@@ -534,6 +534,13 @@ namespace Score2Stream.ScoreboardService
             return result.ToString();
         }
 
+        private string GetPeriod()
+        {
+            var result = clips[SegmentType.Period]?.Value;
+
+            return result;
+        }
+
         private string GetScoreGuest()
         {
             var result = new StringBuilder();
@@ -595,33 +602,29 @@ namespace Score2Stream.ScoreboardService
 
         private void UpdateBoard()
         {
-            if (!IsGameOver)
+            ClockGame = GetClockGame();
+            clockGame = !ClockNotFromClip && !IsGameOver
+                ? ClockGame
+                : default;
+
+            ClockShot = GetClockShot();
+            clockShot = !ShotNotFromClip && !IsGameOver
+                ? ClockShot
+                : default;
+
+            Period = GetPeriod();
+            period = !PeriodNotFromClip && !IsGameOver
+                ? Period
+                : default;
+
+            if (!ScoreNotFromClip
+                && !IsGameOver)
             {
-                ClockGame = GetClockGame();
-                clockGame = !ClockNotFromClip
-                    ? ClockGame
-                    : default;
+                ScoreHome = GetScoreHome();
+                scoreHome = ScoreHome;
 
-                ClockShot = GetClockShot();
-                clockShot = !ShotNotFromClip
-                    ? ClockShot
-                    : default;
-
-                if (!PeriodNotFromClip
-                    && clips[SegmentType.Period] != default)
-                {
-                    Period = clips[SegmentType.Period]?.Value;
-                    period = Period;
-                }
-
-                if (!ScoreNotFromClip)
-                {
-                    ScoreHome = GetScoreHome();
-                    scoreHome = ScoreHome;
-
-                    ScoreGuest = GetScoreGuest();
-                    scoreGuest = ScoreGuest;
-                }
+                ScoreGuest = GetScoreGuest();
+                scoreGuest = ScoreGuest;
             }
 
             var frequencyTime = new TimeSpan(

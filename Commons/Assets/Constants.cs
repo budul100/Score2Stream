@@ -6,11 +6,10 @@
 
         public const int ClipPositionFactor = 50;
 
-        public const int DelayUpdateMin = 1;
+        public const int DelayMax = 1000;
+        public const int DelayMin = 50;
 
         public const int DurationKeepLast = 500;
-        public const int DurationMax = 1000;
-        public const int DurationMin = 50;
         public const int DurationUpdateTitle = 500;
 
         public const int ExitCodeStandard = 0;
@@ -26,6 +25,9 @@
         public const int MaxCountInputs = 5;
         public const int MaxCountSamples = 100;
         public const int MaxCountTemplates = 10;
+
+        public const int PortMax = 65535;
+        public const int PortMin = 1;
 
         public const int RecognitionDurationMax = 1000 * 60;
 
@@ -53,6 +55,8 @@
         public const int ThresholdMax = 100;
 
         public const int TickersSize = 6;
+
+        public const int UpdateDelay = 1;
 
         public const double ZoomMax = 5;
         public const double ZoomMin = 0.5;

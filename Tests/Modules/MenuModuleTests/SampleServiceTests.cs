@@ -93,6 +93,7 @@ namespace Score2Stream.Tests.MenuModuleTests
 
             sessionSettingsServiceMock.Setup(m => m.Contents).Returns(session);
 
+            var dispatcherServiceMock = new Mock<IDispatcherService>();
             var webServiceMock = new Mock<IWebService>();
             var scoreboardServiceMock = new Mock<IScoreboardService>();
             var regionManagerMock = new Mock<IRegionManager>();
@@ -114,12 +115,13 @@ namespace Score2Stream.Tests.MenuModuleTests
             inputServiceMock.Setup(m => m.AreaService.Segment).Returns(segment);
 
             var result = new MenuViewModel(
-                sessionSettingsServiceMock.Object,
-                webServiceMock.Object,
-                scoreboardServiceMock.Object,
-                inputServiceMock.Object,
-                regionManagerMock.Object,
-                eventAggregatorMock.Object);
+                settingsService: sessionSettingsServiceMock.Object,
+                webService: webServiceMock.Object,
+                scoreboardService: scoreboardServiceMock.Object,
+                inputService: inputServiceMock.Object,
+                dispatcherService: dispatcherServiceMock.Object,
+                regionManager: regionManagerMock.Object,
+                eventAggregator: eventAggregatorMock.Object);
 
             return result;
         }

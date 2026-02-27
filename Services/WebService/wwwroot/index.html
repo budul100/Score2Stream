@@ -4,76 +4,73 @@
     <meta charset="UTF-8">
     <title>Score2Stream</title>
     <link rel="stylesheet" href="style.css">
-    <!--<script src="http://cdnjs.cloudflare.com/ajax/libs/less.js/1.5.0/less.min.js"></script>
-    <script src="//code.jquery.com/jquery-latest.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.js"></script>-->
-    <script src="less.min.js"></script>
-    <script src="jquery-latest.min.js"></script>
-    <script src="knockout-min.js"></script>
-    <script src="knockout.mapping.js"></script>
-    <script src="script.js"></script>
+    <script src="less.min.js" defer></script>
+    <script src="jquery-latest.min.js" defer></script>
+    <script src="knockout-min.js" defer></script>
+    <script src="knockout.mapping.js" defer></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <pre id="log" style="display:none;position:absolute;bottom:0;width:100%;height:5em;overflow-y:hidden;background-color:#faa;"></pre>
 
-    <body>
-        <pre id="log" style="display:none;position:absolute;bottom:0;width:100%;height: 5em; overflow-y: hidden; background-color: #faa;"></pre>
+    <span id="container" style="display:block;position:absolute;top:0;border:1px solid red;width:1280px;height:720px;-webkit-transform:scale(1.5);-webkit-transform-origin-x:0;-webkit-transform-origin-y:0;">
 
-        <span id='container' style='display:block; position:absolute; top:0;border:1px solid red;width:1280px;height:720px;-webkit-transform: scale(1.5);-webkit-transform-origin-x: 0;-webkit-transform-origin-y: 0;'>
+        <div id="scoreboard" style="margin-top:539px;-webkit-transform:scale(0.8);margin-left:130px;">
 
-            <div id='scoreboard' style='margin-top: 539px;-webkit-transform: scale(0.8);margin-left: 130px;'>
-                <div class='foul' style='left: 200px;' data-bind='visible: homeFouls() >= 1'></div>
-                <div class='foul' style='left: 225px;' data-bind='visible: homeFouls() >= 2'></div>
-                <div class='foul' style='left: 250px;' data-bind='visible: homeFouls() >= 3'></div>
-                <div class='foul' style='left: 275px;' data-bind='visible: homeFouls() >= 4'></div>
-                <div class='foul' style='left: 300px;' data-bind='visible: homeFouls() >= 5'></div>
+            <div class="foul" style="left:200px;" data-bind="visible: homeFouls() >= 1"></div>
+            <div class="foul" style="left:225px;" data-bind="visible: homeFouls() >= 2"></div>
+            <div class="foul" style="left:250px;" data-bind="visible: homeFouls() >= 3"></div>
+            <div class="foul" style="left:275px;" data-bind="visible: homeFouls() >= 4"></div>
+            <div class="foul" style="left:300px;" data-bind="visible: homeFouls() >= 5"></div>
 
-                <div class='foul' style='left: 440px;' data-bind='visible: guestFouls() >= 1'></div>
-                <div class='foul' style='left: 465px;' data-bind='visible: guestFouls() >= 2'></div>
-                <div class='foul' style='left: 490px;' data-bind='visible: guestFouls() >= 3'></div>
-                <div class='foul' style='left: 515px;' data-bind='visible: guestFouls() >= 4'></div>
-                <div class='foul' style='left: 540px;' data-bind='visible: guestFouls() >= 5'></div>
+            <div class="foul" style="left:440px;" data-bind="visible: guestFouls() >= 1"></div>
+            <div class="foul" style="left:465px;" data-bind="visible: guestFouls() >= 2"></div>
+            <div class="foul" style="left:490px;" data-bind="visible: guestFouls() >= 3"></div>
+            <div class="foul" style="left:515px;" data-bind="visible: guestFouls() >= 4"></div>
+            <div class="foul" style="left:540px;" data-bind="visible: guestFouls() >= 5"></div>
 
-                <div id="scorebox_container">
-                    <img id="bg_scoreboard" src='scoreboard.png'></img>
+            <div id="scorebox_container">
+                <img id="bg_scoreboard" src="scoreboard.png">
 
-                    <div id="shotclock_container">
-                        <h3 data-bind='text: game.shot_clock()'></h3>
-                    </div>
-                    <div id="clock_container">
-                        <h3 data-bind='text: game.clock()'></h3>
-                    </div>
-                    <div id="quarter_container">
-                        <h3 data-bind='text: computedPeriod()'></h3>
-                    </div>
+                <div id="shotclock_container">
+                    <h3 data-bind="text: game.shot_clock()"></h3>
+                </div>
+                <div id="clock_container">
+                    <h3 data-bind="text: game.clock()"></h3>
+                </div>
+                <div id="quarter_container">
+                    <h3 data-bind="text: computedPeriod()"></h3>
+                </div>
 
-                    <div id="game_over_container" data-bind='visible: game_over()'>
-                        <h3>final</h3>
-                    </div>
+                <div id="game_over_container" data-bind="visible: game_over()">
+                    <h3>final</h3>
+                </div>
 
-                    <div id="away_logo_container" class="logo_container">
-                        <img data-bind='attr: {src: guest.imagePath() }'>
-                    </div>
-                    <div id="away_score_container">
-                        <h3 data-bind='text: guest.score()'></h3>
-                    </div>
-                    <div id="away_name_container" class='name_container' data-bind='style: { backgroundColor: guest.color() }'>
-                        <h3 style='margin-left: 0px' data-bind='text: guest.name()'></h3>
-                    </div>
+                <div id="away_logo_container" class="logo_container">
+                    <img data-bind="attr: {src: guest.imagePath()}">
+                </div>
+                <div id="away_score_container">
+                    <h3 data-bind="text: guest.score()"></h3>
+                </div>
+                <div id="away_name_container" class="name_container" data-bind="style: { backgroundColor: guest.color() }">
+                    <h3 style="margin-left:0px;" data-bind="text: guest.name()"></h3>
+                </div>
 
-                    <div id="home_logo_container" class="logo_container">
-                        <img data-bind='attr: {src: home.imagePath() }'>
-                    </div>
-                    <div id="home_score_container">
-                        <h3 data-bind='text: home.score()'></h3>
-                    </div>
-                    <div id="home_name_container" class='name_container' data-bind='style: { backgroundColor: home.color() }'>
-                        <h3 style='margin-left: 0px' data-bind='text: home.name()'></h3>
-                    </div>
+                <div id="home_logo_container" class="logo_container">
+                    <img data-bind="attr: {src: home.imagePath()}">
+                </div>
+                <div id="home_score_container">
+                    <h3 data-bind="text: home.score()"></h3>
+                </div>
+                <div id="home_name_container" class="name_container" data-bind="style: { backgroundColor: home.color() }">
+                    <h3 style="margin-left:0px;" data-bind="text: home.name()"></h3>
+                </div>
 
-                    <div id="subtitle_container">
-                        <h3 data-bind='text: ticker()'></h3>
-                    </div>
+                <div id="subtitle_container">
+                    <h3 data-bind="text: ticker()"></h3>
                 </div>
             </div>
-        </span>
-    </body>
+        </div>
+    </span>
+</body>
 </html>

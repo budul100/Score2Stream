@@ -4,7 +4,6 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Prism.Events;
-using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Events.Graphics;
 using Score2Stream.Commons.Events.Scoreboard;
 using Score2Stream.Commons.Interfaces;
@@ -43,7 +42,7 @@ namespace Score2Stream.WebService
                 action: m => OnScoreboardUpdate(m),
                 keepSubscriberReferenceAlive: true);
 
-            Task.Run(() => StartAsync());
+            Task.Run(StartAsync);
         }
 
         #endregion Public Constructors
@@ -57,11 +56,11 @@ namespace Score2Stream.WebService
 
         #region Public Methods
 
-        public void Open(bool openHttps = false)
+        public void Open()
         {
             if (IsActive)
             {
-                webServer.Open(openHttps);
+                webServer.Open();
             }
         }
 
@@ -84,24 +83,27 @@ namespace Score2Stream.WebService
 
             var ipAddress = GetLocalIPAddress();
 
-            var urlWebSocket = $"http://{ipAddress}:{settingsService.Contents.Server.PortSocketHttp}";
+            var urlWebSocket = $"http://{ipAddress}:{settingsService.Contents.Server.PortSocket}";
 
             webSocket = new WebSocket(
                 urlHttp: urlWebSocket,
                 urlHttps: default);
 
             webSocketTask = Task.Run(
-                function: async () => await dispatcherService.InvokeAsync(() => webSocket.RunAsync()),
+                function: async () => await dispatcherService.InvokeAsync(
+                    () => webSocket.RunAsync(cancellationTokenSource.Token)),
                 cancellationToken: cancellationTokenSource.Token);
 
-            var urlWebServer = $"http://{ipAddress}:{settingsService.Contents.Server.PortServerHttp}";
+            var urlWebServer = $"http://{ipAddress}:{settingsService.Contents.Server.PortServer}";
 
             webServer = new WebServer(
-                urlHttp: urlWebServer,
-                urlHttps: default);
+                url: urlWebServer,
+                socketPort: settingsService.Contents.Server.PortSocket,
+                updateInterval: settingsService.Contents.Server.DelaySocket);
 
             webServerTask = Task.Run(
-                function: async () => await dispatcherService.InvokeAsync(() => webServer.RunAsync()),
+                function: async () => await dispatcherService.InvokeAsync(
+                    () => webServer.RunAsync(cancellationTokenSource.Token)),
                 cancellationToken: cancellationTokenSource.Token);
 
             eventAggregator.GetEvent<ServerStartedEvent>().Publish();
@@ -168,7 +170,7 @@ namespace Score2Stream.WebService
             {
                 webSocket.Set(
                     message: message,
-                    requestDelay: settingsService.Contents.Server.WebSocketDelay);
+                    requestDelay: settingsService.Contents.Server.DelaySocket);
             }
         }
 

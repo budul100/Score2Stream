@@ -1,71 +1,39 @@
-$(document).ready(
+$(document).ready(function () {
+    $.ajaxSetup({ cache: false });
 
-    function () {
-        $.ajaxSetup({
-            cache: false
-        });
+    const ellog = document.getElementById('log');
 
-        var sock = null;
-        var ellog = null;
+    function log(m) {
+        ellog.innerHTML += m + '\n';
+        ellog.scrollTop = ellog.scrollHeight;
+    }
 
-        window.onload = function () {
+    $.getJSON("config.json", function (config) {
+        const socketPort = config.socketPort || 9000;
+        const updateInterval = config.updateInterval || 50;
+        init(socketPort, updateInterval);
+    }).fail(function () {
+        console.warn("config.json not found, using default values.");
+        init(9000, 50);
+    });
 
-            ellog = document.getElementById('log');
+    function init(socketPort, updateInterval) {
+        let sock = null;
 
-            var wsuri;
+        const wsuri = (window.location.protocol === "file:")
+            ? `ws://localhost:${socketPort}`
+            : `ws://${window.location.hostname}:${socketPort}`;
 
-            if (window.location.protocol === "file:") {
-                wsuri = "ws://localhost:9000";
-            }
-            else {
-                wsuri = `ws://${window.location.hostname}:9000`;
-            }
+        log(wsuri);
 
-            log(wsuri);
+        if ("WebSocket" in window) {
+            sock = new WebSocket(wsuri);
+        } else {
+            log("Browser does not support WebSocket!");
+            return;
+        }
 
-            if ("WebSocket" in window) {
-                sock = new WebSocket(wsuri);
-            } else if ("MozWebSocket" in window) {
-                sock = new MozWebSocket(wsuri);
-            } else {
-                log("Browser does not support WebSocket!");
-                window.location = "http://autobahn.ws/unsupportedbrowser";
-            }
-
-            if (sock) {
-                sock.onopen = function () {
-                    log("Connected to " + wsuri);
-                }
-
-                sock.onclose = function (e) {
-                    log("Connection closed (wasClean = " + e.wasClean + ", code = " + e.code + ", reason = '" + e.reason + "')");
-                    sock = null;
-                }
-
-                sock.onmessage = function (e) {
-                    //log("Got echo: " + e.data);
-                    console.log(e.data);
-                    ko.mapping.fromJS(JSON.parse(e.data), viewModel);
-                }
-            }
-        };
-
-        function broadcast() {
-            var msg = document.getElementById('message').value;
-            if (sock) {
-                sock.send(msg);
-                log("Sent: " + msg);
-            } else {
-                log("Not connected.");
-            }
-        };
-
-        function log(m) {
-            ellog.innerHTML += m + '\n';
-            ellog.scrollTop = ellog.scrollHeight;
-        };
-
-        vm = {
+        const vm = {
             ticker: ko.observable(""),
             gameID: ko.observable(""),
             game_over: ko.observable(false),
@@ -90,26 +58,18 @@ $(document).ready(
                 imagePath: ko.observable(""),
                 color: ko.observable("#6C6C6C")
             }
-        }
+        };
 
-        var viewModel = ko.mapping.fromJS(vm);
+        const viewModel = ko.mapping.fromJS(vm);
 
         viewModel.computedPeriod = ko.computed(function () {
             if (/^\d+$/.test(this.game.period()) && /^\d+$/.test(this.game.periods())) {
-                var period = parseInt(this.game.period());
-                var periods = parseInt(this.game.periods());
-
-                if (period == 0) {
-                    return "";
-                }
-                else if (period <= periods) {
-                    return `${period}/${periods}`;
-                }
-                else {
-                    return `E${Math.abs(period - periods)}`;
-                }
-            }
-            else {
+                const period = parseInt(this.game.period());
+                const periods = parseInt(this.game.periods());
+                if (period === 0) return "";
+                else if (period <= periods) return `${period}/${periods}`;
+                else return `E${Math.abs(period - periods)}`;
+            } else {
                 return this.game.period();
             }
         }, viewModel);
@@ -124,12 +84,35 @@ $(document).ready(
 
         ko.applyBindings(viewModel);
 
-        var getUpdates = setInterval(function () {
-            $.getJSON(
-                "", {},
-                function (model) {
-                    ko.mapping.fromJS(model, viewModel);
-                });
-        }, 50);
+        const interval = setInterval(function () {
+            if (!sock || sock.readyState !== WebSocket.OPEN) {
+                clearInterval(interval);
+            }
+        }, updateInterval);
+
+        sock.onopen = function () {
+            log("Connected to " + wsuri);
+        };
+
+        sock.onclose = function (e) {
+            log("Connection closed (wasClean = " + e.wasClean +
+                ", code = " + e.code + ", reason = '" + e.reason + "')");
+            clearInterval(interval);
+            sock = null;
+        };
+
+        sock.onmessage = function (e) {
+            if (!e.data) return;
+            try {
+                ko.mapping.fromJS(JSON.parse(e.data), viewModel);
+            } catch (err) {
+                console.error("Invalid message:", err);
+            }
+        };
+
+        sock.onerror = function (e) {
+            log("WebSocket error: " + e);
+            clearInterval(interval);
+        };
     }
-);
+});
