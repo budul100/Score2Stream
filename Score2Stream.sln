@@ -43,6 +43,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Additionals", "Additionals"
 	ProjectSection(SolutionItems) = preProject
 		Additionals\ChangeLog.md = Additionals\ChangeLog.md
 		Directory.Build.props = Directory.Build.props
+		Additionals\FineTuning.md = Additionals\FineTuning.md
 		README.md = README.md
 	EndProjectSection
 EndProject
