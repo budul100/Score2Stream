@@ -13,8 +13,8 @@
     xmlns:prism="http://prismlibrary.com/"
     xmlns:rib="clr-namespace:AvaloniaUI.Ribbon;assembly=AvaloniaUI.Ribbon"
     xmlns:sys="using:System"
-    d:DesignHeight="150"
-    d:DesignWidth="500"
+    d:DesignHeight="120"
+    d:DesignWidth="1000"
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
 
@@ -100,7 +100,7 @@
                         </StackPanel>
 
                         <rib:RibbonButton
-                            Command="{Binding GraphicsReloadCommand}"
+                            Command="{Binding ServerReloadCommand}"
                             Content="Restart server"
                             FontSize="{StaticResource FontSize}"
                             MinSize="Large">
@@ -110,6 +110,21 @@
                                         Width="{StaticResource IconWidth}"
                                         Height="{StaticResource IconHeight}"
                                         Kind="BackupRestore" />
+                                </ControlTemplate>
+                            </rib:RibbonButton.LargeIcon>
+                        </rib:RibbonButton>
+
+                        <rib:RibbonButton
+                            Command="{Binding ServerOpenCommand}"
+                            Content="Open server"
+                            FontSize="{StaticResource FontSize}"
+                            MinSize="Large">
+                            <rib:RibbonButton.LargeIcon>
+                                <ControlTemplate>
+                                    <mat:MaterialIcon
+                                        Width="{StaticResource IconWidth}"
+                                        Height="{StaticResource IconHeight}"
+                                        Kind="Web" />
                                 </ControlTemplate>
                             </rib:RibbonButton.LargeIcon>
                         </rib:RibbonButton>

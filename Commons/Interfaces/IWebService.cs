@@ -12,7 +12,9 @@ namespace Score2Stream.Commons.Interfaces
 
         #region Public Methods
 
-        void Open();
+        void OpenRoot();
+
+        void OpenServer();
 
         Task ReloadAsync();
 

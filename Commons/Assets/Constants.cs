@@ -7,7 +7,7 @@
         public const int ClipPositionFactor = 50;
 
         public const int DelayMax = 1000;
-        public const int DelayMin = 50;
+        public const int DelayMin = 10;
 
         public const int DurationKeepLast = 500;
         public const int DurationUpdateTitle = 500;
@@ -30,6 +30,8 @@
         public const int PortMin = 1;
 
         public const int RecognitionDurationMax = 1000 * 60;
+
+        public const string RootDirectory = "wwwroot";
 
         public const float RotateLeftMax = -10F;
         public const float RotateRightMax = 10F;

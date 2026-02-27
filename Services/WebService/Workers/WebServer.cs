@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
+using Score2Stream.Commons.Assets;
 
 namespace Score2Stream.WebService.Workers
 {
@@ -16,8 +17,7 @@ namespace Score2Stream.WebService.Workers
     {
         #region Private Fields
 
-        private const string RootDirectory = "wwwroot";
-
+        private readonly string contentRootPath;
         private readonly WebApplication server;
 
         #endregion Private Fields
@@ -33,7 +33,9 @@ namespace Score2Stream.WebService.Workers
             var builder = WebApplication.CreateBuilder();
             builder.WebHost.UseUrls(urls);
 
-            var fileProvider = GetFileProvider(builder.Environment.ContentRootPath);
+            contentRootPath = builder.Environment.ContentRootPath;
+
+            var fileProvider = GetFileProvider();
 
             var fileServerOptions = new FileServerOptions()
             {
@@ -62,7 +64,23 @@ namespace Score2Stream.WebService.Workers
 
         #region Public Methods
 
-        public void Open()
+        public void OpenRoot()
+        {
+            var rootPath = GetRootPath();
+
+            if (Directory.Exists(rootPath))
+            {
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = rootPath,
+                    UseShellExecute = true
+                };
+
+                Process.Start(startInfo);
+            }
+        }
+
+        public void OpenServer()
         {
             var startInfo = new ProcessStartInfo
             {
@@ -95,11 +113,9 @@ namespace Score2Stream.WebService.Workers
             return result;
         }
 
-        private static PhysicalFileProvider GetFileProvider(string contentRootPath)
+        private PhysicalFileProvider GetFileProvider()
         {
-            var rootPath = Path.Combine(
-                path1: contentRootPath,
-                path2: RootDirectory);
+            var rootPath = GetRootPath();
 
             if (!Directory.Exists(rootPath))
             {
@@ -107,7 +123,7 @@ namespace Score2Stream.WebService.Workers
                 Directory.CreateDirectory(rootPath);
 
                 var resourceNames = assembly.GetManifestResourceNames()
-                    .Where(n => n.Contains(RootDirectory)).ToArray();
+                    .Where(n => n.Contains(Constants.RootDirectory)).ToArray();
 
                 foreach (var resourceName in resourceNames)
                 {
@@ -127,6 +143,13 @@ namespace Score2Stream.WebService.Workers
             var result = new PhysicalFileProvider(rootPath);
 
             return result;
+        }
+
+        private string GetRootPath()
+        {
+            return Path.Combine(
+                path1: contentRootPath,
+                path2: Constants.RootDirectory);
         }
 
         private IEnumerable<string> GetUrls()

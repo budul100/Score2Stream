@@ -59,10 +59,12 @@ namespace Score2Stream.MenuModule.ViewModels
             this.SelectTabCommand = new DelegateCommand<ViewType?>(
                 executeMethod: t => TabIndex = (int?)t);
 
-            this.GraphicsReloadCommand = new DelegateCommand(
+            this.ServerOpenCommand = new DelegateCommand(
+                executeMethod: webService.OpenRoot);
+            this.ServerReloadCommand = new DelegateCommand(
                 executeMethod: async () => await webService.ReloadAsync());
             this.ScoreboardOpenCommand = new DelegateCommand(
-                executeMethod: webService.Open,
+                executeMethod: webService.OpenServer,
                 canExecuteMethod: () => webService.IsActive);
             this.ScoreboardUpdateCommand = new DelegateCommand(
                 executeMethod: scoreboardService.Update,
@@ -126,7 +128,7 @@ namespace Score2Stream.MenuModule.ViewModels
             filterChangedEvent = eventAggregator.GetEvent<FilterChangedEvent>();
 
             eventAggregator.GetEvent<ServerStartedEvent>().Subscribe(
-                action: OnGraphicsUpdated);
+                action: OnServerStarted);
 
             eventAggregator.GetEvent<InputsChangedEvent>().Subscribe(
                 action: RefreshInputs);
@@ -230,8 +232,6 @@ namespace Score2Stream.MenuModule.ViewModels
             }
         }
 
-        public DelegateCommand GraphicsReloadCommand { get; }
-
         public int ImagesQueueSize
         {
             get { return settingsService.Contents.Video.ImagesQueueSize; }
@@ -250,19 +250,12 @@ namespace Score2Stream.MenuModule.ViewModels
         }
 
         public DelegateCommand InputCenterCommand { get; }
-
         public DelegateCommand InputRotateLeftCommand { get; }
-
         public DelegateCommand InputRotateRightCommand { get; }
-
         public ObservableCollection<RibbonDropDownItem> Inputs { get; } = [];
-
         public DelegateCommand<object> InputSelectCommand { get; }
-
         public DelegateCommand InputStopAllCommand { get; }
-
         public DelegateCommand InputUpdateCommand { get; }
-
         public bool IsActive => inputService.IsActive;
 
         public bool IsSampleDetection
@@ -386,18 +379,15 @@ namespace Score2Stream.MenuModule.ViewModels
         }
 
         public DelegateCommand SampleAddCommand { get; }
-
         public DelegateCommand SampleOrderAllCommand { get; }
-
         public DelegateCommand SampleRemoveAllCommand { get; }
-
         public DelegateCommand SampleRemoveCommand { get; }
-
         public DelegateCommand ScoreboardOpenCommand { get; }
-
         public DelegateCommand ScoreboardUpdateCommand { get; }
-
         public DelegateCommand<ViewType?> SelectTabCommand { get; }
+        public DelegateCommand ServerOpenCommand { get; }
+
+        public DelegateCommand ServerReloadCommand { get; }
 
         public int? TabIndex
         {
@@ -600,17 +590,18 @@ namespace Score2Stream.MenuModule.ViewModels
             RefreshTemplates();
         }
 
-        private void OnGraphicsUpdated()
-        {
-            GraphicsReloadCommand.RaiseCanExecuteChanged();
-
-            ScoreboardOpenCommand.RaiseCanExecuteChanged();
-            ScoreboardUpdateCommand.RaiseCanExecuteChanged();
-        }
-
         private void OnSampleSelected()
         {
             SampleRemoveCommand.RaiseCanExecuteChanged();
+        }
+
+        private void OnServerStarted()
+        {
+            ServerOpenCommand.RaiseCanExecuteChanged();
+            ServerReloadCommand.RaiseCanExecuteChanged();
+
+            ScoreboardOpenCommand.RaiseCanExecuteChanged();
+            ScoreboardUpdateCommand.RaiseCanExecuteChanged();
         }
 
         private void OnTemplateSelected()

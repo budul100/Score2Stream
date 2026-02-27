@@ -56,11 +56,16 @@ namespace Score2Stream.WebService
 
         #region Public Methods
 
-        public void Open()
+        public void OpenRoot()
+        {
+            webServer.OpenRoot();
+        }
+
+        public void OpenServer()
         {
             if (IsActive)
             {
-                webServer.Open();
+                webServer.OpenServer();
             }
         }
 
