@@ -186,7 +186,7 @@
                                         <mat:MaterialIcon
                                             Width="{StaticResource IconWidth}"
                                             Height="{StaticResource IconHeight}"
-                                            Kind="Numeric1BoxMultiple" />
+                                            Kind="Numeric1BoxMultipleOutline" />
                                     </ControlTemplate>
                                 </rib:RibbonDropDownItem.Icon>
                             </rib:RibbonDropDownItem>
@@ -199,7 +199,7 @@
                                         <mat:MaterialIcon
                                             Width="{StaticResource IconWidth}"
                                             Height="{StaticResource IconHeight}"
-                                            Kind="Numeric2BoxMultiple" />
+                                            Kind="Numeric2BoxMultipleOutline" />
                                     </ControlTemplate>
                                 </rib:RibbonDropDownItem.Icon>
                             </rib:RibbonDropDownItem>
@@ -212,7 +212,7 @@
                                         <mat:MaterialIcon
                                             Width="{StaticResource IconWidth}"
                                             Height="{StaticResource IconHeight}"
-                                            Kind="Numeric3BoxMultiple" />
+                                            Kind="Numeric3BoxMultipleOutline" />
                                     </ControlTemplate>
                                 </rib:RibbonDropDownItem.Icon>
                             </rib:RibbonDropDownItem>
