@@ -70,7 +70,7 @@ namespace Score2Stream.Commons.Interfaces
 
         bool[] TickersUpToDate { get; }
 
-        bool UpToDate { get; }
+        bool IsUpToDate { get; }
 
         #endregion Public Properties
 

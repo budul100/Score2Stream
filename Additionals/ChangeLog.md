@@ -2,6 +2,7 @@
 
 ## Version 1.11.1
 
+* Show scoreboard update status in button ([#11](https://github.com/budul100/Score2Stream/issues/11))
 * Refactor recognition logic and improve image handling
 * Refactor blending and bitmap update logic
 

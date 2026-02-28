@@ -39,7 +39,7 @@ namespace Score2Stream.WebService
             this.eventAggregator = eventAggregator;
 
             eventAggregator.GetEvent<ScoreboardUpdatedEvent>().Subscribe(
-                action: m => OnScoreboardUpdate(m),
+                action: OnScoreboardUpdate,
                 keepSubscriberReferenceAlive: true);
 
             Task.Run(StartAsync);

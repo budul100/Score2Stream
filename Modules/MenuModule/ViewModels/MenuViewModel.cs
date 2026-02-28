@@ -33,6 +33,7 @@ namespace Score2Stream.MenuModule.ViewModels
         private readonly IInputService inputService;
         private readonly IRegionManager regionManager;
         private readonly ISettingsService<Session> settingsService;
+        private readonly IScoreboardService scoreboardService;
         private readonly TabSelectedEvent tabSelectedEvent;
 
         private int tabIndex;
@@ -47,6 +48,7 @@ namespace Score2Stream.MenuModule.ViewModels
             : base(regionManager)
         {
             this.settingsService = settingsService;
+            this.scoreboardService = scoreboardService;
             this.inputService = inputService;
             this.regionManager = regionManager;
 
@@ -62,7 +64,7 @@ namespace Score2Stream.MenuModule.ViewModels
                 canExecuteMethod: () => webService.IsActive);
             this.ScoreboardUpdateCommand = new DelegateCommand(
                 executeMethod: scoreboardService.Update,
-                canExecuteMethod: () => !scoreboardService.UpToDate);
+                canExecuteMethod: () => !scoreboardService.IsUpToDate);
 
             this.InputUpdateCommand = new DelegateCommand(
                 executeMethod: UpdateInputs);
@@ -156,6 +158,8 @@ namespace Score2Stream.MenuModule.ViewModels
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
                 action: _ => OnSampleSelected());
 
+            eventAggregator.GetEvent<ScoreboardUpdatedEvent>().Subscribe(
+                action: _ => RaisePropertyChanged(nameof(IsUpToDate)));
             eventAggregator.GetEvent<ScoreboardModifiedEvent>().Subscribe(
                 action: () => ScoreboardUpdateCommand.RaiseCanExecuteChanged());
         }
@@ -299,6 +303,8 @@ namespace Score2Stream.MenuModule.ViewModels
                 }
             }
         }
+
+        public bool IsUpToDate => scoreboardService.IsUpToDate;
 
         public bool NoCropping
         {

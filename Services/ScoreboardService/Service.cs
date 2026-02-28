@@ -161,6 +161,17 @@ namespace Score2Stream.ScoreboardService
 
         public bool IsGameOverUpToDate => IsGameOver == isGameOver;
 
+        public bool IsUpToDate => IsGameOverUpToDate
+            && ColorGuestUpToDate
+            && ColorHomeUpToDate
+            && PeriodsUpToDate
+            && PeriodUpToDate
+            && ScoreGuestUpToDate
+            && ScoreHomeUpToDate
+            && TeamGuestUpToDate
+            && TeamHomeUpToDate
+            && TickersUpToDate.All(t => t);
+
         public string Message { get; private set; }
 
         public string Period { get; set; }
@@ -257,17 +268,6 @@ namespace Score2Stream.ScoreboardService
         }
 
         public bool[] TickersUpToDate { get; private set; }
-
-        public bool UpToDate => ColorGuestUpToDate
-            && ColorHomeUpToDate
-            && IsGameOverUpToDate
-            && PeriodsUpToDate
-            && PeriodUpToDate
-            && ScoreGuestUpToDate
-            && ScoreHomeUpToDate
-            && TeamGuestUpToDate
-            && TeamHomeUpToDate
-            && TickersUpToDate.All(t => t);
 
         #endregion Public Properties
 

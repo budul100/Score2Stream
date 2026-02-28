@@ -57,7 +57,7 @@
                                     <mat:MaterialIcon
                                         Width="{StaticResource IconWidth}"
                                         Height="{StaticResource IconHeight}"
-                                        Kind="Videocam" />
+                                        Kind="VideoOutline" />
                                 </ControlTemplate>
                             </rib:RibbonDropDownButton.LargeIcon>
                         </rib:RibbonDropDownButton>
@@ -72,7 +72,7 @@
                                     <mat:MaterialIcon
                                         Width="{StaticResource IconWidth}"
                                         Height="{StaticResource IconHeight}"
-                                        Kind="VideocamOff" />
+                                        Kind="VideoOffOutline" />
                                 </ControlTemplate>
                             </rib:RibbonButton.LargeIcon>
                         </rib:RibbonButton>
@@ -273,30 +273,9 @@
                                 </ControlTemplate>
                             </rib:RibbonButton.LargeIcon>
                         </rib:RibbonButton>
-                        <!--<rib:RibbonButton
-                        Command="{Binding AreaEmptyCommand}"
-                        Content="Empty neighbours"
-                        FontSize="{StaticResource FontSize}"
-                        MinSize="Large">
-                        <rib:RibbonButton.LargeIcon>
-                        <ControlTemplate>
-                        <mat:MaterialIcon
-                        Width="{StaticResource IconWidth}"
-                        Height="{StaticResource IconHeight}"
-                        Kind="DeleteVariant" />
-                        </ControlTemplate>
-                        </rib:RibbonButton.LargeIcon>
-                        </rib:RibbonButton>-->
                     </rib:RibbonGroupBox>
 
                     <rib:RibbonGroupBox Header="Segment options">
-                        <!--<CheckBox
-                        Margin="0,0,4,4"
-                        VerticalAlignment="Center"
-                        Content="Deactivate neighbour detection"
-                        FontSize="{StaticResource FontSize}"
-                        IsChecked="{Binding NoNeighboring, Mode=TwoWay}"
-                        IsEnabled="{Binding IsActive}" />-->
                         <CheckBox
                             Margin="0,0,4,4"
                             VerticalAlignment="Center"
@@ -330,7 +309,7 @@
                                     <mat:MaterialIcon
                                         Width="{StaticResource IconWidth}"
                                         Height="{StaticResource IconHeight}"
-                                        Kind="Movie" />
+                                        Kind="MovieOutline" />
                                 </ControlTemplate>
                             </rib:RibbonDropDownButton.LargeIcon>
                         </rib:RibbonDropDownButton>
@@ -344,7 +323,7 @@
                                     <mat:MaterialIcon
                                         Width="{StaticResource IconWidth}"
                                         Height="{StaticResource IconHeight}"
-                                        Kind="MovieMinus" />
+                                        Kind="MovieMinusOutline" />
                                 </ControlTemplate>
                             </rib:RibbonButton.LargeIcon>
                         </rib:RibbonButton>
@@ -367,7 +346,7 @@
                                                     <mat:MaterialIcon
                                                         Width="{StaticResource IconWidth}"
                                                         Height="{StaticResource IconHeight}"
-                                                        Kind="ImageSearchOutline" />
+                                                        Kind="ImageSearch" />
                                                 </ControlTemplate>
                                             </Setter.Value>
                                         </Setter>
@@ -381,7 +360,7 @@
                                                     <mat:MaterialIcon
                                                         Width="{StaticResource IconWidth}"
                                                         Height="{StaticResource IconHeight}"
-                                                        Kind="ImageSearch" />
+                                                        Kind="ImageSearchOutline" />
                                                 </ControlTemplate>
                                             </Setter.Value>
                                         </Setter>
@@ -442,7 +421,7 @@
                                     <mat:MaterialIcon
                                         Width="{StaticResource IconWidth}"
                                         Height="{StaticResource IconHeight}"
-                                        Kind="ImagePlus" />
+                                        Kind="ImagePlusOutline" />
                                 </ControlTemplate>
                             </rib:RibbonButton.LargeIcon>
                         </rib:RibbonButton>
@@ -456,7 +435,7 @@
                                     <mat:MaterialIcon
                                         Width="{StaticResource IconWidth}"
                                         Height="{StaticResource IconHeight}"
-                                        Kind="ImageMinus" />
+                                        Kind="ImageMinusOutline" />
                                 </ControlTemplate>
                             </rib:RibbonButton.LargeIcon>
                         </rib:RibbonButton>
@@ -470,7 +449,7 @@
                                     <mat:MaterialIcon
                                         Width="{StaticResource IconWidth}"
                                         Height="{StaticResource IconHeight}"
-                                        Kind="ImageRemove" />
+                                        Kind="ImageRemoveOutline" />
                                 </ControlTemplate>
                             </rib:RibbonButton.LargeIcon>
                         </rib:RibbonButton>
@@ -506,7 +485,7 @@
                                                     <mat:MaterialIcon
                                                         Width="{StaticResource IconWidth}"
                                                         Height="{StaticResource IconHeight}"
-                                                        Kind="FilterOutline" />
+                                                        Kind="Filter" />
                                                 </ControlTemplate>
                                             </Setter.Value>
                                         </Setter>
@@ -520,7 +499,7 @@
                                                     <mat:MaterialIcon
                                                         Width="{StaticResource IconWidth}"
                                                         Height="{StaticResource IconHeight}"
-                                                        Kind="Filter" />
+                                                        Kind="FilterOutline" />
                                                 </ControlTemplate>
                                             </Setter.Value>
                                         </Setter>
@@ -597,24 +576,50 @@
                                     <mat:MaterialIcon
                                         Width="{StaticResource IconWidth}"
                                         Height="{StaticResource IconHeight}"
-                                        Kind="OpenInApp" />
+                                        Kind="EyeOutline" />
                                 </ControlTemplate>
                             </rib:RibbonButton.LargeIcon>
                         </rib:RibbonButton>
+
                         <rib:RibbonButton
+                            Classes.IsUpToDate="{Binding IsUpToDate}"
+                            Classes.IsNotUpToDate="{Binding !IsUpToDate}"
                             Command="{Binding ScoreboardUpdateCommand}"
                             Content="Update board"
                             FontSize="{StaticResource FontSize}"
                             MinSize="Large">
-                            <rib:RibbonButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="Update" />
-                                </ControlTemplate>
-                            </rib:RibbonButton.LargeIcon>
+                            <rib:RibbonButton.Styles>
+                                <Style Selector="RibbonButton.IsUpToDate">
+                                    <Style.Setters>
+                                        <Setter Property="LargeIcon">
+                                            <Setter.Value>
+                                                <ControlTemplate>
+                                                    <mat:MaterialIcon
+                                                        Width="{StaticResource IconWidth}"
+                                                        Height="{StaticResource IconHeight}"
+                                                        Kind="UploadBoxOutline" />
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style.Setters>
+                                </Style>
+                                <Style Selector="RibbonButton.IsNotUpToDate">
+                                    <Style.Setters>
+                                        <Setter Property="LargeIcon">
+                                            <Setter.Value>
+                                                <ControlTemplate>
+                                                    <mat:MaterialIcon
+                                                        Width="{StaticResource IconWidth}"
+                                                        Height="{StaticResource IconHeight}"
+                                                        Kind="UploadBox" />
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style.Setters>
+                                </Style>
+                            </rib:RibbonButton.Styles>
                         </rib:RibbonButton>
+
                     </rib:RibbonGroupBox>
 
                     <rib:RibbonGroupBox Header="Server control">
@@ -644,7 +649,7 @@
                                     <mat:MaterialIcon
                                         Width="{StaticResource IconWidth}"
                                         Height="{StaticResource IconHeight}"
-                                        Kind="FolderOpen" />
+                                        Kind="FolderOpenOutline" />
                                 </ControlTemplate>
                             </rib:RibbonButton.LargeIcon>
                         </rib:RibbonButton>
