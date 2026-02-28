@@ -69,6 +69,8 @@ namespace Score2Stream.SampleService
 
         public bool IsDetection { get; set; }
 
+        public bool IsTrained => recognitionService.IsTrained;
+
         public Sample Sample { get; private set; }
 
         public List<Sample> Samples { get; } = [];
@@ -231,6 +233,11 @@ namespace Score2Stream.SampleService
             }
         }
 
+        public void ResetTraining()
+        {
+            recognitionService.Reset();
+        }
+
         public void Select(Sample sample)
         {
             if (Sample != sample)
@@ -240,6 +247,14 @@ namespace Score2Stream.SampleService
                     : default;
 
                 sampleSelectedEvent.Publish(Sample);
+            }
+        }
+
+        public void Train()
+        {
+            if (Samples?.Count > 0)
+            {
+                recognitionService.Train(Samples);
             }
         }
 

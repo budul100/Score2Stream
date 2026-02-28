@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using AvaloniaUI.Ribbon;
@@ -16,6 +17,7 @@ using Score2Stream.Commons.Events.Menu;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Scoreboard;
 using Score2Stream.Commons.Events.Template;
+using Score2Stream.Commons.Events.Training;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
@@ -113,9 +115,16 @@ namespace Score2Stream.MenuModule.ViewModels
             this.SampleRemoveAllCommand = new DelegateCommand(
                 executeMethod: () => inputService.SampleService.ClearAsync(),
                 canExecuteMethod: () => inputService?.SampleService?.Samples?.Count > 0);
-            this.SampleOrderAllCommand = new DelegateCommand(
+            this.SampleOrderCommand = new DelegateCommand(
                 executeMethod: () => inputService.SampleService.Order(true),
                 canExecuteMethod: () => inputService?.SampleService?.Samples?.Count > 0);
+
+            this.RecognitionTrainCommand = new DelegateCommand(
+                executeMethod: () => inputService?.SampleService?.Train(),
+                canExecuteMethod: () => inputService?.SampleService?.Samples?.Count > 0);
+            this.RecognitionResetCommand = new DelegateCommand(
+                executeMethod: () => inputService?.SampleService?.ResetTraining(),
+                canExecuteMethod: () => inputService?.SampleService?.IsTrained == true);
 
             tabSelectedEvent = eventAggregator.GetEvent<TabSelectedEvent>();
             detectionChangedEvent = eventAggregator.GetEvent<DetectionChangedEvent>();
@@ -152,9 +161,12 @@ namespace Score2Stream.MenuModule.ViewModels
                 action: _ => OnTemplateSelected());
 
             eventAggregator.GetEvent<SamplesChangedEvent>().Subscribe(
-                action: RefreshSamples);
+                action: OnSamplesChanged);
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
                 action: _ => OnSampleSelected());
+
+            eventAggregator.GetEvent<TrainingChangedEvent>().Subscribe(
+                action: OnTrainigChanged);
 
             eventAggregator.GetEvent<ScoreboardModifiedEvent>().Subscribe(
                 action: () => ScoreboardUpdateCommand.RaiseCanExecuteChanged());
@@ -381,9 +393,13 @@ namespace Score2Stream.MenuModule.ViewModels
             }
         }
 
+        public DelegateCommand RecognitionResetCommand { get; }
+
+        public DelegateCommand RecognitionTrainCommand { get; }
+
         public DelegateCommand SampleAddCommand { get; }
 
-        public DelegateCommand SampleOrderAllCommand { get; }
+        public DelegateCommand SampleOrderCommand { get; }
 
         public DelegateCommand SampleRemoveAllCommand { get; }
 
@@ -411,27 +427,15 @@ namespace Score2Stream.MenuModule.ViewModels
 
                     switch (tabIndex)
                     {
-                        case (int)ViewType.Board:
+                        case (int)ViewType.Inputs:
 
                             IsSampleDetection = false;
 
                             regionManager.RequestNavigate(
                                 regionName: nameof(RegionType.EditRegion),
-                                source: nameof(ViewType.Board));
+                                source: nameof(ViewType.Inputs));
 
-                            tabSelectedEvent.Publish(ViewType.Board);
-
-                            break;
-
-                        case (int)ViewType.Areas:
-
-                            IsSampleDetection = false;
-
-                            regionManager.RequestNavigate(
-                                regionName: nameof(RegionType.EditRegion),
-                                source: nameof(ViewType.Areas));
-
-                            tabSelectedEvent.Publish(ViewType.Areas);
+                            tabSelectedEvent.Publish(ViewType.Inputs);
 
                             break;
 
@@ -443,7 +447,19 @@ namespace Score2Stream.MenuModule.ViewModels
 
                             tabSelectedEvent.Publish(ViewType.Templates);
 
-                            RefreshSamples();
+                            OnSamplesChanged();
+
+                            break;
+
+                        case (int)ViewType.Board:
+
+                            IsSampleDetection = false;
+
+                            regionManager.RequestNavigate(
+                                regionName: nameof(RegionType.EditRegion),
+                                source: nameof(ViewType.Board));
+
+                            tabSelectedEvent.Publish(ViewType.Board);
 
                             break;
                     }
@@ -600,6 +616,14 @@ namespace Score2Stream.MenuModule.ViewModels
             RefreshTemplates();
         }
 
+        private void OnSamplesChanged()
+        {
+            SampleRemoveAllCommand.RaiseCanExecuteChanged();
+            SampleOrderCommand.RaiseCanExecuteChanged();
+
+            OnTrainigChanged();
+        }
+
         private void OnSampleSelected()
         {
             SampleRemoveCommand.RaiseCanExecuteChanged();
@@ -621,7 +645,13 @@ namespace Score2Stream.MenuModule.ViewModels
             TemplateRemoveCommand.RaiseCanExecuteChanged();
             SampleAddCommand.RaiseCanExecuteChanged();
 
-            RefreshSamples();
+            OnSamplesChanged();
+        }
+
+        private void OnTrainigChanged()
+        {
+            RecognitionTrainCommand.RaiseCanExecuteChanged();
+            RecognitionResetCommand.RaiseCanExecuteChanged();
         }
 
         private void RefreshInputControl()
@@ -683,7 +713,7 @@ namespace Score2Stream.MenuModule.ViewModels
                 RaisePropertyChanged(nameof(ThresholdMatching));
                 RaisePropertyChanged(nameof(WaitingDuration));
 
-                RefreshSamples();
+                OnSamplesChanged();
             }
             else
             {
@@ -702,12 +732,6 @@ namespace Score2Stream.MenuModule.ViewModels
             }
 
             InputStopCommand.RaiseCanExecuteChanged();
-        }
-
-        private void RefreshSamples()
-        {
-            SampleRemoveAllCommand.RaiseCanExecuteChanged();
-            SampleOrderAllCommand.RaiseCanExecuteChanged();
         }
 
         private void RefreshTemplates()

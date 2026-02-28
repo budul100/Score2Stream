@@ -101,6 +101,7 @@ namespace Score2Stream.Tests.VideoServiceTests
                 .Setup(d => d.InvokeAsync(
                     It.IsAny<Action>(),
                     It.IsAny<CancellationToken>()))
+                .Callback<Action, CancellationToken>((action, _) => action())
                 .Returns(Task.CompletedTask);
 
             dispatcherServiceMock

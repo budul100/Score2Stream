@@ -13,15 +13,14 @@ namespace Score2Stream.AreaModule
 
         public void OnInitialized(IContainerProvider containerProvider)
         {
-            regionManager.RequestNavigate(
-                regionName: nameof(RegionType.EditRegion),
-                source: nameof(ViewType.Areas));
+            regionManager.RegisterViewWithRegion<AreasView>(
+                regionName: nameof(RegionType.EditRegion));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.RegisterForNavigation<AreasView>(
-                name: nameof(ViewType.Areas));
+                name: nameof(ViewType.Inputs));
         }
 
         #endregion Public Methods

@@ -221,7 +221,7 @@ namespace Score2Stream.VideoService
 
                     foreach (var clip in clips)
                     {
-                        UpdateBitmap(clip);
+                        await UpdateBitmapAsync(clip);
                     }
                 }
 
@@ -360,24 +360,19 @@ namespace Score2Stream.VideoService
                     }
                 }
 
-                IsActive = true;
-
-                await dispatcherService.InvokeAsync(
-                    action: inputStartedEvent.Publish,
-                    cancellationToken: cancellationTokenSource.Token);
-
                 if (cancellationTokenSource?.IsCancellationRequested == false)
                 {
+                    IsActive = true;
+
+                    await dispatcherService.InvokeAsync(
+                        action: inputStartedEvent.Publish);
+
                     await CaptureAsync(
                         deviceId: deviceId,
                         video: video);
                 }
             }
-            catch (OperationCanceledException)
-            {
-                logger?.LogInformation("Input capturing was cancelled.");
-            }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 logger?.LogError(
                     exception: ex,
@@ -412,7 +407,9 @@ namespace Score2Stream.VideoService
                 if (!isDisposed)
                 {
                     await UpdateVideoAsync();
-                    inputEndedEvent.Publish();
+
+                    await dispatcherService.InvokeAsync(
+                        action: inputEndedEvent.Publish);
                 }
             }
         }
@@ -446,7 +443,7 @@ namespace Score2Stream.VideoService
             }
         }
 
-        private void UpdateBitmap(Segment clip)
+        private async Task UpdateBitmapAsync(Segment clip)
         {
             if (isDisposed) return;
 
@@ -471,12 +468,16 @@ namespace Score2Stream.VideoService
                     {
                         var bitmapStream = blendedImage.ToMemoryStream();
 
-                        clip.Bitmap = new Bitmap(bitmapStream);
+                        clip.Bitmap = await dispatcherService.InvokeAsync(
+                            function: () => new Bitmap(bitmapStream),
+                            cancellationToken: cancellationTokenSource.Token);
 
-                        segmentDrawnEvent.Publish(clip);
+                        await dispatcherService.InvokeAsync(
+                            action: () => segmentDrawnEvent.Publish(clip),
+                            cancellationToken: cancellationTokenSource.Token);
                     }
 
-                    UpdateValue(clip);
+                    await UpdateValueAsync(clip);
                 }
             }
         }
@@ -525,7 +526,7 @@ namespace Score2Stream.VideoService
             }
         }
 
-        private void UpdateValue(Segment segment)
+        private async Task UpdateValueAsync(Segment segment)
         {
             var thresholdMatching = Math.Abs(settingsService.Contents.Detection.ThresholdMatching) / Constants.ThresholdDivider;
             var waitingDurationMS = Math.Abs(settingsService.Contents.Detection.DurationDetectionWait);
@@ -537,48 +538,59 @@ namespace Score2Stream.VideoService
             var relevant = segment.Matches
                 .OrderByDescending(m => m.Similarity).FirstOrDefault();
 
-            if (relevant?.Type == MatchType.Similar)
+            var value = relevant?.Sample?.Value;
+            var similarity = (float)(relevant?.Similarity ?? 0);
+
+            if (similarity > thresholdMatching
+                && relevant != default)
             {
                 relevant.Type = MatchType.Match;
+            }
 
+            if (!settingsService.Contents.Detection.PreventAutoRecognition)
+            {
+                var (current, confidence) = recognitionService.Recognize(segment.Mat);
+
+                if (confidence > similarity)
+                {
+                    value = current;
+                    similarity = confidence;
+
+                    if (relevant != default)
+                    {
+                        relevant.Type = MatchType.Similar;
+                    }
+                }
+            }
+
+            if (similarity > thresholdMatching)
+            {
                 segment.SetValue(
-                    value: relevant.Sample.Value,
+                    value: value,
                     hasValue: true,
-                    similarity: (float)relevant.Similarity,
+                    similarity: similarity,
                     waitingDuration: waitingDuration);
             }
             else
             {
-                var value = segment.Area?.Template?.Empty;
-                var hasValue = relevant != default;
-                var similarity = (float)(relevant?.Similarity ?? 0);
-
-                if (!settingsService.Contents.Detection.PreventAutoRecognition
-                    && relevant == default)
-                {
-                    var (Value, Confidence) = recognitionService.Recognize(segment.Mat);
-
-                    if (Confidence > thresholdMatching)
-                    {
-                        value = Value;
-                        hasValue = true;
-                        similarity = Confidence;
-                    }
-                }
+                value = segment.Area?.Template?.Empty;
 
                 segment.SetValue(
                     value: value,
-                    hasValue: hasValue,
+                    hasValue: false,
                     similarity: similarity,
                     waitingDuration: waitingDuration);
             }
 
-            segmentUpdatedEvent.Publish(segment);
+            await dispatcherService.InvokeAsync(
+                action: () => segmentUpdatedEvent.Publish(segment),
+                cancellationToken: cancellationTokenSource.Token);
         }
 
         private async Task UpdateVideoAsync(DateTime? capturingStart = default)
         {
-            inputUpdatedEvent.Publish();
+            await dispatcherService.InvokeAsync(
+                action: inputUpdatedEvent.Publish);
 
             var delay = settingsService.Contents.Video.ProcessingDelay + Constants.UpdateDelay;
 

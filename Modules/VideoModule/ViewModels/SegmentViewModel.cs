@@ -117,7 +117,7 @@ namespace Score2Stream.VideoModule.ViewModels
 
                     break;
 
-                case ViewType.Areas:
+                case ViewType.Inputs:
 
                     IsActive = areaService.Area == Segment.Area;
                     IsSelected = false;

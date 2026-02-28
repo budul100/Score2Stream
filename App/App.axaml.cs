@@ -122,12 +122,6 @@ namespace Score2Stream.App
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            var dispatcherService = new DispatcherService.Service();
-            containerRegistry.RegisterInstance<IDispatcherService>(dispatcherService);
-
-            var recognitionService = new RecognitionService.Service();
-            containerRegistry.RegisterInstance<IRecognitionService>(recognitionService);
-
             var settingsService = new SettingsService.Service<Session>();
             containerRegistry.RegisterInstance<ISettingsService<Session>>(settingsService);
 
@@ -135,6 +129,8 @@ namespace Score2Stream.App
             containerRegistry.RegisterInstance(loggerFactory);
             containerRegistry.Register(typeof(ILogger<>), typeof(Logger<>));
 
+            containerRegistry.RegisterSingleton<IDispatcherService, DispatcherService.Service>();
+            containerRegistry.RegisterSingleton<IRecognitionService, RecognitionService.Service>();
             containerRegistry.RegisterSingleton<IDialogService, DialogService.Service>();
             containerRegistry.RegisterSingleton<INavigationService, Service>();
             containerRegistry.RegisterSingleton<IScoreboardService, ScoreboardService.Service>();

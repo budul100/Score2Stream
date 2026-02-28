@@ -7,6 +7,7 @@ using Prism.Events;
 using Prism.Ioc;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Events.Template;
+using Score2Stream.Commons.Events.Training;
 using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;

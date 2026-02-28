@@ -19,13 +19,13 @@ namespace Score2Stream.NavigationService
 
                 return viewName switch
                 {
-                    nameof(ViewType.Areas) => (ViewType?)ViewType.Areas,
+                    nameof(ViewType.Inputs) => (ViewType?)ViewType.Inputs,
 
                     nameof(ViewType.Templates) => (ViewType?)ViewType.Templates,
 
                     nameof(ViewType.Board) => (ViewType?)ViewType.Board,
 
-                    _ => (ViewType?)ViewType.Board,
+                    _ => (ViewType?)ViewType.Inputs,
                 };
             }
         }

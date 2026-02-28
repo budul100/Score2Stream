@@ -2,10 +2,10 @@
 {
     public enum ViewType
     {
-        Board = 0,
+        Inputs = 0,
 
-        Areas = 1,
+        Templates = 1,
 
-        Templates = 2,
+        Board = 2,
     }
 }

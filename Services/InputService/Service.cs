@@ -14,6 +14,7 @@ using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Template;
+using Score2Stream.Commons.Events.Training;
 using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
@@ -328,8 +329,8 @@ namespace Score2Stream.InputService
                 .OrderBy(d => d.Value).ToArray();
 
             var removedDevices = Inputs
-                .Where(i => !currentDevices.Any(d => d.Value == i.Name)
-                    || (i.IsDevice && i.IsEnded)).ToArray();
+                .Where(i => (i.IsDevice && !currentDevices.Any(d => d.Value == i.Name))
+                    || (!i.IsDevice && i.IsEnded)).ToArray();
 
             foreach (var removedDevice in removedDevices)
             {

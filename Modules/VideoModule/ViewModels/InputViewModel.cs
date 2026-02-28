@@ -254,7 +254,7 @@ namespace Score2Stream.VideoModule.ViewModels
             var result = area != default
             && Bitmap != default
             && (area.IsEditing || isActivating)
-            && navigationService.EditView == ViewType.Areas;
+            && navigationService.EditView == ViewType.Inputs;
 
             return result;
         }

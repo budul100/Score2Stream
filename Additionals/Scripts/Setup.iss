@@ -5,10 +5,10 @@
 #define OutputDir "..\\..\\_Publish"
 #define AppIcon "..\\Icons\\Score2Stream.ico"
 
+#define AppExeName "Score2Stream.exe"
 #ifndef AppVersion
   #define AppVersion "0.0.0"
 #endif
-#define AppExeName "Score2Stream_" + AppVersion + ".exe"
 
 [Setup]
 AppId={{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}
