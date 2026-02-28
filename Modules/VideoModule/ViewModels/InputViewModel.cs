@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading.Tasks;
 using Avalonia.Controls.PanAndZoom;
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
@@ -68,11 +67,15 @@ namespace Score2Stream.VideoModule.ViewModels
             ZoomChangedCommand = new DelegateCommand<ZoomChangedEventArgs>(OnZoomChanged);
 
             eventAggregator.GetEvent<InputSelectedEvent>().Subscribe(
-                action: _ => LoadInput(),
+                action: _ => StartLoading(),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<InputUpdatedEvent>().Subscribe(
                 action: RefreshInput,
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<InputEndedEvent>().Subscribe(
+                action: EndLoading,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<InputCenteringEvent>().Subscribe(
@@ -231,6 +234,11 @@ namespace Score2Stream.VideoModule.ViewModels
                 e: default);
         }
 
+        private void EndLoading()
+        {
+            IsLoading = false;
+        }
+
         private double? GetActualHeight()
         {
             var result = heightMin.HasValue
@@ -257,13 +265,6 @@ namespace Score2Stream.VideoModule.ViewModels
             && navigationService.EditView == ViewType.Inputs;
 
             return result;
-        }
-
-        private void LoadInput()
-        {
-            IsLoading = true;
-
-            UpdateAreas();
         }
 
         private void OnMousePressed(PointerPressedEventArgs eventArgs)
@@ -348,7 +349,7 @@ namespace Score2Stream.VideoModule.ViewModels
 
             if (Bitmap != default)
             {
-                IsLoading = false;
+                EndLoading();
             }
         }
 
@@ -374,6 +375,13 @@ namespace Score2Stream.VideoModule.ViewModels
                 heightMin = Math.Floor((FullHeight - BitmapHeight) / 2);
                 heightMax = heightMin + Math.Floor(BitmapHeight);
             }
+
+            UpdateAreas();
+        }
+
+        private void StartLoading()
+        {
+            IsLoading = true;
 
             UpdateAreas();
         }

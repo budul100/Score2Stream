@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -99,11 +100,34 @@ namespace Score2Stream.VideoService
 
         public async Task RunAsync(Input input)
         {
-            this.Name = input.Name;
+            if (serviceTask?.IsCompleted != false)
+            {
+                this.Name = input.Name;
 
-            await StartAsync(
-                deviceId: input.DeviceId,
-                fileName: input.FileName);
+                var oldTokenSource = cancellationTokenSource;
+
+                cancellationTokenSource = new CancellationTokenSource();
+
+                oldTokenSource?.Cancel();
+                oldTokenSource?.Dispose();
+
+                serviceTask = Task.Run(
+                    function: () => RunAsync(
+                        deviceId: input.DeviceId,
+                        fileName: input.FileName),
+                    cancellationToken: cancellationTokenSource.Token);
+
+                try
+                {
+                    await serviceTask;
+                }
+                catch (Exception ex)
+                {
+                    logger?.LogError(
+                        exception: ex,
+                        message: "Start capturing failed.");
+                }
+            }
         }
 
         public void Stop()
@@ -160,6 +184,8 @@ namespace Score2Stream.VideoService
             var frameCount = 0.0;
             var frameIndex = 0.0;
 
+            var cancellationToken = cancellationTokenSource.Token;
+
             do
             {
                 if (isDisposed) break;
@@ -202,7 +228,7 @@ namespace Score2Stream.VideoService
 
                     Bitmap = await dispatcherService.InvokeAsync(
                         function: () => new Bitmap(rotated.ToMemoryStream()),
-                        cancellationToken: cancellationTokenSource.Token);
+                        cancellationToken: cancellationToken);
                 }
 
                 var clips = AreaService?.Areas?
@@ -221,7 +247,9 @@ namespace Score2Stream.VideoService
 
                     foreach (var clip in clips)
                     {
-                        await UpdateBitmapAsync(clip);
+                        await UpdateBitmapAsync(
+                            clip: clip,
+                            cancellationToken: cancellationToken);
                     }
                 }
 
@@ -260,7 +288,7 @@ namespace Score2Stream.VideoService
                 }
             }
             while (hasContent
-                && !cancellationTokenSource.IsCancellationRequested);
+                && !cancellationToken.IsCancellationRequested);
         }
 
         private Mat GetImage(Segment clip)
@@ -377,9 +405,15 @@ namespace Score2Stream.VideoService
                 logger?.LogError(
                     exception: ex,
                     message: "Input capturing failed.");
+
+                Debugger.Break();
             }
             finally
             {
+                Bitmap = default;
+                IsActive = false;
+                IsEnded = true;
+
                 if (!isDisposed)
                 {
                     frameLock.EnterWriteLock();
@@ -393,57 +427,21 @@ namespace Score2Stream.VideoService
                     {
                         frameLock.ExitWriteLock();
                     }
+
+                    await UpdateVideoAsync();
+
+                    await dispatcherService.InvokeAsync(
+                        action: inputEndedEvent.Publish);
                 }
                 else
                 {
                     frame?.Dispose();
                     frame = null;
                 }
-
-                Bitmap = default;
-                IsActive = false;
-                IsEnded = true;
-
-                if (!isDisposed)
-                {
-                    await UpdateVideoAsync();
-
-                    await dispatcherService.InvokeAsync(
-                        action: inputEndedEvent.Publish);
-                }
             }
         }
 
-        private async Task StartAsync(int? deviceId, string fileName)
-        {
-            if (serviceTask?.IsCompleted == false) return;
-
-            var oldTokenSource = cancellationTokenSource;
-
-            cancellationTokenSource = new CancellationTokenSource();
-
-            oldTokenSource?.Cancel();
-            oldTokenSource?.Dispose();
-
-            serviceTask = Task.Run(
-                function: () => RunAsync(
-                    deviceId: deviceId,
-                    fileName: fileName),
-                cancellationToken: cancellationTokenSource.Token);
-
-            try
-            {
-                await serviceTask;
-            }
-            catch (Exception ex)
-            {
-                logger?.LogError(
-                    exception: ex,
-                    message: "Start capturing failed.");
-            }
-        }
-
-        private async Task UpdateBitmapAsync(Segment clip)
+        private async Task UpdateBitmapAsync(Segment clip, CancellationToken cancellationToken)
         {
             if (isDisposed) return;
 
@@ -470,14 +468,16 @@ namespace Score2Stream.VideoService
 
                         clip.Bitmap = await dispatcherService.InvokeAsync(
                             function: () => new Bitmap(bitmapStream),
-                            cancellationToken: cancellationTokenSource.Token);
+                            cancellationToken: cancellationToken);
 
                         await dispatcherService.InvokeAsync(
                             action: () => segmentDrawnEvent.Publish(clip),
-                            cancellationToken: cancellationTokenSource.Token);
+                            cancellationToken: cancellationToken);
                     }
 
-                    await UpdateValueAsync(clip);
+                    await UpdateValueAsync(
+                        segment: clip,
+                        cancellationToken: cancellationToken);
                 }
             }
         }
@@ -490,9 +490,10 @@ namespace Score2Stream.VideoService
 
             try
             {
-                if (frame == null) return;
-
-                if (area?.HasDimensions != true || !AreaService.Areas.Contains(area)) return;
+                if (frame == null
+                    || area?.HasDimensions != true
+                    || area?.Segments?.Count() == 0
+                    || !AreaService.Areas.Contains(area)) return;
 
                 var size = frame.Size();
 
@@ -506,14 +507,14 @@ namespace Score2Stream.VideoService
 
                 var index = 0;
 
-                foreach (var clip in area.Segments)
+                foreach (var segement in area.Segments)
                 {
                     var clipX1 = areaX1 + (width * index);
-                    var clipX2 = clip != area.Segments.Last()
+                    var clipX2 = segement != area.Segments.Last()
                         ? areaX1 + (width * ++index)
                         : areaX2;
 
-                    clip.Rect = size.GetRectangle(
+                    segement.Rect = size.GetRectangle(
                         firstX: clipX1,
                         firstY: areaY1,
                         secondX: clipX2,
@@ -526,65 +527,52 @@ namespace Score2Stream.VideoService
             }
         }
 
-        private async Task UpdateValueAsync(Segment segment)
+        private async Task UpdateValueAsync(Segment segment, CancellationToken cancellationToken)
         {
-            var thresholdMatching = Math.Abs(settingsService.Contents.Detection.ThresholdMatching) / Constants.ThresholdDivider;
             var waitingDurationMS = Math.Abs(settingsService.Contents.Detection.DurationDetectionWait);
             var waitingDuration = TimeSpan.FromMilliseconds(waitingDurationMS);
 
-            segment.Matches = segment.GetMatches(
-                thresholdMatching: thresholdMatching).ToArray();
+            segment.Matches = recognitionService
+                .GetSampleMatches(segment.Mat).ToArray();
 
-            var relevant = segment.Matches
-                .OrderByDescending(m => m.Similarity).FirstOrDefault();
+            var match = segment.Matches?.FirstOrDefault();
 
-            var value = relevant?.Sample?.Value;
-            var similarity = (float)(relevant?.Similarity ?? 0);
-
-            if (similarity > thresholdMatching
-                && relevant != default)
+            if (segment.Matches?.Count() > 0)
             {
-                relevant.Type = MatchType.Match;
+                match.Type = MatchType.Match;
             }
-
-            if (!settingsService.Contents.Detection.PreventAutoRecognition)
+            else
             {
-                var (current, confidence) = recognitionService.Recognize(segment.Mat);
+                match = recognitionService.GetModelMatch(segment.Mat);
 
-                if (confidence > similarity)
+                if (match != default)
                 {
-                    value = current;
-                    similarity = confidence;
-
-                    if (relevant != default)
-                    {
-                        relevant.Type = MatchType.Similar;
-                    }
+                    match.Type = MatchType.Match;
                 }
             }
 
-            if (similarity > thresholdMatching)
+            if (match != default)
             {
                 segment.SetValue(
-                    value: value,
+                    value: match.Value,
                     hasValue: true,
-                    similarity: similarity,
+                    similarity: match.Similarity,
                     waitingDuration: waitingDuration);
             }
             else
             {
-                value = segment.Area?.Template?.Empty;
+                var value = segment.Area?.Template?.Empty;
 
                 segment.SetValue(
                     value: value,
                     hasValue: false,
-                    similarity: similarity,
+                    similarity: 0.0,
                     waitingDuration: waitingDuration);
             }
 
             await dispatcherService.InvokeAsync(
                 action: () => segmentUpdatedEvent.Publish(segment),
-                cancellationToken: cancellationTokenSource.Token);
+                cancellationToken: cancellationToken);
         }
 
         private async Task UpdateVideoAsync(DateTime? capturingStart = default)

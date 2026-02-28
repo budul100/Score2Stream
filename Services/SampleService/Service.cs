@@ -57,7 +57,7 @@ namespace Score2Stream.SampleService
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<SegmentUpdatedEvent>().Subscribe(
-                action: s => DetectSegment(s),
+                action: DetectSegment,
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: _ => IsDetection);
@@ -68,8 +68,6 @@ namespace Score2Stream.SampleService
         #region Public Properties
 
         public bool IsDetection { get; set; }
-
-        public bool IsTrained => recognitionService.IsTrained;
 
         public Sample Sample { get; private set; }
 
@@ -90,15 +88,13 @@ namespace Score2Stream.SampleService
                         maxCount: Constants.MaxCountSamples);
                 }
 
-                sample.Bitmap = new Bitmap(sample.Mat.ToMemoryStream());
-
                 if (sample.Value == default
-                    && recognitionService != default
-                    && !settingsService.Contents.Detection.PreventAutoRecognition)
+                    && recognitionService != default)
                 {
-                    sample.Value = recognitionService.Recognize(sample.Mat).Value;
+                    sample.Value = recognitionService.GetModelMatch(sample.Mat)?.Value;
                 }
 
+                sample.Bitmap = new Bitmap(sample.Mat.ToMemoryStream());
                 sample.Index = index++;
 
                 Samples.Add(sample);
@@ -112,10 +108,9 @@ namespace Score2Stream.SampleService
                 for (var index = Samples.Count; index > 0; index--)
                 {
                     var sample = Samples[index - 1];
+
                     RemoveSample(sample);
                 }
-
-                samplesChangedEvent.Publish();
 
                 Select(default);
             }
@@ -227,15 +222,8 @@ namespace Score2Stream.SampleService
                     RemoveSample(Sample);
 
                     Select(next);
-
-                    samplesChangedEvent.Publish();
                 }
             }
-        }
-
-        public void ResetTraining()
-        {
-            recognitionService.Reset();
         }
 
         public void Select(Sample sample)
@@ -247,14 +235,6 @@ namespace Score2Stream.SampleService
                     : default;
 
                 sampleSelectedEvent.Publish(Sample);
-            }
-        }
-
-        public void Train()
-        {
-            if (Samples?.Count > 0)
-            {
-                recognitionService.Train(Samples);
             }
         }
 
@@ -281,6 +261,8 @@ namespace Score2Stream.SampleService
                 }
 
                 Add(sample);
+
+                recognitionService.Add(sample);
 
                 samplesChangedEvent.Publish();
 
@@ -348,6 +330,10 @@ namespace Score2Stream.SampleService
                 sample.Template?.Samples.Remove(sample);
 
                 Samples.Remove(sample);
+
+                recognitionService.Remove(sample);
+
+                samplesChangedEvent.Publish();
             }
         }
 

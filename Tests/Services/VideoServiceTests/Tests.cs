@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Prism.Events;
-using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Clip;
 using Score2Stream.Commons.Events.Input;
@@ -89,7 +88,6 @@ namespace Score2Stream.Tests.VideoServiceTests
                 {
                     ThresholdMatching = 80,
                     DurationDetectionWait = 0,
-                    PreventAutoRecognition = false
                 }
             };
 

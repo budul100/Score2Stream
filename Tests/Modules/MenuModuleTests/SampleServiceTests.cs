@@ -17,7 +17,6 @@ using Score2Stream.Commons.Events.Menu;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Scoreboard;
 using Score2Stream.Commons.Events.Template;
-using Score2Stream.Commons.Events.Training;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
@@ -136,7 +135,6 @@ namespace Score2Stream.Tests.MenuModuleTests
             mock.RegisterNewMockedEvent<InputEndedEvent>();
             mock.RegisterNewMockedEvent<InputStartedEvent>();
             mock.RegisterNewMockedEvent<InputUpdatedEvent>();
-            mock.RegisterNewMockedEvent<TrainingChangedEvent>();
 
             return mock;
         }
@@ -158,10 +156,7 @@ namespace Score2Stream.Tests.MenuModuleTests
 
             var eventAggregatorMock = CreateEventAggregatorMock();
 
-            var session = new Session
-            {
-                Detection = new Detection { PreventAutoRecognition = true }
-            };
+            var session = new Session();
 
             var sessionSettingsServiceMock = new Mock<ISettingsService<Session>>();
             sessionSettingsServiceMock.Setup(m => m.Contents).Returns(session);

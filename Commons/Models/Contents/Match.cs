@@ -12,6 +12,8 @@ namespace Score2Stream.Commons.Models.Contents
 
         public MatchType Type { get; set; }
 
+        public string Value { get; set; }
+
         #endregion Public Properties
     }
 }

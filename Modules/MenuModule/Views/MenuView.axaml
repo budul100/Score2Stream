@@ -531,40 +531,6 @@
 
                     </rib:RibbonGroupBox>
 
-                    <rib:RibbonGroupBox Header="Recognition control" IsEnabled="{Binding IsActive}">
-
-                        <rib:RibbonButton
-                            Command="{Binding RecognitionTrainCommand}"
-                            Content="Train samples"
-                            FontSize="{StaticResource FontSize}"
-                            MinSize="Large">
-                            <rib:RibbonButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="School" />
-                                </ControlTemplate>
-                            </rib:RibbonButton.LargeIcon>
-                        </rib:RibbonButton>
-
-                        <rib:RibbonButton
-                            Command="{Binding RecognitionResetCommand}"
-                            Content="Reset training"
-                            FontSize="{StaticResource FontSize}"
-                            MinSize="Large">
-                            <rib:RibbonButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="SchoolOutline" />
-                                </ControlTemplate>
-                            </rib:RibbonButton.LargeIcon>
-                        </rib:RibbonButton>
-
-                    </rib:RibbonGroupBox>
-
                     <rib:RibbonGroupBox Header="Recognition options" IsEnabled="{Binding IsActive}">
 
                         <StackPanel
@@ -604,14 +570,6 @@
                                 Minimum="0"
                                 Value="{Binding ThresholdMatching, Mode=TwoWay}" />
                         </StackPanel>
-
-                        <CheckBox
-                            Margin="0,0,4,4"
-                            VerticalAlignment="Center"
-                            Content="Deactivate auto recognition"
-                            FontSize="{StaticResource FontSize}"
-                            IsChecked="{Binding PreventAutoRecognition, Mode=TwoWay}"
-                            IsEnabled="{Binding IsActive}" />
 
                     </rib:RibbonGroupBox>
                 </rib:RibbonTab.Groups>

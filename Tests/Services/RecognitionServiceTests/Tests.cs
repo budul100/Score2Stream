@@ -1,21 +1,10 @@
 using System;
 using System.IO;
-using EventAggregatorMocker;
 using Moq;
 using OpenCvSharp;
-using Prism.Events;
-using Score2Stream.Commons.Enums;
-using Score2Stream.Commons.Events.Area;
-using Score2Stream.Commons.Events.Clip;
-using Score2Stream.Commons.Events.Graphics;
-using Score2Stream.Commons.Events.Input;
-using Score2Stream.Commons.Events.Menu;
-using Score2Stream.Commons.Events.Sample;
-using Score2Stream.Commons.Events.Scoreboard;
-using Score2Stream.Commons.Events.Template;
-using Score2Stream.Commons.Events.Training;
 using Score2Stream.Commons.Extensions;
-using Score2Stream.Commons.Models.Contents;
+using Score2Stream.Commons.Interfaces;
+using Score2Stream.Commons.Models.Settings;
 using Xunit;
 
 namespace Score2Stream.Tests.RecognitionServiceTests
@@ -26,20 +15,51 @@ namespace Score2Stream.Tests.RecognitionServiceTests
 
         private const string SamplesPath = @"..\..\..\..\..\Samples\Images";
 
+        private readonly Mock<ISettingsService<Session>> settingsServiceMock;
+
         #endregion Private Fields
+
+        #region Public Constructors
+
+        public Tests()
+        {
+            settingsServiceMock = new Mock<ISettingsService<Session>>();
+
+            var session = new Session
+            {
+                Video = new Video
+                {
+                    ProcessingDelay = 0,
+                    Rotation = 0,
+                    ImagesQueueSize = 5,
+                    NoCropping = false,
+                    FilePathVideo = string.Empty
+                },
+
+                Detection = new Detection
+                {
+                    ThresholdMatching = 80,
+                    DurationDetectionWait = 0,
+                }
+            };
+
+            settingsServiceMock
+                .Setup(s => s.Contents)
+                .Returns(session);
+        }
+
+        #endregion Public Constructors
 
         #region Public Methods
 
         [Fact]
         public void RecognizeNumbers()
         {
-            var eventAggregatorMock = CreateEventAggregatorMock();
-
-            var recognitionService = new RecognitionService.Service(eventAggregatorMock.Object);
+            var recognitionService = new RecognitionService.Service(settingsServiceMock.Object);
 
             var path0 = Path.Combine(SamplesPath, "SevenSegment-0.png");
             var bytes0 = GetBytes(path0);
-            var result0 = recognitionService.Recognize(bytes0).Value;
+            var result0 = recognitionService.GetModelMatch(bytes0).Value;
 
             Assert.Equal(
                 "0",
@@ -49,7 +69,7 @@ namespace Score2Stream.Tests.RecognitionServiceTests
 
             var path3 = Path.Combine(samplesPath, "SevenSegment-3.png");
             var bytes3 = GetBytes(path3);
-            var result3 = recognitionService.Recognize(bytes3).Value;
+            var result3 = recognitionService.GetModelMatch(bytes3).Value;
 
             Assert.Equal(
                 "3",
@@ -57,7 +77,7 @@ namespace Score2Stream.Tests.RecognitionServiceTests
 
             var path4 = Path.Combine(samplesPath, "SevenSegment-4.png");
             var bytes4 = GetBytes(path4);
-            var result4 = recognitionService.Recognize(bytes4).Value;
+            var result4 = recognitionService.GetModelMatch(bytes4).Value;
 
             Assert.Equal(
                 "4",
@@ -65,7 +85,7 @@ namespace Score2Stream.Tests.RecognitionServiceTests
 
             var path5 = Path.Combine(samplesPath, "SevenSegment-5.png");
             var bytes5 = GetBytes(path5);
-            var result5 = recognitionService.Recognize(bytes5).Value;
+            var result5 = recognitionService.GetModelMatch(bytes5).Value;
 
             Assert.Equal(
                 "5",
@@ -75,35 +95,6 @@ namespace Score2Stream.Tests.RecognitionServiceTests
         #endregion Public Methods
 
         #region Private Methods
-
-        private static Mock<IEventAggregator> CreateEventAggregatorMock()
-        {
-            var mock = new Mock<IEventAggregator>();
-
-            mock.RegisterNewMockedEvent<AreaModifiedEvent, Area>();
-            mock.RegisterNewMockedEvent<AreasChangedEvent>();
-            mock.RegisterNewMockedEvent<AreaSelectedEvent, Area>();
-            mock.RegisterNewMockedEvent<InputCenteringEvent>();
-            mock.RegisterNewMockedEvent<DetectionChangedEvent>();
-            mock.RegisterNewMockedEvent<FilterChangedEvent>();
-            mock.RegisterNewMockedEvent<InputsChangedEvent>();
-            mock.RegisterNewMockedEvent<SamplesChangedEvent>();
-            mock.RegisterNewMockedEvent<SamplesOrderedEvent>();
-            mock.RegisterNewMockedEvent<SampleSelectedEvent, Sample>();
-            mock.RegisterNewMockedEvent<ScoreboardModifiedEvent>();
-            mock.RegisterNewMockedEvent<SegmentSelectedEvent, Segment>();
-            mock.RegisterNewMockedEvent<SegmentUpdatedEvent, Segment>();
-            mock.RegisterNewMockedEvent<ServerStartedEvent>();
-            mock.RegisterNewMockedEvent<TabSelectedEvent, ViewType>();
-            mock.RegisterNewMockedEvent<TemplatesChangedEvent>();
-            mock.RegisterNewMockedEvent<TemplateSelectedEvent, Template>();
-            mock.RegisterNewMockedEvent<InputEndedEvent>();
-            mock.RegisterNewMockedEvent<InputStartedEvent>();
-            mock.RegisterNewMockedEvent<InputUpdatedEvent>();
-            mock.RegisterNewMockedEvent<TrainingChangedEvent>();
-
-            return mock;
-        }
 
         private static Mat GetBytes(string path)
         {

@@ -7,6 +7,12 @@ namespace Score2Stream.Commons.Extensions
 {
     public static class MatExtensions
     {
+        #region Private Fields
+
+        private const float MinMeanBrightness = 0.05f;
+
+        #endregion Private Fields
+
         #region Public Methods
 
         public static Mat AsBlended(this IEnumerable<Mat> images)
@@ -188,15 +194,32 @@ namespace Score2Stream.Commons.Extensions
 
         public static bool HasValue(this Mat image)
         {
-            var result = image?.Step(0) > 0
-                && image.Rows > 0;
+            var result = false;
 
-            return result;
-        }
+            if (image?.IsDisposed == false
+                && !image.Empty()
+                && image.Rows > 0
+                && image.Cols > 0
+                && image.Step(0) > 0)
+            {
+                var gray = new Mat();
 
-        public static bool IsEmpty(this Mat image)
-        {
-            var result = image.Rows == 0 || image.Cols == 0 || image.CountNonZero() == 0;
+                if (image.Channels() > 1)
+                {
+                    Cv2.CvtColor(
+                        src: image,
+                        dst: gray,
+                        code: ColorConversionCodes.BGR2GRAY);
+                }
+                else
+                {
+                    gray = image.Clone();
+                }
+
+                var mean = Cv2.Mean(gray);
+
+                result = (mean.Val0 / 255f) >= MinMeanBrightness;
+            }
 
             return result;
         }

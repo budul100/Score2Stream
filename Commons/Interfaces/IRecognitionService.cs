@@ -6,19 +6,15 @@ namespace Score2Stream.Commons.Interfaces
 {
     public interface IRecognitionService
     {
-        #region Public Properties
-
-        public bool IsTrained { get; }
-
-        #endregion Public Properties
-
         #region Public Methods
 
-        (string Value, float Confidence) Recognize(Mat image);
+        void Add(Sample sample);
 
-        void Reset();
+        Match GetModelMatch(Mat image);
 
-        void Train(IEnumerable<Sample> samples, int epochs = 50, float learningRate = 0.01f);
+        IEnumerable<Match> GetSampleMatches(Mat image);
+
+        void Remove(Sample sample);
 
         #endregion Public Methods
     }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using AvaloniaUI.Ribbon;
@@ -17,7 +16,6 @@ using Score2Stream.Commons.Events.Menu;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Scoreboard;
 using Score2Stream.Commons.Events.Template;
-using Score2Stream.Commons.Events.Training;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
@@ -119,13 +117,6 @@ namespace Score2Stream.MenuModule.ViewModels
                 executeMethod: () => inputService.SampleService.Order(true),
                 canExecuteMethod: () => inputService?.SampleService?.Samples?.Count > 0);
 
-            this.RecognitionTrainCommand = new DelegateCommand(
-                executeMethod: () => inputService?.SampleService?.Train(),
-                canExecuteMethod: () => inputService?.SampleService?.Samples?.Count > 0);
-            this.RecognitionResetCommand = new DelegateCommand(
-                executeMethod: () => inputService?.SampleService?.ResetTraining(),
-                canExecuteMethod: () => inputService?.SampleService?.IsTrained == true);
-
             tabSelectedEvent = eventAggregator.GetEvent<TabSelectedEvent>();
             detectionChangedEvent = eventAggregator.GetEvent<DetectionChangedEvent>();
             filterChangedEvent = eventAggregator.GetEvent<FilterChangedEvent>();
@@ -164,9 +155,6 @@ namespace Score2Stream.MenuModule.ViewModels
                 action: OnSamplesChanged);
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
                 action: _ => OnSampleSelected());
-
-            eventAggregator.GetEvent<TrainingChangedEvent>().Subscribe(
-                action: OnTrainigChanged);
 
             eventAggregator.GetEvent<ScoreboardModifiedEvent>().Subscribe(
                 action: () => ScoreboardUpdateCommand.RaiseCanExecuteChanged());
@@ -361,21 +349,6 @@ namespace Score2Stream.MenuModule.ViewModels
             }
         }
 
-        public bool PreventAutoRecognition
-        {
-            get { return settingsService.Contents.Detection.PreventAutoRecognition; }
-            set
-            {
-                if (settingsService.Contents.Detection.PreventAutoRecognition != value)
-                {
-                    settingsService.Contents.Detection.PreventAutoRecognition = value;
-                    settingsService.Save();
-
-                    RaisePropertyChanged(nameof(PreventAutoRecognition));
-                }
-            }
-        }
-
         public int ProcessingDelay
         {
             get { return settingsService.Contents.Video.ProcessingDelay; }
@@ -392,10 +365,6 @@ namespace Score2Stream.MenuModule.ViewModels
                 }
             }
         }
-
-        public DelegateCommand RecognitionResetCommand { get; }
-
-        public DelegateCommand RecognitionTrainCommand { get; }
 
         public DelegateCommand SampleAddCommand { get; }
 
@@ -620,8 +589,6 @@ namespace Score2Stream.MenuModule.ViewModels
         {
             SampleRemoveAllCommand.RaiseCanExecuteChanged();
             SampleOrderCommand.RaiseCanExecuteChanged();
-
-            OnTrainigChanged();
         }
 
         private void OnSampleSelected()
@@ -646,12 +613,6 @@ namespace Score2Stream.MenuModule.ViewModels
             SampleAddCommand.RaiseCanExecuteChanged();
 
             OnSamplesChanged();
-        }
-
-        private void OnTrainigChanged()
-        {
-            RecognitionTrainCommand.RaiseCanExecuteChanged();
-            RecognitionResetCommand.RaiseCanExecuteChanged();
         }
 
         private void RefreshInputControl()

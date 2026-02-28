@@ -10,8 +10,6 @@ namespace Score2Stream.Commons.Interfaces
 
         bool IsDetection { get; set; }
 
-        bool IsTrained { get; }
-
         Sample Sample { get; }
 
         List<Sample> Samples { get; }
@@ -36,11 +34,7 @@ namespace Score2Stream.Commons.Interfaces
 
         Task RemoveAsync();
 
-        void ResetTraining();
-
         void Select(Sample sample);
-
-        void Train();
 
         #endregion Public Methods
     }

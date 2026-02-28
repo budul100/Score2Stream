@@ -14,7 +14,6 @@ using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Template;
-using Score2Stream.Commons.Events.Training;
 using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
@@ -61,7 +60,7 @@ namespace Score2Stream.InputService
                 action: UpdateInputs,
                 keepSubscriberReferenceAlive: true);
             eventAggregator.GetEvent<InputEndedEvent>().Subscribe(
-                action: UpdateInputs,
+                action: EndInputs,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<AreasChangedEvent>().Subscribe(
@@ -171,7 +170,8 @@ namespace Score2Stream.InputService
 
         public async Task SelectAsync(Input input)
         {
-            if (input == null || (!input.IsDevice && (!input.IsActive || !File.Exists(input.FileName))))
+            if (input == null
+                || (!input.IsDevice && (!input.IsActive || !File.Exists(input.FileName))))
             {
                 try
                 {
@@ -222,10 +222,16 @@ namespace Score2Stream.InputService
 
         #region Private Methods
 
+        private void EndInputs()
+        {
+            Active = default;
+
+            UpdateInputs();
+        }
+
         private Input GetInput(string fileName)
         {
-            if (!File.Exists(fileName))
-                return default;
+            if (!File.Exists(fileName)) return default;
 
             if (Inputs.Count >= Constants.MaxCountInputs)
             {
@@ -289,15 +295,13 @@ namespace Score2Stream.InputService
                 allowMultiple: false,
                 startLocation: startLocation);
 
-            if (paths?.Any() != true)
-                return default;
+            if (paths?.Any() != true) return default;
 
             var fileName = paths
                 .Select(p => p.Path.LocalPath)
                 .FirstOrDefault(File.Exists);
 
-            if (string.IsNullOrWhiteSpace(fileName))
-                return default;
+            if (string.IsNullOrWhiteSpace(fileName)) return default;
 
             startLocation = await dialogService.GetFolderAsync(fileName);
 
@@ -315,12 +319,7 @@ namespace Score2Stream.InputService
 
                 startLocation = await dialogService.GetFolderAsync(filePathVideo);
             }
-            catch (Exception ex)
-            {
-                logger?.LogWarning(
-                    exception: ex,
-                    message: "Could not determine start location.");
-            }
+            catch { }
         }
 
         private void RefreshDevices()
@@ -418,10 +417,7 @@ namespace Score2Stream.InputService
 
         private async Task RunInputAsync(Input input)
         {
-            if (input == default)
-            {
-                return;
-            }
+            if (input == default) return;
 
             try
             {
@@ -446,10 +442,7 @@ namespace Score2Stream.InputService
 
         private void SaveAreas()
         {
-            if (isInitializing || Active == default)
-            {
-                return;
-            }
+            if (isInitializing || Active == default) return;
 
             Active.Areas = AreaService?.Areas;
 
@@ -458,8 +451,7 @@ namespace Score2Stream.InputService
 
         private void SaveInputs()
         {
-            if (isInitializing)
-                return;
+            if (isInitializing) return;
 
             var activeInputs = Inputs
                 .Where(i => i.IsActive && !i.IsEnded).ToList();
@@ -490,14 +482,13 @@ namespace Score2Stream.InputService
                 {
                     var dirties = template.Samples?
                         .Where(s => s.Mat != default
-                            && (s.Image == null || s.IsDirty)).ToArray();
+                            && s.Image == null).ToArray();
 
                     if (dirties?.Length > 0)
                     {
                         foreach (var dirty in dirties)
                         {
                             dirty.Image = dirty.Mat.ToBytes();
-                            dirty.IsDirty = false;
                         }
                     }
                 }
@@ -508,34 +499,34 @@ namespace Score2Stream.InputService
 
         private void SelectInput(Input input)
         {
-            if (input == default)
-                return;
-
-            _ = RunInputAsync(input);
-
-            if (input == Active)
-                return;
-
-            Active = input;
-
-            if (TemplateService != default)
+            if (input != default)
             {
-                if (!(TemplateService.Templates?.Count > 0))
+                _ = RunInputAsync(input);
+
+                if (input != Active)
                 {
-                    try
+                    Active = input;
+
+                    if (TemplateService != default)
                     {
-                        TemplateService.Create();
+                        if (!(TemplateService.Templates?.Count > 0))
+                        {
+                            try
+                            {
+                                TemplateService.Create();
+                            }
+                            catch (MaxCountExceededException)
+                            { }
+                        }
+
+                        TemplateService.Select(TemplateService.Templates?.FirstOrDefault());
                     }
-                    catch (MaxCountExceededException)
-                    { }
+
+                    inputSelectedEvent.Publish(Active);
+
+                    SaveInputs();
                 }
-
-                TemplateService.Select(TemplateService.Templates?.FirstOrDefault());
             }
-
-            inputSelectedEvent.Publish(Active);
-
-            SaveInputs();
         }
 
         private void UpdateInputs()

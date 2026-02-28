@@ -12,8 +12,6 @@ namespace Score2Stream.Commons.Models.Settings
 
         public int MaxCountUnverifieds { get; set; } = Defaults.DetectionUnverifieds;
 
-        public bool PreventAutoRecognition { get; set; }
-
         public int ThresholdDetecting { get; set; } = Defaults.DetectionThreshold;
 
         public int ThresholdMatching { get; set; } = Defaults.DetectionMatching;

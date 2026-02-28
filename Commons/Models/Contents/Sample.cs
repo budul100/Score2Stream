@@ -19,9 +19,6 @@ namespace Score2Stream.Commons.Models.Contents
         public int Index { get; set; }
 
         [JsonIgnore]
-        public bool IsDirty { get; set; }
-
-        [JsonIgnore]
         public bool IsFiltered { get; set; }
 
         public bool IsVerified { get; set; }

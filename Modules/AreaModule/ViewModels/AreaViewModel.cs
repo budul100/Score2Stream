@@ -10,7 +10,6 @@ using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Template;
-using Score2Stream.Commons.Events.Training;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 
