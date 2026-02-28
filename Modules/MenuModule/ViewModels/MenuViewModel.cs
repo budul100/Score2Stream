@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using static System.Net.Mime.MediaTypeNames;
-using Avalonia.Threading;
 using AvaloniaUI.Ribbon;
 using Prism.Commands;
 using Prism.Events;
@@ -19,7 +16,6 @@ using Score2Stream.Commons.Events.Menu;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Scoreboard;
 using Score2Stream.Commons.Events.Template;
-using Score2Stream.Commons.Events.Video;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
@@ -33,7 +29,6 @@ namespace Score2Stream.MenuModule.ViewModels
         #region Private Fields
 
         private readonly DetectionChangedEvent detectionChangedEvent;
-        private readonly IDispatcherService dispatcherService;
         private readonly FilterChangedEvent filterChangedEvent;
         private readonly IInputService inputService;
         private readonly IRegionManager regionManager;
@@ -47,13 +42,12 @@ namespace Score2Stream.MenuModule.ViewModels
         #region Public Constructors
 
         public MenuViewModel(ISettingsService<Session> settingsService, IWebService webService,
-            IScoreboardService scoreboardService, IInputService inputService, IDispatcherService dispatcherService,
-            IRegionManager regionManager, IEventAggregator eventAggregator)
+            IScoreboardService scoreboardService, IInputService inputService, IRegionManager regionManager,
+            IEventAggregator eventAggregator)
             : base(regionManager)
         {
             this.settingsService = settingsService;
             this.inputService = inputService;
-            this.dispatcherService = dispatcherService;
             this.regionManager = regionManager;
 
             this.SelectTabCommand = new DelegateCommand<ViewType?>(
@@ -74,12 +68,12 @@ namespace Score2Stream.MenuModule.ViewModels
                 executeMethod: UpdateInputs);
             this.InputSelectCommand = new DelegateCommand<object>(
                 executeMethod: param => inputService.SelectAsync(param as Input));
-            this.InputStopAllCommand = new DelegateCommand(
+            this.InputStopCommand = new DelegateCommand(
                 executeMethod: () => inputService.StopAsync(),
-                canExecuteMethod: () => inputService.IsActive);
+                canExecuteMethod: () => inputService.Active != default);
 
             this.InputCenterCommand = new DelegateCommand(
-                executeMethod: () => eventAggregator.GetEvent<CenteringRequestedEvent>().Publish(),
+                executeMethod: () => eventAggregator.GetEvent<InputCenteringEvent>().Publish(),
                 canExecuteMethod: () => inputService.IsActive);
             this.InputRotateLeftCommand = new DelegateCommand(
                 executeMethod: () => ChangeInputRotate(true),
@@ -130,15 +124,17 @@ namespace Score2Stream.MenuModule.ViewModels
             eventAggregator.GetEvent<ServerStartedEvent>().Subscribe(
                 action: OnServerStarted);
 
+            eventAggregator.GetEvent<InputStartedEvent>().Subscribe(
+                action: UpdateInputs,
+                threadOption: ThreadOption.UIThread);
+            eventAggregator.GetEvent<InputEndedEvent>().Subscribe(
+                action: UpdateInputs,
+                threadOption: ThreadOption.UIThread);
             eventAggregator.GetEvent<InputsChangedEvent>().Subscribe(
-                action: RefreshInputs);
-            eventAggregator.GetEvent<VideoStartedEvent>().Subscribe(
-                action: UpdateInputs);
-            eventAggregator.GetEvent<VideoEndedEvent>().Subscribe(
-                action: UpdateInputs);
-
-            eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
-                action: OnVideoUpdated);
+                action: RefreshInputs,
+                threadOption: ThreadOption.UIThread);
+            eventAggregator.GetEvent<InputUpdatedEvent>().Subscribe(
+                action: RefreshInputControl);
 
             eventAggregator.GetEvent<AreasChangedEvent>().Subscribe(
                 action: OnClipsChanged);
@@ -250,12 +246,19 @@ namespace Score2Stream.MenuModule.ViewModels
         }
 
         public DelegateCommand InputCenterCommand { get; }
+
         public DelegateCommand InputRotateLeftCommand { get; }
+
         public DelegateCommand InputRotateRightCommand { get; }
+
         public ObservableCollection<RibbonDropDownItem> Inputs { get; } = [];
+
         public DelegateCommand<object> InputSelectCommand { get; }
-        public DelegateCommand InputStopAllCommand { get; }
+
+        public DelegateCommand InputStopCommand { get; }
+
         public DelegateCommand InputUpdateCommand { get; }
+
         public bool IsActive => inputService.IsActive;
 
         public bool IsSampleDetection
@@ -379,12 +382,19 @@ namespace Score2Stream.MenuModule.ViewModels
         }
 
         public DelegateCommand SampleAddCommand { get; }
+
         public DelegateCommand SampleOrderAllCommand { get; }
+
         public DelegateCommand SampleRemoveAllCommand { get; }
+
         public DelegateCommand SampleRemoveCommand { get; }
+
         public DelegateCommand ScoreboardOpenCommand { get; }
+
         public DelegateCommand ScoreboardUpdateCommand { get; }
+
         public DelegateCommand<ViewType?> SelectTabCommand { get; }
+
         public DelegateCommand ServerOpenCommand { get; }
 
         public DelegateCommand ServerReloadCommand { get; }
@@ -614,9 +624,9 @@ namespace Score2Stream.MenuModule.ViewModels
             RefreshSamples();
         }
 
-        private void OnVideoUpdated()
+        private void RefreshInputControl()
         {
-            InputStopAllCommand.RaiseCanExecuteChanged();
+            InputStopCommand.RaiseCanExecuteChanged();
 
             InputCenterCommand.RaiseCanExecuteChanged();
             InputRotateLeftCommand.RaiseCanExecuteChanged();
@@ -690,6 +700,8 @@ namespace Score2Stream.MenuModule.ViewModels
                 RaisePropertyChanged(nameof(Inputs));
                 RaisePropertyChanged(nameof(IsActive));
             }
+
+            InputStopCommand.RaiseCanExecuteChanged();
         }
 
         private void RefreshSamples()

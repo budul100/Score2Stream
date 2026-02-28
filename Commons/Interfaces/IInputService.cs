@@ -12,7 +12,7 @@ namespace Score2Stream.Commons.Interfaces
 
         IAreaService AreaService { get; }
 
-        HashSet<Input> Inputs { get; }
+        IReadOnlyList<Input> Inputs { get; }
 
         bool IsActive { get; }
 

@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Avalonia.Platform.Storage;
-using Hompus.VideoInputDevices;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Prism.Ioc;
@@ -13,7 +14,6 @@ using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Template;
-using Score2Stream.Commons.Events.Video;
 using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
@@ -31,8 +31,10 @@ namespace Score2Stream.InputService
         private readonly IInputEnumerator inputEnumerator;
         private readonly InputsChangedEvent inputsChangedEvent;
         private readonly InputSelectedEvent inputSelectedEvent;
+        private readonly ILogger<Service> logger;
         private readonly ISettingsService<Session> settingsService;
 
+        private ImmutableList<Input> inputs = [];
         private bool isInitializing;
         private IStorageFolder startLocation;
         private Task startLocationTask;
@@ -42,21 +44,23 @@ namespace Score2Stream.InputService
         #region Public Constructors
 
         public Service(ISettingsService<Session> settingsService, IDialogService dialogService,
-            IContainerProvider containerProvider, IEventAggregator eventAggregator, IInputEnumerator inputEnumerator)
+            IContainerProvider containerProvider, IEventAggregator eventAggregator,
+            IInputEnumerator inputEnumerator, ILogger<Service> logger = default)
         {
             this.settingsService = settingsService;
             this.dialogService = dialogService;
             this.containerProvider = containerProvider;
             this.inputEnumerator = inputEnumerator;
+            this.logger = logger;
 
             inputsChangedEvent = eventAggregator.GetEvent<InputsChangedEvent>();
             inputSelectedEvent = eventAggregator.GetEvent<InputSelectedEvent>();
 
-            eventAggregator.GetEvent<VideoStartedEvent>().Subscribe(
-                action: OnVideoChanged,
+            eventAggregator.GetEvent<InputStartedEvent>().Subscribe(
+                action: UpdateInputs,
                 keepSubscriberReferenceAlive: true);
-            eventAggregator.GetEvent<VideoEndedEvent>().Subscribe(
-                action: OnVideoChanged,
+            eventAggregator.GetEvent<InputEndedEvent>().Subscribe(
+                action: UpdateInputs,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<AreasChangedEvent>().Subscribe(
@@ -92,7 +96,7 @@ namespace Score2Stream.InputService
 
         public IAreaService AreaService => Active?.AreaService;
 
-        public HashSet<Input> Inputs { get; } = [];
+        public IReadOnlyList<Input> Inputs => inputs;
 
         public bool IsActive => VideoService?.IsActive ?? false;
 
@@ -110,9 +114,9 @@ namespace Score2Stream.InputService
         {
             isInitializing = true;
 
-            startLocationTask = GetStartLocationTask();
+            startLocationTask = InitializeStartLocationAsync();
 
-            UpdateInputs();
+            RefreshInputs();
 
             foreach (var input in Inputs)
             {
@@ -122,9 +126,7 @@ namespace Score2Stream.InputService
 
                 if (current?.Templates?.Count > 0)
                 {
-                    var templates = current.Templates.ToArray();
-
-                    foreach (var template in templates)
+                    foreach (var template in current.Templates.ToArray())
                     {
                         try
                         {
@@ -137,9 +139,7 @@ namespace Score2Stream.InputService
 
                 if (current?.Areas?.Count > 0)
                 {
-                    var areas = current.Areas.ToArray();
-
-                    foreach (var area in areas)
+                    foreach (var area in current.Areas.ToArray())
                     {
                         area.Template = input.TemplateService.Templates?
                             .FirstOrDefault(t => t.Name == area.TemplateName
@@ -170,8 +170,7 @@ namespace Score2Stream.InputService
 
         public async Task SelectAsync(Input input)
         {
-            if (input?.IsDevice != true
-                && (input?.IsActive != true || !File.Exists(input?.FileName)))
+            if (input == null || (!input.IsDevice && (!input.IsActive || !File.Exists(input.FileName))))
             {
                 try
                 {
@@ -188,6 +187,8 @@ namespace Score2Stream.InputService
                         contentMessage: exception.Message,
                         contentTitle: "Maximum count exceeded",
                         icon: Icon.Error);
+
+                    return;
                 }
             }
 
@@ -196,21 +197,15 @@ namespace Score2Stream.InputService
 
         public async Task StopAsync()
         {
-            var relevants = Inputs
-                .Where(i => i.IsActive).ToArray();
-
-            if (relevants.Length > 0)
+            if (Active != default)
             {
                 var result = await dialogService.GetMessageBoxResultAsync(
-                    contentMessage: "Shall all inputs be stopped?",
-                    contentTitle: "Stop inputs");
+                    contentMessage: $"Shall {Active.Name} be stopped?",
+                    contentTitle: "Stop input");
 
                 if (result == ButtonResult.Yes)
                 {
-                    foreach (var relevant in relevants)
-                    {
-                        relevant.VideoService.Stop();
-                    }
+                    Active.VideoService.Stop();
 
                     SaveInputs();
                 }
@@ -219,7 +214,7 @@ namespace Score2Stream.InputService
 
         public void Update()
         {
-            UpdateDevices();
+            RefreshDevices();
         }
 
         #endregion Public Methods
@@ -228,38 +223,39 @@ namespace Score2Stream.InputService
 
         private Input GetInput(string fileName)
         {
-            var result = default(Input);
+            if (!File.Exists(fileName))
+                return default;
 
-            if (File.Exists(fileName))
+            if (Inputs.Count >= Constants.MaxCountInputs)
             {
-                if (Inputs.Count >= Constants.MaxCountInputs)
-                {
-                    throw new MaxCountExceededException(
-                        type: typeof(Input),
-                        maxCount: Constants.MaxCountInputs);
-                }
-
-                result = Inputs.SingleOrDefault(i => i.FileName == fileName);
-
-                if (result == default)
-                {
-                    result = new Input(false)
-                    {
-                        FileName = fileName,
-                        Guid = Guid.NewGuid(),
-                        Name = Path.GetFileName(fileName),
-                    };
-
-                    Inputs.Add(result);
-                }
+                throw new MaxCountExceededException(
+                    type: typeof(Input),
+                    maxCount: Constants.MaxCountInputs);
             }
+
+            var existing = Inputs.SingleOrDefault(i => i.FileName == fileName);
+
+            if (existing != default)
+                return existing;
+
+            var result = new Input(false)
+            {
+                FileName = fileName,
+                Guid = Guid.NewGuid(),
+                Name = Path.GetFileName(fileName),
+            };
+
+            ImmutableInterlocked.Update(
+                location: ref inputs,
+                transformer: l => l.Add(result));
 
             return result;
         }
 
         private Input GetInput(int deviceId, string name)
         {
-            var result = Inputs.SingleOrDefault(i => i.Name == name);
+            var result = inputs
+                .FirstOrDefault(i => i.IsDevice && i.Name == name && !i.IsEnded);
 
             if (result == default)
             {
@@ -270,7 +266,9 @@ namespace Score2Stream.InputService
                     Name = name,
                 };
 
-                Inputs.Add(result);
+                ImmutableInterlocked.Update(
+                    location: ref inputs,
+                    transformer: l => l.Add(result));
             }
             else
             {
@@ -282,186 +280,65 @@ namespace Score2Stream.InputService
 
         private async Task<Input> GetInputAsync()
         {
-            var result = default(Input);
+            if (Inputs.Count >= Constants.MaxCountInputs)
+                return default;
 
-            if (Inputs.Count < Constants.MaxCountInputs)
+            var paths = await dialogService.OpenFilePickerAsync(
+                title: Texts.MenuInputFileText,
+                allowMultiple: false,
+                startLocation: startLocation);
+
+            if (paths?.Any() != true)
+                return default;
+
+            var fileName = paths
+                .Select(p => p.Path.LocalPath)
+                .FirstOrDefault(File.Exists);
+
+            if (string.IsNullOrWhiteSpace(fileName))
+                return default;
+
+            startLocation = await dialogService.GetFolderAsync(fileName);
+
+            settingsService.Contents.Video.FilePathVideo = fileName;
+            settingsService.Save();
+
+            return GetInput(fileName);
+        }
+
+        private async Task InitializeStartLocationAsync()
+        {
+            try
             {
-                var paths = await dialogService.OpenFilePickerAsync(
-                    title: Texts.MenuInputFileText,
-                    allowMultiple: false,
-                    startLocation: startLocation);
+                var filePathVideo = settingsService.Contents.Video.FilePathVideo;
 
-                if (paths?.Any() == true)
-                {
-                    var fileName = paths
-                        .Select(p => p.Path.LocalPath)
-                        .FirstOrDefault(p => File.Exists(p));
-
-                    if (!string.IsNullOrWhiteSpace(fileName))
-                    {
-                        startLocation = await dialogService.GetFolderAsync(fileName);
-
-                        settingsService.Contents.Video.FilePathVideo = fileName;
-                        settingsService.Save();
-
-                        result = GetInput(fileName);
-                    }
-                }
+                startLocation = await dialogService.GetFolderAsync(filePathVideo);
             }
-
-            return result;
-        }
-
-        private Task<IStorageFolder> GetStartLocationTask()
-        {
-            var filePathVideo = settingsService.Contents.Video.FilePathVideo;
-            var result = Task.Run(async () => startLocation = await dialogService.GetFolderAsync(filePathVideo));
-
-            return result;
-        }
-
-        private void OnVideoChanged()
-        {
-            UpdateDevices();
-            SaveInputs();
-
-            inputsChangedEvent.Publish();
-        }
-
-        private void RunInput(Input input)
-        {
-            if (input != default)
+            catch (Exception ex)
             {
-                if (input.VideoService == default)
-                {
-                    input.VideoService = containerProvider
-                        .Resolve<IVideoService>();
-                }
-
-                if (!input.IsActive)
-                {
-                    input.VideoService.RunAsync(input);
-                }
+                logger?.LogWarning(
+                    exception: ex,
+                    message: "Could not determine start location.");
             }
         }
 
-        private void SaveAreas()
-        {
-            if (!isInitializing
-                && Active != default)
-            {
-                Active.Areas = AreaService?.Areas;
-
-                settingsService.Save();
-            }
-        }
-
-        private void SaveInputs()
-        {
-            if (!isInitializing)
-            {
-                var inputs = Inputs
-                    .Where(i => i.IsActive
-                        && !i.IsEnded).ToList();
-
-                var currentInputs = settingsService.Contents.Inputs;
-
-                var hasChanges = currentInputs == null
-                    || currentInputs.Count != inputs.Count
-                    || !inputs.All(i => currentInputs.Contains(i));
-
-                if (hasChanges)
-                {
-                    settingsService.Contents.Inputs = inputs;
-
-                    settingsService.Save();
-                }
-            }
-        }
-
-        private void SaveTemplates()
-        {
-            if (!isInitializing
-                && Active != default)
-            {
-                Active.Templates = TemplateService?.Templates;
-
-                if (Active.Templates?.Count > 0)
-                {
-                    foreach (var template in Active.Templates)
-                    {
-                        var relevants = template.Samples?
-                            .Where(s => s.Mat != default).ToArray();
-
-                        if (relevants?.Length > 0)
-                        {
-                            foreach (var relevant in relevants)
-                            {
-                                relevant.Image = relevant.Mat.ToBytes();
-                            }
-                        }
-                    }
-                }
-
-                settingsService.Save();
-            }
-        }
-
-        private void SelectInput(Input input)
-        {
-            if (input != default)
-            {
-                RunInput(input);
-
-                if (input != Active)
-                {
-                    Active = input;
-
-                    if (TemplateService != default)
-                    {
-                        if (!(TemplateService.Templates?.Count > 0))
-                        {
-                            try
-                            {
-                                TemplateService.Create();
-                            }
-                            catch (MaxCountExceededException)
-                            { }
-                        }
-
-                        TemplateService.Select(TemplateService.Templates?.FirstOrDefault());
-                    }
-
-                    inputSelectedEvent.Publish(Active);
-
-                    SaveInputs();
-                }
-            }
-        }
-
-        private void UpdateDevices()
+        private void RefreshDevices()
         {
             var currentDevices = inputEnumerator.GetDevices()
                 .OrderBy(d => d.Value).ToArray();
 
-            var previousStates = Inputs
-                .ToDictionary(i => i, i => i.IsActive);
-
             var removedDevices = Inputs
-                .Where(i => i.IsEnded
-                    || (i.IsDevice && !currentDevices.Any(d => d.Value == i.Name))).ToArray();
+                .Where(i => !currentDevices.Any(d => d.Value == i.Name)
+                    || (i.IsDevice && i.IsEnded)).ToArray();
 
             foreach (var removedDevice in removedDevices)
             {
                 removedDevice?.AreaService?.Clear();
                 removedDevice?.VideoService?.Dispose();
 
-                if (removedDevice == Active)
-                {
-                    Active = null;
-                }
-
-                Inputs.Remove(removedDevice);
+                ImmutableInterlocked.Update(
+                    location: ref inputs,
+                    transformer: l => l.Remove(removedDevice));
             }
 
             var hasChanges = removedDevices.Length > 0;
@@ -469,7 +346,7 @@ namespace Score2Stream.InputService
             foreach (var currentDevice in currentDevices)
             {
                 var currentInput = Inputs
-                    .SingleOrDefault(i => i.IsDevice && i.Name == currentDevice.Value);
+                    .SingleOrDefault(i => i.Name == currentDevice.Value);
 
                 if (currentInput == default)
                 {
@@ -487,12 +364,12 @@ namespace Score2Stream.InputService
                 }
             }
 
-            if (!hasChanges)
+            if (Active != default
+                && !Inputs.Contains(Active))
             {
-                hasChanges = Inputs
-                    .Any(i => previousStates.TryGetValue(
-                        key: i,
-                        value: out var wasActive) && wasActive != i.IsActive);
+                Active = Inputs.FirstOrDefault(i => i.IsActive);
+
+                hasChanges = true;
             }
 
             if (hasChanges)
@@ -501,9 +378,9 @@ namespace Score2Stream.InputService
             }
         }
 
-        private void UpdateInputs()
+        private void RefreshInputs()
         {
-            UpdateDevices();
+            RefreshDevices();
 
             if (settingsService.Contents.Inputs?.Count > 0)
             {
@@ -514,7 +391,7 @@ namespace Score2Stream.InputService
 
                 foreach (var device in devices)
                 {
-                    RunInput(device);
+                    _ = RunInputAsync(device);
                 }
 
                 var files = settingsService.Contents.Inputs
@@ -529,13 +406,143 @@ namespace Score2Stream.InputService
 
                         if (input != default)
                         {
-                            RunInput(input);
+                            _ = RunInputAsync(input);
                         }
                     }
                 }
                 catch (MaxCountExceededException)
                 { }
             }
+        }
+
+        private async Task RunInputAsync(Input input)
+        {
+            if (input == default)
+            {
+                return;
+            }
+
+            try
+            {
+                if (input.VideoService == default)
+                {
+                    input.VideoService = containerProvider.Resolve<IVideoService>();
+                }
+
+                if (!input.IsActive)
+                {
+                    await input.VideoService.RunAsync(input);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(
+                    exception: ex,
+                    message: "Failed to run input {Name}.",
+                    args: input.Name);
+            }
+        }
+
+        private void SaveAreas()
+        {
+            if (isInitializing || Active == default)
+            {
+                return;
+            }
+
+            Active.Areas = AreaService?.Areas;
+
+            settingsService.Save();
+        }
+
+        private void SaveInputs()
+        {
+            if (isInitializing)
+                return;
+
+            var activeInputs = Inputs
+                .Where(i => i.IsActive && !i.IsEnded).ToList();
+
+            var currentInputs = settingsService.Contents.Inputs;
+
+            var hasChanges = currentInputs == null
+                || currentInputs.Count != activeInputs.Count
+                || !activeInputs.All(i => currentInputs.Contains(i));
+
+            if (hasChanges)
+            {
+                settingsService.Contents.Inputs = activeInputs;
+                settingsService.Save();
+            }
+        }
+
+        private void SaveTemplates()
+        {
+            if (isInitializing || Active == default)
+                return;
+
+            Active.Templates = TemplateService?.Templates;
+
+            if (Active.Templates?.Count > 0)
+            {
+                foreach (var template in Active.Templates)
+                {
+                    var dirties = template.Samples?
+                        .Where(s => s.Mat != default
+                            && (s.Image == null || s.IsDirty)).ToArray();
+
+                    if (dirties?.Length > 0)
+                    {
+                        foreach (var dirty in dirties)
+                        {
+                            dirty.Image = dirty.Mat.ToBytes();
+                            dirty.IsDirty = false;
+                        }
+                    }
+                }
+            }
+
+            settingsService.Save();
+        }
+
+        private void SelectInput(Input input)
+        {
+            if (input == default)
+                return;
+
+            _ = RunInputAsync(input);
+
+            if (input == Active)
+                return;
+
+            Active = input;
+
+            if (TemplateService != default)
+            {
+                if (!(TemplateService.Templates?.Count > 0))
+                {
+                    try
+                    {
+                        TemplateService.Create();
+                    }
+                    catch (MaxCountExceededException)
+                    { }
+                }
+
+                TemplateService.Select(TemplateService.Templates?.FirstOrDefault());
+            }
+
+            inputSelectedEvent.Publish(Active);
+
+            SaveInputs();
+        }
+
+        private void UpdateInputs()
+        {
+            RefreshDevices();
+            SaveInputs();
+
+            inputsChangedEvent.Publish();
         }
 
         #endregion Private Methods

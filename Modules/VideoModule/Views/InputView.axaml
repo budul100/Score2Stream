@@ -20,96 +20,141 @@
         <co:ExpandedSizeConverter x:Key="ExpandedSizeConverter" />
     </UserControl.Resources>
 
-    <ScrollViewer
-        Margin="5"
-        BorderBrush="LightSlateGray"
-        BorderThickness="2"
-        HorizontalScrollBarVisibility="Auto"
-        VerticalScrollBarVisibility="Auto">
+    <UserControl.Styles>
+        <Style Selector="Border.spinner">
+            <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+            <Setter Property="RenderTransform">
+                <RotateTransform />
+            </Setter>
+            <Style.Animations>
+                <Animation Duration="0:0:1" IterationCount="INFINITE">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="RotateTransform.Angle" Value="0" />
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="RotateTransform.Angle" Value="360" />
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+    </UserControl.Styles>
 
-        <paz:ZoomBorder
-            Name="InputBorder"
-            Background="LightGray"
-            Focusable="True"
-            MaxZoomX="{Binding ZoomMax, Mode=OneWay}"
-            MaxZoomY="{Binding ZoomMax, Mode=OneWay}"
-            MinZoomX="{Binding ZoomMin, Mode=OneWay}"
-            MinZoomY="{Binding ZoomMin, Mode=OneWay}"
-            PanButton="Right"
-            Stretch="Uniform"
-            ZoomSpeed="1.2">
+    <Grid>
+        <ScrollViewer
+            Margin="5"
+            BorderBrush="LightSlateGray"
+            BorderThickness="2"
+            HorizontalScrollBarVisibility="Auto"
+            VerticalScrollBarVisibility="Auto">
 
-            <i:Interaction.Behaviors>
-
-                <ia:EventTriggerBehavior EventName="ZoomChanged" SourceObject="InputBorder">
-                    <ia:InvokeCommandAction Command="{Binding ZoomChangedCommand}" PassEventArgsToCommand="True" />
-                </ia:EventTriggerBehavior>
-
-                <bv:SizeChangeBehavior Width="{Binding FullWidth, Mode=TwoWay}" Height="{Binding FullHeight, Mode=TwoWay}" />
-            </i:Interaction.Behaviors>
-
-            <Panel Name="VideoPanel">
+            <paz:ZoomBorder
+                Name="InputBorder"
+                Background="LightGray"
+                Focusable="True"
+                MaxZoomX="{Binding ZoomMax, Mode=OneWay}"
+                MaxZoomY="{Binding ZoomMax, Mode=OneWay}"
+                MinZoomX="{Binding ZoomMin, Mode=OneWay}"
+                MinZoomY="{Binding ZoomMin, Mode=OneWay}"
+                PanButton="Right"
+                Stretch="Uniform"
+                ZoomSpeed="1.2">
 
                 <i:Interaction.Behaviors>
 
-                    <ia:EventTriggerBehavior EventName="PointerPressed" SourceObject="VideoPanel">
-                        <ia:InvokeCommandAction Command="{Binding MousePressedCommand}" PassEventArgsToCommand="True" />
-                    </ia:EventTriggerBehavior>
-                    <ia:EventTriggerBehavior EventName="PointerReleased" SourceObject="VideoPanel">
-                        <ia:InvokeCommandAction Command="{Binding MouseReleasedCommand}" PassEventArgsToCommand="True" />
+                    <ia:EventTriggerBehavior EventName="ZoomChanged" SourceObject="InputBorder">
+                        <ia:InvokeCommandAction Command="{Binding ZoomChangedCommand}" PassEventArgsToCommand="True" />
                     </ia:EventTriggerBehavior>
 
-                    <bv:PointerPositionBehavior PointerX="{Binding MouseX, Mode=TwoWay}" PointerY="{Binding MouseY, Mode=TwoWay}" />
+                    <bv:SizeChangeBehavior Width="{Binding FullWidth, Mode=TwoWay}" Height="{Binding FullHeight, Mode=TwoWay}" />
                 </i:Interaction.Behaviors>
 
-                <Image
-                    Margin="2"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Source="{Binding Bitmap}">
+                <Panel Name="VideoPanel">
+
                     <i:Interaction.Behaviors>
-                        <bv:SizeChangeBehavior Width="{Binding BitmapWidth, Mode=TwoWay}" Height="{Binding BitmapHeight, Mode=TwoWay}" />
+
+                        <ia:EventTriggerBehavior EventName="PointerPressed" SourceObject="VideoPanel">
+                            <ia:InvokeCommandAction Command="{Binding MousePressedCommand}" PassEventArgsToCommand="True" />
+                        </ia:EventTriggerBehavior>
+                        <ia:EventTriggerBehavior EventName="PointerReleased" SourceObject="VideoPanel">
+                            <ia:InvokeCommandAction Command="{Binding MouseReleasedCommand}" PassEventArgsToCommand="True" />
+                        </ia:EventTriggerBehavior>
+
+                        <bv:PointerPositionBehavior PointerX="{Binding MouseX, Mode=TwoWay}" PointerY="{Binding MouseY, Mode=TwoWay}" />
                     </i:Interaction.Behaviors>
-                </Image>
 
-                <ItemsControl ItemsSource="{Binding Areas}">
+                    <Image
+                        Margin="2"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Source="{Binding Bitmap}">
+                        <i:Interaction.Behaviors>
+                            <bv:SizeChangeBehavior Width="{Binding BitmapWidth, Mode=TwoWay}" Height="{Binding BitmapHeight, Mode=TwoWay}" />
+                        </i:Interaction.Behaviors>
+                    </Image>
 
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <Canvas />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
+                    <ItemsControl ItemsSource="{Binding Areas}">
 
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <v:AreaView />
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
 
-                    <ItemsControl.Styles>
-                        <Style Selector="ItemsControl > ContentPresenter">
-                            <Setter Property="Canvas.Left">
-                                <Setter.Value>
-                                    <MultiBinding Converter="{StaticResource ExpandedSizeConverter}">
-                                        <Binding Path="Left" />
-                                        <Binding Path="Width" />
-                                        <Binding Path="WidthName" />
-                                    </MultiBinding>
-                                </Setter.Value>
-                            </Setter>
-                            <Setter Property="Canvas.Top">
-                                <Setter.Value>
-                                    <MultiBinding Converter="{StaticResource ExpandedSizeConverter}">
-                                        <Binding Path="Top" />
-                                        <Binding Path="Height" />
-                                        <Binding Path="HeightName" />
-                                    </MultiBinding>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </ItemsControl.Styles>
-                </ItemsControl>
-            </Panel>
-        </paz:ZoomBorder>
-    </ScrollViewer>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <v:AreaView />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+
+                        <ItemsControl.Styles>
+                            <Style Selector="ItemsControl > ContentPresenter">
+                                <Setter Property="Canvas.Left">
+                                    <Setter.Value>
+                                        <MultiBinding Converter="{StaticResource ExpandedSizeConverter}">
+                                            <Binding Path="Left" />
+                                            <Binding Path="Width" />
+                                            <Binding Path="WidthName" />
+                                        </MultiBinding>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="Canvas.Top">
+                                    <Setter.Value>
+                                        <MultiBinding Converter="{StaticResource ExpandedSizeConverter}">
+                                            <Binding Path="Top" />
+                                            <Binding Path="Height" />
+                                            <Binding Path="HeightName" />
+                                        </MultiBinding>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ItemsControl.Styles>
+                    </ItemsControl>
+                </Panel>
+            </paz:ZoomBorder>
+        </ScrollViewer>
+
+        <!-- Loading feedback with spinning circle -->
+        <Border
+            Background="{StaticResource LoadingBackground}"
+            IsVisible="{Binding IsLoading}">
+            <StackPanel
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Spacing="12">
+                <Border
+                    Classes="spinner"
+                    Width="40"
+                    Height="40"
+                    HorizontalAlignment="Center"
+                    BorderBrush="White"
+                    BorderThickness="4,4,4,0"
+                    CornerRadius="20" />
+                <TextBlock
+                    Foreground="{StaticResource LoadingForeground}"
+                    FontSize="14"
+                    Text="Loading..." />
+            </StackPanel>
+        </Border>
+
+    </Grid>
 </UserControl>

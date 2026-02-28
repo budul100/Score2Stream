@@ -96,7 +96,8 @@ namespace Score2Stream.WebService
 
             webSocketTask = Task.Run(
                 function: async () => await dispatcherService.InvokeAsync(
-                    () => webSocket.RunAsync(cancellationTokenSource.Token)),
+                    function: () => webSocket.RunAsync(cancellationTokenSource.Token),
+                    cancellationToken: cancellationTokenSource.Token),
                 cancellationToken: cancellationTokenSource.Token);
 
             var urlWebServer = $"http://{ipAddress}:{settingsService.Contents.Server.PortServer}";
@@ -108,7 +109,8 @@ namespace Score2Stream.WebService
 
             webServerTask = Task.Run(
                 function: async () => await dispatcherService.InvokeAsync(
-                    () => webServer.RunAsync(cancellationTokenSource.Token)),
+                    function: () => webServer.RunAsync(cancellationTokenSource.Token),
+                    cancellationToken: cancellationTokenSource.Token),
                 cancellationToken: cancellationTokenSource.Token);
 
             eventAggregator.GetEvent<ServerStartedEvent>().Publish();

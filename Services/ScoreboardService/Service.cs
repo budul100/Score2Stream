@@ -10,8 +10,8 @@ using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Clip;
 using Score2Stream.Commons.Events.Graphics;
+using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Events.Scoreboard;
-using Score2Stream.Commons.Events.Video;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Scoreboard;
@@ -68,7 +68,7 @@ namespace Score2Stream.ScoreboardService
             clipModifiedEvent = eventAggregator.GetEvent<SegmentModifiedEvent>();
             scoreboardUpdatedEvent = eventAggregator.GetEvent<ScoreboardUpdatedEvent>();
 
-            eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
+            eventAggregator.GetEvent<InputUpdatedEvent>().Subscribe(
                 action: UpdateBoard,
                 keepSubscriberReferenceAlive: true);
 

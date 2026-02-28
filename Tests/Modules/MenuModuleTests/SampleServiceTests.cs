@@ -17,7 +17,6 @@ using Score2Stream.Commons.Events.Menu;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Scoreboard;
 using Score2Stream.Commons.Events.Template;
-using Score2Stream.Commons.Events.Video;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
@@ -119,7 +118,7 @@ namespace Score2Stream.Tests.MenuModuleTests
             mock.RegisterNewMockedEvent<AreaModifiedEvent, Area>();
             mock.RegisterNewMockedEvent<AreasChangedEvent>();
             mock.RegisterNewMockedEvent<AreaSelectedEvent, Area>();
-            mock.RegisterNewMockedEvent<CenteringRequestedEvent>();
+            mock.RegisterNewMockedEvent<InputCenteringEvent>();
             mock.RegisterNewMockedEvent<DetectionChangedEvent>();
             mock.RegisterNewMockedEvent<FilterChangedEvent>();
             mock.RegisterNewMockedEvent<InputsChangedEvent>();
@@ -133,9 +132,9 @@ namespace Score2Stream.Tests.MenuModuleTests
             mock.RegisterNewMockedEvent<TabSelectedEvent, ViewType>();
             mock.RegisterNewMockedEvent<TemplatesChangedEvent>();
             mock.RegisterNewMockedEvent<TemplateSelectedEvent, Template>();
-            mock.RegisterNewMockedEvent<VideoEndedEvent>();
-            mock.RegisterNewMockedEvent<VideoStartedEvent>();
-            mock.RegisterNewMockedEvent<VideoUpdatedEvent>();
+            mock.RegisterNewMockedEvent<InputEndedEvent>();
+            mock.RegisterNewMockedEvent<InputStartedEvent>();
+            mock.RegisterNewMockedEvent<InputUpdatedEvent>();
 
             return mock;
         }
@@ -185,7 +184,6 @@ namespace Score2Stream.Tests.MenuModuleTests
                 webService: new Mock<IWebService>().Object,
                 scoreboardService: new Mock<IScoreboardService>().Object,
                 inputService: inputServiceMock.Object,
-                dispatcherService: new Mock<IDispatcherService>().Object,
                 regionManager: new Mock<IRegionManager>().Object,
                 eventAggregator: eventAggregatorMock.Object);
 

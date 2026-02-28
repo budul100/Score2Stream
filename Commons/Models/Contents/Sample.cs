@@ -1,7 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using Avalonia.Media.Imaging;
 using OpenCvSharp;
-using Score2Stream.Commons.Enums;
 
 namespace Score2Stream.Commons.Models.Contents
 {
@@ -18,6 +17,9 @@ namespace Score2Stream.Commons.Models.Contents
 
         [JsonIgnore]
         public int Index { get; set; }
+
+        [JsonIgnore]
+        public bool IsDirty { get; set; }
 
         [JsonIgnore]
         public bool IsFiltered { get; set; }

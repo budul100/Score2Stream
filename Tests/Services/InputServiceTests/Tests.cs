@@ -12,7 +12,6 @@ using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Template;
-using Score2Stream.Commons.Events.Video;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
@@ -41,9 +40,9 @@ namespace Score2Stream.Tests.InputServiceTests
         private readonly Session session;
         private readonly Mock<ISettingsService<Session>> settingsServiceMock;
         private readonly TemplatesChangedEvent templatesChangedEvent;
-        private readonly VideoEndedEvent videoEndedEvent;
+        private readonly InputEndedEvent videoEndedEvent;
         private readonly Mock<IVideoService> videoServiceMock;
-        private readonly VideoStartedEvent videoStartedEvent;
+        private readonly InputStartedEvent videoStartedEvent;
 
         #endregion Private Fields
 
@@ -58,8 +57,8 @@ namespace Score2Stream.Tests.InputServiceTests
             eventAggregatorMock = new Mock<IEventAggregator>();
             videoServiceMock = new Mock<IVideoService>();
 
-            videoStartedEvent = new VideoStartedEvent();
-            videoEndedEvent = new VideoEndedEvent();
+            videoStartedEvent = new InputStartedEvent();
+            videoEndedEvent = new InputEndedEvent();
             areasChangedEvent = new AreasChangedEvent();
             areasOrderedEvent = new AreasOrderedEvent();
             areaModifiedEvent = new AreaModifiedEvent();
@@ -70,8 +69,8 @@ namespace Score2Stream.Tests.InputServiceTests
             inputsChangedEvent = new InputsChangedEvent();
             inputSelectedEvent = new InputSelectedEvent();
 
-            eventAggregatorMock.Setup(e => e.GetEvent<VideoStartedEvent>()).Returns(videoStartedEvent);
-            eventAggregatorMock.Setup(e => e.GetEvent<VideoEndedEvent>()).Returns(videoEndedEvent);
+            eventAggregatorMock.Setup(e => e.GetEvent<InputStartedEvent>()).Returns(videoStartedEvent);
+            eventAggregatorMock.Setup(e => e.GetEvent<InputEndedEvent>()).Returns(videoEndedEvent);
             eventAggregatorMock.Setup(e => e.GetEvent<AreasChangedEvent>()).Returns(areasChangedEvent);
             eventAggregatorMock.Setup(e => e.GetEvent<AreasOrderedEvent>()).Returns(areasOrderedEvent);
             eventAggregatorMock.Setup(e => e.GetEvent<AreaModifiedEvent>()).Returns(areaModifiedEvent);

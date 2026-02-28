@@ -10,7 +10,7 @@ using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
 using Score2Stream.Commons.Assets;
-using Score2Stream.Commons.Events.Video;
+using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Settings;
 
@@ -47,7 +47,7 @@ namespace Score2Stream.App.ViewModels
 
             assemblyTitle = GetAssemblyTitle();
 
-            eventAggregator.GetEvent<VideoUpdatedEvent>().Subscribe(
+            eventAggregator.GetEvent<InputUpdatedEvent>().Subscribe(
                 action: UpdateTitle,
                 keepSubscriberReferenceAlive: true);
 

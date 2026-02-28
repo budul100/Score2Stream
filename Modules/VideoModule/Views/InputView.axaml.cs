@@ -19,7 +19,7 @@ namespace Score2Stream.VideoModule.Views
             if (dataContext != default
                 && zoomBorder != default)
             {
-                dataContext.OnVideoCentredEvent += (s, e) => zoomBorder.ResetMatrix();
+                dataContext.CenterInputEvent += (s, e) => zoomBorder.ResetMatrix();
             }
         }
 
