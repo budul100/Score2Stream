@@ -5,6 +5,7 @@
 * Refactor server/socket config, unify ports and delays ([#15](https://github.com/budul100/Score2Stream/issues/15))
 * Refactor input device matching by name ([#30](https://github.com/budul100/Score2Stream/issues/30))
 * Refactor input and video service
+* Sample determination based on ML
 
 ## Version 1.10.0
 
