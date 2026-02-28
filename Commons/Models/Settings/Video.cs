@@ -14,8 +14,6 @@ namespace Score2Stream.Commons.Models.Settings
 
         public int ProcessingDelay { get; set; } = Defaults.VideoDelayProcessing;
 
-        public float Rotation { get; set; }
-
         #endregion Public Properties
     }
 }

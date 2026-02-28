@@ -21,6 +21,7 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         private readonly SampleModifiedEvent sampleModifiedEvent;
         private readonly ISettingsService<Session> settingsService;
+
         private IAreaService areaService;
         private bool isSelected;
         private Match match;
@@ -40,10 +41,10 @@ namespace Score2Stream.TemplateModule.ViewModels
             OnFocusGotCommand = new DelegateCommand(
                 executeMethod: () => sampleService.Select(Sample));
             OnFocusLostCommand = new DelegateCommand(
-                executeMethod: () => SetVerified());
+                executeMethod: SetVerified);
 
             OnSelectionCommand = new DelegateCommand(
-                executeMethod: () => SelectSample());
+                executeMethod: SelectSample);
             OnSelectionNextCommand = new DelegateCommand(
                 executeMethod: () => sampleService.Next(false));
             OnSelectionPreviousCommand = new DelegateCommand(
@@ -52,14 +53,18 @@ namespace Score2Stream.TemplateModule.ViewModels
             sampleModifiedEvent = eventAggregator.GetEvent<SampleModifiedEvent>();
 
             eventAggregator.GetEvent<SegmentSelectedEvent>().Subscribe(
-                action: _ => UpdateMatch(),
-                keepSubscriberReferenceAlive: true);
-
-            eventAggregator.GetEvent<SegmentUpdatedEvent>().Subscribe(
-                action: _ => UpdateMatch(),
+                action: UpdateMatch,
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: s => areaService?.Segment == s);
+                filter: s => areaService?.Segment == s
+                    && s?.Matches?.Any(m => m?.Sample == Sample) == true);
+
+            eventAggregator.GetEvent<SegmentUpdatedEvent>().Subscribe(
+                action: UpdateMatch,
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: s => areaService?.Segment == s
+                    && s?.Matches?.Any(m => m?.Sample == Sample) == true);
 
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
                 action: s => IsSelected = s == Sample,
@@ -162,9 +167,9 @@ namespace Score2Stream.TemplateModule.ViewModels
             }
         }
 
-        private void UpdateMatch()
+        private void UpdateMatch(Segment segment)
         {
-            match = areaService?.Segment?.Matches?
+            match = segment?.Matches?
                 .SingleOrDefault(m => m.Sample == Sample);
 
             RaisePropertyChanged(nameof(Similarity));

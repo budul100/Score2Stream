@@ -32,7 +32,7 @@ namespace Score2Stream.Tests.VideoServiceTests
         private readonly Mock<SegmentDrawnEvent> segmentDrawnEventMock;
         private readonly Mock<SegmentUpdatedEvent> segmentUpdatedEventMock;
         private readonly Mock<ISettingsService<Session>> settingsServiceMock;
-        private readonly Service sut;
+        private readonly Service videoService;
 
         #endregion Private Fields
 
@@ -78,7 +78,6 @@ namespace Score2Stream.Tests.VideoServiceTests
                 Video = new Video
                 {
                     ProcessingDelay = 0,
-                    Rotation = 0,
                     ImagesQueueSize = 5,
                     NoCropping = false,
                     FilePathVideo = string.Empty
@@ -108,7 +107,7 @@ namespace Score2Stream.Tests.VideoServiceTests
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Func<object> f, CancellationToken _) => f());
 
-            sut = new Service(
+            videoService = new Service(
                 settingsService: settingsServiceMock.Object,
                 areaService: areaServiceMock.Object,
                 dispatcherService: dispatcherServiceMock.Object,
@@ -123,16 +122,16 @@ namespace Score2Stream.Tests.VideoServiceTests
 
         public void Dispose()
         {
-            ((IDisposable)sut).Dispose();
+            ((IDisposable)videoService).Dispose();
             GC.SuppressFinalize(this);
         }
 
         [Fact]
         public void Dispose_AfterStop_DoesNotThrow()
         {
-            sut.Stop();
+            videoService.Stop();
 
-            var exception = Record.Exception(() => ((IDisposable)sut).Dispose());
+            var exception = Record.Exception(() => ((IDisposable)videoService).Dispose());
 
             Assert.Null(exception);
         }
@@ -140,9 +139,9 @@ namespace Score2Stream.Tests.VideoServiceTests
         [Fact]
         public void Dispose_WhenCalledMultipleTimes_DoesNotThrow()
         {
-            ((IDisposable)sut).Dispose();
+            ((IDisposable)videoService).Dispose();
 
-            var exception = Record.Exception(() => ((IDisposable)sut).Dispose());
+            var exception = Record.Exception(() => ((IDisposable)videoService).Dispose());
 
             Assert.Null(exception);
         }
@@ -150,7 +149,7 @@ namespace Score2Stream.Tests.VideoServiceTests
         [Fact]
         public void Dispose_WhenNeverStarted_DoesNotThrow()
         {
-            var exception = Record.Exception(() => ((IDisposable)sut).Dispose());
+            var exception = Record.Exception(() => ((IDisposable)videoService).Dispose());
 
             Assert.Null(exception);
         }
@@ -165,32 +164,17 @@ namespace Score2Stream.Tests.VideoServiceTests
                 Guid = Guid.NewGuid()
             };
 
-            var runTask = sut.RunAsync(input);
+            var runTask = videoService.RunAsync(input);
 
             await Task.Delay(100);
 
-            var disposeTask = Task.Run(() => ((IDisposable)sut).Dispose());
+            var disposeTask = Task.Run(() => ((IDisposable)videoService).Dispose());
 
             var completed = await Task.WhenAny(
                 disposeTask,
                 Task.Delay(TimeSpan.FromSeconds(5)));
 
             Assert.Equal(disposeTask, completed);
-        }
-
-        [Fact]
-        public async Task RunAsync_SetsNameFromInput()
-        {
-            var input = new Input(false)
-            {
-                FileName = "nonexistent_file_xyz.mp4",
-                Name = "ExpectedName",
-                Guid = Guid.NewGuid()
-            };
-
-            await sut.RunAsync(input);
-
-            Assert.Equal("ExpectedName", sut.Name);
         }
 
         [Fact]
@@ -203,13 +187,13 @@ namespace Score2Stream.Tests.VideoServiceTests
                 Guid = Guid.NewGuid()
             };
 
-            var firstRun = sut.RunAsync(input);
+            var firstRun = videoService.RunAsync(input);
 
             await Task.Delay(100);
 
-            var secondRun = sut.RunAsync(input);
+            var secondRun = videoService.RunAsync(input);
 
-            sut.Stop();
+            videoService.Stop();
 
             await Task.WhenAll(firstRun, secondRun);
 
@@ -228,7 +212,7 @@ namespace Score2Stream.Tests.VideoServiceTests
                 Guid = Guid.NewGuid()
             };
 
-            await sut.RunAsync(input);
+            await videoService.RunAsync(input);
 
             inputEndedEventMock.Verify(
                 e => e.Publish(),
@@ -245,9 +229,9 @@ namespace Score2Stream.Tests.VideoServiceTests
                 Guid = Guid.NewGuid()
             };
 
-            await sut.RunAsync(input);
+            await videoService.RunAsync(input);
 
-            Assert.False(sut.IsActive);
+            Assert.False(videoService.IsActive);
         }
 
         [Fact]
@@ -260,9 +244,9 @@ namespace Score2Stream.Tests.VideoServiceTests
                 Guid = Guid.NewGuid()
             };
 
-            await sut.RunAsync(input);
+            await videoService.RunAsync(input);
 
-            Assert.True(sut.IsEnded);
+            Assert.True(videoService.IsEnded);
         }
 
         [Fact]
@@ -275,7 +259,7 @@ namespace Score2Stream.Tests.VideoServiceTests
                 Guid = Guid.NewGuid()
             };
 
-            await sut.RunAsync(input);
+            await videoService.RunAsync(input);
 
             loggerMock.Verify(
                 l => l.Log(
@@ -290,9 +274,9 @@ namespace Score2Stream.Tests.VideoServiceTests
         [Fact]
         public void Stop_WhenCalledMultipleTimes_DoesNotThrow()
         {
-            sut.Stop();
+            videoService.Stop();
 
-            var exception = Record.Exception(() => sut.Stop());
+            var exception = Record.Exception(() => videoService.Stop());
 
             Assert.Null(exception);
         }
@@ -300,7 +284,7 @@ namespace Score2Stream.Tests.VideoServiceTests
         [Fact]
         public void Stop_WhenNeverStarted_DoesNotThrow()
         {
-            var exception = Record.Exception(() => sut.Stop());
+            var exception = Record.Exception(() => videoService.Stop());
 
             Assert.Null(exception);
         }

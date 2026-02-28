@@ -91,13 +91,17 @@ namespace Score2Stream.SampleService
                 if (sample.Value == default
                     && recognitionService != default)
                 {
-                    sample.Value = recognitionService.GetModelMatch(sample.Mat)?.Value;
+                    sample.Value = recognitionService.GetValue(sample.Mat)?.Value;
                 }
 
                 sample.Bitmap = new Bitmap(sample.Mat.ToMemoryStream());
                 sample.Index = index++;
 
                 Samples.Add(sample);
+
+                recognitionService.Add(sample);
+
+                samplesChangedEvent.Publish();
             }
         }
 
@@ -262,10 +266,6 @@ namespace Score2Stream.SampleService
 
                 Add(sample);
 
-                recognitionService.Add(sample);
-
-                samplesChangedEvent.Publish();
-
                 if (segment.Area.Template == default)
                 {
                     segment.Area.Template = sample.Template;
@@ -283,23 +283,17 @@ namespace Score2Stream.SampleService
 
         private void DetectSegment(Segment segment)
         {
-            if (segment != default)
+            if (segment?.Mat?.IsEmpty() == false
+                && !recognitionService.HasSimilars(segment.Mat))
             {
-                var thresholdDetecting = Math.Abs(settingsService.Contents.Detection.ThresholdDetecting) / Constants.ThresholdDivider;
-
-                if (segment.Matches?.Any() != true
-                    || (segment.Matches.Any(m => m.Similarity > Constants.SimilarityMin)
-                    && segment.Matches.All(m => m.Similarity < thresholdDetecting)))
+                try
                 {
-                    try
-                    {
-                        AddSample(
-                            segment: segment,
-                            select: false);
-                    }
-                    catch (MaxCountExceededException)
-                    { }
+                    AddSample(
+                        segment: segment,
+                        select: false);
                 }
+                catch (MaxCountExceededException)
+                { }
             }
         }
 

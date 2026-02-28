@@ -41,15 +41,15 @@ namespace Score2Stream.TemplateModule.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<TemplateSelectedEvent>().Subscribe(
-                action: t => SetTemplate(t),
+                action: SetTemplate,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<SamplesChangedEvent>().Subscribe(
-                action: () => UpdateSamples(),
+                action: UpdateSamples,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<SamplesOrderedEvent>().Subscribe(
-                action: () => OrderSamples(),
+                action: OrderSamples,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<SegmentSelectedEvent>().Subscribe(

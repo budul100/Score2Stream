@@ -31,6 +31,8 @@ namespace Score2Stream.Commons.Models.Contents
 
         public string Name { get; set; }
 
+        public float Rotation { get; set; }
+
         public List<Template> Templates { get; set; }
 
         [JsonIgnore]

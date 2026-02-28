@@ -194,34 +194,29 @@ namespace Score2Stream.Commons.Extensions
 
         public static bool HasValue(this Mat image)
         {
-            var result = false;
-
-            if (image?.IsDisposed == false
+            var result = image?.IsDisposed == false
                 && !image.Empty()
                 && image.Rows > 0
                 && image.Cols > 0
-                && image.Step(0) > 0)
-            {
-                var gray = new Mat();
+                && image.Step(0) > 0;
 
-                if (image.Channels() > 1)
-                {
-                    Cv2.CvtColor(
-                        src: image,
-                        dst: gray,
-                        code: ColorConversionCodes.BGR2GRAY);
-                }
-                else
-                {
-                    gray = image.Clone();
-                }
+            return result;
+        }
+
+        public static bool IsEmpty(this Mat image)
+        {
+            if (image?.HasValue() == true)
+            {
+                using var gray = image.Channels() > 1
+                    ? image.CvtColor(ColorConversionCodes.BGR2GRAY)
+                    : image.Clone();
 
                 var mean = Cv2.Mean(gray);
 
-                result = (mean.Val0 / 255f) >= MinMeanBrightness;
+                return (mean.Val0 / 255f) < MinMeanBrightness;
             }
 
-            return result;
+            return true;
         }
 
         public static Mat WithoutNoise(this Mat image, int erodeIterations, int dilateIterations)
@@ -246,6 +241,8 @@ namespace Score2Stream.Commons.Extensions
                     iterations: dilateIterations,
                     borderType: BorderTypes.Default,
                     borderValue: border);
+
+                eroded.Dispose();
             }
 
             return result;

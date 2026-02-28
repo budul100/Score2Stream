@@ -16,6 +16,8 @@ namespace Score2Stream.Commons.Interfaces
 
         bool IsActive { get; }
 
+        float Rotation { get; set; }
+
         ISampleService SampleService { get; }
 
         ITemplateService TemplateService { get; }

@@ -82,11 +82,44 @@ namespace Score2Stream.RecognitionService
             GC.SuppressFinalize(this);
         }
 
-        public Match GetModelMatch(Mat image)
+        public IEnumerable<Match> GetMatches(Mat image)
+        {
+            if (!image.IsEmpty()
+                && sampleVectors.Count > 0)
+            {
+                var preprocessed = GetPreprocessed(image);
+                var features = GetFeatures(preprocessed);
+
+                var thresholdMatching = Math.Abs(settingsService.Contents.Detection.ThresholdMatching)
+                    / Constants.ThresholdDivider;
+
+                var comparisons = sampleVectors
+                    .Select(s => (s.Sample, Similarity: CosineSimilarity(s.Features, features))).ToArray();
+
+                foreach (var comparison in comparisons)
+                {
+                    var type = comparison.Similarity >= thresholdMatching
+                        ? Commons.Enums.MatchType.Similar
+                        : Commons.Enums.MatchType.None;
+
+                    var result = new Match
+                    {
+                        Value = comparison.Sample.Value,
+                        Sample = comparison.Sample,
+                        Similarity = comparison.Similarity,
+                        Type = type,
+                    };
+
+                    yield return result;
+                }
+            }
+        }
+
+        public Match GetValue(Mat image)
         {
             var result = default(Match);
 
-            if (image.HasValue())
+            if (!image.IsEmpty())
             {
                 var preprocessed = GetPreprocessed(image);
 
@@ -110,34 +143,25 @@ namespace Score2Stream.RecognitionService
             return result;
         }
 
-        public IEnumerable<Match> GetSampleMatches(Mat image)
+        public bool HasSimilars(Mat image)
         {
-            if (image.HasValue() && sampleVectors.Count > 0)
+            var result = false;
+
+            if (!image.IsEmpty()
+                && sampleVectors.Count > 0)
             {
                 var preprocessed = GetPreprocessed(image);
                 var features = GetFeatures(preprocessed);
 
-                var thresholdMatching = Math.Abs(settingsService.Contents.Detection.ThresholdMatching)
+                var thresholdDetecting = Math.Abs(settingsService.Contents.Detection.ThresholdDetecting)
                     / Constants.ThresholdDivider;
 
-                var relevants = sampleVectors
-                    .Where(s => s.Sample.IsVerified)
-                    .Select(s => (s.Sample, Similarity: CosineSimilarity(s.Features, features)))
-                    .Where(s => s.Similarity >= thresholdMatching).ToArray();
-
-                foreach (var relevant in relevants)
-                {
-                    var result = new Match
-                    {
-                        Value = relevant.Sample.Value,
-                        Sample = relevant.Sample,
-                        Similarity = relevant.Similarity,
-                        Type = Commons.Enums.MatchType.Similar,
-                    };
-
-                    yield return result;
-                }
+                result = sampleVectors
+                    .Select(s => CosineSimilarity(s.Features, features))
+                    .Any(s => s >= thresholdDetecting);
             }
+
+            return result;
         }
 
         public void Remove(Sample sample)

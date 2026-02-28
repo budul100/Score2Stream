@@ -182,10 +182,13 @@ namespace Score2Stream.App.ViewModels
                         result.Append(Constants.SplitterTitle);
                     }
 
+                    var duration = videoService.ProcessingTime.Value
+                        .TotalMilliseconds.ToString("0");
+
                     result
                         .Append(videoService.Name)
                         .Append(": ")
-                        .Append(videoService.ProcessingTime.Value.TotalMilliseconds.ToString("0"))
+                        .Append(duration)
                         .Append("ms");
                 }
 

@@ -134,7 +134,7 @@ namespace Score2Stream.MenuModule.ViewModels
                 action: RefreshInputs,
                 threadOption: ThreadOption.UIThread);
             eventAggregator.GetEvent<InputUpdatedEvent>().Subscribe(
-                action: RefreshInputControl);
+                action: RefreshInput);
 
             eventAggregator.GetEvent<AreasChangedEvent>().Subscribe(
                 action: OnClipsChanged);
@@ -535,7 +535,7 @@ namespace Score2Stream.MenuModule.ViewModels
         private bool CanRotateLeft()
         {
             var result = inputService.IsActive
-                && settingsService.Contents.Video.Rotation >= Constants.RotateLeftMax;
+                && inputService.Rotation >= Constants.RotateLeftMax;
 
             return result;
         }
@@ -543,7 +543,7 @@ namespace Score2Stream.MenuModule.ViewModels
         private bool CanRotateRight()
         {
             var result = inputService.IsActive
-                && settingsService.Contents.Video.Rotation <= Constants.RotateRightMax;
+                && inputService.Rotation <= Constants.RotateRightMax;
 
             return result;
         }
@@ -554,16 +554,14 @@ namespace Score2Stream.MenuModule.ViewModels
             {
                 if (CanRotateLeft())
                 {
-                    settingsService.Contents.Video.Rotation -= Constants.RotateStep;
-                    settingsService.Save();
+                    inputService.Rotation -= Constants.RotateStep;
                 }
             }
             else
             {
                 if (CanRotateRight())
                 {
-                    settingsService.Contents.Video.Rotation += Constants.RotateStep;
-                    settingsService.Save();
+                    inputService.Rotation += Constants.RotateStep;
                 }
             }
         }
@@ -615,7 +613,7 @@ namespace Score2Stream.MenuModule.ViewModels
             OnSamplesChanged();
         }
 
-        private void RefreshInputControl()
+        private void RefreshInput()
         {
             InputStopCommand.RaiseCanExecuteChanged();
 
@@ -638,21 +636,22 @@ namespace Score2Stream.MenuModule.ViewModels
             {
                 Inputs.Clear();
 
-                var orderedInputs = inputService.Inputs
+                var ordereds = inputService.Inputs
+                    .Where(i => i != default)
                     .OrderByDescending(i => i.IsDevice)
                     .ThenBy(i => i.Name).ToArray();
 
-                foreach (var orderedInput in orderedInputs)
+                foreach (var ordered in ordereds)
                 {
-                    var isChecked = (orderedInput.IsDevice && orderedInput.IsActive)
-                        || (!orderedInput.IsDevice && !orderedInput.IsEnded);
+                    var isChecked = (ordered.IsDevice && ordered.IsActive)
+                        || (!ordered.IsDevice && !ordered.IsEnded);
 
                     var input = new RibbonDropDownItem
                     {
                         Command = InputSelectCommand,
-                        CommandParameter = orderedInput,
+                        CommandParameter = ordered,
                         IsChecked = isChecked,
-                        Text = orderedInput.Name
+                        Text = ordered.Name
                     };
 
                     Inputs.Add(input);
@@ -678,12 +677,15 @@ namespace Score2Stream.MenuModule.ViewModels
             }
             else
             {
-                foreach (var input in Inputs)
+                var relevants = Inputs
+                    .Where(i => i?.CommandParameter != default).ToArray();
+
+                foreach (var relevant in relevants)
                 {
-                    if (input.CommandParameter is Input currentInput)
+                    if (relevant.CommandParameter is Input currentInput)
                     {
-                        input.Text = currentInput.Name;
-                        input.IsChecked = (currentInput.IsDevice && currentInput.IsActive)
+                        relevant.Text = currentInput.Name;
+                        relevant.IsChecked = (currentInput.IsDevice && currentInput.IsActive)
                             || (!currentInput.IsDevice && !currentInput.IsEnded);
                     }
                 }

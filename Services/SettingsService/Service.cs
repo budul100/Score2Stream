@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using System.Threading;
@@ -85,7 +84,7 @@ namespace Score2Stream.SettingsService
         {
             SetPath(filePath);
 
-            Task.Run(() => SaveSettingsAsync());
+            Task.Run(SaveSettingsAsync);
         }
 
         #endregion Public Methods
@@ -130,9 +129,9 @@ namespace Score2Stream.SettingsService
             catch (Exception ex)
             {
                 logger?.LogError(
-                    ex, 
-                    "Loading of settings failed for path '{Path}'.", 
-                    Path);
+                    exception: ex,
+                    message: "Loading of settings failed for path '{Path}'.",
+                    args: Path);
             }
         }
 
@@ -159,9 +158,9 @@ namespace Score2Stream.SettingsService
             catch (Exception ex)
             {
                 logger?.LogError(
-                    ex, 
-                    "Saving of settings failed for path '{Path}'.", 
-                    Path);
+                    exception: ex,
+                    message: "Saving of settings failed for path '{Path}'.",
+                    args: Path);
             }
         }
 

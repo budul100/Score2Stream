@@ -10,9 +10,11 @@ namespace Score2Stream.Commons.Interfaces
 
         void Add(Sample sample);
 
-        Match GetModelMatch(Mat image);
+        IEnumerable<Match> GetMatches(Mat image);
 
-        IEnumerable<Match> GetSampleMatches(Mat image);
+        Match GetValue(Mat image);
+
+        bool HasSimilars(Mat image);
 
         void Remove(Sample sample);
 

@@ -40,6 +40,7 @@ namespace Score2Stream.VideoService
         private Mat frame;
         private int heightLast;
         private int heightMax;
+        private Input input;
         private volatile bool isDisposed;
         private Task serviceTask;
         private int widthLast;
@@ -102,6 +103,7 @@ namespace Score2Stream.VideoService
         {
             if (serviceTask?.IsCompleted != false)
             {
+                this.input = input;
                 this.Name = input.Name;
 
                 var oldTokenSource = cancellationTokenSource;
@@ -199,7 +201,7 @@ namespace Score2Stream.VideoService
                 if (!currentFrame.Empty())
                 {
                     var rotated = currentFrame.Clone()
-                        .AsRotated(settingsService.Contents.Video.Rotation);
+                        .AsRotated(input.Rotation);
 
                     frameLock.EnterWriteLock();
 
@@ -248,7 +250,7 @@ namespace Score2Stream.VideoService
                     foreach (var clip in clips)
                     {
                         await UpdateBitmapAsync(
-                            clip: clip,
+                            segment: clip,
                             cancellationToken: cancellationToken);
                     }
                 }
@@ -441,45 +443,51 @@ namespace Score2Stream.VideoService
             }
         }
 
-        private async Task UpdateBitmapAsync(Segment clip, CancellationToken cancellationToken)
+        private async Task UpdateBitmapAsync(Segment segment, CancellationToken cancellationToken)
         {
             if (isDisposed) return;
 
-            var current = GetImage(clip);
+            segment.Mat = default;
+
+            var current = GetImage(segment);
 
             if (current.HasValue())
             {
-                clip.Images.Enqueue(current);
+                segment.Images.Enqueue(current);
 
-                if (clip.Images.Count >= settingsService.Contents.Video.ImagesQueueSize)
+                if (segment.Images.Count >= settingsService.Contents.Video.ImagesQueueSize)
                 {
-                    if (clip.Images.Count > settingsService.Contents.Video.ImagesQueueSize)
+                    if (segment.Images.Count > settingsService.Contents.Video.ImagesQueueSize)
                     {
-                        clip.Images.Dequeue();
+                        segment.Images.Dequeue();
                     }
 
-                    var blendedImage = clip.Images.AsBlended();
-
-                    clip.Mat = blendedImage;
-
-                    if (blendedImage.HasValue())
-                    {
-                        var bitmapStream = blendedImage.ToMemoryStream();
-
-                        clip.Bitmap = await dispatcherService.InvokeAsync(
-                            function: () => new Bitmap(bitmapStream),
-                            cancellationToken: cancellationToken);
-
-                        await dispatcherService.InvokeAsync(
-                            action: () => segmentDrawnEvent.Publish(clip),
-                            cancellationToken: cancellationToken);
-                    }
-
-                    await UpdateValueAsync(
-                        segment: clip,
-                        cancellationToken: cancellationToken);
+                    segment.Mat = segment.Images.AsBlended();
                 }
             }
+
+            if (segment.Mat.HasValue() == true)
+            {
+                var bitmapStream = segment.Mat.ToMemoryStream();
+
+                segment.Bitmap = await dispatcherService.InvokeAsync(
+                    function: () => new Bitmap(bitmapStream),
+                    cancellationToken: cancellationToken);
+            }
+            else
+            {
+                segment.Bitmap = await dispatcherService.InvokeAsync(
+                    function: () => default(Bitmap),
+                    cancellationToken: cancellationToken);
+            }
+
+            await dispatcherService.InvokeAsync(
+                action: () => segmentDrawnEvent.Publish(segment),
+                cancellationToken: cancellationToken);
+
+            await UpdateValueAsync(
+                segment: segment,
+                cancellationToken: cancellationToken);
         }
 
         private void UpdateRectangles(Area area)
@@ -529,27 +537,29 @@ namespace Score2Stream.VideoService
 
         private async Task UpdateValueAsync(Segment segment, CancellationToken cancellationToken)
         {
-            var waitingDurationMS = Math.Abs(settingsService.Contents.Detection.DurationDetectionWait);
-            var waitingDuration = TimeSpan.FromMilliseconds(waitingDurationMS);
-
             segment.Matches = recognitionService
-                .GetSampleMatches(segment.Mat).ToArray();
+                .GetMatches(segment.Mat).ToArray();
 
-            var match = segment.Matches?.FirstOrDefault();
+            var match = segment.Matches?
+                .Where(m => m.Type == MatchType.Similar)
+                .OrderByDescending(m => m.Similarity).FirstOrDefault();
 
-            if (segment.Matches?.Count() > 0)
+            if (match != default)
             {
                 match.Type = MatchType.Match;
             }
             else
             {
-                match = recognitionService.GetModelMatch(segment.Mat);
+                match = recognitionService.GetValue(segment.Mat);
 
                 if (match != default)
                 {
                     match.Type = MatchType.Match;
                 }
             }
+
+            var waitingDurationMS = Math.Abs(settingsService.Contents.Detection.DurationDetectionWait);
+            var waitingDuration = TimeSpan.FromMilliseconds(waitingDurationMS);
 
             if (match != default)
             {

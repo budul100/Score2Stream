@@ -1,5 +1,9 @@
 # Change log
 
+## Version 1.11.1
+
+* Refactor recognition logic and improve image handling
+
 ## Version 1.11.0
 
 * Refactor server/socket config, unify ports and delays ([#15](https://github.com/budul100/Score2Stream/issues/15))

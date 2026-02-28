@@ -30,7 +30,6 @@ namespace Score2Stream.Tests.RecognitionServiceTests
                 Video = new Video
                 {
                     ProcessingDelay = 0,
-                    Rotation = 0,
                     ImagesQueueSize = 5,
                     NoCropping = false,
                     FilePathVideo = string.Empty
@@ -59,7 +58,7 @@ namespace Score2Stream.Tests.RecognitionServiceTests
 
             var path0 = Path.Combine(SamplesPath, "SevenSegment-0.png");
             var bytes0 = GetBytes(path0);
-            var result0 = recognitionService.GetModelMatch(bytes0).Value;
+            var result0 = recognitionService.GetValue(bytes0).Value;
 
             Assert.Equal(
                 "0",
@@ -69,7 +68,7 @@ namespace Score2Stream.Tests.RecognitionServiceTests
 
             var path3 = Path.Combine(samplesPath, "SevenSegment-3.png");
             var bytes3 = GetBytes(path3);
-            var result3 = recognitionService.GetModelMatch(bytes3).Value;
+            var result3 = recognitionService.GetValue(bytes3).Value;
 
             Assert.Equal(
                 "3",
@@ -77,7 +76,7 @@ namespace Score2Stream.Tests.RecognitionServiceTests
 
             var path4 = Path.Combine(samplesPath, "SevenSegment-4.png");
             var bytes4 = GetBytes(path4);
-            var result4 = recognitionService.GetModelMatch(bytes4).Value;
+            var result4 = recognitionService.GetValue(bytes4).Value;
 
             Assert.Equal(
                 "4",
@@ -85,7 +84,7 @@ namespace Score2Stream.Tests.RecognitionServiceTests
 
             var path5 = Path.Combine(samplesPath, "SevenSegment-5.png");
             var bytes5 = GetBytes(path5);
-            var result5 = recognitionService.GetModelMatch(bytes5).Value;
+            var result5 = recognitionService.GetValue(bytes5).Value;
 
             Assert.Equal(
                 "5",

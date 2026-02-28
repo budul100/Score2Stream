@@ -26,7 +26,6 @@ namespace Score2Stream.VideoModule.ViewModels
 
         private readonly IContainerProvider containerProvider;
         private readonly IDialogService dialogService;
-        private readonly IDispatcherService dispatcherService;
         private readonly IInputService inputService;
         private readonly INavigationService navigationService;
 
@@ -53,14 +52,13 @@ namespace Score2Stream.VideoModule.ViewModels
 
         public InputViewModel(IInputService inputService, INavigationService navigationService,
             IDialogService dialogService, IContainerProvider containerProvider, IEventAggregator eventAggregator,
-            IRegionManager regionManager, IDispatcherService dispatcherService)
+            IRegionManager regionManager)
             : base(regionManager)
         {
             this.inputService = inputService;
             this.navigationService = navigationService;
             this.dialogService = dialogService;
             this.containerProvider = containerProvider;
-            this.dispatcherService = dispatcherService;
 
             MousePressedCommand = new DelegateCommand<PointerPressedEventArgs>(OnMousePressed);
             MouseReleasedCommand = new DelegateCommand<PointerReleasedEventArgs>(OnMouseReleasedAsync);

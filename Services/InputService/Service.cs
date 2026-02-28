@@ -100,6 +100,43 @@ namespace Score2Stream.InputService
 
         public bool IsActive => VideoService?.IsActive ?? false;
 
+        public float Rotation
+        {
+            get
+            {
+                var result = 0f;
+
+                if (Active != default)
+                {
+                    result = Active.IsDevice
+                        ? settingsService.Contents.Inputs?
+                            .SingleOrDefault(i => i.Name == Active.Name)?.Rotation ?? 0
+                        : settingsService.Contents.Inputs?
+                            .SingleOrDefault(i => i.FileName == Active.FileName)?.Rotation ?? 0;
+                }
+
+                return result;
+            }
+            set
+            {
+                if (Active != default)
+                {
+                    if (Active.IsDevice)
+                    {
+                        settingsService.Contents.Inputs
+                            .SingleOrDefault(i => i.Name == Active.Name).Rotation = value;
+                    }
+                    else
+                    {
+                        settingsService.Contents.Inputs
+                            .SingleOrDefault(i => i.FileName == Active.FileName).Rotation = value;
+                    }
+
+                    settingsService.Save();
+                }
+            }
+        }
+
         public ISampleService SampleService => TemplateService?.Template?.SampleService;
 
         public ITemplateService TemplateService => Active?.TemplateService;
@@ -120,13 +157,9 @@ namespace Score2Stream.InputService
 
             foreach (var input in Inputs)
             {
-                var current = input.IsDevice
-                    ? settingsService.Contents.Inputs?.SingleOrDefault(i => i.Name == input.Name)
-                    : settingsService.Contents.Inputs?.SingleOrDefault(i => i.FileName == input.FileName);
-
-                if (current?.Templates?.Count > 0)
+                if (input?.Templates?.Count > 0)
                 {
-                    foreach (var template in current.Templates.ToArray())
+                    foreach (var template in input.Templates.ToArray())
                     {
                         try
                         {
@@ -137,9 +170,9 @@ namespace Score2Stream.InputService
                     }
                 }
 
-                if (current?.Areas?.Count > 0)
+                if (input?.Areas?.Count > 0)
                 {
-                    foreach (var area in current.Areas.ToArray())
+                    foreach (var area in input.Areas.ToArray())
                     {
                         area.Template = input.TemplateService.Templates?
                             .FirstOrDefault(t => t.Name == area.TemplateName
@@ -155,8 +188,8 @@ namespace Score2Stream.InputService
                 }
             }
 
-            var relevant = Inputs.FirstOrDefault(i => !i.IsDevice
-                || settingsService.Contents.Inputs?.Any(s => s.Name == i.Name) == true);
+            var relevant = Inputs.FirstOrDefault(i => i != default
+                && settingsService.Contents.Inputs?.Contains(i) == true);
 
             SelectInput(relevant);
 
@@ -240,47 +273,95 @@ namespace Score2Stream.InputService
                     maxCount: Constants.MaxCountInputs);
             }
 
-            var existing = Inputs.SingleOrDefault(i => i.FileName == fileName);
+            var result = Inputs?.FirstOrDefault(i => i != default
+                && !i.IsDevice
+                && !i.IsEnded
+                && i.FileName == fileName);
 
-            if (existing != default)
-                return existing;
-
-            var result = new Input(false)
+            if (result == default)
             {
-                FileName = fileName,
-                Guid = Guid.NewGuid(),
-                Name = Path.GetFileName(fileName),
-            };
+                result = settingsService.Contents.Inputs?.FirstOrDefault(i => i != default
+                    && !i.IsDevice
+                    && !i.IsEnded
+                    && i.FileName == fileName);
 
-            ImmutableInterlocked.Update(
-                location: ref inputs,
-                transformer: l => l.Add(result));
+                if (result != default)
+                {
+                    ImmutableInterlocked.Update(
+                        location: ref inputs,
+                        transformer: l => l.Add(result));
+                }
+            }
+
+            if (result == default)
+            {
+                result = new Input(false)
+                {
+                    FileName = fileName,
+                    Name = Path.GetFileName(fileName),
+                };
+
+                if (result != default)
+                {
+                    ImmutableInterlocked.Update(
+                        location: ref inputs,
+                        transformer: l => l.Add(result));
+                }
+            }
+
+            result.Guid = Guid.NewGuid();
 
             return result;
         }
 
         private Input GetInput(int deviceId, string name)
         {
-            var result = inputs
-                .FirstOrDefault(i => i.IsDevice && i.Name == name && !i.IsEnded);
+            if (Inputs.Count >= Constants.MaxCountInputs)
+            {
+                throw new MaxCountExceededException(
+                    type: typeof(Input),
+                    maxCount: Constants.MaxCountInputs);
+            }
+
+            var result = Inputs?.FirstOrDefault(i => i != default
+                && i.IsDevice
+                && !i.IsEnded
+                && i.Name == name);
+
+            if (result == default)
+            {
+                result = settingsService.Contents.Inputs?
+                    .FirstOrDefault(i => i != default
+                        && i.IsDevice
+                        && !i.IsEnded
+                        && i.Name == name);
+
+                if (result != default)
+                {
+                    ImmutableInterlocked.Update(
+                        location: ref inputs,
+                        transformer: l => l.Add(result));
+                }
+            }
 
             if (result == default)
             {
                 result = new Input(true)
                 {
                     DeviceId = deviceId,
-                    Guid = Guid.NewGuid(),
                     Name = name,
                 };
 
-                ImmutableInterlocked.Update(
-                    location: ref inputs,
-                    transformer: l => l.Add(result));
+                if (result != default)
+                {
+                    ImmutableInterlocked.Update(
+                        location: ref inputs,
+                        transformer: l => l.Add(result));
+                }
             }
-            else
-            {
-                result.DeviceId = deviceId;
-            }
+
+            result.Guid = Guid.NewGuid();
+            result.DeviceId = deviceId;
 
             return result;
         }
@@ -324,14 +405,14 @@ namespace Score2Stream.InputService
 
         private void RefreshDevices()
         {
-            var currentDevices = inputEnumerator.GetDevices()
+            var currentInputs = inputEnumerator.GetDevices()
                 .OrderBy(d => d.Value).ToArray();
 
-            var removedDevices = Inputs
-                .Where(i => (i.IsDevice && !currentDevices.Any(d => d.Value == i.Name))
+            var removedInput = Inputs
+                .Where(i => (i.IsDevice && !currentInputs.Any(d => d.Value == i.Name))
                     || (!i.IsDevice && i.IsEnded)).ToArray();
 
-            foreach (var removedDevice in removedDevices)
+            foreach (var removedDevice in removedInput)
             {
                 removedDevice?.AreaService?.Clear();
                 removedDevice?.VideoService?.Dispose();
@@ -341,12 +422,14 @@ namespace Score2Stream.InputService
                     transformer: l => l.Remove(removedDevice));
             }
 
-            var hasChanges = removedDevices.Length > 0;
+            var hasChanges = removedInput.Length > 0;
 
-            foreach (var currentDevice in currentDevices)
+            foreach (var currentDevice in currentInputs)
             {
-                var currentInput = Inputs
-                    .SingleOrDefault(i => i.Name == currentDevice.Value);
+                var currentInput = Inputs?.FirstOrDefault(i => i != default
+                        && i.IsDevice
+                        && !i.IsEnded
+                        && i?.Name == currentDevice.Value);
 
                 if (currentInput == default)
                 {
@@ -385,9 +468,10 @@ namespace Score2Stream.InputService
             if (settingsService.Contents.Inputs?.Count > 0)
             {
                 var devices = Inputs
-                    .Where(i => i.IsDevice)
-                    .Where(d => settingsService.Contents.Inputs
-                        .Any(i => i.Name == d.Name)).ToArray();
+                    .Where(i => i != default
+                        && i.IsDevice
+                        && !i.IsEnded
+                        && settingsService.Contents.Inputs.Any(s => s.Name == i.Name)).ToArray();
 
                 foreach (var device in devices)
                 {
@@ -395,7 +479,7 @@ namespace Score2Stream.InputService
                 }
 
                 var files = settingsService.Contents.Inputs
-                    .Where(i => !i.IsDevice)
+                    .Where(i => i?.IsDevice == false)
                     .Select(i => i.FileName).ToArray();
 
                 try
@@ -453,18 +537,18 @@ namespace Score2Stream.InputService
         {
             if (isInitializing) return;
 
-            var activeInputs = Inputs
+            var inputs = Inputs
                 .Where(i => i.IsActive && !i.IsEnded).ToList();
 
-            var currentInputs = settingsService.Contents.Inputs;
+            var settings = settingsService.Contents.Inputs;
 
-            var hasChanges = currentInputs == null
-                || currentInputs.Count != activeInputs.Count
-                || !activeInputs.All(i => currentInputs.Contains(i));
+            var hasChanges = settings == null
+                || settings.Count != inputs.Count
+                || !inputs.All(settings.Contains);
 
             if (hasChanges)
             {
-                settingsService.Contents.Inputs = activeInputs;
+                settingsService.Contents.Inputs = inputs;
                 settingsService.Save();
             }
         }
