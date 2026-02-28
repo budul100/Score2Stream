@@ -17,30 +17,44 @@ namespace Score2Stream.Commons.Extensions
 
         public static Mat AsBlended(this IEnumerable<Mat> images)
         {
-            var result = default(Mat);
+            var list = images
+                .Where(i => i.HasValue()).ToList();
 
-            if (images.Any())
+            if (list.Count == 0) return default;
+
+            var convert = new Mat();
+
+            list[0].ConvertTo(
+                m: convert,
+                rtype: MatType.CV_32F);
+
+            for (var i = 1; i < list.Count; i++)
             {
-                result = images.First();
+                if (list[i].Width != list[0].Width
+                    || list[i].Height != list[0].Height) continue;
 
-                var others = images.Skip(1)
-                    .Where(i => i.Width == result.Width
-                        && i.Height == result.Height).ToArray();
+                using var floatMat = new Mat();
 
-                for (var index = 0; index < others.Length; index++)
-                {
-                    var alpha = 1.0 / (index + 1);
-                    var beta = 1.0 - alpha;
+                list[i].ConvertTo(
+                    m: floatMat,
+                    rtype: MatType.CV_32F);
 
-                    Cv2.AddWeighted(
-                        src1: others[index],
-                        alpha: alpha,
-                        src2: result,
-                        beta: beta,
-                        gamma: 0.0,
-                        dst: result);
-                }
+                Cv2.AddWeighted(
+                    src1: convert,
+                    alpha: (double)i / (i + 1),
+                    src2: floatMat,
+                    beta: 1.0 / (i + 1),
+                    gamma: 0,
+                    dst: convert);
             }
+
+            var result = new Mat();
+
+            convert.ConvertTo(
+                m: result,
+                rtype: list[0].Type());
+
+            convert.Dispose();
 
             return result;
         }

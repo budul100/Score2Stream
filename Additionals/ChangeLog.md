@@ -3,6 +3,7 @@
 ## Version 1.11.1
 
 * Refactor recognition logic and improve image handling
+* Refactor blending and bitmap update logic
 
 ## Version 1.11.0
 

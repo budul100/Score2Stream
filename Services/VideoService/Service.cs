@@ -228,9 +228,9 @@ namespace Score2Stream.VideoService
                     heightLast = size.Height;
                     widthLast = size.Width;
 
+                    var bitmap = new Bitmap(rotated.ToMemoryStream());
                     Bitmap = await dispatcherService.InvokeAsync(
-                        function: () => new Bitmap(rotated.ToMemoryStream()),
-                        cancellationToken: cancellationToken);
+                        function: () => bitmap);
                 }
 
                 var clips = AreaService?.Areas?
@@ -247,12 +247,9 @@ namespace Score2Stream.VideoService
                         location1: ref widthMax,
                         value: clips.Max(a => a.Rect.Value.Width));
 
-                    foreach (var clip in clips)
-                    {
-                        await UpdateBitmapAsync(
-                            segment: clip,
-                            cancellationToken: cancellationToken);
-                    }
+                    await Task.WhenAll(clips.Select(clip => UpdateBitmapAsync(
+                        segment: clip,
+                        cancellationToken: cancellationToken)));
                 }
 
                 var position = 0.0;
