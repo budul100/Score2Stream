@@ -409,8 +409,8 @@ namespace Score2Stream.InputService
                 .OrderBy(d => d.Value).ToArray();
 
             var removedInput = Inputs
-                .Where(i => (i.IsDevice && !currentInputs.Any(d => d.Value == i.Name))
-                    || (!i.IsDevice && i.IsEnded)).ToArray();
+                .Where(i => i.IsEnded
+                    || (i.IsDevice && !currentInputs.Any(d => d.Value == i.Name))).ToArray();
 
             foreach (var removedDevice in removedInput)
             {
@@ -479,19 +479,17 @@ namespace Score2Stream.InputService
                 }
 
                 var files = settingsService.Contents.Inputs
-                    .Where(i => i?.IsDevice == false)
-                    .Select(i => i.FileName).ToArray();
+                    .Where(i => i != default
+                        && !i.IsDevice
+                        && !i.IsEnded)
+                    .Select(i => GetInput(i.FileName))
+                    .Where(f => f != default).ToArray();
 
                 try
                 {
                     foreach (var file in files)
                     {
-                        var input = GetInput(file);
-
-                        if (input != default)
-                        {
-                            _ = RunInputAsync(input);
-                        }
+                        _ = RunInputAsync(file);
                     }
                 }
                 catch (MaxCountExceededException)

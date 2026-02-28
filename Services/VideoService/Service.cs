@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using OpenCvSharp;
 using Prism.Events;
 using Score2Stream.Commons.Assets;
@@ -228,9 +229,11 @@ namespace Score2Stream.VideoService
                     heightLast = size.Height;
                     widthLast = size.Width;
 
-                    var bitmap = new Bitmap(rotated.ToMemoryStream());
-                    Bitmap = await dispatcherService.InvokeAsync(
-                        function: () => bitmap);
+                    using var converted = new Mat();
+
+                    var bitmap = converted.GetBitmap(rotated);
+
+                    Bitmap = await dispatcherService.InvokeAsync(() => bitmap);
                 }
 
                 var clips = AreaService?.Areas?

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using OpenCvSharp;
 
 namespace Score2Stream.Commons.Extensions
@@ -168,6 +170,29 @@ namespace Score2Stream.Commons.Extensions
                     m: transformed,
                     dsize: size);
             }
+
+            return result;
+        }
+
+        public static Bitmap GetBitmap(this Mat image, Mat rotated)
+        {
+            Cv2.CvtColor(
+                src: rotated,
+                dst: image,
+                code: ColorConversionCodes.BGR2BGRA);
+
+            var bitmapSize = new Avalonia.PixelSize(
+                width: image.Width,
+                height: image.Height);
+            var bitmapDPI = new Avalonia.Vector(96, 96);
+
+            var result = new Bitmap(
+                format: PixelFormat.Bgra8888,
+                alphaFormat: AlphaFormat.Opaque,
+                data: image.Data,
+                size: bitmapSize,
+                dpi: bitmapDPI,
+                stride: (int)image.Step());
 
             return result;
         }
