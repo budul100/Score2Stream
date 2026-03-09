@@ -33,16 +33,12 @@ namespace Score2Stream.AreaModule.ViewModels
                 action: _ => UpdateAreas(),
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<InputsChangedEvent>().Subscribe(
-                action: UpdateAreas,
-                keepSubscriberReferenceAlive: true);
-
             eventAggregator.GetEvent<AreasChangedEvent>().Subscribe(
                 action: UpdateAreas,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<AreasOrderedEvent>().Subscribe(
-                action: () => OrderAreas(),
+                action: OrderAreas,
                 keepSubscriberReferenceAlive: true);
 
             UpdateAreas();

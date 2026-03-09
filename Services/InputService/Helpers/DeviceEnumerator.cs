@@ -1,22 +1,29 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 using Hompus.VideoInputDevices;
 using Score2Stream.Commons.Interfaces;
 
 namespace Score2Stream.InputService.Helpers
 {
     public class DeviceEnumerator
-        : IInputEnumerator
+        : IDeviceEnumerator
     {
+        #region Private Fields
+
+        private readonly SystemDeviceEnumerator enumerator = new();
+
+        #endregion Private Fields
+
         #region Public Methods
 
-        public IReadOnlyDictionary<int, string> GetDevices()
+        public void Dispose()
         {
-            using var enumerator = new SystemDeviceEnumerator();
+            enumerator.Dispose();
 
-            return enumerator.ListVideoInputDevice()
-                .ToDictionary(d => d.Key, d => d.Value);
+            GC.SuppressFinalize(this);
         }
+
+        public IReadOnlyDictionary<int, string> GetVideoDevices() => enumerator.ListVideoInputDevice();
 
         #endregion Public Methods
     }

@@ -3,6 +3,6 @@
 namespace Score2Stream.Commons.Events.Input
 {
     public class InputStartedEvent
-        : PubSubEvent
+        : PubSubEvent<Models.Contents.Input>
     { }
 }

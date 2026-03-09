@@ -118,23 +118,24 @@ namespace Score2Stream.Tests.MenuModuleTests
             mock.RegisterNewMockedEvent<AreaModifiedEvent, Area>();
             mock.RegisterNewMockedEvent<AreasChangedEvent>();
             mock.RegisterNewMockedEvent<AreaSelectedEvent, Area>();
-            mock.RegisterNewMockedEvent<InputCenteringEvent>();
             mock.RegisterNewMockedEvent<DetectionChangedEvent>();
             mock.RegisterNewMockedEvent<FilterChangedEvent>();
-            mock.RegisterNewMockedEvent<InputsChangedEvent>();
+            mock.RegisterNewMockedEvent<InputCenteringEvent>();
+            mock.RegisterNewMockedEvent<InputEndedEvent, Input>();
+            mock.RegisterNewMockedEvent<InputSelectedEvent, Input>();
+            mock.RegisterNewMockedEvent<InputStartedEvent, Input>();
+            mock.RegisterNewMockedEvent<InputUpdatedEvent>();
             mock.RegisterNewMockedEvent<SamplesChangedEvent>();
-            mock.RegisterNewMockedEvent<SamplesOrderedEvent>();
             mock.RegisterNewMockedEvent<SampleSelectedEvent, Sample>();
+            mock.RegisterNewMockedEvent<SamplesOrderedEvent>();
             mock.RegisterNewMockedEvent<ScoreboardModifiedEvent>();
+            mock.RegisterNewMockedEvent<ScoreboardUpdatedEvent, string>();
             mock.RegisterNewMockedEvent<SegmentSelectedEvent, Segment>();
             mock.RegisterNewMockedEvent<SegmentUpdatedEvent, Segment>();
             mock.RegisterNewMockedEvent<ServerStartedEvent>();
             mock.RegisterNewMockedEvent<TabSelectedEvent, ViewType>();
             mock.RegisterNewMockedEvent<TemplatesChangedEvent>();
             mock.RegisterNewMockedEvent<TemplateSelectedEvent, Template>();
-            mock.RegisterNewMockedEvent<InputEndedEvent>();
-            mock.RegisterNewMockedEvent<InputStartedEvent>();
-            mock.RegisterNewMockedEvent<InputUpdatedEvent>();
 
             return mock;
         }
@@ -182,6 +183,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 scoreboardService: new Mock<IScoreboardService>().Object,
                 inputService: inputServiceMock.Object,
                 regionManager: new Mock<IRegionManager>().Object,
+                dialogService: dialogServiceMock.Object,
                 eventAggregator: eventAggregatorMock.Object);
 
             return (viewModel, sampleService);

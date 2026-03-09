@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Avalonia.Media.Imaging;
-using Avalonia.Platform;
 using OpenCvSharp;
 using Prism.Events;
 using Score2Stream.Commons.Assets;
@@ -36,6 +35,7 @@ namespace Score2Stream.VideoService
         private readonly SegmentDrawnEvent segmentDrawnEvent;
         private readonly SegmentUpdatedEvent segmentUpdatedEvent;
         private readonly ISettingsService<Session> settingsService;
+        private readonly Func<IVideoCapture> videoCaptureFactory;
 
         private CancellationTokenSource cancellationTokenSource;
         private Mat frame;
@@ -52,8 +52,9 @@ namespace Score2Stream.VideoService
         #region Public Constructors
 
         public Service(ISettingsService<Session> settingsService, IAreaService areaService,
-            IDispatcherService dispatcherService, IEventAggregator eventAggregator,
-            IRecognitionService recognitionService, ILogger<Service> logger = default)
+            Func<IVideoCapture> videoCaptureFactory, IDispatcherService dispatcherService,
+            IEventAggregator eventAggregator, IRecognitionService recognitionService,
+            ILogger<Service> logger = default)
         {
             this.dispatcherService = dispatcherService;
             this.recognitionService = recognitionService;
@@ -61,7 +62,7 @@ namespace Score2Stream.VideoService
             this.logger = logger;
 
             AreaService = areaService;
-
+            this.videoCaptureFactory = videoCaptureFactory;
             inputStartedEvent = eventAggregator.GetEvent<InputStartedEvent>();
             inputEndedEvent = eventAggregator.GetEvent<InputEndedEvent>();
             inputUpdatedEvent = eventAggregator.GetEvent<InputUpdatedEvent>();
@@ -86,7 +87,7 @@ namespace Score2Stream.VideoService
 
         public bool IsEnded { get; private set; }
 
-        public string Name { get; private set; }
+        public string Name => input?.Name;
 
         public TimeSpan? ProcessingTime { get; private set; }
 
@@ -105,7 +106,6 @@ namespace Score2Stream.VideoService
             if (serviceTask?.IsCompleted != false)
             {
                 this.input = input;
-                this.Name = input.Name;
 
                 var oldTokenSource = cancellationTokenSource;
 
@@ -180,7 +180,7 @@ namespace Score2Stream.VideoService
 
         #region Private Methods
 
-        private async Task CaptureAsync(int? deviceId, VideoCapture video)
+        private async Task CaptureAsync(int? deviceId, IVideoCapture video)
         {
             var hasContent = false;
 
@@ -366,7 +366,7 @@ namespace Score2Stream.VideoService
             {
                 await UpdateVideoAsync();
 
-                using var video = new VideoCapture();
+                using var video = videoCaptureFactory();
 
                 if (deviceId.HasValue)
                 {
@@ -394,8 +394,7 @@ namespace Score2Stream.VideoService
                 {
                     IsActive = true;
 
-                    await dispatcherService.InvokeAsync(
-                        action: inputStartedEvent.Publish);
+                    await dispatcherService.InvokeAsync(() => inputStartedEvent.Publish(input));
 
                     await CaptureAsync(
                         deviceId: deviceId,
@@ -432,8 +431,7 @@ namespace Score2Stream.VideoService
 
                     await UpdateVideoAsync();
 
-                    await dispatcherService.InvokeAsync(
-                        action: inputEndedEvent.Publish);
+                    await dispatcherService.InvokeAsync(() => inputEndedEvent.Publish(input));
                 }
                 else
                 {

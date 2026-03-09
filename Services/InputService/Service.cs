@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Avalonia.Platform.Storage;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Prism.Ioc;
@@ -15,6 +14,7 @@ using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Template;
 using Score2Stream.Commons.Exceptions;
+using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
@@ -27,40 +27,36 @@ namespace Score2Stream.InputService
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
+        private readonly IDeviceEnumerator deviceEnumerator;
         private readonly IDialogService dialogService;
-        private readonly IInputEnumerator inputEnumerator;
-        private readonly InputsChangedEvent inputsChangedEvent;
         private readonly InputSelectedEvent inputSelectedEvent;
         private readonly ILogger<Service> logger;
         private readonly ISettingsService<Session> settingsService;
 
         private ImmutableList<Input> inputs = [];
         private bool isInitializing;
-        private IStorageFolder startLocation;
-        private Task startLocationTask;
 
         #endregion Private Fields
 
         #region Public Constructors
 
         public Service(ISettingsService<Session> settingsService, IDialogService dialogService,
-            IContainerProvider containerProvider, IEventAggregator eventAggregator,
-            IInputEnumerator inputEnumerator, ILogger<Service> logger = default)
+            IDeviceEnumerator deviceEnumerator, IContainerProvider containerProvider,
+            IEventAggregator eventAggregator, ILogger<Service> logger = default)
         {
             this.settingsService = settingsService;
             this.dialogService = dialogService;
+            this.deviceEnumerator = deviceEnumerator;
             this.containerProvider = containerProvider;
-            this.inputEnumerator = inputEnumerator;
             this.logger = logger;
 
-            inputsChangedEvent = eventAggregator.GetEvent<InputsChangedEvent>();
             inputSelectedEvent = eventAggregator.GetEvent<InputSelectedEvent>();
 
             eventAggregator.GetEvent<InputStartedEvent>().Subscribe(
-                action: UpdateInputs,
+                action: _ => SaveInputs(),
                 keepSubscriberReferenceAlive: true);
             eventAggregator.GetEvent<InputEndedEvent>().Subscribe(
-                action: EndInputs,
+                action: _ => SaveInputs(),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<AreasChangedEvent>().Subscribe(
@@ -110,7 +106,7 @@ namespace Score2Stream.InputService
                 {
                     result = Active.IsDevice
                         ? settingsService.Contents.Inputs?
-                            .SingleOrDefault(i => i.Name == Active.Name)?.Rotation ?? 0
+                            .SingleOrDefault(i => i.DeviceName == Active.DeviceName)?.Rotation ?? 0
                         : settingsService.Contents.Inputs?
                             .SingleOrDefault(i => i.FileName == Active.FileName)?.Rotation ?? 0;
                 }
@@ -124,7 +120,7 @@ namespace Score2Stream.InputService
                     if (Active.IsDevice)
                     {
                         settingsService.Contents.Inputs
-                            .SingleOrDefault(i => i.Name == Active.Name).Rotation = value;
+                            .SingleOrDefault(i => i.DeviceName == Active.DeviceName).Rotation = value;
                     }
                     else
                     {
@@ -147,14 +143,275 @@ namespace Score2Stream.InputService
 
         #region Public Methods
 
+        public IReadOnlyDictionary<int, string> GetDevices()
+        {
+            return deviceEnumerator.GetVideoDevices()
+                .Where(d => !string.IsNullOrWhiteSpace(d.Value))
+                .ToDictionary(d => d.Key, d => d.Value);
+        }
+
         public void Initialize()
         {
             isInitializing = true;
 
-            startLocationTask = InitializeStartLocationAsync();
+            InitializeInputs();
+            InitialzeAreas();
+            InitialzeTemplates();
 
-            RefreshInputs();
+            if (Inputs.Count > 0)
+            {
+                var relevant = Inputs[0];
+                Select(relevant);
+            }
 
+            isInitializing = false;
+
+            SaveAreas();
+            SaveTemplates();
+        }
+
+        public void Select(Input input)
+        {
+            if (input != default)
+            {
+                ImmutableList<Input> transformer(ImmutableList<Input> i) => i.Contains(input)
+                    ? i
+                    : i.Add(input);
+
+                ImmutableInterlocked.Update(
+                    location: ref inputs,
+                    transformer: transformer);
+
+                _ = RunAsync(input);
+
+                if (input != Active)
+                {
+                    if (TemplateService != default)
+                    {
+                        if (!(TemplateService.Templates?.Count > 0))
+                        {
+                            try
+                            {
+                                TemplateService.Create();
+                            }
+                            catch (MaxCountExceededException)
+                            { }
+                        }
+
+                        TemplateService.Select(TemplateService.Templates?.FirstOrDefault());
+                    }
+
+                    SetActive(input);
+
+                    SaveInputs();
+                }
+            }
+        }
+
+        public void SelectDevice(string deviceName)
+        {
+            var input = GetDevice(deviceName);
+
+            Select(input);
+        }
+
+        public void SelectFile(string fileName)
+        {
+            var input = GetFile(fileName);
+
+            Select(input);
+        }
+
+        public async Task StopAsync(Input input = default)
+        {
+            input ??= Active;
+
+            if (input != default)
+            {
+                var result = await dialogService.GetMessageBoxResultAsync(
+                    contentMessage: $"Shall {input.Name} be stopped?",
+                    contentTitle: "Stop input");
+
+                if (result == ButtonResult.Yes)
+                {
+                    if (input.VideoService != default)
+                    {
+                        input.VideoService.Stop();
+                        input.VideoService.Dispose();
+                        input.VideoService = default;
+                    }
+
+                    if (input == Active)
+                    {
+                        SetActive();
+                    }
+
+                    inputSelectedEvent.Publish(Active);
+
+                    SaveInputs();
+                }
+            }
+        }
+
+        #endregion Public Methods
+
+        #region Private Methods
+
+        private Input GetDevice(string deviceName)
+        {
+            var devices = GetDevices();
+
+            if (!devices.Values.Contains(deviceName))
+            {
+                throw new DeviceNotFoundException(deviceName);
+            }
+
+            var result = Inputs?
+                .FirstOrDefault(i => i.IsDevice
+                    && i.DeviceName == deviceName);
+
+            if (result == default)
+            {
+                if (Inputs.Count >= Constants.MaxCountInputs)
+                {
+                    throw new MaxCountExceededException(
+                        type: typeof(Input),
+                        maxCount: Constants.MaxCountInputs);
+                }
+
+                result = settingsService.Contents.Inputs?
+                    .FirstOrDefault(i => i.IsDevice
+                        && i.DeviceName == deviceName);
+
+                if (result == default)
+                {
+                    result = new Input
+                    {
+                        DeviceName = deviceName,
+                        IsDevice = true,
+                        Name = deviceName,
+                    };
+                }
+            }
+
+            result.DeviceId = devices
+                .First(d => d.Value == deviceName).Key;
+
+            return result;
+        }
+
+        private Input GetFile(string fileName)
+        {
+            if (!File.Exists(fileName))
+            {
+                throw new FileNotFoundException(fileName);
+            }
+
+            var result = Inputs?
+                .FirstOrDefault(i => !i.IsDevice
+                    && i.FileName == fileName);
+
+            if (result == default)
+            {
+                if (Inputs.Count >= Constants.MaxCountInputs)
+                {
+                    throw new MaxCountExceededException(
+                        type: typeof(Input),
+                        maxCount: Constants.MaxCountInputs);
+                }
+
+                result = settingsService.Contents.Inputs?
+                    .FirstOrDefault(i => !i.IsDevice
+                        && i.FileName == fileName);
+
+                if (result == default)
+                {
+                    var name = Path.GetFileNameWithoutExtension(fileName);
+
+                    result = new Input
+                    {
+                        FileName = fileName,
+                        IsDevice = false,
+                        Name = name,
+                    };
+                }
+            }
+
+            return result;
+        }
+
+        private void InitializeInputs()
+        {
+            if (settingsService.Contents.Inputs?.Count > 0)
+            {
+                try
+                {
+                    var devices = settingsService.Contents.Inputs
+                        .Where(i => i.IsDevice
+                            && !i.IsEnded).ToArray();
+
+                    foreach (var device in devices)
+                    {
+                        var input = default(Input);
+
+                        try
+                        {
+                            input = GetDevice(device.DeviceName);
+                        }
+                        catch (DeviceNotFoundException)
+                        { }
+
+                        _ = RunAsync(input);
+                    }
+
+                    var files = settingsService.Contents.Inputs
+                        .Where(i => !i.IsDevice
+                            && !i.IsEnded).ToArray();
+
+                    foreach (var file in files)
+                    {
+                        var input = default(Input);
+
+                        try
+                        {
+                            input = GetFile(file.FileName);
+                        }
+                        catch (FileNotFoundException)
+                        { }
+
+                        _ = RunAsync(input);
+                    }
+                }
+                catch (MaxCountExceededException)
+                { }
+            }
+        }
+
+        private void InitialzeAreas()
+        {
+            foreach (var input in Inputs)
+            {
+                if (input?.Areas?.Count > 0)
+                {
+                    foreach (var area in input.Areas.ToArray())
+                    {
+                        try
+                        {
+                            input.AreaService.Add(area);
+
+                            area.Template = input.TemplateService.Templates?
+                                .FirstOrDefault(t => t.Name == area.TemplateName
+                                    && t.Samples?.Count > 0);
+                        }
+                        catch (MaxCountExceededException)
+                        { }
+                    }
+                }
+            }
+        }
+
+        private void InitialzeTemplates()
+        {
             foreach (var input in Inputs)
             {
                 if (input?.Templates?.Count > 0)
@@ -169,347 +426,22 @@ namespace Score2Stream.InputService
                         { }
                     }
                 }
-
-                if (input?.Areas?.Count > 0)
-                {
-                    foreach (var area in input.Areas.ToArray())
-                    {
-                        area.Template = input.TemplateService.Templates?
-                            .FirstOrDefault(t => t.Name == area.TemplateName
-                                && t.Samples?.Count > 0);
-
-                        try
-                        {
-                            input.AreaService.Add(area);
-                        }
-                        catch (MaxCountExceededException)
-                        { }
-                    }
-                }
-            }
-
-            var relevant = Inputs.FirstOrDefault(i => i != default
-                && settingsService.Contents.Inputs?.Contains(i) == true);
-
-            SelectInput(relevant);
-
-            isInitializing = false;
-
-            SaveAreas();
-            SaveTemplates();
-
-            inputsChangedEvent.Publish();
-        }
-
-        public async Task SelectAsync(Input input)
-        {
-            if (input == null
-                || (!input.IsDevice && (!input.IsActive || !File.Exists(input.FileName))))
-            {
-                try
-                {
-                    if (startLocationTask != null)
-                    {
-                        await startLocationTask;
-                    }
-
-                    input = await GetInputAsync();
-                }
-                catch (MaxCountExceededException exception)
-                {
-                    await dialogService.ShowMessageBoxAsync(
-                        contentMessage: exception.Message,
-                        contentTitle: "Maximum count exceeded",
-                        icon: Icon.Error);
-
-                    return;
-                }
-            }
-
-            SelectInput(input);
-        }
-
-        public async Task StopAsync()
-        {
-            if (Active != default)
-            {
-                var result = await dialogService.GetMessageBoxResultAsync(
-                    contentMessage: $"Shall {Active.Name} be stopped?",
-                    contentTitle: "Stop input");
-
-                if (result == ButtonResult.Yes)
-                {
-                    Active.VideoService.Stop();
-
-                    SaveInputs();
-                }
             }
         }
 
-        public void Update()
-        {
-            RefreshDevices();
-        }
-
-        #endregion Public Methods
-
-        #region Private Methods
-
-        private void EndInputs()
-        {
-            Active = default;
-
-            UpdateInputs();
-        }
-
-        private Input GetInput(string fileName)
-        {
-            if (!File.Exists(fileName)) return default;
-
-            if (Inputs.Count >= Constants.MaxCountInputs)
-            {
-                throw new MaxCountExceededException(
-                    type: typeof(Input),
-                    maxCount: Constants.MaxCountInputs);
-            }
-
-            var result = Inputs?.FirstOrDefault(i => i != default
-                && !i.IsDevice
-                && !i.IsEnded
-                && i.FileName == fileName);
-
-            if (result == default)
-            {
-                result = settingsService.Contents.Inputs?.FirstOrDefault(i => i != default
-                    && !i.IsDevice
-                    && !i.IsEnded
-                    && i.FileName == fileName);
-
-                if (result != default)
-                {
-                    ImmutableInterlocked.Update(
-                        location: ref inputs,
-                        transformer: l => l.Add(result));
-                }
-            }
-
-            if (result == default)
-            {
-                result = new Input(false)
-                {
-                    FileName = fileName,
-                    Name = Path.GetFileName(fileName),
-                };
-
-                if (result != default)
-                {
-                    ImmutableInterlocked.Update(
-                        location: ref inputs,
-                        transformer: l => l.Add(result));
-                }
-            }
-
-            result.Guid = Guid.NewGuid();
-
-            return result;
-        }
-
-        private Input GetInput(int deviceId, string name)
-        {
-            if (Inputs.Count >= Constants.MaxCountInputs)
-            {
-                throw new MaxCountExceededException(
-                    type: typeof(Input),
-                    maxCount: Constants.MaxCountInputs);
-            }
-
-            var result = Inputs?.FirstOrDefault(i => i != default
-                && i.IsDevice
-                && !i.IsEnded
-                && i.Name == name);
-
-            if (result == default)
-            {
-                result = settingsService.Contents.Inputs?
-                    .FirstOrDefault(i => i != default
-                        && i.IsDevice
-                        && !i.IsEnded
-                        && i.Name == name);
-
-                if (result != default)
-                {
-                    ImmutableInterlocked.Update(
-                        location: ref inputs,
-                        transformer: l => l.Add(result));
-                }
-            }
-
-            if (result == default)
-            {
-                result = new Input(true)
-                {
-                    DeviceId = deviceId,
-                    Name = name,
-                };
-
-                if (result != default)
-                {
-                    ImmutableInterlocked.Update(
-                        location: ref inputs,
-                        transformer: l => l.Add(result));
-                }
-            }
-
-            result.Guid = Guid.NewGuid();
-            result.DeviceId = deviceId;
-
-            return result;
-        }
-
-        private async Task<Input> GetInputAsync()
-        {
-            if (Inputs.Count >= Constants.MaxCountInputs)
-                return default;
-
-            var paths = await dialogService.OpenFilePickerAsync(
-                title: Texts.MenuInputFileText,
-                allowMultiple: false,
-                startLocation: startLocation);
-
-            if (paths?.Any() != true) return default;
-
-            var fileName = paths
-                .Select(p => p.Path.LocalPath)
-                .FirstOrDefault(File.Exists);
-
-            if (string.IsNullOrWhiteSpace(fileName)) return default;
-
-            startLocation = await dialogService.GetFolderAsync(fileName);
-
-            settingsService.Contents.Video.FilePathVideo = fileName;
-            settingsService.Save();
-
-            return GetInput(fileName);
-        }
-
-        private async Task InitializeStartLocationAsync()
-        {
-            try
-            {
-                var filePathVideo = settingsService.Contents.Video.FilePathVideo;
-
-                startLocation = await dialogService.GetFolderAsync(filePathVideo);
-            }
-            catch { }
-        }
-
-        private void RefreshDevices()
-        {
-            var currentInputs = inputEnumerator.GetDevices()
-                .OrderBy(d => d.Value).ToArray();
-
-            var removedInput = Inputs
-                .Where(i => i.IsEnded
-                    || (i.IsDevice && !currentInputs.Any(d => d.Value == i.Name))).ToArray();
-
-            foreach (var removedDevice in removedInput)
-            {
-                removedDevice?.AreaService?.Clear();
-                removedDevice?.VideoService?.Dispose();
-
-                ImmutableInterlocked.Update(
-                    location: ref inputs,
-                    transformer: l => l.Remove(removedDevice));
-            }
-
-            var hasChanges = removedInput.Length > 0;
-
-            foreach (var currentDevice in currentInputs)
-            {
-                var currentInput = Inputs?.FirstOrDefault(i => i != default
-                        && i.IsDevice
-                        && !i.IsEnded
-                        && i?.Name == currentDevice.Value);
-
-                if (currentInput == default)
-                {
-                    GetInput(
-                        deviceId: currentDevice.Key,
-                        name: currentDevice.Value);
-
-                    hasChanges = true;
-                }
-                else if (currentInput.DeviceId != currentDevice.Key)
-                {
-                    currentInput.DeviceId = currentDevice.Key;
-
-                    hasChanges = true;
-                }
-            }
-
-            if (Active != default
-                && !Inputs.Contains(Active))
-            {
-                Active = Inputs.FirstOrDefault(i => i.IsActive);
-
-                hasChanges = true;
-            }
-
-            if (hasChanges)
-            {
-                inputsChangedEvent.Publish();
-            }
-        }
-
-        private void RefreshInputs()
-        {
-            RefreshDevices();
-
-            if (settingsService.Contents.Inputs?.Count > 0)
-            {
-                var devices = Inputs
-                    .Where(i => i != default
-                        && i.IsDevice
-                        && !i.IsEnded
-                        && settingsService.Contents.Inputs.Any(s => s.Name == i.Name)).ToArray();
-
-                foreach (var device in devices)
-                {
-                    _ = RunInputAsync(device);
-                }
-
-                var files = settingsService.Contents.Inputs
-                    .Where(i => i != default
-                        && !i.IsDevice
-                        && !i.IsEnded)
-                    .Select(i => GetInput(i.FileName))
-                    .Where(f => f != default).ToArray();
-
-                try
-                {
-                    foreach (var file in files)
-                    {
-                        _ = RunInputAsync(file);
-                    }
-                }
-                catch (MaxCountExceededException)
-                { }
-            }
-        }
-
-        private async Task RunInputAsync(Input input)
+        private async Task RunAsync(Input input)
         {
             if (input == default) return;
 
             try
             {
-                if (input.VideoService == default)
-                {
-                    input.VideoService = containerProvider.Resolve<IVideoService>();
-                }
-
                 if (!input.IsActive)
                 {
+                    if (input.VideoService == default)
+                    {
+                        input.VideoService = containerProvider.Resolve<IVideoService>();
+                    }
+
                     await input.VideoService.RunAsync(input);
                 }
             }
@@ -536,7 +468,7 @@ namespace Score2Stream.InputService
             if (isInitializing) return;
 
             var inputs = Inputs
-                .Where(i => i.IsActive && !i.IsEnded).ToList();
+                .Where(i => !i.IsEnded).ToList();
 
             var settings = settingsService.Contents.Inputs;
 
@@ -579,44 +511,17 @@ namespace Score2Stream.InputService
             settingsService.Save();
         }
 
-        private void SelectInput(Input input)
+        private void SetActive(Input input = default)
         {
-            if (input != default)
+            if (input == default)
             {
-                _ = RunInputAsync(input);
-
-                if (input != Active)
-                {
-                    Active = input;
-
-                    if (TemplateService != default)
-                    {
-                        if (!(TemplateService.Templates?.Count > 0))
-                        {
-                            try
-                            {
-                                TemplateService.Create();
-                            }
-                            catch (MaxCountExceededException)
-                            { }
-                        }
-
-                        TemplateService.Select(TemplateService.Templates?.FirstOrDefault());
-                    }
-
-                    inputSelectedEvent.Publish(Active);
-
-                    SaveInputs();
-                }
+                input = Inputs
+                    .FirstOrDefault(i => !i.IsEnded);
             }
-        }
 
-        private void UpdateInputs()
-        {
-            RefreshDevices();
-            SaveInputs();
+            Active = input;
 
-            inputsChangedEvent.Publish();
+            inputSelectedEvent.Publish(Active);
         }
 
         #endregion Private Methods

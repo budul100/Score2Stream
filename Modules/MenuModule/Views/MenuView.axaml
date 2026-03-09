@@ -47,7 +47,7 @@
                     <rib:RibbonGroupBox Header="Video control">
                         <rib:RibbonDropDownButton
                             Content="Inputs"
-                            Command="{Binding InputUpdateCommand}"
+                            Command="{Binding InputRefreshCommand}"
                             FontSize="{StaticResource FontSize}"
                             ItemsSource="{Binding Inputs}"
                             MinSize="Large">
@@ -61,21 +61,6 @@
                                 </ControlTemplate>
                             </rib:RibbonDropDownButton.LargeIcon>
                         </rib:RibbonDropDownButton>
-
-                        <rib:RibbonButton
-                            Command="{Binding InputStopCommand}"
-                            Content="Stop input"
-                            FontSize="{StaticResource FontSize}"
-                            MinSize="Large">
-                            <rib:RibbonButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="VideoOffOutline" />
-                                </ControlTemplate>
-                            </rib:RibbonButton.LargeIcon>
-                        </rib:RibbonButton>
                     </rib:RibbonGroupBox>
 
                     <rib:RibbonGroupBox Header="Video handling">

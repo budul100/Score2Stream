@@ -24,6 +24,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Update="Views\TabsView.axaml.cs">
+	    <DependentUpon>TabsView.axaml</DependentUpon>
+	  </Compile>
 	  <Compile Update="Views\InputView.axaml.cs">
 	    <DependentUpon>InputView.axaml</DependentUpon>
 	  </Compile>

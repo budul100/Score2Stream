@@ -18,6 +18,7 @@ using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Logging;
 using Score2Stream.Commons.Models.Settings;
 using Score2Stream.NavigationService;
+using Score2Stream.VideoService.Helpers;
 
 namespace Score2Stream.App
 {
@@ -135,11 +136,11 @@ namespace Score2Stream.App
             containerRegistry.RegisterSingleton<INavigationService, Service>();
             containerRegistry.RegisterSingleton<IScoreboardService, ScoreboardService.Service>();
             containerRegistry.RegisterSingleton<IWebService, WebService.Service>();
-
             containerRegistry.RegisterSingleton<IInputService, InputService.Service>();
-            containerRegistry.RegisterSingleton<IInputEnumerator, InputService.Helpers.DeviceEnumerator>();
+            containerRegistry.RegisterSingleton<IDeviceEnumerator, InputService.Helpers.DeviceEnumerator>();
 
             containerRegistry.Register<IVideoService, VideoService.Service>();
+            containerRegistry.Register<IVideoCapture, VideoCaptureWrapper>();
             containerRegistry.Register<IAreaService, AreaService.Service>();
             containerRegistry.Register<ITemplateService, TemplateService.Service>();
             containerRegistry.Register<ISampleService, SampleService.Service>();
@@ -173,20 +174,18 @@ namespace Score2Stream.App
         {
             try
             {
-                var inputService = Container.Resolve<IInputService>();
-
-                inputService.Initialize();
-
                 desktop.MainWindow = mainWindow;
 
                 var assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
                 var iconUri = $"avares://{assemblyName}/Assets/{assemblyName}.png";
 
                 var dialogService = Container.Resolve<IDialogService>();
-
                 dialogService.Initialize(
                     window: mainWindow,
                     iconUri: iconUri);
+
+                var inputService = Container.Resolve<IInputService>();
+                inputService.Initialize();
 
                 splashWindow?.Close();
             }

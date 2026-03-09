@@ -1,7 +1,6 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.LogicalTree;
-using Avalonia.VisualTree;
 
 namespace AvaloniaUI.Ribbon
 {

@@ -28,13 +28,17 @@ namespace Score2Stream.Commons.Interfaces
 
         #region Public Methods
 
+        IReadOnlyDictionary<int, string> GetDevices();
+
         void Initialize();
 
-        Task SelectAsync(Input input);
+        void Select(Input input);
 
-        Task StopAsync();
+        void SelectDevice(string deviceName);
 
-        void Update();
+        void SelectFile(string fileName);
+
+        Task StopAsync(Input input = default);
 
         #endregion Public Methods
     }

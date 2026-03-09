@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using Score2Stream.Commons.Interfaces;
 
 namespace Score2Stream.Commons.Models.Contents
 {
-    public class Input(bool isDevice)
+    public class Input
     {
         #region Public Properties
 
@@ -16,15 +15,14 @@ namespace Score2Stream.Commons.Models.Contents
 
         public int? DeviceId { get; set; }
 
-        public string FileName { get; set; }
+        public string DeviceName { get; set; }
 
-        [JsonIgnore]
-        public Guid Guid { get; set; }
+        public string FileName { get; set; }
 
         [JsonIgnore]
         public bool IsActive => VideoService?.IsActive ?? false;
 
-        public bool IsDevice { get; } = isDevice;
+        public bool IsDevice { get; set; }
 
         [JsonIgnore]
         public bool IsEnded => VideoService?.IsEnded ?? false;

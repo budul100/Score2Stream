@@ -8,19 +8,18 @@ using MsBox.Avalonia.Enums;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
-using Prism.Regions;
+using Prism.Mvvm;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
-using Score2Stream.Commons.Prism;
 
 namespace Score2Stream.VideoModule.ViewModels
 {
     public class InputViewModel
-    : RegionViewModelBase
+        : BindableBase
     {
         #region Private Fields
 
@@ -51,9 +50,7 @@ namespace Score2Stream.VideoModule.ViewModels
         #region Public Constructors
 
         public InputViewModel(IInputService inputService, INavigationService navigationService,
-            IDialogService dialogService, IContainerProvider containerProvider, IEventAggregator eventAggregator,
-            IRegionManager regionManager)
-            : base(regionManager)
+            IDialogService dialogService, IContainerProvider containerProvider, IEventAggregator eventAggregator)
         {
             this.inputService = inputService;
             this.navigationService = navigationService;
@@ -64,16 +61,8 @@ namespace Score2Stream.VideoModule.ViewModels
             MouseReleasedCommand = new DelegateCommand<PointerReleasedEventArgs>(OnMouseReleasedAsync);
             ZoomChangedCommand = new DelegateCommand<ZoomChangedEventArgs>(OnZoomChanged);
 
-            eventAggregator.GetEvent<InputSelectedEvent>().Subscribe(
-                action: _ => StartLoading(),
-                keepSubscriberReferenceAlive: true);
-
             eventAggregator.GetEvent<InputUpdatedEvent>().Subscribe(
                 action: RefreshInput,
-                keepSubscriberReferenceAlive: true);
-
-            eventAggregator.GetEvent<InputEndedEvent>().Subscribe(
-                action: EndLoading,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<InputCenteringEvent>().Subscribe(
@@ -91,6 +80,8 @@ namespace Score2Stream.VideoModule.ViewModels
             eventAggregator.GetEvent<AreaModifiedEvent>().Subscribe(
                 action: _ => UpdateAreas(),
                 keepSubscriberReferenceAlive: true);
+
+            IsLoading = true;
         }
 
         #endregion Public Constructors
@@ -216,25 +207,13 @@ namespace Score2Stream.VideoModule.ViewModels
 
         #endregion Public Properties
 
-        #region Public Methods
-
-        public override void OnNavigatedTo(NavigationContext navigationContext)
-        { }
-
-        #endregion Public Methods
-
         #region Private Methods
 
         private void CenterInput()
         {
-            CenterInputEvent.Invoke(
+            CenterInputEvent?.Invoke(
                 sender: this,
                 e: default);
-        }
-
-        private void EndLoading()
-        {
-            IsLoading = false;
         }
 
         private double? GetActualHeight()
@@ -267,8 +246,10 @@ namespace Score2Stream.VideoModule.ViewModels
 
         private void OnMousePressed(PointerPressedEventArgs eventArgs)
         {
-            if (eventArgs.GetCurrentPoint(default).Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonPressed
-            && IsMouseEditing(true))
+            var pointerUpdateKind = eventArgs.GetCurrentPoint(default).Properties.PointerUpdateKind;
+
+            if (pointerUpdateKind == PointerUpdateKind.LeftButtonPressed
+                && IsMouseEditing(true))
             {
                 area.IsEditing = true;
                 area.Left = default;
@@ -309,14 +290,14 @@ namespace Score2Stream.VideoModule.ViewModels
                         var actualHeight = GetActualHeight();
 
                         inputService.AreaService.Resize(
-                        left: area.Left,
-                        widthMin: widthMin,
-                        widthFull: area.Width,
-                        widthActual: actualWidth,
-                        top: area.Top,
-                        heightMin: heightMin,
-                        heightFull: area.Height,
-                        heightActual: actualHeight);
+                            left: area.Left,
+                            widthMin: widthMin,
+                            widthFull: area.Width,
+                            widthActual: actualWidth,
+                            top: area.Top,
+                            heightMin: heightMin,
+                            heightFull: area.Height,
+                            heightActual: actualHeight);
 
                         area.IsEditing = false;
 
@@ -345,9 +326,12 @@ namespace Score2Stream.VideoModule.ViewModels
         {
             Bitmap = inputService.VideoService?.Bitmap;
 
-            if (Bitmap != default)
+            if (Bitmap != default
+                && IsLoading)
             {
-                EndLoading();
+                UpdateAreas();
+
+                IsLoading = false;
             }
         }
 
@@ -373,13 +357,6 @@ namespace Score2Stream.VideoModule.ViewModels
                 heightMin = Math.Floor((FullHeight - BitmapHeight) / 2);
                 heightMax = heightMin + Math.Floor(BitmapHeight);
             }
-
-            UpdateAreas();
-        }
-
-        private void StartLoading()
-        {
-            IsLoading = true;
 
             UpdateAreas();
         }

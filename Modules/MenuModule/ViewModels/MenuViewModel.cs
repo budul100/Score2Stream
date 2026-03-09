@@ -1,11 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Platform.Storage;
 using AvaloniaUI.Ribbon;
+using MsBox.Avalonia.Enums;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Regions;
-using ReactiveUI;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Events.Area;
@@ -16,6 +18,7 @@ using Score2Stream.Commons.Events.Menu;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Scoreboard;
 using Score2Stream.Commons.Events.Template;
+using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
@@ -29,13 +32,16 @@ namespace Score2Stream.MenuModule.ViewModels
         #region Private Fields
 
         private readonly DetectionChangedEvent detectionChangedEvent;
+        private readonly IDialogService dialogService;
         private readonly FilterChangedEvent filterChangedEvent;
         private readonly IInputService inputService;
         private readonly IRegionManager regionManager;
-        private readonly ISettingsService<Session> settingsService;
         private readonly IScoreboardService scoreboardService;
+        private readonly ISettingsService<Session> settingsService;
+        private readonly Task startLocationTask;
         private readonly TabSelectedEvent tabSelectedEvent;
 
+        private IStorageFolder startLocation;
         private int tabIndex;
 
         #endregion Private Fields
@@ -44,13 +50,14 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public MenuViewModel(ISettingsService<Session> settingsService, IWebService webService,
             IScoreboardService scoreboardService, IInputService inputService, IRegionManager regionManager,
-            IEventAggregator eventAggregator)
+            IDialogService dialogService, IEventAggregator eventAggregator)
             : base(regionManager)
         {
             this.settingsService = settingsService;
             this.scoreboardService = scoreboardService;
             this.inputService = inputService;
             this.regionManager = regionManager;
+            this.dialogService = dialogService;
 
             this.SelectTabCommand = new DelegateCommand<ViewType?>(
                 executeMethod: t => TabIndex = (int?)t);
@@ -66,13 +73,10 @@ namespace Score2Stream.MenuModule.ViewModels
                 executeMethod: scoreboardService.Update,
                 canExecuteMethod: () => !scoreboardService.IsUpToDate);
 
-            this.InputUpdateCommand = new DelegateCommand(
-                executeMethod: UpdateInputs);
-            this.InputSelectCommand = new DelegateCommand<object>(
-                executeMethod: param => inputService.SelectAsync(param as Input));
-            this.InputStopCommand = new DelegateCommand(
-                executeMethod: () => inputService.StopAsync(),
-                canExecuteMethod: () => inputService.Active != default);
+            this.InputRefreshCommand = new DelegateCommand(
+                executeMethod: RefreshInputs);
+            this.InputSelectCommand = new DelegateCommand<string>(
+                executeMethod: async param => await SelectInputAsync(param));
 
             this.InputCenterCommand = new DelegateCommand(
                 executeMethod: () => eventAggregator.GetEvent<InputCenteringEvent>().Publish(),
@@ -125,18 +129,8 @@ namespace Score2Stream.MenuModule.ViewModels
 
             eventAggregator.GetEvent<ServerStartedEvent>().Subscribe(
                 action: OnServerStarted);
-
-            eventAggregator.GetEvent<InputStartedEvent>().Subscribe(
-                action: UpdateInputs,
-                threadOption: ThreadOption.UIThread);
-            eventAggregator.GetEvent<InputEndedEvent>().Subscribe(
-                action: UpdateInputs,
-                threadOption: ThreadOption.UIThread);
-            eventAggregator.GetEvent<InputsChangedEvent>().Subscribe(
-                action: RefreshInputs,
-                threadOption: ThreadOption.UIThread);
-            eventAggregator.GetEvent<InputUpdatedEvent>().Subscribe(
-                action: RefreshInput);
+            eventAggregator.GetEvent<InputSelectedEvent>().Subscribe(
+                action: _ => OnInputChanged());
 
             eventAggregator.GetEvent<AreasChangedEvent>().Subscribe(
                 action: OnClipsChanged);
@@ -162,6 +156,8 @@ namespace Score2Stream.MenuModule.ViewModels
                 action: _ => RaisePropertyChanged(nameof(IsUpToDate)));
             eventAggregator.GetEvent<ScoreboardModifiedEvent>().Subscribe(
                 action: () => ScoreboardUpdateCommand.RaiseCanExecuteChanged());
+
+            startLocationTask = InitializeStartLocationAsync();
         }
 
         #endregion Public Constructors
@@ -251,17 +247,15 @@ namespace Score2Stream.MenuModule.ViewModels
 
         public DelegateCommand InputCenterCommand { get; }
 
+        public DelegateCommand InputRefreshCommand { get; }
+
         public DelegateCommand InputRotateLeftCommand { get; }
 
         public DelegateCommand InputRotateRightCommand { get; }
 
         public ObservableCollection<RibbonDropDownItem> Inputs { get; } = [];
 
-        public DelegateCommand<object> InputSelectCommand { get; }
-
-        public DelegateCommand InputStopCommand { get; }
-
-        public DelegateCommand InputUpdateCommand { get; }
+        public DelegateCommand<string> InputSelectCommand { get; }
 
         public bool IsActive => inputService.IsActive;
 
@@ -285,6 +279,8 @@ namespace Score2Stream.MenuModule.ViewModels
             }
         }
 
+        public bool IsUpToDate => scoreboardService.IsUpToDate;
+
         public bool IsVerifiedsFiltered
         {
             get
@@ -303,8 +299,6 @@ namespace Score2Stream.MenuModule.ViewModels
                 }
             }
         }
-
-        public bool IsUpToDate => scoreboardService.IsUpToDate;
 
         public bool NoCropping
         {
@@ -572,6 +566,55 @@ namespace Score2Stream.MenuModule.ViewModels
             }
         }
 
+        private async Task<string> GetInputFileAsync()
+        {
+            if (Inputs.Count >= Constants.MaxCountInputs)
+            {
+                await dialogService.ShowMessageBoxAsync(
+                    contentMessage: $"Maximum number of {Constants.MaxCountInputs} inputs is exceeded.",
+                    contentTitle: "Maximum inputs exceeded",
+                    icon: Icon.Error);
+
+                return default;
+            }
+
+            if (startLocationTask != null)
+            {
+                await startLocationTask;
+            }
+
+            var paths = await dialogService.OpenFilePickerAsync(
+                title: Texts.MenuInputFileText,
+                allowMultiple: false,
+                startLocation: startLocation);
+
+            if (paths?.Any() != true) return default;
+
+            var result = paths
+                .Select(p => p.Path.LocalPath)
+                .FirstOrDefault(File.Exists);
+
+            if (string.IsNullOrWhiteSpace(result)) return default;
+
+            startLocation = await dialogService.GetFolderAsync(result);
+
+            settingsService.Contents.Video.FilePathVideo = result;
+            settingsService.Save();
+
+            return result;
+        }
+
+        private async Task InitializeStartLocationAsync()
+        {
+            try
+            {
+                var filePathVideo = settingsService.Contents.Video.FilePathVideo;
+
+                startLocation = await dialogService.GetFolderAsync(filePathVideo);
+            }
+            catch { }
+        }
+
         private void OnClipsChanged()
         {
             AreaRemoveCommand.RaiseCanExecuteChanged();
@@ -587,6 +630,22 @@ namespace Score2Stream.MenuModule.ViewModels
             AreaOrderAllCommand.RaiseCanExecuteChanged();
 
             RefreshTemplates();
+        }
+
+        private void OnInputChanged()
+        {
+            RaisePropertyChanged(nameof(IsActive));
+            RaisePropertyChanged(nameof(NoCropping));
+            RaisePropertyChanged(nameof(ProcessingDelay));
+            RaisePropertyChanged(nameof(ThresholdDetecting));
+            RaisePropertyChanged(nameof(ThresholdMatching));
+            RaisePropertyChanged(nameof(WaitingDuration));
+
+            InputCenterCommand.RaiseCanExecuteChanged();
+            InputRotateLeftCommand.RaiseCanExecuteChanged();
+            InputRotateRightCommand.RaiseCanExecuteChanged();
+
+            AreaAddCommand.RaiseCanExecuteChanged();
         }
 
         private void OnSamplesChanged()
@@ -619,88 +678,34 @@ namespace Score2Stream.MenuModule.ViewModels
             OnSamplesChanged();
         }
 
-        private void RefreshInput()
-        {
-            InputStopCommand.RaiseCanExecuteChanged();
-
-            InputCenterCommand.RaiseCanExecuteChanged();
-            InputRotateLeftCommand.RaiseCanExecuteChanged();
-            InputRotateRightCommand.RaiseCanExecuteChanged();
-
-            AreaAddCommand.RaiseCanExecuteChanged();
-        }
-
         private void RefreshInputs()
         {
-            var menuInputs = new HashSet<Input>(Inputs
-                .Where(i => i.CommandParameter != default)
-                .Select(i => (Input)i.CommandParameter));
+            Inputs.Clear();
 
-            var serviceInputs = new HashSet<Input>(inputService.Inputs);
+            var devices = inputService.GetDevices();
 
-            if (!menuInputs.SetEquals(serviceInputs))
+            var ordereds = devices
+                .OrderBy(i => i.Value).ToArray();
+
+            foreach (var ordered in ordereds)
             {
-                Inputs.Clear();
-
-                var ordereds = inputService.Inputs
-                    .Where(i => i != default)
-                    .OrderByDescending(i => i.IsDevice)
-                    .ThenBy(i => i.Name).ToArray();
-
-                foreach (var ordered in ordereds)
-                {
-                    var isChecked = (ordered.IsDevice && ordered.IsActive)
-                        || (!ordered.IsDevice && !ordered.IsEnded);
-
-                    var input = new RibbonDropDownItem
-                    {
-                        Command = InputSelectCommand,
-                        CommandParameter = ordered,
-                        IsChecked = isChecked,
-                        Text = ordered.Name
-                    };
-
-                    Inputs.Add(input);
-                }
-
-                var fileInput = new RibbonDropDownItem
+                var input = new RibbonDropDownItem
                 {
                     Command = InputSelectCommand,
-                    Text = Texts.MenuInputFileText,
+                    CommandParameter = ordered.Value,
+                    Text = ordered.Value
                 };
 
-                Inputs.Add(fileInput);
-
-                RaisePropertyChanged(nameof(Inputs));
-                RaisePropertyChanged(nameof(IsActive));
-                RaisePropertyChanged(nameof(NoCropping));
-                RaisePropertyChanged(nameof(ProcessingDelay));
-                RaisePropertyChanged(nameof(ThresholdDetecting));
-                RaisePropertyChanged(nameof(ThresholdMatching));
-                RaisePropertyChanged(nameof(WaitingDuration));
-
-                OnSamplesChanged();
+                Inputs.Add(input);
             }
-            else
+
+            var fileInput = new RibbonDropDownItem
             {
-                var relevants = Inputs
-                    .Where(i => i?.CommandParameter != default).ToArray();
+                Command = InputSelectCommand,
+                Text = Texts.MenuInputFileText,
+            };
 
-                foreach (var relevant in relevants)
-                {
-                    if (relevant.CommandParameter is Input currentInput)
-                    {
-                        relevant.Text = currentInput.Name;
-                        relevant.IsChecked = (currentInput.IsDevice && currentInput.IsActive)
-                            || (!currentInput.IsDevice && !currentInput.IsEnded);
-                    }
-                }
-
-                RaisePropertyChanged(nameof(Inputs));
-                RaisePropertyChanged(nameof(IsActive));
-            }
-
-            InputStopCommand.RaiseCanExecuteChanged();
+            Inputs.Add(fileInput);
         }
 
         private void RefreshTemplates()
@@ -739,6 +744,31 @@ namespace Score2Stream.MenuModule.ViewModels
             }
         }
 
+        private async Task SelectInputAsync(string deviceName)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(deviceName))
+                {
+                    var fileName = await GetInputFileAsync();
+                    inputService.SelectFile(fileName);
+                }
+                else
+                {
+                    inputService.SelectDevice(deviceName);
+                }
+            }
+            catch (MaxCountExceededException exception)
+            {
+                await dialogService.ShowMessageBoxAsync(
+                    contentMessage: exception.Message,
+                    contentTitle: "Maximum count exceeded",
+                    icon: Icon.Error);
+
+                return;
+            }
+        }
+
         private void SelectTemplate(Template template)
         {
             if (inputService?.TemplateService != default)
@@ -752,13 +782,6 @@ namespace Score2Stream.MenuModule.ViewModels
                     inputService.TemplateService.Select(template);
                 }
             }
-        }
-
-        private void UpdateInputs()
-        {
-            inputService.Update();
-
-            RefreshInputs();
         }
 
         #endregion Private Methods

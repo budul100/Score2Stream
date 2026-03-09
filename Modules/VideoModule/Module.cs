@@ -13,7 +13,7 @@ namespace Score2Stream.VideoModule
 
         public void OnInitialized(IContainerProvider containerProvider)
         {
-            regionManager.RegisterViewWithRegion<InputView>(
+            regionManager.RegisterViewWithRegion<TabsView>(
                 regionName: nameof(RegionType.OutputRegion));
         }
 
