@@ -303,12 +303,14 @@ namespace Score2Stream.Tests.InputServiceTests
         public async Task StopAsync_UserSaysYes_StopsVideoAndSaves()
         {
             // Arrange
+            var videoServiceMock = new Mock<IVideoService>();
+
             var input = new Input
             {
                 DeviceName = "TestCam",
                 IsDevice = true,
                 Name = "TestCam",
-                VideoService = new Mock<IVideoService>().Object,
+                VideoService = videoServiceMock.Object,
             };
 
             // Force SaveInputs to detect a change (settings == null will be true)
@@ -322,7 +324,6 @@ namespace Score2Stream.Tests.InputServiceTests
             await inputService.StopAsync(input);
 
             // Assert
-            var videoServiceMock = Mock.Get(input.VideoService);
             videoServiceMock.Verify(v => v.Stop(), Times.Once);
 
             // Explicitly specify the optional parameter for Moq:
