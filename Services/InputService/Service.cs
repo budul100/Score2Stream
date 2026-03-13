@@ -361,7 +361,7 @@ namespace Score2Stream.InputService
                         catch (DeviceNotFoundException)
                         { }
 
-                        _ = RunAsync(input);
+                        Select(input);
                     }
 
                     var files = settingsService.Contents.Inputs
@@ -379,7 +379,7 @@ namespace Score2Stream.InputService
                         catch (FileNotFoundException)
                         { }
 
-                        _ = RunAsync(input);
+                        Select(input);
                     }
                 }
                 catch (MaxCountExceededException)
