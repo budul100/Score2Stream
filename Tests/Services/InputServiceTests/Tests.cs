@@ -160,15 +160,15 @@ namespace Score2Stream.Tests.InputServiceTests
             var videoServiceMock = new Mock<IVideoService>();
 
             videoServiceMock.Setup(v => v.IsStarted).Returns(false);
-            videoServiceMock
-                .Setup(v => v.RunAsync(It.IsAny<Input>()))
-                .Callback(() => videoServiceMock.Setup(v => v.IsStarted).Returns(true))
-                .Returns(Task.CompletedTask);
-
             videoServiceMock.Setup(v => v.IsActive).Returns(false);
+
             videoServiceMock
                 .Setup(v => v.RunAsync(It.IsAny<Input>()))
-                .Callback(() => videoServiceMock.Setup(v => v.IsActive).Returns(true))
+                .Callback(() =>
+                {
+                    videoServiceMock.Setup(v => v.IsStarted).Returns(true);
+                    videoServiceMock.Setup(v => v.IsActive).Returns(true);
+                })
                 .Returns(Task.CompletedTask);
 
             containerProviderMock
@@ -188,7 +188,20 @@ namespace Score2Stream.Tests.InputServiceTests
         public void Rotation_GetAndSet_SavesToSettings()
         {
             // Arrange
-            deviceEnumeratorMock.Setup(d => d.GetVideoDevices()).Returns(new Dictionary<int, string> { { 1, "Cam 1" } });
+            var input = new Input
+            {
+                DeviceName = "Cam 1",
+                IsDevice = true,
+                Name = "Cam 1",
+            };
+
+            // Input muss in session.Inputs liegen, damit Rotation-Getter/-Setter ihn findet
+            session.Inputs = [input];
+
+            deviceEnumeratorMock.Setup(d => d.GetVideoDevices()).Returns(new Dictionary<int, string>
+            {
+                { 1, "Cam 1" }
+            });
 
             var videoServiceMock = new Mock<IVideoService>();
 
@@ -208,7 +221,6 @@ namespace Score2Stream.Tests.InputServiceTests
                 .Setup(c => c.Resolve(typeof(IVideoService)))
                 .Returns(videoServiceMock.Object);
 
-            // To test properties, we need an active device
             inputService.SelectDevice("Cam 1");
 
             // Act
