@@ -85,8 +85,6 @@ namespace Score2Stream.VideoService
 
         public bool IsActive { get; private set; }
 
-        public bool IsEnded { get; private set; }
-
         public string Name => input?.Name;
 
         public TimeSpan? ProcessingTime { get; private set; }
@@ -413,7 +411,6 @@ namespace Score2Stream.VideoService
             {
                 Bitmap = default;
                 IsActive = false;
-                IsEnded = true;
 
                 if (!isDisposed)
                 {

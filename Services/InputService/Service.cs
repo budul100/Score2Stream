@@ -117,15 +117,15 @@ namespace Score2Stream.InputService
             {
                 if (Active != default)
                 {
-                    if (Active.IsDevice)
+                    var current = Active.IsDevice
+                        ? settingsService.Contents.Inputs?
+                            .SingleOrDefault(i => i.DeviceName == Active.DeviceName)
+                        : settingsService.Contents.Inputs?
+                            .SingleOrDefault(i => i.FileName == Active.FileName);
+
+                    if (current != default)
                     {
-                        settingsService.Contents.Inputs
-                            .SingleOrDefault(i => i.DeviceName == Active.DeviceName).Rotation = value;
-                    }
-                    else
-                    {
-                        settingsService.Contents.Inputs
-                            .SingleOrDefault(i => i.FileName == Active.FileName).Rotation = value;
+                        current.Rotation = value;
                     }
 
                     settingsService.Save();
@@ -347,8 +347,7 @@ namespace Score2Stream.InputService
                 try
                 {
                     var devices = settingsService.Contents.Inputs
-                        .Where(i => i.IsDevice
-                            && !i.IsEnded).ToArray();
+                        .Where(i => i.IsDevice).ToArray();
 
                     foreach (var device in devices)
                     {
@@ -365,8 +364,7 @@ namespace Score2Stream.InputService
                     }
 
                     var files = settingsService.Contents.Inputs
-                        .Where(i => !i.IsDevice
-                            && !i.IsEnded).ToArray();
+                        .Where(i => !i.IsDevice).ToArray();
 
                     foreach (var file in files)
                     {
@@ -467,18 +465,18 @@ namespace Score2Stream.InputService
         {
             if (isInitializing) return;
 
-            var inputs = Inputs
-                .Where(i => !i.IsEnded).ToList();
+            var givens = settingsService.Contents.Inputs;
 
-            var settings = settingsService.Contents.Inputs;
+            var currents = Inputs
+                .Where(i => i.IsActive).ToList();
 
-            var hasChanges = settings == null
-                || settings.Count != inputs.Count
-                || !inputs.All(settings.Contains);
+            var hasChanges = givens == null
+                || givens.Count != currents.Count
+                || !currents.All(givens.Contains);
 
             if (hasChanges)
             {
-                settingsService.Contents.Inputs = inputs;
+                settingsService.Contents.Inputs = currents;
                 settingsService.Save();
             }
         }
@@ -516,7 +514,7 @@ namespace Score2Stream.InputService
             if (input == default)
             {
                 input = Inputs
-                    .FirstOrDefault(i => !i.IsEnded);
+                    .FirstOrDefault(i => i.IsActive);
             }
 
             Active = input;

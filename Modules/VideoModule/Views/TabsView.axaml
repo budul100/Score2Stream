@@ -2,46 +2,41 @@
     x:Class="Score2Stream.VideoModule.Views.TabsView"
     xmlns="https://github.com/avaloniaui"
     xmlns:prism="http://prismlibrary.com/"
-    xmlns:sys="using:System"
     xmlns:v="using:Score2Stream.VideoModule.Views"
     xmlns:vm="using:Score2Stream.VideoModule.ViewModels"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     prism:ViewModelLocator.AutoWireViewModel="True">
 
-    <UserControl.Resources>
-        <sys:Double x:Key="FontSize">10</sys:Double>
-    </UserControl.Resources>
-
     <TabControl
         ItemsSource="{Binding Tabs}"
-        SelectedItem="{Binding SelectedTab, Mode=TwoWay}"
-        BorderBrush="#AAAAAA"
+        SelectedItem="{Binding Tab, Mode=TwoWay}"
+        BorderBrush="{StaticResource TabBorderBrush}"
         BorderThickness="1">
 
         <TabControl.Styles>
-            <!-- Tab-Header-Leiste -->
+            <!-- Tab header strip -->
             <Style Selector="TabControl > TabStrip">
                 <!--<Setter Property="IsVisible" Value="{Binding ShowTabHeaders}" />-->
-                <Setter Property="Background" Value="#E8E8E8" />
+                <Setter Property="Background" Value="{StaticResource TabStripBackground}" />
             </Style>
-            <!-- Einzelner Tab-Header -->
+            <!-- Single tab header -->
             <Style Selector="TabItem">
-                <Setter Property="Background" Value="#DEDEDE" />
-                <Setter Property="BorderBrush" Value="#AAAAAA" />
+                <Setter Property="Background" Value="{StaticResource TabItemBackground}" />
+                <Setter Property="BorderBrush" Value="{StaticResource TabBorderBrush}" />
                 <Setter Property="Padding" Value="8,4" />
             </Style>
-            <!-- Aktiver Tab-Header -->
+            <!-- Active tab header -->
             <Style Selector="TabItem:selected">
-                <Setter Property="Background" Value="#F5F5F5" />
+                <Setter Property="Background" Value="{StaticResource TabItemSelectedBackground}" />
             </Style>
             <!-- Hover -->
             <Style Selector="TabItem:pointerover">
-                <Setter Property="Background" Value="#ECECEC" />
+                <Setter Property="Background" Value="{StaticResource TabItemHoverBackground}" />
             </Style>
-            <!-- Content-Bereich -->
+            <!-- Content area -->
             <Style Selector="TabControl > Border">
-                <Setter Property="Background" Value="#F5F5F5" />
-                <Setter Property="BorderBrush" Value="#AAAAAA" />
+                <Setter Property="Background" Value="{StaticResource TabContentBackground}" />
+                <Setter Property="BorderBrush" Value="{StaticResource TabBorderBrush}" />
                 <Setter Property="BorderThickness" Value="1" />
             </Style>
         </TabControl.Styles>
@@ -51,12 +46,12 @@
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <TextBlock
                         Text="{Binding Name}"
-                        FontSize="{StaticResource FontSize}"
+                        FontSize="{StaticResource TabFontSize}"
                         VerticalAlignment="Center" />
                     <Button
                         Content="✕"
                         Command="{Binding CloseCommand}"
-                        FontSize="{StaticResource FontSize}"
+                        FontSize="{StaticResource TabFontSize}"
                         Padding="2,0"
                         VerticalAlignment="Center"
                         Background="Transparent"

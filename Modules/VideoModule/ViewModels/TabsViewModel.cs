@@ -52,11 +52,15 @@ namespace Score2Stream.VideoModule.ViewModels
 
         #region Public Properties
 
-        public TabViewModel SelectedTab
+        public bool ShowTabHeaders => Tabs.Count > 1;
+
+        public TabViewModel Tab
         {
             get => selectedTab;
             set
             {
+                if (isRefreshing) return;
+
                 SetProperty(ref selectedTab, value);
 
                 if (value != default
@@ -66,8 +70,6 @@ namespace Score2Stream.VideoModule.ViewModels
                 }
             }
         }
-
-        public bool ShowTabHeaders => Tabs.Count > 1;
 
         public ObservableCollection<TabViewModel> Tabs { get; } = [];
 
@@ -92,7 +94,9 @@ namespace Score2Stream.VideoModule.ViewModels
 
             var relevants = inputService.Inputs
                 .Where(i => i.VideoService != default
-                    && !i.IsEnded).ToArray();
+                    && i.IsActive).ToArray();
+
+            var selected = default(TabViewModel);
 
             foreach (var relevant in relevants)
             {
@@ -106,9 +110,16 @@ namespace Score2Stream.VideoModule.ViewModels
                     CloseCommand: closeCommand);
 
                 Tabs.Add(tab);
+
+                if (relevant == inputService.Active)
+                {
+                    selected = tab;
+                }
             }
 
             isRefreshing = false;
+
+            Tab = selected;
 
             RaisePropertyChanged(nameof(Tabs));
             RaisePropertyChanged(nameof(ShowTabHeaders));

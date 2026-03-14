@@ -19,13 +19,9 @@ namespace Score2Stream.Commons.Models.Contents
 
         public string FileName { get; set; }
 
-        [JsonIgnore]
-        public bool IsActive => VideoService?.IsActive ?? false;
+        public bool IsActive => VideoService?.IsActive == true;
 
         public bool IsDevice { get; set; }
-
-        [JsonIgnore]
-        public bool IsEnded => VideoService?.IsEnded ?? false;
 
         public string Name { get; set; }
 

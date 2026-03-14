@@ -131,16 +131,18 @@ namespace Score2Stream.MenuModule.ViewModels
                 action: OnServerStarted);
             eventAggregator.GetEvent<InputSelectedEvent>().Subscribe(
                 action: _ => OnInputChanged());
+            eventAggregator.GetEvent<InputStartedEvent>().Subscribe(
+                action: _ => OnInputChanged());
 
             eventAggregator.GetEvent<AreasChangedEvent>().Subscribe(
                 action: OnClipsChanged);
             eventAggregator.GetEvent<AreaSelectedEvent>().Subscribe(
                 action: _ => OnClipsChanged());
-            eventAggregator.GetEvent<SegmentSelectedEvent>().Subscribe(
-                action: _ => OnClipsChanged());
-
             eventAggregator.GetEvent<AreaModifiedEvent>().Subscribe(
                 action: _ => OnClipsUpdated());
+
+            eventAggregator.GetEvent<SegmentSelectedEvent>().Subscribe(
+                action: _ => OnClipsChanged());
 
             eventAggregator.GetEvent<TemplatesChangedEvent>().Subscribe(
                 action: RefreshTemplates);

@@ -117,7 +117,6 @@ namespace Score2Stream.Tests.VideoServiceTests
         {
             // Assert
             Assert.False(videoService.IsActive);
-            Assert.False(videoService.IsEnded);
             Assert.Null(videoService.Name);
             Assert.Null(videoService.Bitmap);
             Assert.Null(videoService.ProcessingTime);
@@ -315,7 +314,6 @@ namespace Score2Stream.Tests.VideoServiceTests
 
                 // Ensure the loop ended and cleaned up properly
                 Assert.False(videoService.IsActive);
-                Assert.True(videoService.IsEnded);
                 inputEndedEventMock.Verify(e => e.Publish(input), Times.Once);
             }
             finally
