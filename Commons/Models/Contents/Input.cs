@@ -13,18 +13,21 @@ namespace Score2Stream.Commons.Models.Contents
         [JsonIgnore]
         public IAreaService AreaService => VideoService?.AreaService;
 
+        [JsonIgnore]
         public int? DeviceId { get; set; }
 
         public string DeviceName { get; set; }
 
         public string FileName { get; set; }
 
-        public bool IsActive => VideoService?.IsActive == true;
+        public bool IsActive { get; set; }
 
+        [JsonIgnore]
         public bool IsStarted => VideoService?.IsStarted == true;
 
         public bool IsDevice { get; set; }
 
+        [JsonIgnore]
         public string Name { get; set; }
 
         public float Rotation { get; set; }

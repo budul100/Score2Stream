@@ -31,7 +31,7 @@ namespace Score2Stream.VideoModule.ViewModels
             this.navigationService = navigationService;
 
             OnPressedCommand = new DelegateCommand(
-                executeMethod: () => OnPressed());
+                executeMethod: OnPressed);
 
             eventAggregator.GetEvent<AreaSelectedEvent>().Subscribe(
                 action: _ => UpdateStatus(),

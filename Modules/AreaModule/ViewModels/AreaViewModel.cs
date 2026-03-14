@@ -55,7 +55,7 @@ namespace Score2Stream.AreaModule.ViewModels
                 action: _ => SelectTemplate(),
                 keepSubscriberReferenceAlive: true);
             eventAggregator.GetEvent<TemplatesChangedEvent>().Subscribe(
-                action: () => UpdateTemplates(),
+                action: UpdateTemplates,
                 keepSubscriberReferenceAlive: true);
         }
 

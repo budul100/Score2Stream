@@ -14,7 +14,6 @@ using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Template;
 using Score2Stream.Commons.Exceptions;
-using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
@@ -53,7 +52,7 @@ namespace Score2Stream.InputService
             inputSelectedEvent = eventAggregator.GetEvent<InputSelectedEvent>();
 
             eventAggregator.GetEvent<InputStartedEvent>().Subscribe(
-                action: _ => SaveInputs(),
+                action: StartInput,
                 keepSubscriberReferenceAlive: true);
             eventAggregator.GetEvent<InputEndedEvent>().Subscribe(
                 action: StopInput,
@@ -95,8 +94,6 @@ namespace Score2Stream.InputService
         public IReadOnlyList<Input> Inputs => inputs;
 
         public bool IsActive => VideoService?.IsActive ?? false;
-
-        public bool IsStarted => VideoService?.IsStarted ?? false;
 
         public float Rotation
         {
@@ -156,9 +153,49 @@ namespace Score2Stream.InputService
         {
             isInitializing = true;
 
-            InitializeInputs();
-            InitialzeAreas();
-            InitialzeTemplates();
+            if (settingsService.Contents.Inputs?.Count > 0)
+            {
+                try
+                {
+                    var devices = settingsService.Contents.Inputs
+                        .Where(i => i.IsDevice
+                            && i.IsActive).ToArray();
+
+                    foreach (var device in devices)
+                    {
+                        var input = default(Input);
+
+                        try
+                        {
+                            input = GetDevice(device.DeviceName);
+                        }
+                        catch (DeviceNotFoundException)
+                        { }
+
+                        InitializeInput(input);
+                    }
+
+                    var files = settingsService.Contents.Inputs
+                        .Where(i => !i.IsDevice
+                            && i.IsActive).ToArray();
+
+                    foreach (var file in files)
+                    {
+                        var input = default(Input);
+
+                        try
+                        {
+                            input = GetFile(file.FileName);
+                        }
+                        catch (FileNotFoundException)
+                        { }
+
+                        InitializeInput(input);
+                    }
+                }
+                catch (MaxCountExceededException)
+                { }
+            }
 
             if (Inputs.Count > 0)
             {
@@ -167,46 +204,17 @@ namespace Score2Stream.InputService
             }
 
             isInitializing = false;
-
-            SaveAreas();
-            SaveTemplates();
         }
 
         public void Select(Input input)
         {
-            if (input != default)
+            if (input == default) return;
+
+            InitializeInput(input);
+
+            if (input != Active || !Active.IsStarted)
             {
-                ImmutableList<Input> transformer(ImmutableList<Input> currents) => currents.Contains(input)
-                    ? currents
-                    : currents.Add(input);
-
-                ImmutableInterlocked.Update(
-                    location: ref inputs,
-                    transformer: transformer);
-
-                _ = StartInputAsync(input);
-
-                if (input != Active || !Active.IsStarted)
-                {
-                    if (TemplateService != default)
-                    {
-                        if (!(TemplateService.Templates?.Count > 0))
-                        {
-                            try
-                            {
-                                TemplateService.Create();
-                            }
-                            catch (MaxCountExceededException)
-                            { }
-                        }
-
-                        TemplateService.Select(TemplateService.Templates?.FirstOrDefault());
-                    }
-
-                    SetActive(input);
-
-                    SaveInputs();
-                }
+                SetActive(input);
             }
         }
 
@@ -238,8 +246,9 @@ namespace Score2Stream.InputService
                 {
                     if (input.VideoService != default)
                     {
-                        input.VideoService.Stop();
-                        input.VideoService.Dispose();
+                        await input.VideoService.StopAsync();
+                        await input.VideoService.DisposeAsync();
+
                         input.VideoService = default;
                     }
 
@@ -251,6 +260,51 @@ namespace Score2Stream.InputService
         #endregion Public Methods
 
         #region Private Methods
+
+        private static void InitializeAreas(Input input)
+        {
+            if (input?.Areas?.Count > 0)
+            {
+                foreach (var area in input.Areas.ToArray())
+                {
+                    try
+                    {
+                        input.AreaService.Add(area);
+
+                        area.Template = input.TemplateService.Templates?
+                            .FirstOrDefault(t => t.Name == area.TemplateName
+                                && t.Samples?.Count > 0);
+                    }
+                    catch (MaxCountExceededException)
+                    { }
+                }
+            }
+        }
+
+        private static void InitializeTemplates(Input input)
+        {
+            if (input?.Templates?.Count > 0)
+            {
+                foreach (var template in input.Templates.ToArray())
+                {
+                    try
+                    {
+                        input.TemplateService.Add(template);
+                    }
+                    catch (MaxCountExceededException)
+                    { }
+                }
+            }
+            else
+            {
+                try
+                {
+                    input.TemplateService.Create();
+                }
+                catch (MaxCountExceededException)
+                { }
+            }
+        }
 
         private Input GetDevice(string deviceName)
         {
@@ -284,11 +338,11 @@ namespace Score2Stream.InputService
                     {
                         DeviceName = deviceName,
                         IsDevice = true,
-                        Name = deviceName,
                     };
                 }
             }
 
+            result.Name = deviceName;
             result.DeviceId = devices
                 .First(d => d.Value == deviceName).Key;
 
@@ -321,104 +375,56 @@ namespace Score2Stream.InputService
 
                 if (result == default)
                 {
-                    var name = Path.GetFileNameWithoutExtension(fileName);
-
                     result = new Input
                     {
                         FileName = fileName,
                         IsDevice = false,
-                        Name = name,
                     };
                 }
             }
 
+            result.Name = Path.GetFileNameWithoutExtension(fileName);
+
             return result;
         }
 
-        private void InitializeInputs()
+        private void InitializeInput(Input input)
         {
-            if (settingsService.Contents.Inputs?.Count > 0)
-            {
-                try
-                {
-                    var devices = settingsService.Contents.Inputs
-                        .Where(i => i.IsDevice).ToArray();
+            if (input?.IsStarted != false) return;
 
-                    foreach (var device in devices)
-                    {
-                        var input = default(Input);
+            ImmutableList<Input> transformer(ImmutableList<Input> currents) => currents.Contains(input)
+                ? currents
+                : currents.Add(input);
 
-                        try
-                        {
-                            input = GetDevice(device.DeviceName);
-                        }
-                        catch (DeviceNotFoundException)
-                        { }
+            ImmutableInterlocked.Update(
+                location: ref inputs,
+                transformer: transformer);
 
-                        Select(input);
-                    }
+            _ = InitializeInputAsync(input);
 
-                    var files = settingsService.Contents.Inputs
-                        .Where(i => !i.IsDevice).ToArray();
-
-                    foreach (var file in files)
-                    {
-                        var input = default(Input);
-
-                        try
-                        {
-                            input = GetFile(file.FileName);
-                        }
-                        catch (FileNotFoundException)
-                        { }
-
-                        Select(input);
-                    }
-                }
-                catch (MaxCountExceededException)
-                { }
-            }
+            InitializeTemplates(input);
+            InitializeAreas(input);
         }
 
-        private void InitialzeAreas()
+        private async Task InitializeInputAsync(Input input)
         {
-            foreach (var input in Inputs)
-            {
-                if (input?.Areas?.Count > 0)
-                {
-                    foreach (var area in input.Areas.ToArray())
-                    {
-                        try
-                        {
-                            input.AreaService.Add(area);
+            if (input?.IsStarted != false) return;
 
-                            area.Template = input.TemplateService.Templates?
-                                .FirstOrDefault(t => t.Name == area.TemplateName
-                                    && t.Samples?.Count > 0);
-                        }
-                        catch (MaxCountExceededException)
-                        { }
-                    }
+            try
+            {
+                if (input.VideoService == default)
+                {
+                    input.VideoService = containerProvider.Resolve<IVideoService>();
                 }
+
+                await input.VideoService.RunAsync(input);
             }
-        }
-
-        private void InitialzeTemplates()
-        {
-            foreach (var input in Inputs)
+            catch (Exception ex)
             {
-                if (input?.Templates?.Count > 0)
-                {
-                    foreach (var template in input.Templates.ToArray())
-                    {
-                        try
-                        {
-                            input.TemplateService.Add(template);
-                        }
-                        catch (MaxCountExceededException)
-                        { }
-                    }
-                }
+                logger?.LogError(
+                    exception: ex,
+                    message: "Failed to run input {Name}.",
+                    args: input.Name);
             }
         }
 
@@ -435,26 +441,13 @@ namespace Score2Stream.InputService
         {
             if (isInitializing) return;
 
-            var givens = settingsService.Contents.Inputs;
-
-            var currents = Inputs
-                .Where(i => i.IsActive).ToList();
-
-            var hasChanges = givens == null
-                || givens.Count != currents.Count
-                || !currents.All(givens.Contains);
-
-            if (hasChanges)
-            {
-                settingsService.Contents.Inputs = currents;
-                settingsService.Save();
-            }
+            settingsService.Contents.Inputs = Inputs.ToList();
+            settingsService.Save();
         }
 
         private void SaveTemplates()
         {
-            if (isInitializing || Active == default)
-                return;
+            if (isInitializing || Active == default) return;
 
             Active.Templates = TemplateService?.Templates;
 
@@ -481,54 +474,37 @@ namespace Score2Stream.InputService
 
         private void SetActive(Input input = default)
         {
-            if (input == default)
-            {
-                input = Inputs
-                    .FirstOrDefault(i => i.IsActive);
-            }
-
-            Active = input;
+            Active = input
+                ?? Inputs.FirstOrDefault(i => i.IsActive);
 
             inputSelectedEvent.Publish(Active);
+
+            SaveInputs();
         }
 
-        private async Task StartInputAsync(Input input)
+        private void StartInput(Input input)
         {
-            if (input == default) return;
+            input.IsActive = true;
 
-            try
-            {
-                if (!input.IsStarted)
-                {
-                    if (input.VideoService == default)
-                    {
-                        input.VideoService = containerProvider.Resolve<IVideoService>();
-                    }
-
-                    await input.VideoService.RunAsync(input);
-                }
-            }
-            catch (Exception ex)
-            {
-                logger?.LogError(
-                    exception: ex,
-                    message: "Failed to run input {Name}.",
-                    args: input.Name);
-            }
+            SaveInputs();
         }
 
         private void StopInput(Input input)
         {
             if (input == default) return;
 
+            input.IsActive = false;
+
             if (input == Active)
             {
+                Active = default;
+
                 SetActive();
             }
-
-            inputSelectedEvent.Publish(Active);
-
-            SaveInputs();
+            else
+            {
+                SaveInputs();
+            }
         }
 
         #endregion Private Methods

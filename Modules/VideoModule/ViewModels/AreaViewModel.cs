@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Mvvm;
@@ -39,6 +40,9 @@ namespace Score2Stream.VideoModule.ViewModels
         {
             this.containerProvider = containerProvider;
             this.navigationService = navigationService;
+
+            OnPressedCommand = new DelegateCommand(
+                executeMethod: OnPressed);
 
             eventAggregator.GetEvent<AreaSelectedEvent>().Subscribe(
                 action: _ => UpdateStatus(),
@@ -137,6 +141,8 @@ namespace Score2Stream.VideoModule.ViewModels
             }
         }
 
+        public DelegateCommand OnPressedCommand { get; }
+
         public double? Right => HasValue
             ? Left.Value + Width
             : default;
@@ -225,8 +231,8 @@ namespace Score2Stream.VideoModule.ViewModels
 
         #region Public Methods
 
-        public void Initialize(Area area, double zoom, double? actualLeft, double? actualTop, double? actualWidth,
-            double? actualHeight, IAreaService areaService)
+        public void Initialize(Area area, double zoom, double? actualLeft, double? actualTop,
+            double? actualWidth, double? actualHeight, IAreaService areaService)
         {
             this.areaService = areaService;
 
@@ -251,6 +257,14 @@ namespace Score2Stream.VideoModule.ViewModels
 
         #region Private Methods
 
+        private void OnPressed()
+        {
+            if (navigationService.EditView == ViewType.Inputs)
+            {
+                areaService.Select(Area);
+            }
+        }
+
         private void UpdateSegments(IAreaService areaService)
         {
             Segments.Clear();
@@ -271,7 +285,8 @@ namespace Score2Stream.VideoModule.ViewModels
             RaisePropertyChanged(nameof(Segments));
         }
 
-        private void UpdateSize(double? actualLeft, double? actualTop, double? actualWidth, double? actualHeight)
+        private void UpdateSize(double? actualLeft, double? actualTop, double? actualWidth,
+            double? actualHeight)
         {
             if (actualWidth.HasValue
                 && actualHeight.HasValue)

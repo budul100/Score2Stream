@@ -29,6 +29,9 @@ namespace Score2Stream.AreaModule.ViewModels
             this.inputService = inputService;
             this.containerProvider = containerProvider;
 
+            eventAggregator.GetEvent<InputStartedEvent>().Subscribe(
+                action: _ => UpdateAreas(),
+                keepSubscriberReferenceAlive: true);
             eventAggregator.GetEvent<InputSelectedEvent>().Subscribe(
                 action: _ => UpdateAreas(),
                 keepSubscriberReferenceAlive: true);
@@ -36,7 +39,6 @@ namespace Score2Stream.AreaModule.ViewModels
             eventAggregator.GetEvent<AreasChangedEvent>().Subscribe(
                 action: UpdateAreas,
                 keepSubscriberReferenceAlive: true);
-
             eventAggregator.GetEvent<AreasOrderedEvent>().Subscribe(
                 action: OrderAreas,
                 keepSubscriberReferenceAlive: true);

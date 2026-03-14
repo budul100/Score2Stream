@@ -20,7 +20,7 @@ using Score2Stream.VideoService.Extensions;
 
 namespace Score2Stream.VideoService
 {
-    public class Service
+    public sealed class Service
         : IVideoService
     {
         #region Private Fields
@@ -37,6 +37,7 @@ namespace Score2Stream.VideoService
         private readonly SegmentUpdatedEvent segmentUpdatedEvent;
         private readonly ISettingsService<Session> settingsService;
         private readonly Func<IVideoCapture> videoCaptureFactory;
+
         private CancellationTokenSource cancellationTokenSource;
         private Mat frame;
         private int heightLast;
@@ -97,23 +98,59 @@ namespace Score2Stream.VideoService
 
         void IDisposable.Dispose()
         {
-            Dispose(true);
+            DisposeAsync().AsTask().GetAwaiter().GetResult();
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            if (isDisposed) return;
+
+            isDisposed = true;
+
+            CancellationTokenSource cts;
+
+            lock (ctsLock)
+            {
+                cts = cancellationTokenSource;
+                cancellationTokenSource = default;
+            }
+
+            if (cts != default
+                && !cts.IsCancellationRequested)
+            {
+                try
+                {
+                    cts.Cancel();
+                }
+                catch (ObjectDisposedException) { }
+            }
+
+            if (serviceTask != null)
+            {
+                try
+                {
+                    await serviceTask.WaitAsync(TimeSpan.FromSeconds(5));
+                }
+                catch { }
+            }
+
+            cts?.Dispose();
+            frameLock?.Dispose();
+
             GC.SuppressFinalize(this);
         }
 
         public async Task RunAsync(Input input)
         {
-            if (serviceTask?.IsCompleted != false)
+            lock (ctsLock)
             {
+                if (serviceTask?.IsCompleted == false)
+                    return;
+
                 this.input = input;
 
-                CancellationTokenSource oldTokenSource;
-
-                lock (ctsLock)
-                {
-                    oldTokenSource = cancellationTokenSource;
-                    cancellationTokenSource = new CancellationTokenSource();
-                }
+                var oldTokenSource = cancellationTokenSource;
+                cancellationTokenSource = new CancellationTokenSource();
 
                 oldTokenSource?.Cancel();
                 oldTokenSource?.Dispose();
@@ -125,21 +162,21 @@ namespace Score2Stream.VideoService
                         deviceId: input.DeviceId,
                         fileName: input.FileName),
                     cancellationToken: cancellationTokenSource.Token);
+            }
 
-                try
-                {
-                    await serviceTask;
-                }
-                catch (Exception ex)
-                {
-                    logger?.LogError(
-                        exception: ex,
-                        message: "Start capturing failed.");
-                }
+            try
+            {
+                await serviceTask;
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(
+                    exception: ex,
+                    message: "Start capturing failed.");
             }
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
             try
             {
@@ -149,52 +186,18 @@ namespace Score2Stream.VideoService
                 }
             }
             catch (ObjectDisposedException) { }
-        }
 
-        #endregion Public Methods
-
-        #region Protected Methods
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!isDisposed)
+            if (serviceTask != null)
             {
-                isDisposed = true;
-
-                if (disposing)
+                try
                 {
-                    CancellationTokenSource cts;
-
-                    lock (ctsLock)
-                    {
-                        cts = cancellationTokenSource;
-                        cancellationTokenSource = default;
-                    }
-
-                    if (cts != default
-                        && !cts.IsCancellationRequested)
-                    {
-                        try
-                        {
-                            cts.Cancel();
-                        }
-                        catch (ObjectDisposedException) { }
-                    }
-
-                    // Warten bis serviceTask beendet ist, bevor frameLock disposed wird
-                    try
-                    {
-                        serviceTask?.Wait(TimeSpan.FromSeconds(5));
-                    }
-                    catch { }
-
-                    cts?.Dispose();
-                    frameLock?.Dispose();
+                    await serviceTask;
                 }
+                catch { }
             }
         }
 
-        #endregion Protected Methods
+        #endregion Public Methods
 
         #region Private Methods
 
@@ -488,7 +491,8 @@ namespace Score2Stream.VideoService
                 {
                     if (segment.Images.Count > settingsService.Contents.Video.ImagesQueueSize)
                     {
-                        segment.Images.Dequeue();
+                        var oldImgaes = segment.Images.Dequeue();
+                        oldImgaes?.Dispose();
                     }
 
                     segment.Mat = segment.Images.AsBlended();

@@ -270,7 +270,8 @@ namespace Score2Stream.MenuModule.ViewModels
             set
             {
                 if (IsActive
-                    && inputService?.SampleService?.IsDetection != value)
+                    && inputService?.SampleService != default
+                    && inputService.SampleService.IsDetection != value)
                 {
                     inputService.SampleService.IsDetection = value;
 

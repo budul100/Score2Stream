@@ -232,30 +232,32 @@ namespace Score2Stream.AreaService
 
         public void Select(Area area)
         {
-            Area = Area != area
-                ? area
-                : default;
-
-            areaSelectedEvent.Publish(Area);
-
-            if (Segment != default
-                && Segment.Area != Area)
+            if (Area != area)
             {
-                Select();
+                Area = area;
+
+                areaSelectedEvent.Publish(Area);
+
+                if (Segment != default
+                    && Segment.Area != Area)
+                {
+                    Select();
+                }
             }
         }
 
         public void Select(Segment segment = default)
         {
-            Segment = Segment != segment
-                ? segment
-                : default;
+            if (Segment != segment)
+            {
+                Segment = segment;
 
-            clipSelectedEvent.Publish(Segment);
+                clipSelectedEvent.Publish(Segment);
 
-            Area = Segment?.Area;
+                Area = Segment?.Area;
 
-            areaSelectedEvent.Publish(Area);
+                areaSelectedEvent.Publish(Area);
+            }
         }
 
         public void Undo()
