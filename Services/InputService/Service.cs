@@ -56,7 +56,7 @@ namespace Score2Stream.InputService
                 action: _ => SaveInputs(),
                 keepSubscriberReferenceAlive: true);
             eventAggregator.GetEvent<InputEndedEvent>().Subscribe(
-                action: _ => SaveInputs(),
+                action: StopInput,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<AreasChangedEvent>().Subscribe(
@@ -95,6 +95,8 @@ namespace Score2Stream.InputService
         public IReadOnlyList<Input> Inputs => inputs;
 
         public bool IsActive => VideoService?.IsActive ?? false;
+
+        public bool IsStarted => VideoService?.IsStarted ?? false;
 
         public float Rotation
         {
@@ -174,17 +176,17 @@ namespace Score2Stream.InputService
         {
             if (input != default)
             {
-                ImmutableList<Input> transformer(ImmutableList<Input> i) => i.Contains(input)
-                    ? i
-                    : i.Add(input);
+                ImmutableList<Input> transformer(ImmutableList<Input> currents) => currents.Contains(input)
+                    ? currents
+                    : currents.Add(input);
 
                 ImmutableInterlocked.Update(
                     location: ref inputs,
                     transformer: transformer);
 
-                _ = RunAsync(input);
+                _ = StartInputAsync(input);
 
-                if (input != Active)
+                if (input != Active || !Active.IsStarted)
                 {
                     if (TemplateService != default)
                     {
@@ -241,14 +243,7 @@ namespace Score2Stream.InputService
                         input.VideoService = default;
                     }
 
-                    if (input == Active)
-                    {
-                        SetActive();
-                    }
-
-                    inputSelectedEvent.Publish(Active);
-
-                    SaveInputs();
+                    StopInput(input);
                 }
             }
         }
@@ -427,31 +422,6 @@ namespace Score2Stream.InputService
             }
         }
 
-        private async Task RunAsync(Input input)
-        {
-            if (input == default) return;
-
-            try
-            {
-                if (!input.IsActive)
-                {
-                    if (input.VideoService == default)
-                    {
-                        input.VideoService = containerProvider.Resolve<IVideoService>();
-                    }
-
-                    await input.VideoService.RunAsync(input);
-                }
-            }
-            catch (Exception ex)
-            {
-                logger?.LogError(
-                    exception: ex,
-                    message: "Failed to run input {Name}.",
-                    args: input.Name);
-            }
-        }
-
         private void SaveAreas()
         {
             if (isInitializing || Active == default) return;
@@ -520,6 +490,45 @@ namespace Score2Stream.InputService
             Active = input;
 
             inputSelectedEvent.Publish(Active);
+        }
+
+        private async Task StartInputAsync(Input input)
+        {
+            if (input == default) return;
+
+            try
+            {
+                if (!input.IsStarted)
+                {
+                    if (input.VideoService == default)
+                    {
+                        input.VideoService = containerProvider.Resolve<IVideoService>();
+                    }
+
+                    await input.VideoService.RunAsync(input);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(
+                    exception: ex,
+                    message: "Failed to run input {Name}.",
+                    args: input.Name);
+            }
+        }
+
+        private void StopInput(Input input)
+        {
+            if (input == default) return;
+
+            if (input == Active)
+            {
+                SetActive();
+            }
+
+            inputSelectedEvent.Publish(Active);
+
+            SaveInputs();
         }
 
         #endregion Private Methods

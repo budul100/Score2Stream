@@ -19,14 +19,6 @@
     Icon="/Assets/Score2Stream.png"
     WindowState="{Binding WindowState, Mode=TwoWay}">
 
-    <Window.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </Window.Resources>
-
     <i:Interaction.Behaviors>
         <ia:EventTriggerBehavior EventName="Closing">
             <ia:InvokeCommandAction Command="{Binding OnClosingCommand}" PassEventArgsToCommand="True" />

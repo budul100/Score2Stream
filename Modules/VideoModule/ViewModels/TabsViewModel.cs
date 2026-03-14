@@ -94,7 +94,7 @@ namespace Score2Stream.VideoModule.ViewModels
 
             var relevants = inputService.Inputs
                 .Where(i => i.VideoService != default
-                    && i.IsActive).ToArray();
+                    && i.IsStarted).ToArray();
 
             var selected = default(TabViewModel);
 

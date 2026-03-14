@@ -25,6 +25,7 @@ namespace Score2Stream.VideoService
     {
         #region Private Fields
 
+        private readonly object ctsLock = new();
         private readonly IDispatcherService dispatcherService;
         private readonly ReaderWriterLockSlim frameLock = new();
         private readonly InputEndedEvent inputEndedEvent;
@@ -36,7 +37,6 @@ namespace Score2Stream.VideoService
         private readonly SegmentUpdatedEvent segmentUpdatedEvent;
         private readonly ISettingsService<Session> settingsService;
         private readonly Func<IVideoCapture> videoCaptureFactory;
-
         private CancellationTokenSource cancellationTokenSource;
         private Mat frame;
         private int heightLast;
@@ -85,6 +85,8 @@ namespace Score2Stream.VideoService
 
         public bool IsActive { get; private set; }
 
+        public bool IsStarted { get; private set; }
+
         public string Name => input?.Name;
 
         public TimeSpan? ProcessingTime { get; private set; }
@@ -105,12 +107,18 @@ namespace Score2Stream.VideoService
             {
                 this.input = input;
 
-                var oldTokenSource = cancellationTokenSource;
+                CancellationTokenSource oldTokenSource;
 
-                cancellationTokenSource = new CancellationTokenSource();
+                lock (ctsLock)
+                {
+                    oldTokenSource = cancellationTokenSource;
+                    cancellationTokenSource = new CancellationTokenSource();
+                }
 
                 oldTokenSource?.Cancel();
                 oldTokenSource?.Dispose();
+
+                IsStarted = true;
 
                 serviceTask = Task.Run(
                     function: () => RunAsync(
@@ -135,7 +143,10 @@ namespace Score2Stream.VideoService
         {
             try
             {
-                cancellationTokenSource?.Cancel();
+                lock (ctsLock)
+                {
+                    cancellationTokenSource?.Cancel();
+                }
             }
             catch (ObjectDisposedException) { }
         }
@@ -152,7 +163,13 @@ namespace Score2Stream.VideoService
 
                 if (disposing)
                 {
-                    var cts = cancellationTokenSource;
+                    CancellationTokenSource cts;
+
+                    lock (ctsLock)
+                    {
+                        cts = cancellationTokenSource;
+                        cancellationTokenSource = default;
+                    }
 
                     if (cts != default
                         && !cts.IsCancellationRequested)
@@ -162,13 +179,16 @@ namespace Score2Stream.VideoService
                             cts.Cancel();
                         }
                         catch (ObjectDisposedException) { }
-                        finally
-                        {
-                            cts.Dispose();
-                            cancellationTokenSource = default;
-                        }
                     }
 
+                    // Warten bis serviceTask beendet ist, bevor frameLock disposed wird
+                    try
+                    {
+                        serviceTask?.Wait(TimeSpan.FromSeconds(5));
+                    }
+                    catch { }
+
+                    cts?.Dispose();
                     frameLock?.Dispose();
                 }
             }
@@ -178,14 +198,13 @@ namespace Score2Stream.VideoService
 
         #region Private Methods
 
-        private async Task CaptureAsync(int? deviceId, IVideoCapture video)
+        private async Task CaptureAsync(int? deviceId, IVideoCapture video,
+            CancellationToken cancellationToken)
         {
             var hasContent = false;
 
             var frameCount = 0.0;
             var frameIndex = 0.0;
-
-            var cancellationToken = cancellationTokenSource.Token;
 
             do
             {
@@ -231,7 +250,9 @@ namespace Score2Stream.VideoService
 
                     var bitmap = converted.GetBitmap(rotated);
 
-                    Bitmap = await dispatcherService.InvokeAsync(() => bitmap);
+                    Bitmap = await dispatcherService.InvokeAsync(
+                        function: () => bitmap,
+                        cancellationToken: cancellationToken);
                 }
 
                 var clips = AreaService?.Areas?
@@ -360,6 +381,16 @@ namespace Score2Stream.VideoService
 
         private async Task RunAsync(int? deviceId, string fileName)
         {
+            CancellationToken cancellationToken;
+
+            lock (ctsLock)
+            {
+                if (cancellationTokenSource == null)
+                    return;
+
+                cancellationToken = cancellationTokenSource.Token;
+            }
+
             try
             {
                 await UpdateVideoAsync();
@@ -388,7 +419,7 @@ namespace Score2Stream.VideoService
                     }
                 }
 
-                if (cancellationTokenSource?.IsCancellationRequested == false)
+                if (!cancellationToken.IsCancellationRequested)
                 {
                     IsActive = true;
 
@@ -396,7 +427,8 @@ namespace Score2Stream.VideoService
 
                     await CaptureAsync(
                         deviceId: deviceId,
-                        video: video);
+                        video: video,
+                        cancellationToken: cancellationToken);
                 }
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
@@ -410,6 +442,8 @@ namespace Score2Stream.VideoService
             finally
             {
                 Bitmap = default;
+
+                IsStarted = false;
                 IsActive = false;
 
                 if (!isDisposed)

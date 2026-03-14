@@ -158,6 +158,13 @@ namespace Score2Stream.Tests.InputServiceTests
             });
 
             var videoServiceMock = new Mock<IVideoService>();
+
+            videoServiceMock.Setup(v => v.IsStarted).Returns(false);
+            videoServiceMock
+                .Setup(v => v.RunAsync(It.IsAny<Input>()))
+                .Callback(() => videoServiceMock.Setup(v => v.IsStarted).Returns(true))
+                .Returns(Task.CompletedTask);
+
             videoServiceMock.Setup(v => v.IsActive).Returns(false);
             videoServiceMock
                 .Setup(v => v.RunAsync(It.IsAny<Input>()))
@@ -184,12 +191,19 @@ namespace Score2Stream.Tests.InputServiceTests
             deviceEnumeratorMock.Setup(d => d.GetVideoDevices()).Returns(new Dictionary<int, string> { { 1, "Cam 1" } });
 
             var videoServiceMock = new Mock<IVideoService>();
+
+            videoServiceMock.Setup(v => v.IsStarted).Returns(false);
+            videoServiceMock
+                .Setup(v => v.RunAsync(It.IsAny<Input>()))
+                .Callback(() => videoServiceMock.Setup(v => v.IsStarted).Returns(true))
+                .Returns(Task.CompletedTask);
+
             videoServiceMock.Setup(v => v.IsActive).Returns(false);
             videoServiceMock
                 .Setup(v => v.RunAsync(It.IsAny<Input>()))
                 .Callback(() => videoServiceMock.Setup(v => v.IsActive).Returns(true))
                 .Returns(Task.CompletedTask);
-            
+
             containerProviderMock
                 .Setup(c => c.Resolve(typeof(IVideoService)))
                 .Returns(videoServiceMock.Object);
@@ -232,6 +246,12 @@ namespace Score2Stream.Tests.InputServiceTests
 
             var eventPublished = false;
             inputSelectedEvent.Subscribe(_ => eventPublished = true);
+
+            videoServiceMock.Setup(v => v.IsStarted).Returns(false);
+            videoServiceMock
+                .Setup(v => v.RunAsync(It.IsAny<Input>()))
+                .Callback(() => videoServiceMock.Setup(v => v.IsStarted).Returns(true))
+                .Returns(Task.CompletedTask);
 
             videoServiceMock.Setup(v => v.IsActive).Returns(false);
             videoServiceMock

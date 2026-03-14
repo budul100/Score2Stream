@@ -16,6 +16,8 @@ namespace Score2Stream.Commons.Interfaces
 
         bool IsActive { get; }
 
+        bool IsStarted { get; }
+
         string Name { get; }
 
         TimeSpan? ProcessingTime { get; }

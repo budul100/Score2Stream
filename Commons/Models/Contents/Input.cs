@@ -21,6 +21,8 @@ namespace Score2Stream.Commons.Models.Contents
 
         public bool IsActive => VideoService?.IsActive == true;
 
+        public bool IsStarted => VideoService?.IsStarted == true;
+
         public bool IsDevice { get; set; }
 
         public string Name { get; set; }
