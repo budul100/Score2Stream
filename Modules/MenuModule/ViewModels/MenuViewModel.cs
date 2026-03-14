@@ -40,7 +40,7 @@ namespace Score2Stream.MenuModule.ViewModels
         private readonly ISettingsService<Session> settingsService;
         private readonly Task startLocationTask;
         private readonly TabSelectedEvent tabSelectedEvent;
-
+        private readonly ITemplateService templateService;
         private IStorageFolder startLocation;
         private int tabIndex;
 
@@ -49,13 +49,14 @@ namespace Score2Stream.MenuModule.ViewModels
         #region Public Constructors
 
         public MenuViewModel(ISettingsService<Session> settingsService, IWebService webService,
-            IScoreboardService scoreboardService, IInputService inputService, IRegionManager regionManager,
-            IDialogService dialogService, IEventAggregator eventAggregator)
+            IScoreboardService scoreboardService, IInputService inputService, ITemplateService templateService,
+            IRegionManager regionManager, IDialogService dialogService, IEventAggregator eventAggregator)
             : base(regionManager)
         {
             this.settingsService = settingsService;
             this.scoreboardService = scoreboardService;
             this.inputService = inputService;
+            this.templateService = templateService;
             this.regionManager = regionManager;
             this.dialogService = dialogService;
 
@@ -93,7 +94,7 @@ namespace Score2Stream.MenuModule.ViewModels
                 canExecuteMethod: _ => inputService.IsActive);
             this.AreaRemoveCommand = new DelegateCommand(
                 executeMethod: () => inputService.AreaService?.RemoveAsync(),
-                canExecuteMethod: () => inputService.AreaService?.Area != default);
+                canExecuteMethod: () => inputService.AreaService?.Active != default);
             this.AreaRemoveAllCommand = new DelegateCommand(
                 executeMethod: () => inputService.AreaService?.ClearAsync(),
                 canExecuteMethod: () => inputService.AreaService?.Areas?.Count > 0);
@@ -107,21 +108,21 @@ namespace Score2Stream.MenuModule.ViewModels
             this.TemplateSelectCommand = new DelegateCommand<object>(
                 executeMethod: param => SelectTemplate(param as Template));
             this.TemplateRemoveCommand = new DelegateCommand(
-                executeMethod: () => inputService.TemplateService.RemoveAsync(),
-                canExecuteMethod: () => inputService?.TemplateService?.Template != default);
+                executeMethod: () => templateService?.RemoveAsync(),
+                canExecuteMethod: () => templateService?.Active != default);
 
             this.SampleAddCommand = new DelegateCommand(
-                executeMethod: () => inputService.SampleService?.Create(inputService.AreaService.Segment),
+                executeMethod: () => templateService?.SampleService?.Create(inputService.AreaService.Segment),
                 canExecuteMethod: () => inputService?.AreaService?.Segment != default);
             this.SampleRemoveCommand = new DelegateCommand(
-                executeMethod: () => inputService.SampleService.RemoveAsync(),
-                canExecuteMethod: () => inputService?.SampleService?.Sample != default);
+                executeMethod: () => templateService?.SampleService.RemoveAsync(),
+                canExecuteMethod: () => templateService?.SampleService?.Active != default);
             this.SampleRemoveAllCommand = new DelegateCommand(
-                executeMethod: () => inputService.SampleService.ClearAsync(),
-                canExecuteMethod: () => inputService?.SampleService?.Samples?.Count > 0);
+                executeMethod: () => templateService.SampleService.ClearAsync(),
+                canExecuteMethod: () => templateService?.SampleService?.Samples?.Count > 0);
             this.SampleOrderCommand = new DelegateCommand(
-                executeMethod: () => inputService.SampleService.Order(true),
-                canExecuteMethod: () => inputService?.SampleService?.Samples?.Count > 0);
+                executeMethod: () => templateService.SampleService.Order(true),
+                canExecuteMethod: () => templateService?.SampleService?.Samples?.Count > 0);
 
             tabSelectedEvent = eventAggregator.GetEvent<TabSelectedEvent>();
             detectionChangedEvent = eventAggregator.GetEvent<DetectionChangedEvent>();
@@ -265,15 +266,15 @@ namespace Score2Stream.MenuModule.ViewModels
         {
             get
             {
-                return inputService?.SampleService?.IsDetection ?? false;
+                return templateService?.SampleService?.IsDetection ?? false;
             }
             set
             {
                 if (IsActive
-                    && inputService?.SampleService != default
-                    && inputService.SampleService.IsDetection != value)
+                    && templateService?.SampleService != default
+                    && templateService.SampleService.IsDetection != value)
                 {
-                    inputService.SampleService.IsDetection = value;
+                    templateService.SampleService.IsDetection = value;
 
                     detectionChangedEvent.Publish();
 
@@ -715,14 +716,14 @@ namespace Score2Stream.MenuModule.ViewModels
         {
             Templates.Clear();
 
-            if (inputService.TemplateService != default)
+            if (templateService != default)
             {
-                var ordereds = inputService.TemplateService.Templates
+                var ordereds = templateService.Templates
                     .OrderBy(t => t.Name).ToArray();
 
                 foreach (var ordered in ordereds)
                 {
-                    var isChecked = ordered == inputService.TemplateService.Template;
+                    var isChecked = ordered == templateService.Active;
 
                     var template = new RibbonDropDownItem
                     {
@@ -774,15 +775,15 @@ namespace Score2Stream.MenuModule.ViewModels
 
         private void SelectTemplate(Template template)
         {
-            if (inputService?.TemplateService != default)
+            if (templateService != default)
             {
                 if (template == default)
                 {
-                    inputService.TemplateService.Create();
+                    templateService.Create();
                 }
                 else
                 {
-                    inputService.TemplateService.Select(template);
+                    templateService.Select(template);
                 }
             }
         }

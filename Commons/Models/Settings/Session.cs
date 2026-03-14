@@ -10,11 +10,13 @@ namespace Score2Stream.Commons.Models.Settings
 
         public Detection Detection { get; set; } = new Detection();
 
-        public List<Contents.Input> Inputs { get; set; } = new List<Contents.Input>();
+        public List<Contents.Input> Inputs { get; set; } = [];
 
         public Scoreboard Scoreboard { get; set; } = new Scoreboard();
 
         public Server Server { get; set; } = new Server();
+
+        public List<Contents.Template> Templates { get; set; } = [];
 
         public Video Video { get; set; } = new Video();
 

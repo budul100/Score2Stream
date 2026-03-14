@@ -34,6 +34,7 @@ namespace Score2Stream.Tests.VideoServiceTests
         private readonly Mock<SegmentDrawnEvent> segmentDrawnEventMock;
         private readonly Mock<SegmentUpdatedEvent> segmentUpdatedEventMock;
         private readonly Mock<ISettingsService<Session>> settingsServiceMock;
+        private readonly Mock<ITemplateService> templateServiceMock; // Fix: was missing
         private readonly Mock<IVideoCapture> videoCaptureMock;
         private readonly Service videoService;
         private bool isDisposed;
@@ -50,6 +51,7 @@ namespace Score2Stream.Tests.VideoServiceTests
             loggerMock = new Mock<ILogger<Service>>();
             recognitionServiceMock = new Mock<IRecognitionService>();
             settingsServiceMock = new Mock<ISettingsService<Session>>();
+            templateServiceMock = new Mock<ITemplateService>(); // Fix: added
             videoCaptureMock = new Mock<IVideoCapture>();
 
             inputEndedEventMock = new Mock<InputEndedEvent>();
@@ -97,13 +99,16 @@ namespace Score2Stream.Tests.VideoServiceTests
                 .Setup(d => d.InvokeAsync(It.IsAny<Func<object>>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Func<object> f, CancellationToken _) => f());
 
+            // Fix: constructor parameter order now matches Service's signature;
+            //      templateService added
             videoService = new Service(
                 settingsService: settingsServiceMock.Object,
                 areaService: areaServiceMock.Object,
+                templateService: templateServiceMock.Object,
+                videoCaptureFactory: () => videoCaptureMock.Object,
                 dispatcherService: dispatcherServiceMock.Object,
                 eventAggregator: eventAggregatorMock.Object,
                 recognitionService: recognitionServiceMock.Object,
-                videoCaptureFactory: () => videoCaptureMock.Object,
                 logger: loggerMock.Object);
         }
 
@@ -200,7 +205,8 @@ namespace Score2Stream.Tests.VideoServiceTests
 
             await videoService.RunAsync(input);
 
-            Assert.NotNull(videoService.Name);
+            // Fix: assert the actual expected value, not just non-null
+            Assert.Equal("dummy", videoService.Name);
         }
 
         [Fact]
@@ -234,7 +240,8 @@ namespace Score2Stream.Tests.VideoServiceTests
                 Name = "nonexistent_file_xyz",
             };
 
-            videoCaptureMock.Setup(v => v.Open(It.IsAny<string>())).Returns(false);
+            // Note: no video.Open mock needed — service throws FileNotFoundException
+            //       before Open is ever called when the file does not exist.
 
             await videoService.RunAsync(input);
 
@@ -317,6 +324,12 @@ namespace Score2Stream.Tests.VideoServiceTests
         {
             if (!isDisposed)
             {
+                if (disposing)
+                {
+                    // Fix: actually dispose the service under test
+                    ((IDisposable)videoService).Dispose();
+                }
+
                 isDisposed = true;
             }
         }

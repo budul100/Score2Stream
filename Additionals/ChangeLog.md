@@ -6,6 +6,7 @@
 * Introduce tabbed video input UI & refactor input handling
 * Refactor recognition logic and improve image handling
 * Refactor blending and bitmap update logic
+* Template/sample management centralized
 
 ## Version 1.11.0
 

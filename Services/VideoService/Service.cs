@@ -53,17 +53,19 @@ namespace Score2Stream.VideoService
         #region Public Constructors
 
         public Service(ISettingsService<Session> settingsService, IAreaService areaService,
-            Func<IVideoCapture> videoCaptureFactory, IDispatcherService dispatcherService,
-            IEventAggregator eventAggregator, IRecognitionService recognitionService,
-            ILogger<Service> logger = default)
+            ITemplateService templateService, Func<IVideoCapture> videoCaptureFactory,
+            IDispatcherService dispatcherService, IEventAggregator eventAggregator,
+            IRecognitionService recognitionService, ILogger<Service> logger = default)
         {
+            AreaService = areaService;
+            TemplateService = templateService;
+
             this.dispatcherService = dispatcherService;
             this.recognitionService = recognitionService;
             this.settingsService = settingsService;
+            this.videoCaptureFactory = videoCaptureFactory;
             this.logger = logger;
 
-            AreaService = areaService;
-            this.videoCaptureFactory = videoCaptureFactory;
             inputStartedEvent = eventAggregator.GetEvent<InputStartedEvent>();
             inputEndedEvent = eventAggregator.GetEvent<InputEndedEvent>();
             inputUpdatedEvent = eventAggregator.GetEvent<InputUpdatedEvent>();
@@ -91,6 +93,8 @@ namespace Score2Stream.VideoService
         public string Name => input?.Name;
 
         public TimeSpan? ProcessingTime { get; private set; }
+
+        public ITemplateService TemplateService { get; }
 
         #endregion Public Properties
 

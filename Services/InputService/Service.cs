@@ -31,6 +31,7 @@ namespace Score2Stream.InputService
         private readonly InputSelectedEvent inputSelectedEvent;
         private readonly ILogger<Service> logger;
         private readonly ISettingsService<Session> settingsService;
+        private readonly ITemplateService templateService;
 
         private ImmutableList<Input> inputs = [];
         private bool isInitializing;
@@ -40,11 +41,12 @@ namespace Score2Stream.InputService
         #region Public Constructors
 
         public Service(ISettingsService<Session> settingsService, IDialogService dialogService,
-            IDeviceEnumerator deviceEnumerator, IContainerProvider containerProvider,
+            ITemplateService templateService, IDeviceEnumerator deviceEnumerator, IContainerProvider containerProvider,
             IEventAggregator eventAggregator, ILogger<Service> logger = default)
         {
             this.settingsService = settingsService;
             this.dialogService = dialogService;
+            this.templateService = templateService;
             this.deviceEnumerator = deviceEnumerator;
             this.containerProvider = containerProvider;
             this.logger = logger;
@@ -66,20 +68,6 @@ namespace Score2Stream.InputService
                 keepSubscriberReferenceAlive: true);
             eventAggregator.GetEvent<AreaModifiedEvent>().Subscribe(
                 action: _ => SaveAreas(),
-                keepSubscriberReferenceAlive: true);
-
-            eventAggregator.GetEvent<TemplatesChangedEvent>().Subscribe(
-                action: SaveTemplates,
-                keepSubscriberReferenceAlive: true);
-
-            eventAggregator.GetEvent<SamplesChangedEvent>().Subscribe(
-                action: SaveTemplates,
-                keepSubscriberReferenceAlive: true);
-            eventAggregator.GetEvent<SamplesOrderedEvent>().Subscribe(
-                action: SaveTemplates,
-                keepSubscriberReferenceAlive: true);
-            eventAggregator.GetEvent<SampleModifiedEvent>().Subscribe(
-                action: _ => SaveTemplates(),
                 keepSubscriberReferenceAlive: true);
         }
 
@@ -131,10 +119,6 @@ namespace Score2Stream.InputService
                 }
             }
         }
-
-        public ISampleService SampleService => TemplateService?.Template?.SampleService;
-
-        public ITemplateService TemplateService => Active?.TemplateService;
 
         public IVideoService VideoService => Active?.VideoService;
 
@@ -261,51 +245,6 @@ namespace Score2Stream.InputService
 
         #region Private Methods
 
-        private static void InitializeAreas(Input input)
-        {
-            if (input?.Areas?.Count > 0)
-            {
-                foreach (var area in input.Areas.ToArray())
-                {
-                    try
-                    {
-                        input.AreaService.Add(area);
-
-                        area.Template = input.TemplateService.Templates?
-                            .FirstOrDefault(t => t.Name == area.TemplateName
-                                && t.Samples?.Count > 0);
-                    }
-                    catch (MaxCountExceededException)
-                    { }
-                }
-            }
-        }
-
-        private static void InitializeTemplates(Input input)
-        {
-            if (input?.Templates?.Count > 0)
-            {
-                foreach (var template in input.Templates.ToArray())
-                {
-                    try
-                    {
-                        input.TemplateService.Add(template);
-                    }
-                    catch (MaxCountExceededException)
-                    { }
-                }
-            }
-            else
-            {
-                try
-                {
-                    input.TemplateService.Create();
-                }
-                catch (MaxCountExceededException)
-                { }
-            }
-        }
-
         private Input GetDevice(string deviceName)
         {
             var devices = GetDevices();
@@ -388,6 +327,26 @@ namespace Score2Stream.InputService
             return result;
         }
 
+        private void InitializeAreas(Input input)
+        {
+            if (input?.Areas?.Count > 0)
+            {
+                foreach (var area in input.Areas.ToArray())
+                {
+                    try
+                    {
+                        input.AreaService.Add(area);
+
+                        area.Template = templateService.Templates?
+                            .FirstOrDefault(t => t.Name == area.TemplateName
+                                && t.Samples?.Count > 0);
+                    }
+                    catch (MaxCountExceededException)
+                    { }
+                }
+            }
+        }
+
         private void InitializeInput(Input input)
         {
             if (input?.IsStarted != false) return;
@@ -402,7 +361,6 @@ namespace Score2Stream.InputService
 
             _ = InitializeInputAsync(input);
 
-            InitializeTemplates(input);
             InitializeAreas(input);
         }
 
@@ -442,33 +400,6 @@ namespace Score2Stream.InputService
             if (isInitializing) return;
 
             settingsService.Contents.Inputs = Inputs.ToList();
-            settingsService.Save();
-        }
-
-        private void SaveTemplates()
-        {
-            if (isInitializing || Active == default) return;
-
-            Active.Templates = TemplateService?.Templates;
-
-            if (Active.Templates?.Count > 0)
-            {
-                foreach (var template in Active.Templates)
-                {
-                    var dirties = template.Samples?
-                        .Where(s => s.Mat != default
-                            && s.Image == null).ToArray();
-
-                    if (dirties?.Length > 0)
-                    {
-                        foreach (var dirty in dirties)
-                        {
-                            dirty.Image = dirty.Mat.ToBytes();
-                        }
-                    }
-                }
-            }
-
             settingsService.Save();
         }
 

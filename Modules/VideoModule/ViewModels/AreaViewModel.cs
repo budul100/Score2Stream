@@ -302,7 +302,7 @@ namespace Score2Stream.VideoModule.ViewModels
         private void UpdateStatus()
         {
             IsActive = navigationService.EditView != ViewType.Board
-                && areaService.Area == Area;
+                && areaService.Active == Area;
         }
 
         #endregion Private Methods

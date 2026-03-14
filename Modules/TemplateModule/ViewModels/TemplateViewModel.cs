@@ -22,6 +22,7 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         private readonly IContainerProvider containerProvider;
         private readonly IInputService inputService;
+        private readonly ITemplateService templateService;
 
         private bool isDetection;
 
@@ -29,15 +30,16 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         #region Public Constructors
 
-        public TemplateViewModel(IInputService inputService,
+        public TemplateViewModel(IInputService inputService, ITemplateService templateService,
             IContainerProvider containerProvider, IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
             this.inputService = inputService;
+            this.templateService = templateService;
             this.containerProvider = containerProvider;
 
             eventAggregator.GetEvent<DetectionChangedEvent>().Subscribe(
-                action: () => IsDetection = inputService.SampleService.IsDetection,
+                action: () => IsDetection = templateService.SampleService.IsDetection,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<TemplateSelectedEvent>().Subscribe(
@@ -68,7 +70,7 @@ namespace Score2Stream.TemplateModule.ViewModels
                 keepSubscriberReferenceAlive: true,
                 filter: s => s == inputService.AreaService?.Segment);
 
-            SetTemplate(inputService?.TemplateService?.Template);
+            SetTemplate(templateService?.Active);
         }
 
         #endregion Public Constructors
@@ -141,7 +143,8 @@ namespace Score2Stream.TemplateModule.ViewModels
 
                     current.Initialize(
                         sample: toBeAdded,
-                        inputService: inputService);
+                        areaService: inputService.AreaService,
+                        sampleService: templateService.SampleService);
 
                     Samples.Add(current);
                 }

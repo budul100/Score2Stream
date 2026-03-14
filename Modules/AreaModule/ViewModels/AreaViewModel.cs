@@ -28,6 +28,7 @@ namespace Score2Stream.AreaModule.ViewModels
         private bool isActive;
         private bool isInitializing;
         private bool isUpdatingType;
+        private ITemplateService templateService;
 
         #endregion Private Fields
 
@@ -161,12 +162,14 @@ namespace Score2Stream.AreaModule.ViewModels
 
         #region Public Methods
 
-        public void Initialize(Area area, IAreaService areaService)
+        public void Initialize(Area area, IAreaService areaService, ITemplateService templateService)
         {
             isInitializing = true;
 
             Area = area;
+
             this.areaService = areaService;
+            this.templateService = templateService;
 
             Type = area.Type;
             Types = area.Size
@@ -216,7 +219,7 @@ namespace Score2Stream.AreaModule.ViewModels
 
         private void UpdateStatus()
         {
-            IsActive = areaService.Area == Area;
+            IsActive = areaService.Active == Area;
         }
 
         private void UpdateTemplates()
@@ -226,16 +229,16 @@ namespace Score2Stream.AreaModule.ViewModels
             Template = default;
 
             var toBeRemoveds = Templates
-                .Where(t => areaService?.TemplateService?.Templates?.Contains(t) != true).ToArray();
+                .Where(t => templateService?.Templates?.Contains(t) != true).ToArray();
 
             foreach (var toBeRemoved in toBeRemoveds)
             {
                 Templates.Remove(toBeRemoved);
             }
 
-            if (areaService.TemplateService?.Templates != default)
+            if (templateService?.Templates != default)
             {
-                var toBeAddeds = areaService?.TemplateService?.Templates
+                var toBeAddeds = templateService.Templates
                     .Where(t => !Templates.Contains(t)).ToArray();
 
                 Templates.AddRange(toBeAddeds);

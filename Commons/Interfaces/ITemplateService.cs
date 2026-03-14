@@ -8,9 +8,9 @@ namespace Score2Stream.Commons.Interfaces
     {
         #region Public Properties
 
-        ISampleService SampleService { get; }
+        Template Active { get; }
 
-        Template Template { get; }
+        ISampleService SampleService { get; }
 
         List<Template> Templates { get; }
 
@@ -21,6 +21,8 @@ namespace Score2Stream.Commons.Interfaces
         void Add(Template template);
 
         void Create();
+
+        void Initialize();
 
         Task RemoveAsync();
 

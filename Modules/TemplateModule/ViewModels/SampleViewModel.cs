@@ -132,11 +132,12 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         #region Public Methods
 
-        public void Initialize(Sample sample, IInputService inputService)
+        public void Initialize(Sample sample, IAreaService areaService, ISampleService sampleService)
         {
             this.Sample = sample;
-            this.areaService = inputService.AreaService;
-            this.sampleService = inputService.SampleService;
+
+            this.areaService = areaService;
+            this.sampleService = sampleService;
 
             Value = sample.Value;
 

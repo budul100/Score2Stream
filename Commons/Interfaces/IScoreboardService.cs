@@ -30,6 +30,7 @@ namespace Score2Stream.Commons.Interfaces
 
         bool IsGameOverUpToDate { get; }
 
+        bool IsUpToDate { get; }
         string Message { get; }
 
         string Period { get; set; }
@@ -69,8 +70,6 @@ namespace Score2Stream.Commons.Interfaces
         int TickersFrequency { get; set; }
 
         bool[] TickersUpToDate { get; }
-
-        bool IsUpToDate { get; }
 
         #endregion Public Properties
 

@@ -130,20 +130,20 @@ namespace Score2Stream.App
             containerRegistry.RegisterInstance(loggerFactory);
             containerRegistry.Register(typeof(ILogger<>), typeof(Logger<>));
 
-            containerRegistry.RegisterSingleton<IDispatcherService, DispatcherService.Service>();
-            containerRegistry.RegisterSingleton<IRecognitionService, RecognitionService.Service>();
-            containerRegistry.RegisterSingleton<IDialogService, DialogService.Service>();
-            containerRegistry.RegisterSingleton<INavigationService, Service>();
-            containerRegistry.RegisterSingleton<IScoreboardService, ScoreboardService.Service>();
-            containerRegistry.RegisterSingleton<IWebService, WebService.Service>();
-            containerRegistry.RegisterSingleton<IInputService, InputService.Service>();
             containerRegistry.RegisterSingleton<IDeviceEnumerator, InputService.Helpers.DeviceEnumerator>();
+            containerRegistry.RegisterSingleton<IDialogService, DialogService.Service>();
+            containerRegistry.RegisterSingleton<IDispatcherService, DispatcherService.Service>();
+            containerRegistry.RegisterSingleton<IInputService, InputService.Service>();
+            containerRegistry.RegisterSingleton<INavigationService, Service>();
+            containerRegistry.RegisterSingleton<IRecognitionService, RecognitionService.Service>();
+            containerRegistry.RegisterSingleton<IScoreboardService, ScoreboardService.Service>();
+            containerRegistry.RegisterSingleton<ITemplateService, TemplateService.Service>();
+            containerRegistry.RegisterSingleton<IWebService, WebService.Service>();
 
-            containerRegistry.Register<IVideoService, VideoService.Service>();
-            containerRegistry.Register<IVideoCapture, VideoCaptureWrapper>();
             containerRegistry.Register<IAreaService, AreaService.Service>();
-            containerRegistry.Register<ITemplateService, TemplateService.Service>();
             containerRegistry.Register<ISampleService, SampleService.Service>();
+            containerRegistry.Register<IVideoCapture, VideoCaptureWrapper>();
+            containerRegistry.Register<IVideoService, VideoService.Service>();
 
             containerRegistry.Register<MainView>();
         }
@@ -183,6 +183,9 @@ namespace Score2Stream.App
                 dialogService.Initialize(
                     window: mainWindow,
                     iconUri: iconUri);
+
+                var templateService = Container.Resolve<ITemplateService>();
+                templateService.Initialize();
 
                 var inputService = Container.Resolve<IInputService>();
                 inputService.Initialize();

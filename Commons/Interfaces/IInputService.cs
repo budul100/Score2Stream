@@ -18,10 +18,6 @@ namespace Score2Stream.Commons.Interfaces
 
         float Rotation { get; set; }
 
-        ISampleService SampleService { get; }
-
-        ITemplateService TemplateService { get; }
-
         IVideoService VideoService { get; }
 
         #endregion Public Properties

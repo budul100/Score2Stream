@@ -8,15 +8,13 @@ namespace Score2Stream.Commons.Interfaces
     {
         #region Public Properties
 
-        Area Area { get; }
+        Area Active { get; }
 
         List<Area> Areas { get; }
 
         bool CanUndo { get; }
 
         Segment Segment { get; }
-
-        ITemplateService TemplateService { get; }
 
         #endregion Public Properties
 

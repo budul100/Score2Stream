@@ -44,7 +44,13 @@ namespace Score2Stream.Tests.InputServiceTests
         private readonly Session session;
         private readonly Mock<ISettingsService<Session>> settingsServiceMock;
         private readonly List<string> tempFiles = [];
+
         private readonly TemplatesChangedEvent templatesChangedEvent = new();
+
+        // FIX 1: templateServiceMock was missing entirely as a shared field.
+        // The Service constructor requires ITemplateService; omitting it caused a compile error
+        // and would have caused NullReferenceException inside InitializeAreas().
+        private readonly Mock<ITemplateService> templateServiceMock;
 
         #endregion Private Fields
 
@@ -58,6 +64,9 @@ namespace Score2Stream.Tests.InputServiceTests
             eventAggregatorMock = new Mock<IEventAggregator>();
             loggerMock = new Mock<ILogger<Service>>();
             settingsServiceMock = new Mock<ISettingsService<Session>>();
+
+            // FIX 1 (continued): Initialize the shared template service mock.
+            templateServiceMock = new Mock<ITemplateService>();
 
             session = new Session { Inputs = [] };
             settingsServiceMock.Setup(s => s.Contents).Returns(session);
@@ -80,6 +89,7 @@ namespace Score2Stream.Tests.InputServiceTests
             inputService = new Service(
                 settingsService: settingsServiceMock.Object,
                 dialogService: dialogServiceMock.Object,
+                templateService: templateServiceMock.Object,
                 deviceEnumerator: deviceEnumeratorMock.Object,
                 containerProvider: containerProviderMock.Object,
                 eventAggregator: eventAggregatorMock.Object,
@@ -102,7 +112,7 @@ namespace Score2Stream.Tests.InputServiceTests
         }
 
         [Fact]
-        public void EventAggregator_AreasChanged_TriggersSave()
+        public void EventAggregator_AreasChanged_DoesNotSaveWithoutActiveInput()
         {
             // Act
             areasChangedEvent.Publish();
@@ -163,12 +173,6 @@ namespace Score2Stream.Tests.InputServiceTests
                 })
                 .Returns(Task.CompletedTask);
 
-            var templateServiceMock = new Mock<ITemplateService>();
-            var areaServiceMock = new Mock<IAreaService>();
-            areaServiceMock.Setup(a => a.TemplateService).Returns(templateServiceMock.Object);
-
-            videoServiceMock.Setup(v => v.AreaService).Returns(areaServiceMock.Object);
-
             containerProviderMock
                 .Setup(c => c.Resolve(typeof(IVideoService)))
                 .Returns(videoServiceMock.Object);
@@ -213,12 +217,6 @@ namespace Score2Stream.Tests.InputServiceTests
                     videoServiceMock.Setup(v => v.IsActive).Returns(true);
                 })
                 .Returns(Task.CompletedTask);
-
-            var templateServiceMock = new Mock<ITemplateService>();
-            var areaServiceMock = new Mock<IAreaService>();
-            areaServiceMock.Setup(a => a.TemplateService).Returns(templateServiceMock.Object);
-
-            videoServiceMock.Setup(v => v.AreaService).Returns(areaServiceMock.Object);
 
             containerProviderMock
                 .Setup(c => c.Resolve(typeof(IVideoService)))
@@ -268,12 +266,6 @@ namespace Score2Stream.Tests.InputServiceTests
                 })
                 .Returns(Task.CompletedTask);
 
-            var templateServiceMock = new Mock<ITemplateService>();
-            var areaServiceMock = new Mock<IAreaService>();
-            areaServiceMock.Setup(a => a.TemplateService).Returns(templateServiceMock.Object);
-
-            videoServiceMock.Setup(v => v.AreaService).Returns(areaServiceMock.Object);
-
             containerProviderMock
                 .Setup(c => c.Resolve(typeof(IVideoService)))
                 .Returns(videoServiceMock.Object);
@@ -311,12 +303,6 @@ namespace Score2Stream.Tests.InputServiceTests
             containerProviderMock
                 .Setup(c => c.Resolve(typeof(IVideoService)))
                 .Returns(videoServiceMock.Object);
-
-            var templateServiceMock = new Mock<ITemplateService>();
-            var areaServiceMock = new Mock<IAreaService>();
-            areaServiceMock.Setup(a => a.TemplateService).Returns(templateServiceMock.Object);
-
-            videoServiceMock.Setup(v => v.AreaService).Returns(areaServiceMock.Object);
 
             // Act
             inputService.SelectFile(tempFile);

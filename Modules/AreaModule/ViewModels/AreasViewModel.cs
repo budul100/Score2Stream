@@ -17,16 +17,18 @@ namespace Score2Stream.AreaModule.ViewModels
 
         private readonly IContainerProvider containerProvider;
         private readonly IInputService inputService;
+        private readonly ITemplateService templateService;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public AreasViewModel(IInputService inputService, IContainerProvider containerProvider,
-            IRegionManager regionManager, IEventAggregator eventAggregator)
+        public AreasViewModel(IInputService inputService, ITemplateService templateService,
+            IContainerProvider containerProvider, IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
             this.inputService = inputService;
+            this.templateService = templateService;
             this.containerProvider = containerProvider;
 
             eventAggregator.GetEvent<InputStartedEvent>().Subscribe(
@@ -82,7 +84,8 @@ namespace Score2Stream.AreaModule.ViewModels
 
                     current.Initialize(
                         area: area,
-                        areaService: inputService.AreaService);
+                        areaService: inputService.AreaService,
+                        templateService: templateService);
 
                     Areas.Add(current);
                 }

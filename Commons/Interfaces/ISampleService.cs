@@ -10,7 +10,7 @@ namespace Score2Stream.Commons.Interfaces
 
         bool IsDetection { get; set; }
 
-        Sample Sample { get; }
+        Sample Active { get; }
 
         List<Sample> Samples { get; }
 

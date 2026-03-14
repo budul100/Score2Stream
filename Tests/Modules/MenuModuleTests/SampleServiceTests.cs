@@ -192,7 +192,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var (viewModel, sampleService) = CreateViewModelWithService();
 
                 viewModel.SampleAddCommand.Execute();
-                var sample = sampleService.Sample;
+                var sample = sampleService.Active;
 
                 viewModel.SampleRemoveCommand.Execute();
 
@@ -207,7 +207,6 @@ namespace Score2Stream.Tests.MenuModuleTests
         private static (MenuViewModel ViewModel, ISampleService SampleService) CreateViewModelWithNullSegment()
         {
             var templateMock = new Mock<Template>();
-
             var eventAggregatorMock = CreateEventAggregatorMock();
             var session = new Session();
 
@@ -222,15 +221,18 @@ namespace Score2Stream.Tests.MenuModuleTests
 
             sampleService.Initialize(templateMock.Object);
 
+            var templateServiceMock = new Mock<ITemplateService>();
+            templateServiceMock.Setup(m => m.SampleService).Returns(sampleService);
+
             var inputServiceMock = new Mock<IInputService>();
-            inputServiceMock.Setup(m => m.SampleService).Returns(sampleService);
-            inputServiceMock.Setup(m => m.AreaService.Segment).Returns((Segment)null); // null segment
+            inputServiceMock.Setup(m => m.AreaService.Segment).Returns((Segment)null);
 
             var viewModel = new MenuViewModel(
                 settingsService: sessionSettingsServiceMock.Object,
                 webService: new Mock<IWebService>().Object,
                 scoreboardService: new Mock<IScoreboardService>().Object,
                 inputService: inputServiceMock.Object,
+                templateService: templateServiceMock.Object,
                 regionManager: new Mock<IRegionManager>().Object,
                 dialogService: new Mock<IDialogService>().Object,
                 eventAggregator: eventAggregatorMock.Object);
@@ -242,19 +244,10 @@ namespace Score2Stream.Tests.MenuModuleTests
         {
             var templateMock = new Mock<Template>();
 
-            var area = new Area
-            {
-                Template = templateMock.Object,
-            };
-
-            var segment = new Segment
-            {
-                Area = area,
-                Mat = mat,
-            };
+            var area = new Area { Template = templateMock.Object };
+            var segment = new Segment { Area = area, Mat = mat };
 
             var eventAggregatorMock = CreateEventAggregatorMock();
-
             var session = new Session();
 
             var sessionSettingsServiceMock = new Mock<ISettingsService<Session>>();
@@ -271,8 +264,10 @@ namespace Score2Stream.Tests.MenuModuleTests
 
             sampleService.Initialize(templateMock.Object);
 
+            var templateServiceMock = new Mock<ITemplateService>();
+            templateServiceMock.Setup(m => m.SampleService).Returns(sampleService);
+
             var inputServiceMock = new Mock<IInputService>();
-            inputServiceMock.Setup(m => m.SampleService).Returns(sampleService);
             inputServiceMock.Setup(m => m.AreaService.Segment).Returns(segment);
             inputServiceMock.Setup(m => m.IsActive).Returns(true);
 
@@ -281,6 +276,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 webService: new Mock<IWebService>().Object,
                 scoreboardService: new Mock<IScoreboardService>().Object,
                 inputService: inputServiceMock.Object,
+                templateService: templateServiceMock.Object,
                 regionManager: new Mock<IRegionManager>().Object,
                 dialogService: dialogServiceMock.Object,
                 eventAggregator: eventAggregatorMock.Object);

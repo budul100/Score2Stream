@@ -119,14 +119,14 @@ namespace Score2Stream.VideoModule.ViewModels
 
                 case ViewType.Inputs:
 
-                    IsActive = areaService.Area == Segment.Area;
+                    IsActive = areaService.Active == Segment.Area;
                     IsSelected = false;
 
                     break;
 
                 case ViewType.Templates:
 
-                    IsActive = areaService.Area == Segment.Area;
+                    IsActive = areaService.Active == Segment.Area;
                     IsSelected = areaService.Segment == Segment;
 
                     break;

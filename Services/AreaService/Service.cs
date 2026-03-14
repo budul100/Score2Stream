@@ -15,8 +15,8 @@ using Score2Stream.Commons.Models.Contents;
 
 namespace Score2Stream.AreaService
 {
-    public class Service(IScoreboardService scoreboardService, ITemplateService templateService,
-        IDialogService dialogService, IEventAggregator eventAggregator)
+    public class Service(IScoreboardService scoreboardService, IDialogService dialogService,
+        IEventAggregator eventAggregator)
         : IAreaService
     {
         #region Private Fields
@@ -34,18 +34,16 @@ namespace Score2Stream.AreaService
 
         #region Public Properties
 
-        public Area Area { get; private set; }
+        public Area Active { get; private set; }
 
         public List<Area> Areas { get; } = [];
 
-        public bool CanUndo => Area?.X1Last.HasValue == true
-            && Area.X2Last.HasValue
-            && Area.Y1Last.HasValue
-            && Area.Y2Last.HasValue;
+        public bool CanUndo => Active?.X1Last.HasValue == true
+            && Active.X2Last.HasValue
+            && Active.Y1Last.HasValue
+            && Active.Y2Last.HasValue;
 
         public Segment Segment { get; private set; }
-
-        public ITemplateService TemplateService { get; } = templateService;
 
         #endregion Public Properties
 
@@ -127,7 +125,7 @@ namespace Score2Stream.AreaService
         public void Next(bool backward)
         {
             var next = Areas.GetNext(
-                active: Area,
+                active: Active,
                 backward: backward);
 
             if (next != default)
@@ -167,9 +165,9 @@ namespace Score2Stream.AreaService
 
         public async Task RemoveAsync()
         {
-            if (Area != default)
+            if (Active != default)
             {
-                var canBeRemoved = !Area.HasDimensions;
+                var canBeRemoved = !Active.HasDimensions;
 
                 if (!canBeRemoved)
                 {
@@ -182,9 +180,9 @@ namespace Score2Stream.AreaService
 
                 if (canBeRemoved)
                 {
-                    var next = Areas.GetNext(Area);
+                    var next = Areas.GetNext(Active);
 
-                    RemoveArea(Area);
+                    RemoveArea(Active);
 
                     areasChangedEvent.Publish();
 
@@ -198,7 +196,7 @@ namespace Score2Stream.AreaService
         {
             var isModified = false;
 
-            Area.HasDimensions = false;
+            Active.HasDimensions = false;
 
             if ((heightActual ?? 0) > 0
                 && (top ?? 0) >= (heightMin ?? 0))
@@ -224,22 +222,22 @@ namespace Score2Stream.AreaService
 
             if (isModified)
             {
-                Area.SetSegments();
+                Active.SetSegments();
 
-                areaModifiedEvent.Publish(Area);
+                areaModifiedEvent.Publish(Active);
             }
         }
 
         public void Select(Area area)
         {
-            if (Area != area)
+            if (Active != area)
             {
-                Area = area;
+                Active = area;
 
-                areaSelectedEvent.Publish(Area);
+                areaSelectedEvent.Publish(Active);
 
                 if (Segment != default
-                    && Segment.Area != Area)
+                    && Segment.Area != Active)
                 {
                     Select();
                 }
@@ -254,9 +252,9 @@ namespace Score2Stream.AreaService
 
                 clipSelectedEvent.Publish(Segment);
 
-                Area = Segment?.Area;
+                Active = Segment?.Area;
 
-                areaSelectedEvent.Publish(Area);
+                areaSelectedEvent.Publish(Active);
             }
         }
 
@@ -267,18 +265,18 @@ namespace Score2Stream.AreaService
                 var isModified = false;
 
                 isModified |= ResizeVertical(
-                    y1: Area.Y1Last,
-                    y2: Area.Y2Last);
+                    y1: Active.Y1Last,
+                    y2: Active.Y2Last);
 
                 isModified |= ResizeHorizontal(
-                    x1: Area.X1Last,
-                    x2: Area.X2Last);
+                    x1: Active.X1Last,
+                    x2: Active.X2Last);
 
                 if (isModified)
                 {
-                    Area.SetSegments();
+                    Active.SetSegments();
 
-                    areaModifiedEvent.Publish(Area);
+                    areaModifiedEvent.Publish(Active);
                 }
             }
         }
@@ -304,10 +302,10 @@ namespace Score2Stream.AreaService
                 Size = size,
             };
 
-            if (Area != default)
+            if (Active != default)
             {
-                result.NoiseRemoval = Area.NoiseRemoval;
-                result.ThresholdMonochrome = Area.ThresholdMonochrome;
+                result.NoiseRemoval = Active.NoiseRemoval;
+                result.ThresholdMonochrome = Active.ThresholdMonochrome;
             }
 
             return result;
@@ -330,18 +328,18 @@ namespace Score2Stream.AreaService
             if (x1.HasValue
                 && x2.HasValue)
             {
-                if (Area.X1 != x1 || Area.X2 != x2)
+                if (Active.X1 != x1 || Active.X2 != x2)
                 {
-                    Area.X1Last = Area.X1;
-                    Area.X2Last = Area.X2;
+                    Active.X1Last = Active.X1;
+                    Active.X2Last = Active.X2;
 
-                    Area.X1 = x1.Value;
-                    Area.X2 = x2.Value;
+                    Active.X1 = x1.Value;
+                    Active.X2 = x2.Value;
 
                     result = true;
                 }
 
-                Area.HasDimensions = true;
+                Active.HasDimensions = true;
             }
 
             return result;
@@ -354,18 +352,18 @@ namespace Score2Stream.AreaService
             if (y1.HasValue
                 && y2.HasValue)
             {
-                if (Area.Y1 != y1 || Area.Y2 != y2)
+                if (Active.Y1 != y1 || Active.Y2 != y2)
                 {
-                    Area.Y1Last = Area.Y1;
-                    Area.Y2Last = Area.Y2;
+                    Active.Y1Last = Active.Y1;
+                    Active.Y2Last = Active.Y2;
 
-                    Area.Y1 = y1.Value;
-                    Area.Y2 = y2.Value;
+                    Active.Y1 = y1.Value;
+                    Active.Y2 = y2.Value;
 
                     result = true;
                 }
 
-                Area.HasDimensions = true;
+                Active.HasDimensions = true;
             }
 
             return result;

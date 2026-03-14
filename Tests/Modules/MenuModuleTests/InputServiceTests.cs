@@ -390,7 +390,7 @@ namespace Score2Stream.Tests.MenuModuleTests
         [Fact]
         public async Task InputSelectCommand_MaxCountExceeded_DoesNotThrow()
         {
-            await RunInSessionAsync(async () =>
+            await RunInSessionAsync(() =>
             {
                 var inputServiceMock = new Mock<IInputService>();
                 inputServiceMock
@@ -552,6 +552,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 webService: new Mock<IWebService>().Object,
                 scoreboardService: new Mock<IScoreboardService>().Object,
                 inputService: inputServiceMock.Object,
+                templateService: new Mock<ITemplateService>().Object,
                 regionManager: new Mock<IRegionManager>().Object,
                 dialogService: dialogServiceMock.Object,
                 eventAggregator: eventAggregatorMock.Object);

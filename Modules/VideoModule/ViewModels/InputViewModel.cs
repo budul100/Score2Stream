@@ -427,7 +427,7 @@ namespace Score2Stream.VideoModule.ViewModels
 
                     Areas.Add(current);
 
-                    if (inputService.AreaService.Area == area)
+                    if (inputService.AreaService.Active == area)
                     {
                         this.area = current;
                     }

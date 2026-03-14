@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
@@ -67,9 +66,9 @@ namespace Score2Stream.SampleService
 
         #region Public Properties
 
-        public bool IsDetection { get; set; }
+        public Sample Active { get; private set; }
 
-        public Sample Sample { get; private set; }
+        public bool IsDetection { get; set; }
 
         public List<Sample> Samples { get; } = [];
 
@@ -160,7 +159,7 @@ namespace Score2Stream.SampleService
                 .OrderBy(s => s.Index)
                 .GetUnfiltereds()
                 .GetNext(
-                    active: Sample,
+                    active: Active,
                     backward: backward);
 
             if (next != default)
@@ -208,11 +207,11 @@ namespace Score2Stream.SampleService
 
         public async Task RemoveAsync()
         {
-            if (Sample != default)
+            if (Active != default)
             {
                 var result = ButtonResult.Yes;
 
-                if (Sample.IsVerified)
+                if (Active.IsVerified)
                 {
                     result = await dialogService.GetMessageBoxResultAsync(
                         contentMessage: "Shall the selected sample be removed?",
@@ -221,9 +220,9 @@ namespace Score2Stream.SampleService
 
                 if (result == ButtonResult.Yes)
                 {
-                    var next = Samples.GetNext(Sample);
+                    var next = Samples.GetNext(Active);
 
-                    RemoveSample(Sample);
+                    RemoveSample(Active);
 
                     Select(next);
                 }
@@ -232,13 +231,13 @@ namespace Score2Stream.SampleService
 
         public void Select(Sample sample)
         {
-            if (Sample != sample)
+            if (Active != sample)
             {
-                Sample = Sample != sample
+                Active = Active != sample
                     ? sample
                     : default;
 
-                sampleSelectedEvent.Publish(Sample);
+                sampleSelectedEvent.Publish(Active);
             }
         }
 
@@ -258,7 +257,7 @@ namespace Score2Stream.SampleService
                 if (unverifieds.Length >= settingsService.Contents.Detection.MaxCountUnverifieds)
                 {
                     var relevant = unverifieds
-                        .Where(s => s != Sample)
+                        .Where(s => s != Active)
                         .OrderBy(s => s.Index).FirstOrDefault();
 
                     RemoveSample(relevant);

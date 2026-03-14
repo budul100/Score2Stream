@@ -6,33 +6,60 @@ using OpenCvSharp;
 using Prism.Events;
 using Prism.Ioc;
 using Score2Stream.Commons.Assets;
+using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Template;
 using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
+using Score2Stream.Commons.Models.Settings;
 
 namespace Score2Stream.TemplateService
 {
-    public class Service(IDialogService dialogService, IContainerProvider containerProvider,
-        IEventAggregator eventAggregator)
+    public class Service
         : ITemplateService
     {
         #region Private Fields
 
-        private readonly TemplatesChangedEvent templatesChangedEvent = eventAggregator
-            .GetEvent<TemplatesChangedEvent>();
-
-        private readonly TemplateSelectedEvent templateSelectedEvent = eventAggregator
-            .GetEvent<TemplateSelectedEvent>();
+        private readonly IContainerProvider containerProvider;
+        private readonly IDialogService dialogService;
+        private readonly ISettingsService<Session> settingsService;
+        private readonly TemplatesChangedEvent templatesChangedEvent;
+        private readonly TemplateSelectedEvent templateSelectedEvent;
+        private bool isInitializing;
 
         #endregion Private Fields
 
+        #region Public Constructors
+
+        public Service(ISettingsService<Session> settingsService, IDialogService dialogService,
+            IContainerProvider containerProvider, IEventAggregator eventAggregator)
+        {
+            this.settingsService = settingsService;
+            this.dialogService = dialogService;
+            this.containerProvider = containerProvider;
+
+            templatesChangedEvent = eventAggregator.GetEvent<TemplatesChangedEvent>();
+            templateSelectedEvent = eventAggregator.GetEvent<TemplateSelectedEvent>();
+
+            eventAggregator.GetEvent<SamplesChangedEvent>().Subscribe(
+                action: SaveTemplates,
+                keepSubscriberReferenceAlive: true);
+            eventAggregator.GetEvent<SamplesOrderedEvent>().Subscribe(
+                action: SaveTemplates,
+                keepSubscriberReferenceAlive: true);
+            eventAggregator.GetEvent<SampleModifiedEvent>().Subscribe(
+                action: _ => SaveTemplates(),
+                keepSubscriberReferenceAlive: true);
+        }
+
+        #endregion Public Constructors
+
         #region Public Properties
 
-        public ISampleService SampleService => Template?.SampleService;
+        public Template Active { get; private set; }
 
-        public Template Template { get; private set; }
+        public ISampleService SampleService => Active?.SampleService;
 
         public List<Template> Templates { get; } = [];
 
@@ -110,9 +137,35 @@ namespace Score2Stream.TemplateService
             }
         }
 
+        public void Initialize()
+        {
+            isInitializing = true;
+
+            try
+            {
+                if (settingsService.Contents.Templates?.Count > 0)
+                {
+                    foreach (var template in settingsService.Contents.Templates)
+                    {
+                        Add(template);
+                    }
+                }
+                else
+                {
+                    Create();
+                }
+            }
+            catch (MaxCountExceededException)
+            { }
+
+            Select(Templates?.FirstOrDefault());
+
+            isInitializing = false;
+        }
+
         public async Task RemoveAsync()
         {
-            if (Template != default)
+            if (Active != default)
             {
                 var result = await dialogService.GetMessageBoxResultAsync(
                     contentMessage: "Shall the selected template be removed?",
@@ -120,10 +173,10 @@ namespace Score2Stream.TemplateService
 
                 if (result == ButtonResult.Yes)
                 {
-                    var next = Templates.GetNext(Template);
+                    var next = Templates.GetNext(Active);
 
-                    Template.SampleService.Clear();
-                    Templates.Remove(Template);
+                    Active.SampleService.Clear();
+                    Templates.Remove(Active);
 
                     if (Templates.Count > 0)
                     {
@@ -146,13 +199,17 @@ namespace Score2Stream.TemplateService
 
         public void Select(Template template)
         {
-            if (template != Template || template == default)
+            if (isInitializing) return;
+
+            if (template != Active || template == default)
             {
-                Template = template
+                Active = template
                     ?? Templates.FirstOrDefault();
 
-                templateSelectedEvent.Publish(Template);
+                templateSelectedEvent.Publish(Active);
             }
+
+            SaveTemplates();
         }
 
         #endregion Public Methods
@@ -169,6 +226,29 @@ namespace Score2Stream.TemplateService
             };
 
             return result;
+        }
+
+        private void SaveTemplates()
+        {
+            if (Templates?.Count > 0)
+            {
+                foreach (var template in Templates)
+                {
+                    var relevants = template.Samples?
+                        .Where(s => s.Mat != default
+                            && s.Image == null).ToArray();
+
+                    if (relevants?.Length > 0)
+                    {
+                        foreach (var relevant in relevants)
+                        {
+                            relevant.Image = relevant.Mat.ToBytes();
+                        }
+                    }
+                }
+            }
+
+            settingsService.Save();
         }
 
         #endregion Private Methods
