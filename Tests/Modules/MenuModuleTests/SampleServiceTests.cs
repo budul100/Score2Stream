@@ -1,22 +1,9 @@
 using System;
-using System.Threading;
 using System.Threading.Tasks;
-using Avalonia.Headless;
-using EventAggregatorMocker;
 using Moq;
 using OpenCvSharp;
-using Prism.Events;
 using Prism.Regions;
 using Score2Stream.Commons.Assets;
-using Score2Stream.Commons.Enums;
-using Score2Stream.Commons.Events.Area;
-using Score2Stream.Commons.Events.Clip;
-using Score2Stream.Commons.Events.Graphics;
-using Score2Stream.Commons.Events.Input;
-using Score2Stream.Commons.Events.Menu;
-using Score2Stream.Commons.Events.Sample;
-using Score2Stream.Commons.Events.Scoreboard;
-using Score2Stream.Commons.Events.Template;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
@@ -25,8 +12,9 @@ using Xunit;
 
 namespace Score2Stream.Tests.MenuModuleTests
 {
+    [Collection("HeadlessUI")]
     public class SampleServiceTests
-        : IDisposable
+        : TestBase, IDisposable
     {
         #region Private Fields
 
@@ -52,11 +40,36 @@ namespace Score2Stream.Tests.MenuModuleTests
         }
 
         [Fact]
+        public async Task IsSampleDetection_SetFalse_DisablesDetection()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var (viewModel, sampleService) = CreateViewModelWithService();
+
+                viewModel.IsSampleDetection = true;
+                viewModel.IsSampleDetection = false;
+
+                Assert.False(sampleService.IsDetection);
+            });
+        }
+
+        [Fact]
+        public async Task IsSampleDetection_SetTrue_WhenInputIsActive()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var (viewModel, sampleService) = CreateViewModelWithService();
+
+                viewModel.IsSampleDetection = true;
+
+                Assert.True(sampleService.IsDetection);
+            });
+        }
+
+        [Fact]
         public async Task SampleAdd_ExceedsMaxCount_DoesNotThrow()
         {
-            using var session = HeadlessUnitTestSession.StartNew(typeof(Score2Stream.Tests.TestApp.App));
-
-            await session.Dispatch(() =>
+            await RunInSessionAsync(() =>
             {
                 var (viewModel, sampleService) = CreateViewModelWithService();
 
@@ -69,15 +82,13 @@ namespace Score2Stream.Tests.MenuModuleTests
 
                 Assert.True(sampleService.Samples.Count <= Constants.MaxCountSamples,
                     $"Sample count {sampleService.Samples.Count} should not exceed {Constants.MaxCountSamples}.");
-            }, CancellationToken.None);
+            });
         }
 
         [Fact]
         public async Task SampleAdd_MultipleSamples_IncrementsCount()
         {
-            using var session = HeadlessUnitTestSession.StartNew(typeof(Score2Stream.Tests.TestApp.App));
-
-            await session.Dispatch(() =>
+            await RunInSessionAsync(() =>
             {
                 var (viewModel, sampleService) = CreateViewModelWithService();
 
@@ -89,55 +100,142 @@ namespace Score2Stream.Tests.MenuModuleTests
                 }
 
                 Assert.Equal(expectedCount, sampleService.Samples.Count);
-            }, CancellationToken.None);
+            });
         }
 
         [Fact]
         public async Task SampleAdd_WithValidSegment_AddsSample()
         {
-            using var session = HeadlessUnitTestSession.StartNew(typeof(Score2Stream.Tests.TestApp.App));
-
-            await session.Dispatch(() =>
+            await RunInSessionAsync(() =>
             {
                 var (viewModel, sampleService) = CreateViewModelWithService();
 
                 viewModel.SampleAddCommand.Execute();
 
                 Assert.Single(sampleService.Samples);
-            }, CancellationToken.None);
+            });
+        }
+
+        [Fact]
+        public async Task SampleAddCommand_CanExecute_ReturnsFalseWhenSegmentIsNull()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var (viewModel, _) = CreateViewModelWithNullSegment();
+
+                Assert.False(viewModel.SampleAddCommand.CanExecute());
+            });
+        }
+
+        [Fact]
+        public async Task SampleOrder_WithMultipleSamples_DoesNotThrow()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var (viewModel, sampleService) = CreateViewModelWithService();
+
+                viewModel.SampleAddCommand.Execute();
+                viewModel.SampleAddCommand.Execute();
+
+                var exception = Record.Exception(
+                    () => viewModel.SampleOrderCommand.Execute());
+
+                Assert.Null(exception);
+            });
+        }
+
+        [Fact]
+        public async Task SampleOrderCommand_CanExecute_ReturnsFalseWhenNoSamples()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var (viewModel, sampleService) = CreateViewModelWithService();
+
+                Assert.False(viewModel.SampleOrderCommand.CanExecute());
+            });
+        }
+
+        [Fact]
+        public async Task SampleOrderCommand_CanExecute_ReturnsTrueWhenSamplesExist()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var (viewModel, sampleService) = CreateViewModelWithService();
+
+                viewModel.SampleAddCommand.Execute();
+
+                Assert.True(viewModel.SampleOrderCommand.CanExecute());
+            });
+        }
+
+        [Fact]
+        public async Task SampleRemove_WithSelectedSample_DecrementsCount()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var (viewModel, sampleService) = CreateViewModelWithService();
+
+                viewModel.SampleAddCommand.Execute();
+                viewModel.SampleAddCommand.Execute();
+
+                viewModel.SampleRemoveCommand.Execute();
+
+                Assert.Single(sampleService.Samples);
+            });
+        }
+
+        [Fact]
+        public async Task SampleRemove_WithSelectedSample_RemovesSample()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var (viewModel, sampleService) = CreateViewModelWithService();
+
+                viewModel.SampleAddCommand.Execute();
+                var sample = sampleService.Sample;
+
+                viewModel.SampleRemoveCommand.Execute();
+
+                Assert.DoesNotContain(sample, sampleService.Samples);
+            });
         }
 
         #endregion Public Methods
 
         #region Private Methods
 
-        private static Mock<IEventAggregator> CreateEventAggregatorMock()
+        private static (MenuViewModel ViewModel, ISampleService SampleService) CreateViewModelWithNullSegment()
         {
-            var mock = new Mock<IEventAggregator>();
+            var templateMock = new Mock<Template>();
 
-            mock.RegisterNewMockedEvent<AreaModifiedEvent, Area>();
-            mock.RegisterNewMockedEvent<AreasChangedEvent>();
-            mock.RegisterNewMockedEvent<AreaSelectedEvent, Area>();
-            mock.RegisterNewMockedEvent<DetectionChangedEvent>();
-            mock.RegisterNewMockedEvent<FilterChangedEvent>();
-            mock.RegisterNewMockedEvent<InputCenteringEvent>();
-            mock.RegisterNewMockedEvent<InputEndedEvent, Input>();
-            mock.RegisterNewMockedEvent<InputSelectedEvent, Input>();
-            mock.RegisterNewMockedEvent<InputStartedEvent, Input>();
-            mock.RegisterNewMockedEvent<InputUpdatedEvent>();
-            mock.RegisterNewMockedEvent<SamplesChangedEvent>();
-            mock.RegisterNewMockedEvent<SampleSelectedEvent, Sample>();
-            mock.RegisterNewMockedEvent<SamplesOrderedEvent>();
-            mock.RegisterNewMockedEvent<ScoreboardModifiedEvent>();
-            mock.RegisterNewMockedEvent<ScoreboardUpdatedEvent, string>();
-            mock.RegisterNewMockedEvent<SegmentSelectedEvent, Segment>();
-            mock.RegisterNewMockedEvent<SegmentUpdatedEvent, Segment>();
-            mock.RegisterNewMockedEvent<ServerStartedEvent>();
-            mock.RegisterNewMockedEvent<TabSelectedEvent, ViewType>();
-            mock.RegisterNewMockedEvent<TemplatesChangedEvent>();
-            mock.RegisterNewMockedEvent<TemplateSelectedEvent, Template>();
+            var eventAggregatorMock = CreateEventAggregatorMock();
+            var session = new Session();
 
-            return mock;
+            var sessionSettingsServiceMock = new Mock<ISettingsService<Session>>();
+            sessionSettingsServiceMock.Setup(m => m.Contents).Returns(session);
+
+            var sampleService = new SampleService.Service(
+                settingsService: sessionSettingsServiceMock.Object,
+                recognitionService: new Mock<IRecognitionService>().Object,
+                dialogService: new Mock<IDialogService>().Object,
+                eventAggregator: eventAggregatorMock.Object);
+
+            sampleService.Initialize(templateMock.Object);
+
+            var inputServiceMock = new Mock<IInputService>();
+            inputServiceMock.Setup(m => m.SampleService).Returns(sampleService);
+            inputServiceMock.Setup(m => m.AreaService.Segment).Returns((Segment)null); // null segment
+
+            var viewModel = new MenuViewModel(
+                settingsService: sessionSettingsServiceMock.Object,
+                webService: new Mock<IWebService>().Object,
+                scoreboardService: new Mock<IScoreboardService>().Object,
+                inputService: inputServiceMock.Object,
+                regionManager: new Mock<IRegionManager>().Object,
+                dialogService: new Mock<IDialogService>().Object,
+                eventAggregator: eventAggregatorMock.Object);
+
+            return (viewModel, sampleService);
         }
 
         private (MenuViewModel ViewModel, ISampleService SampleService) CreateViewModelWithService()
@@ -176,6 +274,7 @@ namespace Score2Stream.Tests.MenuModuleTests
             var inputServiceMock = new Mock<IInputService>();
             inputServiceMock.Setup(m => m.SampleService).Returns(sampleService);
             inputServiceMock.Setup(m => m.AreaService.Segment).Returns(segment);
+            inputServiceMock.Setup(m => m.IsActive).Returns(true);
 
             var viewModel = new MenuViewModel(
                 settingsService: sessionSettingsServiceMock.Object,

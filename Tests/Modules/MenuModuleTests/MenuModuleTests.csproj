@@ -28,6 +28,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\..\Modules\MenuModule\MenuModule.csproj" />
+		<ProjectReference Include="..\..\..\Services\InputService\InputService.csproj" />
 		<ProjectReference Include="..\..\..\Services\SampleService\SampleService.csproj" />
 		<ProjectReference Include="..\..\Samples\TestApp\TestApp.csproj" />
 	</ItemGroup>
