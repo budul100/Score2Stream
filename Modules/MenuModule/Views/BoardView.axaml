@@ -1,0 +1,206 @@
+<rib:RibbonTab
+    x:Class="Score2Stream.MenuModule.Views.BoardView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:i="using:Avalonia.Xaml.Interactivity"
+    xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
+    xmlns:b="using:Score2Stream.MenuModule.Behaviors"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:en="using:Score2Stream.Commons.Enums"
+    xmlns:mat="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mo="using:Score2Stream.Core.Models"
+    xmlns:prism="http://prismlibrary.com/"
+    xmlns:rib="clr-namespace:AvaloniaUI.Ribbon;assembly=AvaloniaUI.Ribbon"
+    xmlns:sys="using:System"
+    d:DesignHeight="120"
+    d:DesignWidth="1600"
+    prism:ViewModelLocator.AutoWireViewModel="True"
+    Name="BoardTab"
+    Header="Board"
+    mc:Ignorable="d">
+
+    <rib:RibbonTab.Resources>
+        <sys:Double x:Key="FontSize">10</sys:Double>
+        <sys:Double x:Key="IconWidth">30</sys:Double>
+        <sys:Double x:Key="IconHeight">30</sys:Double>
+    </rib:RibbonTab.Resources>
+
+    <rib:RibbonTab.Styles>
+        <StyleInclude Source="avares://AvaloniaUI.Ribbon/Styles/Fluent/AvaloniaRibbon.xaml" />
+        <StyleInclude Source="avares://Material.Icons.Avalonia/MaterialIconStyles.axaml" />
+    </rib:RibbonTab.Styles>
+
+    <i:Interaction.Behaviors>
+        <ia:EventTriggerBehavior EventName="PointerPressed" SourceObject="BoardTab">
+            <ia:InvokeCommandAction Command="{Binding SelectTabCommand}" CommandParameter="{x:Static en:ViewType.Board}" />
+        </ia:EventTriggerBehavior>
+    </i:Interaction.Behaviors>
+
+    <rib:RibbonTab.Groups>
+
+        <rib:RibbonGroupBox Header="Scoreboard control">
+
+            <rib:RibbonButton
+                Command="{Binding ScoreboardOpenCommand}"
+                Content="Open board"
+                FontSize="{StaticResource FontSize}"
+                MinSize="Large">
+                <rib:RibbonButton.LargeIcon>
+                    <ControlTemplate>
+                        <mat:MaterialIcon
+                            Width="{StaticResource IconWidth}"
+                            Height="{StaticResource IconHeight}"
+                            Kind="EyeOutline" />
+                    </ControlTemplate>
+                </rib:RibbonButton.LargeIcon>
+            </rib:RibbonButton>
+
+            <rib:RibbonButton
+                Classes.IsUpToDate="{Binding IsUpToDate}"
+                Classes.IsNotUpToDate="{Binding !IsUpToDate}"
+                Command="{Binding ScoreboardUpdateCommand}"
+                Content="Update board"
+                FontSize="{StaticResource FontSize}"
+                MinSize="Large">
+                <rib:RibbonButton.Styles>
+                    <Style Selector="RibbonButton.IsUpToDate">
+                        <Style.Setters>
+                            <Setter Property="LargeIcon">
+                                <Setter.Value>
+                                    <ControlTemplate>
+                                        <mat:MaterialIcon
+                                            Width="{StaticResource IconWidth}"
+                                            Height="{StaticResource IconHeight}"
+                                            Kind="UploadBoxOutline" />
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style.Setters>
+                    </Style>
+                    <Style Selector="RibbonButton.IsNotUpToDate">
+                        <Style.Setters>
+                            <Setter Property="LargeIcon">
+                                <Setter.Value>
+                                    <ControlTemplate>
+                                        <mat:MaterialIcon
+                                            Width="{StaticResource IconWidth}"
+                                            Height="{StaticResource IconHeight}"
+                                            Kind="UploadBox" />
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style.Setters>
+                    </Style>
+                </rib:RibbonButton.Styles>
+            </rib:RibbonButton>
+
+        </rib:RibbonGroupBox>
+
+        <rib:RibbonGroupBox Header="Server control">
+
+            <rib:RibbonButton
+                Command="{Binding ServerReloadCommand}"
+                Content="Restart server"
+                FontSize="{StaticResource FontSize}"
+                MinSize="Large">
+                <rib:RibbonButton.LargeIcon>
+                    <ControlTemplate>
+                        <mat:MaterialIcon
+                            Width="{StaticResource IconWidth}"
+                            Height="{StaticResource IconHeight}"
+                            Kind="BackupRestore" />
+                    </ControlTemplate>
+                </rib:RibbonButton.LargeIcon>
+            </rib:RibbonButton>
+
+            <rib:RibbonButton
+                Command="{Binding ServerOpenCommand}"
+                Content="Open root folder"
+                FontSize="{StaticResource FontSize}"
+                MinSize="Large">
+                <rib:RibbonButton.LargeIcon>
+                    <ControlTemplate>
+                        <mat:MaterialIcon
+                            Width="{StaticResource IconWidth}"
+                            Height="{StaticResource IconHeight}"
+                            Kind="FolderOpenOutline" />
+                    </ControlTemplate>
+                </rib:RibbonButton.LargeIcon>
+            </rib:RibbonButton>
+
+        </rib:RibbonGroupBox>
+
+        <rib:RibbonGroupBox Header="Server options">
+
+            <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
+                <TextBlock
+                    Width="100"
+                    Margin="0,0,4,0"
+                    VerticalAlignment="Center"
+                    FontSize="{StaticResource FontSize}"
+                    Text="Port Server" />
+                <NumericUpDown x:Name="PortServerInput"
+                               Width="130"
+                               MaxHeight="5"
+                               Increment="10"
+                               Maximum="{Binding PortMax}"
+                               Minimum="{Binding PortMin}"
+                               Value="{Binding PortServer, Mode=TwoWay}">
+                    <i:Interaction.Behaviors>
+                        <b:PreventEqualPortBehavior OtherPort="{Binding #PortSocketInput}" />
+                    </i:Interaction.Behaviors>
+                </NumericUpDown>
+            </StackPanel>
+            <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
+                <TextBlock
+                    Width="100"
+                    Margin="0,0,4,0"
+                    VerticalAlignment="Center"
+                    FontSize="{StaticResource FontSize}"
+                    Text="Port Socket" />
+                <NumericUpDown x:Name="PortSocketInput"
+                               Width="130"
+                               MaxHeight="5"
+                               Increment="10"
+                               Maximum="{Binding PortMax}"
+                               Minimum="{Binding PortMin}"
+                               Value="{Binding PortSocket, Mode=TwoWay}">
+                    <i:Interaction.Behaviors>
+                        <b:PreventEqualPortBehavior OtherPort="{Binding #PortServerInput}" />
+                    </i:Interaction.Behaviors>
+                </NumericUpDown>
+            </StackPanel>
+
+            <StackPanel Margin="0,0,4,4" Orientation="Horizontal">
+                <TextBlock
+                    Width="100"
+                    Margin="0,0,4,0"
+                    VerticalAlignment="Center"
+                    FontSize="{StaticResource FontSize}"
+                    Text="Delay Socket [ms]" />
+                <NumericUpDown
+                    Width="130"
+                    MaxHeight="5"
+                    Increment="10"
+                    Maximum="{Binding DelayMax}"
+                    Minimum="{Binding DelayMin}"
+                    Value="{Binding DelaySocket, Mode=TwoWay}" />
+            </StackPanel>
+
+        </rib:RibbonGroupBox>
+
+        <rib:RibbonGroupBox Header="App options">
+
+            <CheckBox
+                Margin="0,0,4,4"
+                VerticalAlignment="Center"
+                Content="Allow multiple instances"
+                FontSize="{StaticResource FontSize}"
+                IsChecked="{Binding AllowMultipleInstances, Mode=TwoWay}" />
+
+        </rib:RibbonGroupBox>
+
+    </rib:RibbonTab.Groups>
+
+</rib:RibbonTab>

@@ -63,17 +63,6 @@ namespace Score2Stream.MenuModule.ViewModels
             this.SelectTabCommand = new DelegateCommand<ViewType?>(
                 executeMethod: t => TabIndex = (int?)t);
 
-            this.ServerOpenCommand = new DelegateCommand(
-                executeMethod: webService.OpenRoot);
-            this.ServerReloadCommand = new DelegateCommand(
-                executeMethod: async () => await webService.ReloadAsync());
-            this.ScoreboardOpenCommand = new DelegateCommand(
-                executeMethod: webService.OpenServer,
-                canExecuteMethod: () => webService.IsActive);
-            this.ScoreboardUpdateCommand = new DelegateCommand(
-                executeMethod: scoreboardService.Update,
-                canExecuteMethod: () => !scoreboardService.IsUpToDate);
-
             this.InputRefreshCommand = new DelegateCommand(
                 executeMethod: RefreshInputs);
             this.InputSelectCommand = new DelegateCommand<string>(
@@ -120,6 +109,17 @@ namespace Score2Stream.MenuModule.ViewModels
             this.SampleOrderCommand = new DelegateCommand(
                 executeMethod: () => templateService.SampleService.Order(true),
                 canExecuteMethod: () => templateService?.SampleService?.Samples?.Count > 0);
+
+            this.ServerOpenCommand = new DelegateCommand(
+                executeMethod: webService.OpenRoot);
+            this.ServerReloadCommand = new DelegateCommand(
+                executeMethod: async () => await webService.ReloadAsync());
+            this.ScoreboardOpenCommand = new DelegateCommand(
+                executeMethod: webService.OpenServer,
+                canExecuteMethod: () => webService.IsActive);
+            this.ScoreboardUpdateCommand = new DelegateCommand(
+                executeMethod: scoreboardService.Update,
+                canExecuteMethod: () => !scoreboardService.IsUpToDate);
 
             tabSelectedEvent = eventAggregator.GetEvent<TabSelectedEvent>();
             detectionChangedEvent = eventAggregator.GetEvent<DetectionChangedEvent>();
@@ -256,6 +256,8 @@ namespace Score2Stream.MenuModule.ViewModels
         public DelegateCommand<string> InputSelectCommand { get; }
 
         public bool IsActive => inputService.IsActive;
+
+        public bool IsActiveSample => templateService?.Active != default;
 
         public bool IsSampleDetection
         {
@@ -638,6 +640,7 @@ namespace Score2Stream.MenuModule.ViewModels
         private void OnInputChanged()
         {
             RaisePropertyChanged(nameof(IsActive));
+            RaisePropertyChanged(nameof(IsActiveSample));
             RaisePropertyChanged(nameof(NoCropping));
             RaisePropertyChanged(nameof(ProcessingDelay));
             RaisePropertyChanged(nameof(ThresholdDetecting));
@@ -673,6 +676,8 @@ namespace Score2Stream.MenuModule.ViewModels
 
         private void OnTemplateSelected()
         {
+            RaisePropertyChanged(nameof(IsActiveSample));
+
             SampleAddCommand.RaiseCanExecuteChanged();
 
             OnSamplesChanged();

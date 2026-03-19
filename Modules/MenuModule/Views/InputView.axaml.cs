@@ -1,14 +1,13 @@
-using Avalonia.Controls;
 using AvaloniaUI.Ribbon;
 
 namespace Score2Stream.MenuModule.Views
 {
-    public partial class MenuView
-        : UserControl
+    public partial class InputView
+        : RibbonTab
     {
         #region Public Constructors
 
-        public MenuView()
+        public InputView()
         {
             InitializeComponent();
         }

@@ -3,6 +3,7 @@
 ## Version 1.12.1
 
 * Refactor template management
+* Modularize Ribbon menu into separate tab components
 
 ## Version 1.12.0
 
