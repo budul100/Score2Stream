@@ -16,51 +16,91 @@ using Score2Stream.Commons.Events.Scoreboard;
 using Score2Stream.Commons.Events.Template;
 using Score2Stream.Commons.Models.Contents;
 
-public abstract class TestBase
+namespace Score2Stream.Tests.MenuModuleTests
 {
-    #region Protected Methods
-
-    // Shared across all MenuModule tests
-    protected static Mock<IEventAggregator> CreateEventAggregatorMock()
+    public abstract class TestBase
     {
-        var mock = new Mock<IEventAggregator>();
+        #region Protected Methods
 
-        mock.RegisterNewMockedEvent<AreaModifiedEvent, Area>();
-        mock.RegisterNewMockedEvent<AreasChangedEvent>();
-        mock.RegisterNewMockedEvent<AreaSelectedEvent, Area>();
-        mock.RegisterNewMockedEvent<DetectionChangedEvent>();
-        mock.RegisterNewMockedEvent<FilterChangedEvent>();
-        mock.RegisterNewMockedEvent<InputCenteringEvent>();
-        mock.RegisterNewMockedEvent<InputEndedEvent, Input>();
-        mock.RegisterNewMockedEvent<InputSelectedEvent, Input>();
-        mock.RegisterNewMockedEvent<InputStartedEvent, Input>();
-        mock.RegisterNewMockedEvent<InputUpdatedEvent>();
-        mock.RegisterNewMockedEvent<SamplesChangedEvent>();
-        mock.RegisterNewMockedEvent<SampleSelectedEvent, Sample>();
-        mock.RegisterNewMockedEvent<SamplesOrderedEvent>();
-        mock.RegisterNewMockedEvent<ScoreboardModifiedEvent>();
-        mock.RegisterNewMockedEvent<ScoreboardUpdatedEvent, string>();
-        mock.RegisterNewMockedEvent<SegmentSelectedEvent, Segment>();
-        mock.RegisterNewMockedEvent<SegmentUpdatedEvent, Segment>();
-        mock.RegisterNewMockedEvent<ServerStartedEvent>();
-        mock.RegisterNewMockedEvent<TabSelectedEvent, ViewType>();
-        mock.RegisterNewMockedEvent<TemplatesChangedEvent>();
-        mock.RegisterNewMockedEvent<TemplateSelectedEvent, Template>();
+        protected static Mock<IEventAggregator> CreateEventAggregatorMock()
+        {
+            var mock = new Mock<IEventAggregator>();
 
-        return mock;
+            mock.RegisterNewMockedEvent<AreaModifiedEvent, Area>();
+            mock.RegisterNewMockedEvent<AreasChangedEvent>();
+            mock.RegisterNewMockedEvent<AreaSelectedEvent, Area>();
+            mock.RegisterNewMockedEvent<DetectionChangedEvent>();
+            mock.RegisterNewMockedEvent<FilterChangedEvent>();
+            mock.RegisterNewMockedEvent<InputCenteringEvent>();
+            mock.RegisterNewMockedEvent<InputEndedEvent, Input>();
+            mock.RegisterNewMockedEvent<InputSelectedEvent, Input>();
+            mock.RegisterNewMockedEvent<InputStartedEvent, Input>();
+            mock.RegisterNewMockedEvent<InputUpdatedEvent>();
+            mock.RegisterNewMockedEvent<SamplesChangedEvent>();
+            mock.RegisterNewMockedEvent<SampleSelectedEvent, Sample>();
+            mock.RegisterNewMockedEvent<SamplesOrderedEvent>();
+            mock.RegisterNewMockedEvent<ScoreboardModifiedEvent>();
+            mock.RegisterNewMockedEvent<ScoreboardUpdatedEvent, string>();
+            mock.RegisterNewMockedEvent<SegmentSelectedEvent, Segment>();
+            mock.RegisterNewMockedEvent<SegmentUpdatedEvent, Segment>();
+            mock.RegisterNewMockedEvent<ServerStartedEvent>();
+            mock.RegisterNewMockedEvent<TabSelectedEvent, ViewType>();
+            mock.RegisterNewMockedEvent<TemplatesChangedEvent>();
+            mock.RegisterNewMockedEvent<TemplateSelectedEvent, Template>();
+
+            EnableCallBaseOnAllEvents(mock);
+
+            return mock;
+        }
+
+        protected static async Task RunInSessionAsync(Func<Task> action)
+        {
+            using var session = HeadlessUnitTestSession.StartNew(typeof(TestApp.App));
+            await session.Dispatch(async () => await action(), CancellationToken.None);
+        }
+
+        protected static async Task RunInSessionAsync(Action action)
+        {
+            using var session = HeadlessUnitTestSession.StartNew(typeof(TestApp.App));
+            await session.Dispatch(action, CancellationToken.None);
+        }
+
+        #endregion Protected Methods
+
+        #region Private Methods
+
+        private static void EnableCallBase<TEvent>(Mock<IEventAggregator> mock)
+            where TEvent : EventBase, new()
+        {
+            var eventInstance = mock.Object.GetEvent<TEvent>();
+            Mock.Get(eventInstance).CallBase = true;
+        }
+
+        private static void EnableCallBaseOnAllEvents(Mock<IEventAggregator> mock)
+        {
+            EnableCallBase<AreaModifiedEvent>(mock);
+            EnableCallBase<AreasChangedEvent>(mock);
+            EnableCallBase<AreaSelectedEvent>(mock);
+            EnableCallBase<DetectionChangedEvent>(mock);
+            EnableCallBase<FilterChangedEvent>(mock);
+            EnableCallBase<InputCenteringEvent>(mock);
+            EnableCallBase<InputEndedEvent>(mock);
+            EnableCallBase<InputSelectedEvent>(mock);
+            EnableCallBase<InputStartedEvent>(mock);
+            EnableCallBase<InputUpdatedEvent>(mock);
+            EnableCallBase<SamplesChangedEvent>(mock);
+            EnableCallBase<SampleSelectedEvent>(mock);
+            EnableCallBase<SamplesOrderedEvent>(mock);
+            EnableCallBase<ScoreboardModifiedEvent>(mock);
+            EnableCallBase<ScoreboardUpdatedEvent>(mock);
+            EnableCallBase<SegmentSelectedEvent>(mock);
+            EnableCallBase<SegmentUpdatedEvent>(mock);
+            EnableCallBase<ServerStartedEvent>(mock);
+            EnableCallBase<TabSelectedEvent>(mock);
+            EnableCallBase<TemplatesChangedEvent>(mock);
+            EnableCallBase<TemplateSelectedEvent>(mock);
+        }
+
+        #endregion Private Methods
     }
-
-    protected static async Task RunInSessionAsync(Func<Task> action)
-    {
-        using var session = HeadlessUnitTestSession.StartNew(typeof(Score2Stream.Tests.TestApp.App));
-        await session.Dispatch(async () => await action(), CancellationToken.None);
-    }
-
-    protected static async Task RunInSessionAsync(Action action)
-    {
-        using var session = HeadlessUnitTestSession.StartNew(typeof(Score2Stream.Tests.TestApp.App));
-        await session.Dispatch(action, CancellationToken.None);
-    }
-
-    #endregion Protected Methods
 }

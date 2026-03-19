@@ -20,7 +20,6 @@ using Score2Stream.Commons.Events.Scoreboard;
 using Score2Stream.Commons.Events.Template;
 using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Interfaces;
-using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
 using Score2Stream.Commons.Prism;
 
@@ -41,6 +40,7 @@ namespace Score2Stream.MenuModule.ViewModels
         private readonly Task startLocationTask;
         private readonly TabSelectedEvent tabSelectedEvent;
         private readonly ITemplateService templateService;
+
         private IStorageFolder startLocation;
         private int tabIndex;
 
@@ -90,7 +90,7 @@ namespace Score2Stream.MenuModule.ViewModels
                 canExecuteMethod: CanRotateRight);
 
             this.AreaAddCommand = new DelegateCommand<string>(
-                executeMethod: AddSegments,
+                executeMethod: AddArea,
                 canExecuteMethod: _ => inputService.IsActive);
             this.AreaRemoveCommand = new DelegateCommand(
                 executeMethod: () => inputService.AreaService?.RemoveAsync(),
@@ -105,11 +105,8 @@ namespace Score2Stream.MenuModule.ViewModels
                 executeMethod: () => inputService.AreaService?.Order(true),
                 canExecuteMethod: () => inputService.AreaService?.Areas?.Count > 0);
 
-            this.TemplateSelectCommand = new DelegateCommand<object>(
-                executeMethod: param => SelectTemplate(param as Template));
-            this.TemplateRemoveCommand = new DelegateCommand(
-                executeMethod: () => templateService?.RemoveAsync(),
-                canExecuteMethod: () => templateService?.Active != default);
+            this.TemplateAddCommand = new DelegateCommand(
+                executeMethod: AddTemplate);
 
             this.SampleAddCommand = new DelegateCommand(
                 executeMethod: () => templateService?.SampleService?.Create(inputService.AreaService.Segment),
@@ -136,17 +133,15 @@ namespace Score2Stream.MenuModule.ViewModels
                 action: _ => OnInputChanged());
 
             eventAggregator.GetEvent<AreasChangedEvent>().Subscribe(
-                action: OnClipsChanged);
+                action: OnAreasChanged);
             eventAggregator.GetEvent<AreaSelectedEvent>().Subscribe(
-                action: _ => OnClipsChanged());
+                action: _ => OnAreasChanged());
             eventAggregator.GetEvent<AreaModifiedEvent>().Subscribe(
-                action: _ => OnClipsUpdated());
+                action: _ => OnAreasModified());
 
             eventAggregator.GetEvent<SegmentSelectedEvent>().Subscribe(
-                action: _ => OnClipsChanged());
+                action: _ => OnAreasChanged());
 
-            eventAggregator.GetEvent<TemplatesChangedEvent>().Subscribe(
-                action: RefreshTemplates);
             eventAggregator.GetEvent<TemplateSelectedEvent>().Subscribe(
                 action: _ => OnTemplateSelected());
 
@@ -440,11 +435,7 @@ namespace Score2Stream.MenuModule.ViewModels
             }
         }
 
-        public DelegateCommand TemplateRemoveCommand { get; }
-
-        public ObservableCollection<RibbonDropDownItem> Templates { get; } = [];
-
-        public DelegateCommand<object> TemplateSelectCommand { get; }
+        public DelegateCommand TemplateAddCommand { get; }
 
         public int ThresholdDetecting
         {
@@ -525,14 +516,24 @@ namespace Score2Stream.MenuModule.ViewModels
 
         #region Private Methods
 
-        private void AddSegments(string number)
+        private void AddArea(string numberSegments)
         {
             if (inputService.AreaService != default
-                && int.TryParse(number, out var size)
+                && int.TryParse(
+                    s: numberSegments,
+                    result: out var size)
                 && size >= Constants.SegmentsCountMin
                 && size <= Constants.SegmentsCountMax)
             {
                 inputService.AreaService.Create(size);
+            }
+        }
+
+        private void AddTemplate()
+        {
+            if (templateService != default)
+            {
+                templateService.Create();
             }
         }
 
@@ -619,7 +620,7 @@ namespace Score2Stream.MenuModule.ViewModels
             catch { }
         }
 
-        private void OnClipsChanged()
+        private void OnAreasChanged()
         {
             AreaRemoveCommand.RaiseCanExecuteChanged();
             AreaRemoveAllCommand.RaiseCanExecuteChanged();
@@ -628,12 +629,10 @@ namespace Score2Stream.MenuModule.ViewModels
             SampleAddCommand.RaiseCanExecuteChanged();
         }
 
-        private void OnClipsUpdated()
+        private void OnAreasModified()
         {
             AreaUndoCommand.RaiseCanExecuteChanged();
             AreaOrderAllCommand.RaiseCanExecuteChanged();
-
-            RefreshTemplates();
         }
 
         private void OnInputChanged()
@@ -674,9 +673,6 @@ namespace Score2Stream.MenuModule.ViewModels
 
         private void OnTemplateSelected()
         {
-            RefreshTemplates();
-
-            TemplateRemoveCommand.RaiseCanExecuteChanged();
             SampleAddCommand.RaiseCanExecuteChanged();
 
             OnSamplesChanged();
@@ -712,42 +708,6 @@ namespace Score2Stream.MenuModule.ViewModels
             Inputs.Add(fileInput);
         }
 
-        private void RefreshTemplates()
-        {
-            Templates.Clear();
-
-            if (templateService != default)
-            {
-                var ordereds = templateService.Templates
-                    .OrderBy(t => t.Name).ToArray();
-
-                foreach (var ordered in ordereds)
-                {
-                    var isChecked = ordered == templateService.Active;
-
-                    var template = new RibbonDropDownItem
-                    {
-                        Command = TemplateSelectCommand,
-                        CommandParameter = ordered,
-                        IsChecked = isChecked,
-                        Text = ordered.Name,
-                    };
-
-                    Templates.Add(template);
-                }
-
-                var selectTemplateAdd = new RibbonDropDownItem
-                {
-                    Command = TemplateSelectCommand,
-                    Text = Texts.MenuTemplateAddText,
-                };
-
-                Templates.Add(selectTemplateAdd);
-
-                RaisePropertyChanged(nameof(Templates));
-            }
-        }
-
         private async Task SelectInputAsync(string deviceName)
         {
             try
@@ -770,21 +730,6 @@ namespace Score2Stream.MenuModule.ViewModels
                     icon: Icon.Error);
 
                 return;
-            }
-        }
-
-        private void SelectTemplate(Template template)
-        {
-            if (templateService != default)
-            {
-                if (template == default)
-                {
-                    templateService.Create();
-                }
-                else
-                {
-                    templateService.Select(template);
-                }
             }
         }
 

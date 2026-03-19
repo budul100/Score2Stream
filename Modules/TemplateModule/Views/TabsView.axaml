@@ -1,17 +1,15 @@
 ﻿<UserControl
-    x:Class="Score2Stream.VideoModule.Views.TabsView"
+    x:Class="Score2Stream.TemplateModule.Views.TabsView"
     xmlns="https://github.com/avaloniaui"
     xmlns:prism="http://prismlibrary.com/"
-    xmlns:v="using:Score2Stream.VideoModule.Views"
-    xmlns:vm="using:Score2Stream.VideoModule.ViewModels"
+    xmlns:v="using:Score2Stream.TemplateModule.Views"
+    xmlns:vm="using:Score2Stream.TemplateModule.ViewModels"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     prism:ViewModelLocator.AutoWireViewModel="True">
 
     <TabControl
         ItemsSource="{Binding Tabs}"
-        SelectedItem="{Binding Tab, Mode=TwoWay}"
-        BorderBrush="{StaticResource TabBorderBrush}"
-        BorderThickness="1">
+        SelectedItem="{Binding Tab, Mode=TwoWay}">
 
         <TabControl.Styles>
             <!-- Tab header strip -->
@@ -61,7 +59,7 @@
 
         <TabControl.ContentTemplate>
             <DataTemplate DataType="{x:Type vm:TabViewModel}">
-                <v:InputView DataContext="{Binding Content}" />
+                <v:TemplateView DataContext="{Binding Content}" />
             </DataTemplate>
         </TabControl.ContentTemplate>
 

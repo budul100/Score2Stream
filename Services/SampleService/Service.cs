@@ -38,12 +38,12 @@ namespace Score2Stream.SampleService
 
         #region Public Constructors
 
-        public Service(ISettingsService<Session> settingsService, IRecognitionService recognitionService,
-            IDialogService dialogService, IEventAggregator eventAggregator)
+        public Service(ISettingsService<Session> settingsService, IDialogService dialogService,
+            IRecognitionService recognitionService, IEventAggregator eventAggregator)
         {
             this.settingsService = settingsService;
-            this.recognitionService = recognitionService;
             this.dialogService = dialogService;
+            this.recognitionService = recognitionService;
 
             samplesChangedEvent = eventAggregator.GetEvent<SamplesChangedEvent>();
             samplesOrderedEvent = eventAggregator.GetEvent<SamplesOrderedEvent>();
@@ -70,7 +70,7 @@ namespace Score2Stream.SampleService
 
         public bool IsDetection { get; set; }
 
-        public List<Sample> Samples { get; } = [];
+        public List<Sample> Samples => template.Samples;
 
         #endregion Public Properties
 
@@ -87,14 +87,14 @@ namespace Score2Stream.SampleService
                         maxCount: Constants.MaxCountSamples);
                 }
 
-                if (sample.Value == default
-                    && recognitionService != default)
+                if (sample.Value == default)
                 {
                     sample.Value = recognitionService.GetValue(sample.Mat)?.Value;
                 }
 
                 sample.Bitmap = new Bitmap(sample.Mat.ToMemoryStream());
                 sample.Index = index++;
+                sample.Template = template;
 
                 Samples.Add(sample);
 
@@ -135,7 +135,7 @@ namespace Score2Stream.SampleService
         {
             try
             {
-                AddSample(
+                AddSegment(
                     segment: segment,
                     select: true);
             }
@@ -245,7 +245,7 @@ namespace Score2Stream.SampleService
 
         #region Private Methods
 
-        private void AddSample(Segment segment, bool select)
+        private void AddSegment(Segment segment, bool select)
         {
             var sample = GetSample(segment);
 
@@ -283,11 +283,11 @@ namespace Score2Stream.SampleService
         private void DetectSegment(Segment segment)
         {
             if (segment?.Mat?.IsEmpty() == false
-                && !recognitionService.HasSimilars(segment.Mat))
+                && !recognitionService.HasSimilars(segment))
             {
                 try
                 {
-                    AddSample(
+                    AddSegment(
                         segment: segment,
                         select: false);
                 }
@@ -309,8 +309,6 @@ namespace Score2Stream.SampleService
                     Mat = segment.Mat,
                     Template = template,
                 };
-
-                template.Samples.Add(result);
             }
 
             return result;
@@ -320,8 +318,6 @@ namespace Score2Stream.SampleService
         {
             if (sample != default)
             {
-                sample.Template?.Samples.Remove(sample);
-
                 Samples.Remove(sample);
 
                 recognitionService.Remove(sample);

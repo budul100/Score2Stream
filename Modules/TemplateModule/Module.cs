@@ -15,7 +15,7 @@ namespace Score2Stream.TemplateModule
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterForNavigation<TemplateView>(
+            containerRegistry.RegisterForNavigation<TabsView>(
                 name: nameof(ViewType.Templates));
         }
 

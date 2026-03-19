@@ -12,19 +12,17 @@ namespace Score2Stream.Commons.Interfaces
 
         ISampleService SampleService { get; }
 
-        List<Template> Templates { get; }
+        IReadOnlyList<Template> Templates { get; }
 
         #endregion Public Properties
 
         #region Public Methods
 
-        void Add(Template template);
-
         void Create();
 
         void Initialize();
 
-        Task RemoveAsync();
+        Task RemoveAsync(Template template = default);
 
         void Select(Template template);
 

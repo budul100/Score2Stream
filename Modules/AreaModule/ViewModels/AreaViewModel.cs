@@ -101,13 +101,12 @@ namespace Score2Stream.AreaModule.ViewModels
             get { return Area?.Template; }
             set
             {
-                if (value != default
-                    && Area.Template != value)
+                if (Area?.Template != value)
                 {
                     ActivateArea();
 
                     Area.Template = value;
-                    Area.TemplateName = value.Name;
+                    Area.TemplateName = value?.Name;
 
                     RaisePropertyChanged(nameof(Template));
                 }
@@ -229,7 +228,7 @@ namespace Score2Stream.AreaModule.ViewModels
             Template = default;
 
             var toBeRemoveds = Templates
-                .Where(t => templateService?.Templates?.Contains(t) != true).ToArray();
+                .Where(t => t != null && templateService?.Templates?.Contains(t) != true).ToArray();
 
             foreach (var toBeRemoved in toBeRemoveds)
             {
@@ -238,6 +237,13 @@ namespace Score2Stream.AreaModule.ViewModels
 
             if (templateService?.Templates != default)
             {
+                if (!Templates.Contains(default))
+                {
+                    Templates.Insert(
+                        index: 0,
+                        item: default);
+                }
+
                 var toBeAddeds = templateService.Templates
                     .Where(t => !Templates.Contains(t)).ToArray();
 

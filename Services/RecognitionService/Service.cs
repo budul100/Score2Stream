@@ -25,7 +25,7 @@ namespace Score2Stream.RecognitionService
         private const int SampleHeight = 96;
         private const int SampleWidth = 64;
 
-        private readonly List<(float[] Features, Sample Sample)> sampleVectors = [];
+        private readonly Dictionary<Template, List<(float[] Features, Sample Sample)>> sampleVectors = [];
         private readonly InferenceSession sessionFeature;
         private readonly InferenceSession sessionModel;
         private readonly ISettingsService<Session> settingsService;
@@ -71,9 +71,20 @@ namespace Score2Stream.RecognitionService
 
         public void Add(Sample sample)
         {
-            var features = ExtractFeatures(sample.Mat);
+            if (sample?.Template != default)
+            {
+                var features = ExtractFeatures(sample.Mat);
 
-            sampleVectors.Add((features, sample));
+                if (!sampleVectors.TryGetValue(
+                    key: sample.Template,
+                    value: out var vectors))
+                {
+                    vectors = [];
+                    sampleVectors[sample.Template] = vectors;
+                }
+
+                vectors.Add((features, sample));
+            }
         }
 
         public void Dispose()
@@ -82,19 +93,23 @@ namespace Score2Stream.RecognitionService
             GC.SuppressFinalize(this);
         }
 
-        public IEnumerable<Match> GetMatches(Mat image)
+        public IEnumerable<Match> GetMatches(Segment segment)
         {
-            if (!image.IsEmpty()
-                && sampleVectors.Count > 0)
+            if (segment?.Area?.Template != default
+                && !segment.Mat.IsEmpty()
+                && sampleVectors.TryGetValue(
+                    key: segment.Area.Template,
+                    value: out var vectors)
+                && vectors.Count > 0)
             {
-                var preprocessed = GetPreprocessed(image);
+                var preprocessed = GetPreprocessed(segment.Mat);
                 var features = GetFeatures(preprocessed);
 
                 var thresholdMatching = Math.Abs(settingsService.Contents.Detection.ThresholdMatching)
                     / Constants.ThresholdDivider;
 
-                var comparisons = sampleVectors
-                    .Select(s => (s.Sample, Similarity: CosineSimilarity(s.Features, features))).ToArray();
+                var comparisons = vectors
+                    .Select(v => (v.Sample, Similarity: CosineSimilarity(v.Features, features))).ToArray();
 
                 foreach (var comparison in comparisons)
                 {
@@ -143,21 +158,25 @@ namespace Score2Stream.RecognitionService
             return result;
         }
 
-        public bool HasSimilars(Mat image)
+        public bool HasSimilars(Segment segment)
         {
             var result = false;
 
-            if (!image.IsEmpty()
-                && sampleVectors.Count > 0)
+            if (segment?.Area?.Template != default
+                && !segment.Mat.IsEmpty()
+                && sampleVectors.TryGetValue(
+                    key: segment.Area.Template,
+                    value: out var vectors)
+                && vectors.Count > 0)
             {
-                var preprocessed = GetPreprocessed(image);
+                var preprocessed = GetPreprocessed(segment.Mat);
                 var features = GetFeatures(preprocessed);
 
                 var thresholdDetecting = Math.Abs(settingsService.Contents.Detection.ThresholdDetecting)
                     / Constants.ThresholdDivider;
 
-                result = sampleVectors
-                    .Select(s => CosineSimilarity(s.Features, features))
+                result = vectors
+                    .Select(v => CosineSimilarity(v.Features, features))
                     .Any(s => s >= thresholdDetecting);
             }
 
@@ -166,15 +185,21 @@ namespace Score2Stream.RecognitionService
 
         public void Remove(Sample sample)
         {
-            var features = ExtractFeatures(sample.Mat);
-
-            var closest = sampleVectors
-                .OrderBy(s => CosineSimilarity(s.Features, features))
-                .FirstOrDefault();
-
-            if (closest != default)
+            if (sample?.Template != default
+                && sampleVectors.TryGetValue(
+                    key: sample.Template,
+                    value: out var vectors))
             {
-                sampleVectors.Remove(closest);
+                var features = ExtractFeatures(sample.Mat);
+
+                var closest = vectors
+                    .OrderBy(v => CosineSimilarity(v.Features, features))
+                    .FirstOrDefault();
+
+                if (closest != default)
+                {
+                    vectors.Remove(closest);
+                }
             }
         }
 
@@ -312,7 +337,10 @@ namespace Score2Stream.RecognitionService
             var probs = Softmax(logits);
 
             var confidence = probs.Max();
-            var predicted = Array.IndexOf(probs, confidence);
+
+            var predicted = Array.IndexOf(
+                array: probs,
+                value: confidence);
 
             var result = (predicted.ToString(), confidence);
             return result;

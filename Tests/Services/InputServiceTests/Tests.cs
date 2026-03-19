@@ -44,12 +44,7 @@ namespace Score2Stream.Tests.InputServiceTests
         private readonly Session session;
         private readonly Mock<ISettingsService<Session>> settingsServiceMock;
         private readonly List<string> tempFiles = [];
-
         private readonly TemplatesChangedEvent templatesChangedEvent = new();
-
-        // FIX 1: templateServiceMock was missing entirely as a shared field.
-        // The Service constructor requires ITemplateService; omitting it caused a compile error
-        // and would have caused NullReferenceException inside InitializeAreas().
         private readonly Mock<ITemplateService> templateServiceMock;
 
         #endregion Private Fields
@@ -259,10 +254,14 @@ namespace Score2Stream.Tests.InputServiceTests
 
             videoServiceMock
                 .Setup(v => v.RunAsync(It.IsAny<Input>()))
-                .Callback(() =>
+                .Callback<Input>(i =>
                 {
                     videoServiceMock.Setup(v => v.IsStarted).Returns(true);
                     videoServiceMock.Setup(v => v.IsActive).Returns(true);
+
+                    eventAggregatorMock.Object
+                        .GetEvent<InputStartedEvent>()
+                        .Publish(i);
                 })
                 .Returns(Task.CompletedTask);
 
@@ -281,6 +280,7 @@ namespace Score2Stream.Tests.InputServiceTests
             Assert.Equal("ValidCam", inputService.Active.DeviceName);
             Assert.Equal(1, inputService.Active.DeviceId);
             Assert.True(eventPublished);
+
             videoServiceMock.Verify(v => v.RunAsync(inputService.Active), Times.Once);
             settingsServiceMock.Verify(s => s.Save(It.IsAny<string>()), Times.Once);
         }
@@ -334,7 +334,7 @@ namespace Score2Stream.Tests.InputServiceTests
                 .ReturnsAsync(ButtonResult.No);
 
             // Act
-            await inputService.StopAsync(input);
+            await inputService.RemoveAsync(input);
 
             // Assert
             var videoMock = Mock.Get(input.VideoService);
@@ -369,7 +369,7 @@ namespace Score2Stream.Tests.InputServiceTests
                 .ReturnsAsync(ButtonResult.Yes);
 
             // Act
-            await inputService.StopAsync(input);
+            await inputService.RemoveAsync(input);
 
             // Assert
             videoServiceMock.Verify(v => v.StopAsync(), Times.Once);

@@ -74,6 +74,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InputServiceTests", "Tests\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoServiceTests", "Tests\Services\VideoServiceTests\VideoServiceTests.csproj", "{0771712A-16BC-42D7-BA2F-980EE451C1B0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TemplateServiceTests", "Tests\Services\TemplateServiceTests\TemplateServiceTests.csproj", "{95ED54F3-C286-6859-DEFF-9E183F54DEB1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -180,6 +182,10 @@ Global
 		{0771712A-16BC-42D7-BA2F-980EE451C1B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0771712A-16BC-42D7-BA2F-980EE451C1B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0771712A-16BC-42D7-BA2F-980EE451C1B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95ED54F3-C286-6859-DEFF-9E183F54DEB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95ED54F3-C286-6859-DEFF-9E183F54DEB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95ED54F3-C286-6859-DEFF-9E183F54DEB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95ED54F3-C286-6859-DEFF-9E183F54DEB1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -211,6 +217,7 @@ Global
 		{9D4391ED-5B86-465D-8A25-3B9866A9D0E7} = {81B1AAB2-D724-4963-B6FE-32E5BE18F7E7}
 		{EF4B2051-485E-4634-854D-5756F4BDAA4A} = {2791EF42-0379-4A9C-8DFA-4C89F2CE4975}
 		{0771712A-16BC-42D7-BA2F-980EE451C1B0} = {2791EF42-0379-4A9C-8DFA-4C89F2CE4975}
+		{95ED54F3-C286-6859-DEFF-9E183F54DEB1} = {2791EF42-0379-4A9C-8DFA-4C89F2CE4975}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {426EBDEF-973C-4F65-AA08-27BB71AC16B7}

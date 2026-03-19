@@ -37,6 +37,7 @@ namespace Score2Stream.Tests.VideoServiceTests
         private readonly Mock<ITemplateService> templateServiceMock; // Fix: was missing
         private readonly Mock<IVideoCapture> videoCaptureMock;
         private readonly Service videoService;
+
         private bool isDisposed;
 
         #endregion Private Fields

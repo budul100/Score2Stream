@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Score2Stream.Commons.Extensions
 {
@@ -6,25 +8,30 @@ namespace Score2Stream.Commons.Extensions
     {
         #region Public Methods
 
-        public static T GetNext<T>(this IList<T> values, T active, bool backward = false)
+        public static T GetNext<T>(this IEnumerable<T> values, T active, bool backward = false)
         {
             var result = active;
 
-            if (values.Count > 0)
+            var array = values as T[]
+                ?? values.ToArray();
+
+            if (array.Length > 0)
             {
-                var index = values.IndexOf(active);
+                var index = Array.IndexOf(
+                    array: array,
+                    value: active);
 
                 if (backward)
                 {
                     result = index > 0
-                        ? values[index - 1]
-                        : values[^1];
+                        ? array[index - 1]
+                        : array[^1];
                 }
                 else
                 {
-                    result = index < values.Count - 1
-                        ? values[index + 1]
-                        : values[0];
+                    result = index < array.Length - 1
+                        ? array[index + 1]
+                        : array[0];
                 }
             }
 

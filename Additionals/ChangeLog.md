@@ -1,5 +1,9 @@
 # Change log
 
+## Version 1.12.1
+
+* Refactor template management
+
 ## Version 1.12.0
 
 * Show scoreboard update status in button ([#11](https://github.com/budul100/Score2Stream/issues/11))

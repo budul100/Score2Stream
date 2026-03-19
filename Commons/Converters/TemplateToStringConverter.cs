@@ -1,21 +1,22 @@
 ﻿using System;
 using System.Globalization;
-using Score2Stream.Commons.Extensions;
+using Score2Stream.Commons.Models.Contents;
 
 namespace Score2Stream.Commons.Converters
 {
-    public class DescriptionToStringConverter
+    public class TemplateToStringConverter
         : OneWayValueConverter
     {
         #region Public Methods
 
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var enumValue = value as Enum;
+            if (value is Template template)
+            {
+                return template.Name;
+            }
 
-            var result = enumValue?.GetDescription();
-
-            return result;
+            return "(None)";
         }
 
         #endregion Public Methods

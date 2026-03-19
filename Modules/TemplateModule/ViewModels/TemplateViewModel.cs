@@ -43,11 +43,11 @@ namespace Score2Stream.TemplateModule.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<TemplateSelectedEvent>().Subscribe(
-                action: SetTemplate,
+                action: _ => OnSegmentSelected(),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<SamplesChangedEvent>().Subscribe(
-                action: UpdateSamples,
+                action: RefreshSamples,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<SamplesOrderedEvent>().Subscribe(
@@ -55,7 +55,7 @@ namespace Score2Stream.TemplateModule.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<SegmentSelectedEvent>().Subscribe(
-                action: _ => UpdateTemplate(),
+                action: _ => OnSegmentSelected(),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<SegmentUpdatedEvent>().Subscribe(
@@ -70,7 +70,10 @@ namespace Score2Stream.TemplateModule.ViewModels
                 keepSubscriberReferenceAlive: true,
                 filter: s => s == inputService.AreaService?.Segment);
 
-            SetTemplate(templateService?.Active);
+            this.Template = templateService?.Active;
+
+            RefreshSamples();
+            OnSegmentSelected();
         }
 
         #endregion Public Constructors
@@ -105,6 +108,13 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         #region Private Methods
 
+        private void OnSegmentSelected()
+        {
+            RaisePropertyChanged(nameof(Description));
+            RaisePropertyChanged(nameof(Bitmap));
+            RaisePropertyChanged(nameof(IsDetection));
+        }
+
         private void OrderSamples()
         {
             Samples = new ObservableCollection<SampleViewModel>(Samples.OrderBy(s => s.Sample.Index));
@@ -112,15 +122,7 @@ namespace Score2Stream.TemplateModule.ViewModels
             RaisePropertyChanged(nameof(Samples));
         }
 
-        private void SetTemplate(Template template)
-        {
-            this.Template = template;
-
-            UpdateTemplate();
-            UpdateSamples();
-        }
-
-        private void UpdateSamples()
+        private void RefreshSamples()
         {
             var toBeRemoveds = Samples
                 .Where(s => Template.Samples?.Contains(s.Sample) != true).ToArray();
@@ -149,12 +151,6 @@ namespace Score2Stream.TemplateModule.ViewModels
                     Samples.Add(current);
                 }
             }
-        }
-
-        private void UpdateTemplate()
-        {
-            RaisePropertyChanged(nameof(Description));
-            RaisePropertyChanged(nameof(Bitmap));
         }
 
         #endregion Private Methods

@@ -4,11 +4,11 @@ using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
-using Score2Stream.Commons.Events.Input;
+using Score2Stream.Commons.Events.Template;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Prism;
 
-namespace Score2Stream.VideoModule.ViewModels
+namespace Score2Stream.TemplateModule.ViewModels
 {
     public class TabsViewModel
         : RegionViewModelBase
@@ -16,7 +16,7 @@ namespace Score2Stream.VideoModule.ViewModels
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
-        private readonly IInputService inputService;
+        private readonly ITemplateService templateService;
 
         private bool isRefreshing;
         private TabViewModel selectedTab;
@@ -25,22 +25,18 @@ namespace Score2Stream.VideoModule.ViewModels
 
         #region Public Constructors
 
-        public TabsViewModel(IInputService inputService, IContainerProvider containerProvider,
+        public TabsViewModel(ITemplateService templateService, IContainerProvider containerProvider,
             IEventAggregator eventAggregator, IRegionManager regionManager)
             : base(regionManager)
         {
-            this.inputService = inputService;
             this.containerProvider = containerProvider;
+            this.templateService = templateService;
 
-            eventAggregator.GetEvent<InputSelectedEvent>().Subscribe(
-                action: _ => RefreshTabs(),
+            eventAggregator.GetEvent<TemplatesChangedEvent>().Subscribe(
+                action: RefreshTabs,
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<InputStartedEvent>().Subscribe(
-                action: _ => RefreshTabs(),
-                keepSubscriberReferenceAlive: true);
-
-            eventAggregator.GetEvent<InputEndedEvent>().Subscribe(
+            eventAggregator.GetEvent<TemplateSelectedEvent>().Subscribe(
                 action: _ => RefreshTabs(),
                 keepSubscriberReferenceAlive: true);
 
@@ -61,9 +57,9 @@ namespace Score2Stream.VideoModule.ViewModels
                 SetProperty(ref selectedTab, value);
 
                 if (value != default
-                    && inputService.Active != value.Input)
+                    && templateService.Active != value.Template)
                 {
-                    inputService.Select(value.Input);
+                    templateService.Select(value.Template);
                 }
             }
         }
@@ -89,26 +85,25 @@ namespace Score2Stream.VideoModule.ViewModels
 
             Tabs.Clear();
 
-            var relevants = inputService.Inputs
-                .Where(i => i.VideoService != default
-                    && i.IsStarted).ToArray();
+            var relevants = templateService.Templates
+                .Where(i => i.SampleService != default).ToArray();
 
             var selected = default(TabViewModel);
 
             foreach (var relevant in relevants)
             {
-                var viewModel = containerProvider.Resolve<InputViewModel>();
-                var closeCommand = new DelegateCommand(async () => await inputService.RemoveAsync(relevant));
+                var viewModel = containerProvider.Resolve<TemplateViewModel>();
+                var closeCommand = new DelegateCommand(async () => await templateService.RemoveAsync(relevant));
 
                 var tab = new TabViewModel(
-                    Input: relevant,
+                    Template: relevant,
                     Name: relevant.Name,
                     Content: viewModel,
                     CloseCommand: closeCommand);
 
                 Tabs.Add(tab);
 
-                if (relevant == inputService.Active)
+                if (relevant == templateService.Active)
                 {
                     selected = tab;
                 }

@@ -1,11 +1,11 @@
 ﻿using Score2Stream.Commons.Models.Contents;
 using System.Windows.Input;
 
-namespace Score2Stream.VideoModule.ViewModels
+namespace Score2Stream.TemplateModule.ViewModels
 {
     public record TabViewModel(
-        Input Input,
+        Template Template,
         string Name,
-        InputViewModel Content,
+        TemplateViewModel Content,
         ICommand CloseCommand);
 }

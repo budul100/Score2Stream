@@ -283,24 +283,9 @@
                 <rib:RibbonTab.Groups>
 
                     <rib:RibbonGroupBox Header="Templates selection">
-                        <rib:RibbonDropDownButton
-                            Content="Template"
-                            FontSize="{StaticResource FontSize}"
-                            IsEnabled="{Binding IsActive}"
-                            ItemsSource="{Binding Templates}"
-                            MinSize="Large">
-                            <rib:RibbonDropDownButton.LargeIcon>
-                                <ControlTemplate>
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource IconWidth}"
-                                        Height="{StaticResource IconHeight}"
-                                        Kind="MovieOutline" />
-                                </ControlTemplate>
-                            </rib:RibbonDropDownButton.LargeIcon>
-                        </rib:RibbonDropDownButton>
                         <rib:RibbonButton
-                            Command="{Binding TemplateRemoveCommand}"
-                            Content="Remove current"
+                            Command="{Binding TemplateAddCommand}"
+                            Content="Add template"
                             FontSize="{StaticResource FontSize}"
                             MinSize="Large">
                             <rib:RibbonButton.LargeIcon>
@@ -308,7 +293,7 @@
                                     <mat:MaterialIcon
                                         Width="{StaticResource IconWidth}"
                                         Height="{StaticResource IconHeight}"
-                                        Kind="MovieMinusOutline" />
+                                        Kind="MovieOutline" />
                                 </ControlTemplate>
                             </rib:RibbonButton.LargeIcon>
                         </rib:RibbonButton>

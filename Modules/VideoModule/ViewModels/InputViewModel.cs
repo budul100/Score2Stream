@@ -74,11 +74,11 @@ namespace Score2Stream.VideoModule.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<AreasChangedEvent>().Subscribe(
-                action: UpdateAreas,
+                action: RefreshAreas,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<AreaModifiedEvent>().Subscribe(
-                action: _ => UpdateAreas(),
+                action: _ => RefreshAreas(),
                 keepSubscriberReferenceAlive: true);
 
             IsLoading = true;
@@ -176,7 +176,7 @@ namespace Score2Stream.VideoModule.ViewModels
 
                 mouseX = value;
 
-                UpdateArea();
+                RefreshArea();
             }
         }
 
@@ -199,7 +199,7 @@ namespace Score2Stream.VideoModule.ViewModels
 
                 mouseY = value;
 
-                UpdateArea();
+                RefreshArea();
             }
         }
 
@@ -322,46 +322,7 @@ namespace Score2Stream.VideoModule.ViewModels
             }
         }
 
-        private void RefreshInput()
-        {
-            Bitmap = inputService.VideoService?.Bitmap;
-
-            if (Bitmap != default
-                && IsLoading)
-            {
-                UpdateAreas();
-
-                IsLoading = false;
-            }
-        }
-
-        private void SelectArea(Area area)
-        {
-            this.area = Areas.SingleOrDefault(a => area == a.Area);
-        }
-
-        private void SetDimensions()
-        {
-            if (BitmapHeight == 0 || BitmapWidth == 0)
-            {
-                widthMin = default;
-                widthMax = default;
-                heightMin = default;
-                heightMax = default;
-            }
-            else
-            {
-                widthMin = Math.Floor((FullWidth - BitmapWidth) / 2);
-                widthMax = widthMin + Math.Floor(BitmapWidth);
-
-                heightMin = Math.Floor((FullHeight - BitmapHeight) / 2);
-                heightMax = heightMin + Math.Floor(BitmapHeight);
-            }
-
-            UpdateAreas();
-        }
-
-        private void UpdateArea()
+        private void RefreshArea()
         {
             if (IsMouseEditing())
             {
@@ -401,7 +362,7 @@ namespace Score2Stream.VideoModule.ViewModels
             }
         }
 
-        private void UpdateAreas()
+        private void RefreshAreas()
         {
             Areas.Clear();
 
@@ -433,6 +394,46 @@ namespace Score2Stream.VideoModule.ViewModels
                     }
                 }
             }
+        }
+
+        private void RefreshInput()
+        {
+            Bitmap = inputService.VideoService?.Bitmap;
+
+            if (Bitmap != default
+                && IsLoading)
+            {
+                RefreshAreas();
+
+                IsLoading = false;
+            }
+        }
+
+        private void SelectArea(Area area)
+        {
+            this.area = Areas
+                .SingleOrDefault(a => area == a.Area);
+        }
+
+        private void SetDimensions()
+        {
+            if (BitmapHeight == 0 || BitmapWidth == 0)
+            {
+                widthMin = default;
+                widthMax = default;
+                heightMin = default;
+                heightMax = default;
+            }
+            else
+            {
+                widthMin = Math.Floor((FullWidth - BitmapWidth) / 2);
+                widthMax = widthMin + Math.Floor(BitmapWidth);
+
+                heightMin = Math.Floor((FullHeight - BitmapHeight) / 2);
+                heightMax = heightMin + Math.Floor(BitmapHeight);
+            }
+
+            RefreshAreas();
         }
 
         #endregion Private Methods

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using MsBox.Avalonia.Enums;
@@ -6,6 +7,7 @@ using OpenCvSharp;
 using Prism.Events;
 using Prism.Ioc;
 using Score2Stream.Commons.Assets;
+using Score2Stream.Commons.Events.Menu;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Template;
 using Score2Stream.Commons.Exceptions;
@@ -22,11 +24,13 @@ namespace Score2Stream.TemplateService
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
+        private readonly DetectionChangedEvent detectionChangedEvent;
         private readonly IDialogService dialogService;
         private readonly ISettingsService<Session> settingsService;
         private readonly TemplatesChangedEvent templatesChangedEvent;
         private readonly TemplateSelectedEvent templateSelectedEvent;
         private bool isInitializing;
+        private ImmutableList<Template> templates = [];
 
         #endregion Private Fields
 
@@ -42,14 +46,16 @@ namespace Score2Stream.TemplateService
             templatesChangedEvent = eventAggregator.GetEvent<TemplatesChangedEvent>();
             templateSelectedEvent = eventAggregator.GetEvent<TemplateSelectedEvent>();
 
+            detectionChangedEvent = eventAggregator.GetEvent<DetectionChangedEvent>();
+
             eventAggregator.GetEvent<SamplesChangedEvent>().Subscribe(
-                action: SaveTemplates,
+                action: SaveSamples,
                 keepSubscriberReferenceAlive: true);
             eventAggregator.GetEvent<SamplesOrderedEvent>().Subscribe(
-                action: SaveTemplates,
+                action: SaveSamples,
                 keepSubscriberReferenceAlive: true);
             eventAggregator.GetEvent<SampleModifiedEvent>().Subscribe(
-                action: _ => SaveTemplates(),
+                action: _ => SaveSamples(),
                 keepSubscriberReferenceAlive: true);
         }
 
@@ -61,60 +67,11 @@ namespace Score2Stream.TemplateService
 
         public ISampleService SampleService => Active?.SampleService;
 
-        public List<Template> Templates { get; } = [];
+        public IReadOnlyList<Template> Templates => templates;
 
         #endregion Public Properties
 
         #region Public Methods
-
-        public void Add(Template template)
-        {
-            if (template != default)
-            {
-                if (Templates.Count >= Constants.MaxCountTemplates)
-                {
-                    throw new MaxCountExceededException(
-                        type: typeof(Template),
-                        maxCount: Constants.MaxCountTemplates);
-                }
-
-                if (template.SampleService == default)
-                {
-                    template.SampleService = containerProvider
-                        .Resolve<ISampleService>();
-
-                    template.SampleService.Initialize(
-                        template: template);
-                }
-
-                if (template.Samples?.Count > 0)
-                {
-                    var samples = template.Samples
-                        .Where(s => s.Image != default)
-                        .OrderBy(s => s.Index).ToList();
-
-                    try
-                    {
-                        foreach (var sample in samples)
-                        {
-                            sample.Mat = Mat.FromImageData(
-                                imageBytes: sample.Image,
-                                mode: ImreadModes.Unchanged);
-
-                            sample.Template = template;
-
-                            template.SampleService.Add(sample);
-                        }
-                    }
-                    catch (MaxCountExceededException)
-                    { }
-
-                    template.SampleService.Order();
-                }
-
-                Templates.Add(template);
-            }
-        }
 
         public void Create()
         {
@@ -122,9 +79,7 @@ namespace Score2Stream.TemplateService
             {
                 var template = GetTemplate();
 
-                Add(template);
-
-                templatesChangedEvent.Publish();
+                InitializeTemplate(template);
 
                 Select(template);
             }
@@ -141,80 +96,98 @@ namespace Score2Stream.TemplateService
         {
             isInitializing = true;
 
-            try
+            if (settingsService.Contents.Templates?.Count > 0)
             {
-                if (settingsService.Contents.Templates?.Count > 0)
+                try
                 {
                     foreach (var template in settingsService.Contents.Templates)
                     {
-                        Add(template);
+                        InitializeTemplate(template);
                     }
                 }
-                else
-                {
-                    Create();
-                }
+                catch (MaxCountExceededException)
+                { }
             }
-            catch (MaxCountExceededException)
-            { }
 
-            Select(Templates?.FirstOrDefault());
+            if (Templates.Count > 0)
+            {
+                var relevant = Templates[0];
+
+                Select(relevant);
+            }
 
             isInitializing = false;
         }
 
-        public async Task RemoveAsync()
+        public async Task RemoveAsync(Template template = default)
         {
-            if (Active != default)
+            template ??= Active;
+
+            if (template != default)
             {
                 var result = await dialogService.GetMessageBoxResultAsync(
-                    contentMessage: "Shall the selected template be removed?",
+                    contentMessage: $"Shall {template.Name} be removed?",
                     contentTitle: "Remove template");
 
                 if (result == ButtonResult.Yes)
                 {
-                    var next = Templates.GetNext(Active);
-
-                    Active.SampleService.Clear();
-                    Templates.Remove(Active);
-
-                    if (Templates.Count > 0)
+                    if (template.SampleService != default)
                     {
-                        templatesChangedEvent.Publish();
+                        template.SampleService.Clear();
 
-                        Select(next);
+                        template.SampleService = default;
                     }
-                    else
-                    {
-                        try
-                        {
-                            Create();
-                        }
-                        catch (MaxCountExceededException)
-                        { }
-                    }
+
+                    RemoveTemplate(template);
                 }
             }
         }
 
         public void Select(Template template)
         {
-            if (isInitializing) return;
+            if (template == Active) return;
 
-            if (template != Active || template == default)
+            Active = template;
+
+            if (SampleService?.IsDetection == true)
             {
-                Active = template
-                    ?? Templates.FirstOrDefault();
+                SampleService.IsDetection = false;
 
-                templateSelectedEvent.Publish(Active);
+                detectionChangedEvent.Publish();
             }
 
-            SaveTemplates();
+            templateSelectedEvent.Publish(Active);
         }
 
         #endregion Public Methods
 
         #region Private Methods
+
+        private static void InitializeSamples(Template template)
+        {
+            if (template.Samples?.Count > 0)
+            {
+                var samples = template.Samples
+                    .Where(s => s.Image != default)
+                    .OrderBy(s => s.Index).ToList();
+
+                try
+                {
+                    foreach (var sample in samples)
+                    {
+                        sample.Mat = Mat.FromImageData(
+                            imageBytes: sample.Image,
+                            mode: ImreadModes.Unchanged);
+
+                        template.SampleService.Add(sample);
+                    }
+                }
+                catch (MaxCountExceededException)
+                { }
+
+                template.SampleService.Order();
+            }
+        }
 
         private Template GetTemplate()
         {
@@ -228,26 +201,96 @@ namespace Score2Stream.TemplateService
             return result;
         }
 
-        private void SaveTemplates()
+        private void InitializeService(Template template)
         {
-            if (Templates?.Count > 0)
+            if (template.SampleService == default)
             {
-                foreach (var template in Templates)
-                {
-                    var relevants = template.Samples?
-                        .Where(s => s.Mat != default
-                            && s.Image == null).ToArray();
+                template.SampleService = containerProvider
+                    .Resolve<ISampleService>();
 
-                    if (relevants?.Length > 0)
-                    {
-                        foreach (var relevant in relevants)
-                        {
-                            relevant.Image = relevant.Mat.ToBytes();
-                        }
-                    }
+                template.SampleService.Initialize(
+                    template: template);
+            }
+        }
+
+        private void InitializeTemplate(Template template)
+        {
+            if (template.SampleService != default) return;
+
+            if (Templates.Count >= Constants.MaxCountTemplates)
+            {
+                throw new MaxCountExceededException(
+                    type: typeof(Template),
+                    maxCount: Constants.MaxCountTemplates);
+            }
+
+            InitializeService(template);
+
+            InitializeSamples(template);
+
+            ImmutableList<Template> add(ImmutableList<Template> c) => !c.Contains(template)
+                ? c.Add(template)
+                : c;
+
+            ImmutableInterlocked.Update(
+                location: ref templates,
+                transformer: add);
+
+            SaveTemplates();
+
+            templatesChangedEvent.Publish();
+        }
+
+        private void RemoveTemplate(Template template)
+        {
+            if (template == default) return;
+
+            if (template == Active)
+            {
+                var next = Templates.Count > 1
+                    ? Templates.GetNext(template)
+                    : default;
+
+                Select(next);
+            }
+
+            ImmutableList<Template> remove(ImmutableList<Template> c) => c.Contains(template)
+                ? c.Remove(template)
+                : c;
+
+            ImmutableInterlocked.Update(
+                location: ref templates,
+                transformer: remove);
+
+            SaveTemplates();
+
+            templatesChangedEvent.Publish();
+        }
+
+        private void SaveSamples()
+        {
+            if (isInitializing || Active == default) return;
+
+            var relevants = Active.Samples?
+                .Where(s => s.Mat != default
+                    && s.Image == default).ToArray();
+
+            if (relevants?.Length > 0)
+            {
+                foreach (var relevant in relevants)
+                {
+                    relevant.Image = relevant.Mat.ToBytes();
                 }
             }
 
+            settingsService.Save();
+        }
+
+        private void SaveTemplates()
+        {
+            if (isInitializing) return;
+
+            settingsService.Contents.Templates = Templates.ToList();
             settingsService.Save();
         }
 

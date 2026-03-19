@@ -120,11 +120,14 @@ namespace Score2Stream.TemplateModule.ViewModels
             get { return Sample?.Value; }
             set
             {
-                Sample.Value = value;
+                if (Sample.Value != value)
+                {
+                    Sample.Value = value;
 
-                RaisePropertyChanged(nameof(Value));
+                    RaisePropertyChanged(nameof(Value));
 
-                sampleModifiedEvent.Publish(Sample);
+                    sampleModifiedEvent.Publish(Sample);
+                }
             }
         }
 

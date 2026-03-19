@@ -28,13 +28,13 @@ namespace Score2Stream.Commons.Interfaces
 
         void Initialize();
 
+        Task RemoveAsync(Input input = default);
+
         void Select(Input input);
 
         void SelectDevice(string deviceName);
 
         void SelectFile(string fileName);
-
-        Task StopAsync(Input input = default);
 
         #endregion Public Methods
     }

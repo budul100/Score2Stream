@@ -32,7 +32,6 @@ namespace Score2Stream.VideoService
         private readonly InputStartedEvent inputStartedEvent;
         private readonly InputUpdatedEvent inputUpdatedEvent;
         private readonly ILogger<Service> logger;
-        private readonly IRecognitionService recognitionService;
         private readonly SegmentDrawnEvent segmentDrawnEvent;
         private readonly SegmentUpdatedEvent segmentUpdatedEvent;
         private readonly ISettingsService<Session> settingsService;
@@ -59,9 +58,9 @@ namespace Score2Stream.VideoService
         {
             AreaService = areaService;
             TemplateService = templateService;
+            RecognitionService = recognitionService;
 
             this.dispatcherService = dispatcherService;
-            this.recognitionService = recognitionService;
             this.settingsService = settingsService;
             this.videoCaptureFactory = videoCaptureFactory;
             this.logger = logger;
@@ -94,6 +93,7 @@ namespace Score2Stream.VideoService
 
         public TimeSpan? ProcessingTime { get; private set; }
 
+        public IRecognitionService RecognitionService { get; }
         public ITemplateService TemplateService { get; }
 
         #endregion Public Properties
@@ -574,8 +574,8 @@ namespace Score2Stream.VideoService
 
         private async Task UpdateValueAsync(Segment segment, CancellationToken cancellationToken)
         {
-            segment.Matches = recognitionService
-                .GetMatches(segment.Mat).ToArray();
+            segment.Matches = RecognitionService
+                .GetMatches(segment).ToArray();
 
             var match = segment.Matches?
                 .Where(m => m.Type == MatchType.Similar)
@@ -587,7 +587,8 @@ namespace Score2Stream.VideoService
             }
             else
             {
-                match = recognitionService.GetValue(segment.Mat);
+                match = RecognitionService
+                    .GetValue(segment.Mat);
 
                 if (match != default)
                 {
