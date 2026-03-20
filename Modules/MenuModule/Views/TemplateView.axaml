@@ -125,7 +125,7 @@
                     Margin="0,0,4,0"
                     VerticalAlignment="Center"
                     FontSize="{StaticResource FontSize}"
-                    Text="Max unlableds" />
+                    Text="Max nr undetects" />
                 <NumericUpDown
                     Width="130"
                     MaxHeight="5"
