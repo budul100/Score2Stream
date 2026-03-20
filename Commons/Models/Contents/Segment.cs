@@ -1,26 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using Avalonia.Media.Imaging;
 using OpenCvSharp;
 using Score2Stream.Commons.Enums;
+using Score2Stream.Commons.Models.Base;
 
 namespace Score2Stream.Commons.Models.Contents
 {
     public class Segment
+        : Imageable
     {
         #region Public Properties
 
         public Area Area { get; set; }
-
-        public Bitmap Bitmap { get; set; }
 
         public bool HasValue { get; set; }
 
         public bool HasValueCurrent { get; set; }
 
         public Queue<Mat> Images { get; set; } = new Queue<Mat>();
-
-        public Mat Mat { get; set; }
 
         public IEnumerable<Match> Matches { get; set; }
 

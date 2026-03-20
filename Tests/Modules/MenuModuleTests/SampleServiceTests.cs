@@ -245,7 +245,7 @@ namespace Score2Stream.Tests.MenuModuleTests
             var templateMock = new Mock<Template>();
 
             var area = new Area { Template = templateMock.Object };
-            var segment = new Segment { Area = area, Mat = mat };
+            var segment = new Segment { Area = area, Image = mat };
 
             var eventAggregatorMock = CreateEventAggregatorMock();
             var session = new Session();

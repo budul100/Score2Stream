@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using MsBox.Avalonia.Enums;
 using OpenCvSharp;
 using Prism.Events;
@@ -29,6 +30,7 @@ namespace Score2Stream.TemplateService
         private readonly ISettingsService<Session> settingsService;
         private readonly TemplatesChangedEvent templatesChangedEvent;
         private readonly TemplateSelectedEvent templateSelectedEvent;
+
         private bool isInitializing;
         private ImmutableList<Template> templates = [];
 
@@ -168,16 +170,17 @@ namespace Score2Stream.TemplateService
             if (template.Samples?.Count > 0)
             {
                 var samples = template.Samples
-                    .Where(s => s.Image != default)
+                    .Where(s => s.Bytes != default)
                     .OrderBy(s => s.Index).ToList();
 
                 try
                 {
                     foreach (var sample in samples)
                     {
-                        sample.Mat = Mat.FromImageData(
-                            imageBytes: sample.Image,
+                        sample.Image = Mat.FromImageData(
+                            imageBytes: sample.Bytes,
                             mode: ImreadModes.Unchanged);
+                        sample.Bitmap = new Bitmap(sample.Image.ToMemoryStream());
 
                         template.SampleService.Add(sample);
                     }
@@ -225,7 +228,6 @@ namespace Score2Stream.TemplateService
             }
 
             InitializeService(template);
-
             InitializeSamples(template);
 
             ImmutableList<Template> add(ImmutableList<Template> c) => !c.Contains(template)
@@ -272,14 +274,14 @@ namespace Score2Stream.TemplateService
             if (isInitializing || Active == default) return;
 
             var relevants = Active.Samples?
-                .Where(s => s.Mat != default
-                    && s.Image == default).ToArray();
+                .Where(s => s.Image != default
+                    && s.Bytes == default).ToArray();
 
             if (relevants?.Length > 0)
             {
                 foreach (var relevant in relevants)
                 {
-                    relevant.Image = relevant.Mat.ToBytes();
+                    relevant.Bytes = relevant.Image.ToBytes();
                 }
             }
 

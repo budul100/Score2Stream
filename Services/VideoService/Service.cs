@@ -483,7 +483,7 @@ namespace Score2Stream.VideoService
         {
             if (isDisposed) return;
 
-            segment.Mat = default;
+            segment.Image = default;
 
             var current = GetImage(segment);
 
@@ -499,13 +499,13 @@ namespace Score2Stream.VideoService
                         oldImgaes?.Dispose();
                     }
 
-                    segment.Mat = segment.Images.AsBlended();
+                    segment.Image = segment.Images.AsBlended();
                 }
             }
 
-            if (segment.Mat.HasValue() == true)
+            if (segment.Image.HasValue() == true)
             {
-                var bitmapStream = segment.Mat.ToMemoryStream();
+                var bitmapStream = segment.Image.ToMemoryStream();
 
                 segment.Bitmap = await dispatcherService.InvokeAsync(
                     function: () => new Bitmap(bitmapStream),
@@ -574,33 +574,22 @@ namespace Score2Stream.VideoService
 
         private async Task UpdateValueAsync(Segment segment, CancellationToken cancellationToken)
         {
+            var waitingDurationMS = Math.Abs(settingsService.Contents.Detection.DurationDetectionWait);
+            var waitingDuration = TimeSpan.FromMilliseconds(waitingDurationMS);
+
+            RecognitionService.Update(segment);
+
             segment.Matches = RecognitionService
-                .GetMatches(segment).ToArray();
+                .GetFromSamples(segment).ToArray();
 
             var match = segment.Matches?
-                .Where(m => m.Type == MatchType.Similar)
+                .Where(m => m.Type != MatchType.None)
                 .OrderByDescending(m => m.Similarity).FirstOrDefault();
 
             if (match != default)
             {
                 match.Type = MatchType.Match;
-            }
-            else
-            {
-                match = RecognitionService
-                    .GetValue(segment.Mat);
 
-                if (match != default)
-                {
-                    match.Type = MatchType.Match;
-                }
-            }
-
-            var waitingDurationMS = Math.Abs(settingsService.Contents.Detection.DurationDetectionWait);
-            var waitingDuration = TimeSpan.FromMilliseconds(waitingDurationMS);
-
-            if (match != default)
-            {
                 segment.SetValue(
                     value: match.Value,
                     hasValue: true,

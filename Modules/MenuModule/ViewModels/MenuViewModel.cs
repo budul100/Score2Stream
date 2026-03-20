@@ -105,10 +105,10 @@ namespace Score2Stream.MenuModule.ViewModels
                 canExecuteMethod: () => templateService?.SampleService?.Active != default);
             this.SampleRemoveAllCommand = new DelegateCommand(
                 executeMethod: () => templateService.SampleService.ClearAsync(),
-                canExecuteMethod: () => templateService?.SampleService?.Samples?.Count > 0);
+                canExecuteMethod: () => templateService?.SampleService?.Samples?.Count() > 0);
             this.SampleOrderCommand = new DelegateCommand(
                 executeMethod: () => templateService.SampleService.Order(true),
-                canExecuteMethod: () => templateService?.SampleService?.Samples?.Count > 0);
+                canExecuteMethod: () => templateService?.SampleService?.Samples?.Count() > 0);
 
             this.ServerOpenCommand = new DelegateCommand(
                 executeMethod: webService.OpenRoot);

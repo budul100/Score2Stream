@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
@@ -26,6 +27,7 @@ namespace Score2Stream.SampleService
         private readonly IRecognitionService recognitionService;
         private readonly SamplesChangedEvent samplesChangedEvent;
         private readonly SampleSelectedEvent sampleSelectedEvent;
+        private readonly object samplesLock = new();
         private readonly SamplesOrderedEvent samplesOrderedEvent;
         private readonly ISettingsService<Session> settingsService;
         private readonly TemplateSelectedEvent templateSelectedEvent;
@@ -56,7 +58,7 @@ namespace Score2Stream.SampleService
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<SegmentUpdatedEvent>().Subscribe(
-                action: DetectSegment,
+                action: DetectSample,
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: _ => IsDetection);
@@ -70,7 +72,10 @@ namespace Score2Stream.SampleService
 
         public bool IsDetection { get; set; }
 
-        public List<Sample> Samples => template.Samples;
+        public IReadOnlyList<Sample> Samples
+        {
+            get { lock (samplesLock) return template.Samples.ToList(); }
+        }
 
         #endregion Public Properties
 
@@ -78,27 +83,35 @@ namespace Score2Stream.SampleService
 
         public void Add(Sample sample)
         {
-            if (sample?.Mat != default)
+            if (sample?.Image != default)
             {
-                if (Samples.Count >= Constants.MaxCountSamples)
+                var unverifieds = Samples
+                    .Where(s => !s.IsVerified).ToArray();
+
+                if (unverifieds.Length >= settingsService.Contents.Detection.MaxCountUnverifieds)
+                {
+                    var relevant = unverifieds
+                        .Where(s => s != Active)
+                        .OrderBy(s => s.Index).FirstOrDefault();
+
+                    RemoveSample(relevant);
+                }
+
+                if (Samples.Count() >= Constants.MaxCountSamples)
                 {
                     throw new MaxCountExceededException(
                         type: typeof(Sample),
                         maxCount: Constants.MaxCountSamples);
                 }
 
-                if (sample.Value == default)
-                {
-                    sample.Value = recognitionService.GetValue(sample.Mat)?.Value;
-                }
-
-                sample.Bitmap = new Bitmap(sample.Mat.ToMemoryStream());
                 sample.Index = index++;
                 sample.Template = template;
 
-                Samples.Add(sample);
+                // Bitmap and normalized data must be assigned here rather than in the model
+                // because samples loaded from saved settings also need this initialization.
+                recognitionService.Update(sample);
 
-                recognitionService.Add(sample);
+                lock (samplesLock) template.Samples.Add(sample);
 
                 samplesChangedEvent.Publish();
             }
@@ -106,14 +119,11 @@ namespace Score2Stream.SampleService
 
         public void Clear()
         {
-            if (Samples.Count > 0)
+            if (Samples.Any())
             {
-                for (var index = Samples.Count; index > 0; index--)
-                {
-                    var sample = Samples[index - 1];
+                lock (samplesLock) template.Samples.Clear();
 
-                    RemoveSample(sample);
-                }
+                samplesChangedEvent.Publish();
 
                 Select(default);
             }
@@ -135,9 +145,15 @@ namespace Score2Stream.SampleService
         {
             try
             {
-                AddSegment(
-                    segment: segment,
-                    select: true);
+                var sample = CreateSample(segment);
+
+                if (sample != default)
+                {
+                    sample.Value = recognitionService
+                        .GetFromBase(sample)?.Value;
+
+                    Select(sample);
+                }
             }
             catch (MaxCountExceededException exception)
             {
@@ -157,7 +173,7 @@ namespace Score2Stream.SampleService
         {
             var next = Samples
                 .OrderBy(s => s.Index)
-                .GetUnfiltereds()
+                .Where(s => !s.IsFiltered)
                 .GetNext(
                     active: Active,
                     backward: backward);
@@ -245,82 +261,53 @@ namespace Score2Stream.SampleService
 
         #region Private Methods
 
-        private void AddSegment(Segment segment, bool select)
+        private Sample CreateSample(Segment segment)
         {
-            var sample = GetSample(segment);
+            var result = default(Sample);
 
-            if (sample != default)
+            if (segment?.Image != default)
             {
-                var unverifieds = Samples
-                    .Where(s => !s.IsVerified).ToArray();
-
-                if (unverifieds.Length >= settingsService.Contents.Detection.MaxCountUnverifieds)
+                result = new Sample
                 {
-                    var relevant = unverifieds
-                        .Where(s => s != Active)
-                        .OrderBy(s => s.Index).FirstOrDefault();
+                    Bitmap = segment.Bitmap,
+                    Height = segment.Bitmap?.Size.Height ?? 0,
+                    Width = segment.Bitmap?.Size.Width ?? 0,
+                    Image = segment.Image,
+                };
 
-                    RemoveSample(relevant);
-                }
-
-                Add(sample);
+                Add(result);
 
                 if (segment.Area.Template == default)
                 {
-                    segment.Area.Template = sample.Template;
-                    segment.Area.TemplateName = sample.Template.Name;
+                    segment.Area.Template = result.Template;
+                    segment.Area.TemplateName = result.Template.Name;
 
-                    templateSelectedEvent.Publish(sample.Template);
-                }
-
-                if (select)
-                {
-                    Select(sample);
+                    templateSelectedEvent.Publish(result.Template);
                 }
             }
+
+            return result;
         }
 
-        private void DetectSegment(Segment segment)
+        private void DetectSample(Segment segment)
         {
-            if (segment?.Mat?.IsEmpty() == false
+            if (segment?.IsEmpty == false
                 && !recognitionService.HasSimilars(segment))
             {
                 try
                 {
-                    AddSegment(
-                        segment: segment,
-                        select: false);
+                    CreateSample(segment);
                 }
                 catch (MaxCountExceededException)
                 { }
             }
         }
 
-        private Sample GetSample(Segment segment)
-        {
-            var result = default(Sample);
-
-            if (segment?.Mat != default)
-            {
-                result = new Sample
-                {
-                    Height = segment.Bitmap?.Size.Height ?? 0,
-                    Width = segment.Bitmap?.Size.Width ?? 0,
-                    Mat = segment.Mat,
-                    Template = template,
-                };
-            }
-
-            return result;
-        }
-
         private void RemoveSample(Sample sample)
         {
             if (sample != default)
             {
-                Samples.Remove(sample);
-
-                recognitionService.Remove(sample);
+                lock (samplesLock) template.Samples.Remove(sample);
 
                 samplesChangedEvent.Publish();
             }

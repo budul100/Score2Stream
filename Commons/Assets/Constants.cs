@@ -26,6 +26,9 @@
         public const int MaxCountSamples = 100;
         public const int MaxCountTemplates = 10;
 
+        public const int NormalizedHeight = 96;
+        public const int NormalizedWidth = 64;
+
         public const int PortMax = 65535;
         public const int PortMin = 1;
 

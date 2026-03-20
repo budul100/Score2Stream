@@ -135,7 +135,7 @@ namespace Score2Stream.TemplateModule.ViewModels
             if (Template?.Samples?.Count > 0)
             {
                 var toBeAddeds = Template.Samples
-                    .Where(s => s.Mat != default
+                    .Where(s => s.Image != default
                         && !Samples.Any(m => m.Sample == s))
                     .OrderBy(s => s.Index).ToArray();
 

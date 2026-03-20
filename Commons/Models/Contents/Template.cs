@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using Score2Stream.Commons.Interfaces;
+using Score2Stream.Commons.Models.Base;
 
 namespace Score2Stream.Commons.Models.Contents
 {

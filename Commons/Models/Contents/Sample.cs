@@ -1,19 +1,16 @@
 ﻿using System.Text.Json.Serialization;
-using Avalonia.Media.Imaging;
-using OpenCvSharp;
+using Score2Stream.Commons.Models.Base;
 
 namespace Score2Stream.Commons.Models.Contents
 {
     public class Sample
+        : Imageable
     {
         #region Public Properties
 
-        [JsonIgnore]
-        public Bitmap Bitmap { get; set; }
+        public byte[] Bytes { get; set; }
 
         public double Height { get; set; }
-
-        public byte[] Image { get; set; }
 
         [JsonIgnore]
         public int Index { get; set; }
@@ -22,9 +19,6 @@ namespace Score2Stream.Commons.Models.Contents
         public bool IsFiltered { get; set; }
 
         public bool IsVerified { get; set; }
-
-        [JsonIgnore]
-        public Mat Mat { get; set; }
 
         [JsonIgnore]
         public Template Template { get; set; }

@@ -212,7 +212,10 @@ namespace Score2Stream.Commons.Extensions
                 if (contours.Length > 0)
                 {
                     var relevant = contours
-                        .Where(c => c.All(p => p.X > 0 && p.Y > 0 && p.X < image.Width && p.Y < image.Height))
+                        .Where(c => c.All(p => p.X > 0
+                            && p.Y > 0
+                            && p.X < image.Width
+                            && p.Y < image.Height))
                         .SelectMany(c => c);
 
                     result = Cv2.BoundingRect(relevant);
@@ -231,6 +234,52 @@ namespace Score2Stream.Commons.Extensions
             return result;
         }
 
+        public static float[] GetNormalized(this Mat image, int height, int width)
+        {
+            var result = default(float[]);
+
+            if (!image.IsEmpty())
+            {
+                var gray = new Mat();
+
+                if (image.Channels() > 1)
+                {
+                    Cv2.CvtColor(
+                        src: image,
+                        dst: gray,
+                        code: ColorConversionCodes.BGR2GRAY);
+                }
+                else
+                {
+                    gray = image.Clone();
+                }
+
+                var resized = new Mat();
+
+                var size = new Size(
+                    Width: width,
+                    Height: height);
+
+                Cv2.Resize(
+                    src: gray,
+                    dst: resized,
+                    dsize: size);
+
+                result = new float[height * width];
+
+                for (var y = 0; y < height; y++)
+                {
+                    for (var x = 0; x < width; x++)
+                    {
+                        var pixel = resized.At<byte>(y, x) / 255f;
+                        result[y * width + x] = (pixel - 0.5f) / 0.5f;
+                    }
+                }
+            }
+
+            return result;
+        }
+
         public static bool HasValue(this Mat image)
         {
             var result = image?.IsDisposed == false
@@ -240,22 +289,6 @@ namespace Score2Stream.Commons.Extensions
                 && image.Step(0) > 0;
 
             return result;
-        }
-
-        public static bool IsEmpty(this Mat image)
-        {
-            if (image?.HasValue() == true)
-            {
-                using var gray = image.Channels() > 1
-                    ? image.CvtColor(ColorConversionCodes.BGR2GRAY)
-                    : image.Clone();
-
-                var mean = Cv2.Mean(gray);
-
-                return (mean.Val0 / 255f) < MinMeanBrightness;
-            }
-
-            return true;
         }
 
         public static Mat WithoutNoise(this Mat image, int erodeIterations, int dilateIterations)
@@ -288,5 +321,25 @@ namespace Score2Stream.Commons.Extensions
         }
 
         #endregion Public Methods
+
+        #region Private Methods
+
+        private static bool IsEmpty(this Mat image)
+        {
+            if (image?.HasValue() == true)
+            {
+                using var gray = image.Channels() > 1
+                    ? image.CvtColor(ColorConversionCodes.BGR2GRAY)
+                    : image.Clone();
+
+                var mean = Cv2.Mean(gray);
+
+                return (mean.Val0 / 255f) < MinMeanBrightness;
+            }
+
+            return true;
+        }
+
+        #endregion Private Methods
     }
 }

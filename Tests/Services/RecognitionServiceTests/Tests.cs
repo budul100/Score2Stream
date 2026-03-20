@@ -1,9 +1,9 @@
-using System;
 using System.IO;
 using Moq;
 using OpenCvSharp;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
+using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
 using Xunit;
 
@@ -56,50 +56,21 @@ namespace Score2Stream.Tests.RecognitionServiceTests
         {
             var recognitionService = new RecognitionService.Service(settingsServiceMock.Object);
 
-            var path0 = Path.Combine(SamplesPath, "SevenSegment-0.png");
-            var bytes0 = GetBytes(path0);
-            var result0 = recognitionService.GetValue(bytes0).Value;
-
-            Assert.Equal(
-                "0",
-                result0);
-
-            var samplesPath = Path.GetFullPath(SamplesPath);
-
-            var path3 = Path.Combine(samplesPath, "SevenSegment-3.png");
-            var bytes3 = GetBytes(path3);
-            var result3 = recognitionService.GetValue(bytes3).Value;
-
-            Assert.Equal(
-                "3",
-                result3);
-
-            var path4 = Path.Combine(samplesPath, "SevenSegment-4.png");
-            var bytes4 = GetBytes(path4);
-            var result4 = recognitionService.GetValue(bytes4).Value;
-
-            Assert.Equal(
-                "4",
-                result4);
-
-            var path5 = Path.Combine(samplesPath, "SevenSegment-5.png");
-            var bytes5 = GetBytes(path5);
-            var result5 = recognitionService.GetValue(bytes5).Value;
-
-            Assert.Equal(
-                "5",
-                result5);
+            Assert.Equal("0", Recognize(recognitionService, "SevenSegment-0.png"));
+            Assert.Equal("3", Recognize(recognitionService, "SevenSegment-3.png"));
+            Assert.Equal("4", Recognize(recognitionService, "SevenSegment-4.png"));
+            Assert.Equal("5", Recognize(recognitionService, "SevenSegment-5.png"));
         }
 
         #endregion Public Methods
 
         #region Private Methods
 
-        private static Mat GetBytes(string path)
+        private static Mat GetImage(string path)
         {
             if (!File.Exists(path))
             {
-                throw new Exception();
+                throw new FileNotFoundException(path);
             }
 
             using var video = new VideoCapture();
@@ -120,9 +91,19 @@ namespace Score2Stream.Tests.RecognitionServiceTests
                 fullWidth: noiselessFrame.Width + 10,
                 fullHeight: noiselessFrame.Height + 10);
 
-            var result = centeredFrame.Clone();
+            return centeredFrame.Clone();
+        }
 
-            return result;
+        private static string Recognize(RecognitionService.Service recognitionService, string fileName)
+        {
+            var sample = new Sample
+            {
+                Image = GetImage(Path.Combine(Path.GetFullPath(SamplesPath), fileName))
+            };
+
+            recognitionService.Update(sample);
+
+            return recognitionService.GetFromBase(sample)?.Value;
         }
 
         #endregion Private Methods

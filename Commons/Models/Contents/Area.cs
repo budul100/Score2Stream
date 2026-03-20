@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Extensions;
+using Score2Stream.Commons.Models.Base;
 
 namespace Score2Stream.Commons.Models.Contents
 {

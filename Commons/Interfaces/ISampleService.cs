@@ -12,7 +12,7 @@ namespace Score2Stream.Commons.Interfaces
 
         bool IsDetection { get; set; }
 
-        List<Sample> Samples { get; }
+        IReadOnlyList<Sample> Samples { get; }
 
         #endregion Public Properties
 

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Score2Stream.Commons.Models.Contents;
+﻿using Score2Stream.Commons.Models.Contents;
 
 namespace Score2Stream.Commons.Extensions
 {
@@ -13,14 +11,6 @@ namespace Score2Stream.Commons.Extensions
             var result = sample.IsVerified
                 ? default
                 : sample.Index;
-
-            return result;
-        }
-
-        public static IList<Sample> GetUnfiltereds(this IEnumerable<Sample> samples)
-        {
-            var result = samples
-                .Where(s => !s.IsFiltered).ToList();
 
             return result;
         }

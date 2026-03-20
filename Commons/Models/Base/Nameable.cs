@@ -1,4 +1,4 @@
-﻿namespace Score2Stream.Commons.Models.Contents
+﻿namespace Score2Stream.Commons.Models.Base
 {
     public abstract class Nameable
     {

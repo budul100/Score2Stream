@@ -4,17 +4,18 @@ using System.IO;
 using System.Linq;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
-using OpenCvSharp;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
+using Score2Stream.Commons.Models.Base;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
+using Score2Stream.RecognitionService.Extensions;
 
 namespace Score2Stream.RecognitionService
 {
     public class Service
-        : IRecognitionService, IDisposable
+        : IRecognitionService
     {
         #region Private Fields
 
@@ -22,10 +23,6 @@ namespace Score2Stream.RecognitionService
         private const string FileModel = "digit_model.onnx";
         private const string FolderData = "TrainedData";
 
-        private const int SampleHeight = 96;
-        private const int SampleWidth = 64;
-
-        private readonly Dictionary<Template, List<(float[] Features, Sample Sample)>> sampleVectors = [];
         private readonly InferenceSession sessionFeature;
         private readonly InferenceSession sessionModel;
         private readonly ISettingsService<Session> settingsService;
@@ -69,76 +66,19 @@ namespace Score2Stream.RecognitionService
 
         #region Public Methods
 
-        public void Add(Sample sample)
-        {
-            if (sample?.Template != default)
-            {
-                var features = ExtractFeatures(sample.Mat);
-
-                if (!sampleVectors.TryGetValue(
-                    key: sample.Template,
-                    value: out var vectors))
-                {
-                    vectors = [];
-                    sampleVectors[sample.Template] = vectors;
-                }
-
-                vectors.Add((features, sample));
-            }
-        }
-
         public void Dispose()
         {
             Dispose(isDisposing: true);
             GC.SuppressFinalize(this);
         }
 
-        public IEnumerable<Match> GetMatches(Segment segment)
-        {
-            if (segment?.Area?.Template != default
-                && !segment.Mat.IsEmpty()
-                && sampleVectors.TryGetValue(
-                    key: segment.Area.Template,
-                    value: out var vectors)
-                && vectors.Count > 0)
-            {
-                var preprocessed = GetPreprocessed(segment.Mat);
-                var features = GetFeatures(preprocessed);
-
-                var thresholdMatching = Math.Abs(settingsService.Contents.Detection.ThresholdMatching)
-                    / Constants.ThresholdDivider;
-
-                var comparisons = vectors
-                    .Select(v => (v.Sample, Similarity: CosineSimilarity(v.Features, features))).ToArray();
-
-                foreach (var comparison in comparisons)
-                {
-                    var type = comparison.Similarity >= thresholdMatching
-                        ? Commons.Enums.MatchType.Similar
-                        : Commons.Enums.MatchType.None;
-
-                    var result = new Match
-                    {
-                        Value = comparison.Sample.Value,
-                        Sample = comparison.Sample,
-                        Similarity = comparison.Similarity,
-                        Type = type,
-                    };
-
-                    yield return result;
-                }
-            }
-        }
-
-        public Match GetValue(Mat image)
+        public Match GetFromBase(Imageable imageable)
         {
             var result = default(Match);
 
-            if (!image.IsEmpty())
+            if (!imageable.IsEmpty)
             {
-                var preprocessed = GetPreprocessed(image);
-
-                var (value, confidence) = RecognizeWithBaseModel(preprocessed);
+                var (value, confidence) = GetValue(imageable.Normalized);
 
                 var thresholdMatching = Math.Abs(settingsService.Contents.Detection.ThresholdMatching)
                     / Constants.ThresholdDivider;
@@ -158,48 +98,96 @@ namespace Score2Stream.RecognitionService
             return result;
         }
 
+        public IEnumerable<Match> GetFromSamples(Segment segment)
+        {
+            if (segment?.IsEmpty == false)
+            {
+                var hasSimilar = false;
+
+                var samples = segment?.Area?.Template?.SampleService?.Samples;
+
+                if (samples?.Count > 0)
+                {
+                    var thresholdMatching = Math.Abs(settingsService.Contents.Detection.ThresholdMatching)
+                        / Constants.ThresholdDivider;
+
+                    foreach (var sample in samples)
+                    {
+                        var similarity = sample.Features.CosineSimilarity(segment.Features);
+
+                        var type = similarity >= thresholdMatching
+                            ? Commons.Enums.MatchType.Similar
+                            : Commons.Enums.MatchType.None;
+
+                        hasSimilar = hasSimilar || type == Commons.Enums.MatchType.Similar;
+
+                        var result = new Match
+                        {
+                            Value = sample.Value,
+                            Sample = sample,
+                            Similarity = similarity,
+                            Type = type,
+                        };
+
+                        yield return result;
+                    }
+                }
+
+                if (!hasSimilar)
+                {
+                    var match = GetFromBase(segment);
+
+                    yield return match;
+                }
+            }
+        }
+
         public bool HasSimilars(Segment segment)
         {
             var result = false;
 
-            if (segment?.Area?.Template != default
-                && !segment.Mat.IsEmpty()
-                && sampleVectors.TryGetValue(
-                    key: segment.Area.Template,
-                    value: out var vectors)
-                && vectors.Count > 0)
+            if (segment?.IsEmpty == false)
             {
-                var preprocessed = GetPreprocessed(segment.Mat);
-                var features = GetFeatures(preprocessed);
+                var samples = segment?.Area?.Template?.SampleService?.Samples;
 
-                var thresholdDetecting = Math.Abs(settingsService.Contents.Detection.ThresholdDetecting)
-                    / Constants.ThresholdDivider;
+                if (samples?.Count > 0)
+                {
+                    var thresholdDetecting = Math.Abs(settingsService.Contents.Detection.ThresholdDetecting)
+                        / Constants.ThresholdDivider;
 
-                result = vectors
-                    .Select(v => CosineSimilarity(v.Features, features))
-                    .Any(s => s >= thresholdDetecting);
+                    result = samples
+                        .Select(s => s.Features.CosineSimilarity(segment.Features))
+                        .Any(s => s >= thresholdDetecting);
+                }
             }
 
             return result;
         }
 
-        public void Remove(Sample sample)
+        public void Update(Imageable imageable)
         {
-            if (sample?.Template != default
-                && sampleVectors.TryGetValue(
-                    key: sample.Template,
-                    value: out var vectors))
+            imageable.Normalized = imageable.Image.GetNormalized(
+                Constants.NormalizedHeight,
+                Constants.NormalizedWidth);
+
+            if (imageable.IsEmpty)
             {
-                var features = ExtractFeatures(sample.Mat);
+                imageable.Features = default;
+            }
+            else
+            {
+                var tensor = new DenseTensor<float>(
+                    memory: imageable.Normalized,
+                    dimensions: [1, 1, Constants.NormalizedHeight, Constants.NormalizedWidth]);
 
-                var closest = vectors
-                    .OrderBy(v => CosineSimilarity(v.Features, features))
-                    .FirstOrDefault();
+                var input = NamedOnnxValue.CreateFromTensor(
+                    name: "image",
+                    value: tensor);
 
-                if (closest != default)
-                {
-                    vectors.Remove(closest);
-                }
+                using var outputs = sessionFeature.Run([input]);
+
+                imageable.Features = outputs[0]
+                    .AsEnumerable<float>().ToArray();
             }
         }
 
@@ -225,105 +213,11 @@ namespace Score2Stream.RecognitionService
 
         #region Private Methods
 
-        private static float CosineSimilarity(float[] a, float[] b)
-        {
-            var dot = a.Zip(b, (x, y) => x * y).Sum();
-            var normA = MathF.Sqrt(a.Select(x => x * x).Sum());
-            var normB = MathF.Sqrt(b.Select(x => x * x).Sum());
-
-            var result = (normA * normB) != 0
-                ? dot / (normA * normB)
-                : default;
-
-            return result;
-        }
-
-        private static float[] GetPreprocessed(Mat image)
-        {
-            var gray = new Mat();
-
-            if (image.Channels() > 1)
-            {
-                Cv2.CvtColor(
-                    src: image,
-                    dst: gray,
-                    code: ColorConversionCodes.BGR2GRAY);
-            }
-            else
-            {
-                gray = image.Clone();
-            }
-
-            var resized = new Mat();
-
-            var size = new Size(
-                Width: SampleWidth,
-                Height: SampleHeight);
-
-            Cv2.Resize(
-                src: gray,
-                dst: resized,
-                dsize: size);
-
-            var result = new float[SampleHeight * SampleWidth];
-
-            for (var y = 0; y < SampleHeight; y++)
-            {
-                for (var x = 0; x < SampleWidth; x++)
-                {
-                    var pixel = resized.At<byte>(y, x) / 255f;
-                    result[y * SampleWidth + x] = (pixel - 0.5f) / 0.5f;
-                }
-            }
-
-            return result;
-        }
-
-        private static float[] Softmax(float[] logits)
-        {
-            var max = logits.Max();
-            var exps = logits
-                .Select(x => MathF.Exp(x - max)).ToArray();
-            var sum = exps.Sum();
-
-            var result = exps
-                .Select(x => x / sum).ToArray();
-
-            return result;
-        }
-
-        private float[] ExtractFeatures(Mat image)
-        {
-            var preprocessed = GetPreprocessed(image);
-
-            var result = GetFeatures(preprocessed);
-
-            return result;
-        }
-
-        private float[] GetFeatures(float[] preprocessed)
+        private (string Value, float Confidence) GetValue(float[] preprocessed)
         {
             var tensor = new DenseTensor<float>(
                 memory: preprocessed,
-                dimensions: [1, 1, SampleHeight, SampleWidth]);
-
-            var input = NamedOnnxValue.CreateFromTensor(
-                name: "image",
-                value: tensor);
-
-            using var outputs = sessionFeature.Run([input]);
-
-            var result = outputs[0]
-                .AsEnumerable<float>().ToArray();
-
-            return result;
-        }
-
-        private (string Value, float Confidence) RecognizeWithBaseModel(float[] preprocessed)
-        {
-            var tensor = new DenseTensor<float>(
-                memory: preprocessed,
-                dimensions: [1, 1, SampleHeight, SampleWidth]);
+                dimensions: [1, 1, Constants.NormalizedHeight, Constants.NormalizedWidth]);
 
             var input = NamedOnnxValue.CreateFromTensor(
                 name: "image",
@@ -334,7 +228,7 @@ namespace Score2Stream.RecognitionService
             var logits = outputs[0]
                 .AsEnumerable<float>().ToArray();
 
-            var probs = Softmax(logits);
+            var probs = logits.Softmax();
 
             var confidence = probs.Max();
 
@@ -343,6 +237,7 @@ namespace Score2Stream.RecognitionService
                 value: confidence);
 
             var result = (predicted.ToString(), confidence);
+
             return result;
         }
 
