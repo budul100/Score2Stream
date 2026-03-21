@@ -13,21 +13,21 @@
 <body>
     <pre id="log" style="display:none;position:absolute;bottom:0;width:100%;height:5em;overflow-y:hidden;background-color:#faa;"></pre>
 
-    <span id="container" style="display:block;position:absolute;top:0;border:1px solid red;width:1280px;height:720px;-webkit-transform:scale(1.5);-webkit-transform-origin-x:0;-webkit-transform-origin-y:0;">
+    <div id="container" style="display:block;position:absolute;top:0;border:1px solid red;width:1280px;height:720px;-webkit-transform:scale(1.5);-webkit-transform-origin-x:0;-webkit-transform-origin-y:0;">
 
         <div id="scoreboard" style="margin-top:539px;-webkit-transform:scale(0.8);margin-left:130px;">
 
-            <div class="foul" style="left:200px;" data-bind="visible: homeFouls() >= 1"></div>
-            <div class="foul" style="left:225px;" data-bind="visible: homeFouls() >= 2"></div>
-            <div class="foul" style="left:250px;" data-bind="visible: homeFouls() >= 3"></div>
-            <div class="foul" style="left:275px;" data-bind="visible: homeFouls() >= 4"></div>
-            <div class="foul" style="left:300px;" data-bind="visible: homeFouls() >= 5"></div>
+            <div id="home_fouls">
+                <!-- ko foreach: ko.utils.range(1, 5) -->
+                <div class="foul" data-bind="visible: $parent.homeFouls() &gt;= $data, css: { 'foul--active': $parent.homeFouls() &gt;= $data }"></div>
+                <!-- /ko -->
+            </div>
 
-            <div class="foul" style="left:440px;" data-bind="visible: guestFouls() >= 1"></div>
-            <div class="foul" style="left:465px;" data-bind="visible: guestFouls() >= 2"></div>
-            <div class="foul" style="left:490px;" data-bind="visible: guestFouls() >= 3"></div>
-            <div class="foul" style="left:515px;" data-bind="visible: guestFouls() >= 4"></div>
-            <div class="foul" style="left:540px;" data-bind="visible: guestFouls() >= 5"></div>
+            <div id="guest_fouls">
+                <!-- ko foreach: ko.utils.range(1, 5) -->
+                <div class="foul" data-bind="visible: $parent.guestFouls() &gt;= $data, css: { 'foul--active': $parent.guestFouls() &gt;= $data }"></div>
+                <!-- /ko -->
+            </div>
 
             <div id="scorebox_container">
                 <img id="bg_scoreboard" src="scoreboard.png">
@@ -71,6 +71,6 @@
                 </div>
             </div>
         </div>
-    </span>
+    </div>
 </body>
 </html>

@@ -249,6 +249,25 @@ html {
         top: 55px;
     }
 
+    #scoreboard .foul--active {
+        background-color: red;
+    }
+
+    #scoreboard #home_fouls, #scoreboard #guest_fouls {
+        display: flex;
+        flex-direction: row;
+        gap: 25px;
+        position: absolute;
+    }
+
+    #scoreboard #home_fouls {
+        left: 200px;
+    }
+
+    #scoreboard #guest_fouls {
+        left: 440px;
+    }
+
 .score_h3 {
     font-size: 28pt;
     color: white;

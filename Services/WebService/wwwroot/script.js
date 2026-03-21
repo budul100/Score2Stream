@@ -10,14 +10,13 @@ $(document).ready(function () {
 
     $.getJSON("config.json", function (config) {
         const socketPort = config.socketPort || 9000;
-        const updateInterval = config.updateInterval || 50;
-        init(socketPort, updateInterval);
+        init(socketPort);
     }).fail(function () {
         console.warn("config.json not found, using default values.");
-        init(9000, 50);
+        init(9000);
     });
 
-    function init(socketPort, updateInterval) {
+    function init(socketPort) {
         let sock = null;
 
         const wsuri = (window.location.protocol === "file:")
@@ -26,9 +25,7 @@ $(document).ready(function () {
 
         log(wsuri);
 
-        if ("WebSocket" in window) {
-            sock = new WebSocket(wsuri);
-        } else {
+        if (!("WebSocket" in window)) {
             log("Browser does not support WebSocket!");
             return;
         }
@@ -42,7 +39,7 @@ $(document).ready(function () {
                 shot_clock: ko.observable("24"),
                 period: ko.observable("1"),
                 periods: ko.observable("4"),
-                possesion: ko.observable(""),
+                possession: ko.observable(""),
             },
             guest: {
                 score: ko.observable("0"),
@@ -63,56 +60,89 @@ $(document).ready(function () {
         const viewModel = ko.mapping.fromJS(vm);
 
         viewModel.computedPeriod = ko.computed(function () {
-            if (/^\d+$/.test(this.game.period()) && /^\d+$/.test(this.game.periods())) {
-                const period = parseInt(this.game.period());
-                const periods = parseInt(this.game.periods());
-                if (period === 0) return "";
-                else if (period <= periods) return `${period}/${periods}`;
-                else return `E${Math.abs(period - periods)}`;
-            } else {
-                return this.game.period();
+            const period = this.game.period();
+            const periods = this.game.periods();
+
+            if (/^\d+$/.test(period) && /^\d+$/.test(periods)) {
+                const p = parseInt(period, 10);
+                const ps = parseInt(periods, 10);
+
+                if (p === 0) return "";
+                if (p <= ps) return `${p}/${ps}`;
+                return `E${Math.abs(p - ps)}`;
             }
+
+            return period;
         }, viewModel);
 
         viewModel.guestFouls = ko.computed(function () {
-            return parseInt(this.guest.fouls());
+            return parseInt(this.guest.fouls(), 10);
         }, viewModel);
 
         viewModel.homeFouls = ko.computed(function () {
-            return parseInt(this.home.fouls());
+            return parseInt(this.home.fouls(), 10);
         }, viewModel);
 
         ko.applyBindings(viewModel);
 
-        const interval = setInterval(function () {
-            if (!sock || sock.readyState !== WebSocket.OPEN) {
-                clearInterval(interval);
-            }
-        }, updateInterval);
+        function connect() {
+            sock = new WebSocket(wsuri);
 
-        sock.onopen = function () {
-            log("Connected to " + wsuri);
-        };
+            sock.onopen = function () {
+                log("Connected to " + wsuri);
+            };
 
-        sock.onclose = function (e) {
-            log("Connection closed (wasClean = " + e.wasClean +
-                ", code = " + e.code + ", reason = '" + e.reason + "')");
-            clearInterval(interval);
-            sock = null;
-        };
+            sock.onclose = function (e) {
+                log("Connection closed (wasClean = " + e.wasClean +
+                    ", code = " + e.code + ", reason = '" + e.reason + "')");
+                sock = null;
+                setTimeout(connect, 3000);
+            };
 
-        sock.onmessage = function (e) {
-            if (!e.data) return;
-            try {
-                ko.mapping.fromJS(JSON.parse(e.data), viewModel);
-            } catch (err) {
-                console.error("Invalid message:", err);
-            }
-        };
+            sock.onerror = function (e) {
+                log("WebSocket error: " + e);
+            };
 
-        sock.onerror = function (e) {
-            log("WebSocket error: " + e);
-            clearInterval(interval);
-        };
+            sock.onmessage = function (e) {
+                if (!e.data) return;
+
+                try {
+                    const data = JSON.parse(e.data);
+
+                    if (data.ticker !== undefined) viewModel.ticker(data.ticker);
+                    if (data.gameID !== undefined) viewModel.gameID(data.gameID);
+                    if (data.game_over !== undefined) viewModel.game_over(data.game_over);
+
+                    if (data.game) {
+                        if (data.game.clock !== undefined) viewModel.game.clock(data.game.clock);
+                        if (data.game.shot_clock !== undefined) viewModel.game.shot_clock(data.game.shot_clock);
+                        if (data.game.period !== undefined) viewModel.game.period(data.game.period);
+                        if (data.game.periods !== undefined) viewModel.game.periods(data.game.periods);
+                        if (data.game.possession !== undefined) viewModel.game.possession(data.game.possession);
+                    }
+
+                    if (data.guest) {
+                        if (data.guest.score !== undefined) viewModel.guest.score(data.guest.score);
+                        if (data.guest.fouls !== undefined) viewModel.guest.fouls(data.guest.fouls);
+                        if (data.guest.name !== undefined) viewModel.guest.name(data.guest.name);
+                        if (data.guest.imagePath !== undefined) viewModel.guest.imagePath(data.guest.imagePath);
+                        if (data.guest.color !== undefined) viewModel.guest.color(data.guest.color);
+                    }
+
+                    if (data.home) {
+                        if (data.home.score !== undefined) viewModel.home.score(data.home.score);
+                        if (data.home.fouls !== undefined) viewModel.home.fouls(data.home.fouls);
+                        if (data.home.name !== undefined) viewModel.home.name(data.home.name);
+                        if (data.home.imagePath !== undefined) viewModel.home.imagePath(data.home.imagePath);
+                        if (data.home.color !== undefined) viewModel.home.color(data.home.color);
+                    }
+
+                } catch (err) {
+                    console.error("Invalid message:", err);
+                }
+            };
+        }
+
+        connect();
     }
 });
