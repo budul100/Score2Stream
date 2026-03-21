@@ -103,7 +103,10 @@ namespace Score2Stream.AreaModule.ViewModels
             {
                 if (Area?.Template != value)
                 {
-                    ActivateArea();
+                    if (value != default)
+                    {
+                        ActivateArea();
+                    }
 
                     Area.Template = value;
                     Area.TemplateName = value?.Name;
@@ -225,6 +228,8 @@ namespace Score2Stream.AreaModule.ViewModels
         {
             var template = Area.Template;
 
+            isInitializing = true;
+
             Template = default;
 
             var toBeRemoveds = Templates
@@ -251,6 +256,8 @@ namespace Score2Stream.AreaModule.ViewModels
             }
 
             Template = template;
+
+            isInitializing = false;
 
             RaisePropertyChanged(nameof(Template));
             RaisePropertyChanged(nameof(Templates));

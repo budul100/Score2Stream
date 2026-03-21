@@ -137,7 +137,10 @@ namespace Score2Stream.RecognitionService
                 {
                     var match = GetFromBase(segment);
 
-                    yield return match;
+                    if (match != default)
+                    {
+                        yield return match;
+                    }
                 }
             }
         }

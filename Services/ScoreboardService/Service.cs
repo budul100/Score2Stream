@@ -627,27 +627,24 @@ namespace Score2Stream.ScoreboardService
         private void UpdateBoard()
         {
             ClockGame = GetClockGame();
-
-            clockGame = !ClockNotFromClip && !IsGameOver
+            clockGame = !ClockNotFromClip && !isGameOver
                 ? ClockGame
                 : default;
 
             ClockShot = GetClockShot();
-
-            clockShot = !ShotNotFromClip && !IsGameOver
+            clockShot = !ShotNotFromClip && !isGameOver
                 ? ClockShot
                 : default;
 
-            if (!PeriodNotFromClip)
+            if (!PeriodNotFromClip
+                && !isGameOver)
             {
                 Period = GetPeriod();
+                period = Period;
             }
 
-            period = !PeriodNotFromClip && !IsGameOver
-                ? Period
-                : default;
-
-            if (!ScoreNotFromClip && !IsGameOver)
+            if (!ScoreNotFromClip
+                && !isGameOver)
             {
                 ScoreHome = GetScoreHome();
                 scoreHome = ScoreHome;
@@ -656,7 +653,8 @@ namespace Score2Stream.ScoreboardService
                 scoreGuest = ScoreGuest;
             }
 
-            if (!FoulsNotFromClip && !IsGameOver)
+            if (!FoulsNotFromClip
+                && !isGameOver)
             {
                 FoulsHome = GetFoulsHome();
                 foulsHome = FoulsHome;
