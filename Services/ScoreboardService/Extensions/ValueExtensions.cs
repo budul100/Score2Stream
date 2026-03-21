@@ -2,7 +2,7 @@
 
 namespace Score2Stream.ScoreboardService.Extensions
 {
-    internal static class ColorExtensions
+    internal static class ValueExtensions
     {
         #region Public Methods
 

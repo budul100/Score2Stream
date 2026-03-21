@@ -50,6 +50,8 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         #region Public Properties
 
+        public static int MaxLengthFouls => 10;
+
         public static int MaxLengthPeriod => 10;
 
         public static int MaxLengthScore => 10;
@@ -63,8 +65,9 @@ namespace Score2Stream.ScoreboardModule.ViewModels
             get => scoreboardService.ClockNotFromClip;
             set
             {
-                scoreboardService.ClockNotFromClip = value;
+                if (scoreboardService.ClockNotFromClip == value) return;
 
+                scoreboardService.ClockNotFromClip = value;
                 RaisePropertyChanged(nameof(ClockNotFromClip));
             }
         }
@@ -76,14 +79,13 @@ namespace Score2Stream.ScoreboardModule.ViewModels
             get => scoreboardService.ColorGuest;
             set
             {
-                if (!scoreboardService.ColorGuest.Equals(value))
-                {
-                    scoreboardService.ColorGuest = value;
-                    scoreboardModifiedEvent.Publish();
+                if (scoreboardService.ColorGuest.Equals(value)) return;
 
-                    RaisePropertyChanged(nameof(ColorGuest));
-                    RaisePropertyChanged(nameof(ColorGuestUpToDate));
-                }
+                scoreboardService.ColorGuest = value;
+                scoreboardModifiedEvent.Publish();
+
+                RaisePropertyChanged(nameof(ColorGuest));
+                RaisePropertyChanged(nameof(ColorGuestUpToDate));
             }
         }
 
@@ -94,32 +96,76 @@ namespace Score2Stream.ScoreboardModule.ViewModels
             get => scoreboardService.ColorHome;
             set
             {
-                if (!scoreboardService.ColorHome.Equals(value))
-                {
-                    scoreboardService.ColorHome = value;
-                    scoreboardModifiedEvent.Publish();
+                if (scoreboardService.ColorHome.Equals(value)) return;
 
-                    RaisePropertyChanged(nameof(ColorHome));
-                    RaisePropertyChanged(nameof(ColorHomeUpToDate));
-                }
+                scoreboardService.ColorHome = value;
+                scoreboardModifiedEvent.Publish();
+
+                RaisePropertyChanged(nameof(ColorHome));
+                RaisePropertyChanged(nameof(ColorHomeUpToDate));
             }
         }
 
         public bool ColorHomeUpToDate => scoreboardService.ColorHomeUpToDate;
+
+        public string FoulsGuest
+        {
+            get => scoreboardService.FoulsGuest;
+            set
+            {
+                if (scoreboardService.FoulsGuest == value) return;
+
+                scoreboardService.FoulsGuest = value;
+                scoreboardModifiedEvent.Publish();
+
+                RaisePropertyChanged(nameof(FoulsGuest));
+                RaisePropertyChanged(nameof(FoulsGuestUpToDate));
+            }
+        }
+
+        public bool FoulsGuestUpToDate => scoreboardService.FoulsGuestUpToDate;
+
+        public string FoulsHome
+        {
+            get => scoreboardService.FoulsHome;
+            set
+            {
+                if (scoreboardService.FoulsHome == value) return;
+
+                scoreboardService.FoulsHome = value;
+                scoreboardModifiedEvent.Publish();
+
+                RaisePropertyChanged(nameof(FoulsHome));
+                RaisePropertyChanged(nameof(FoulsHomeUpToDate));
+            }
+        }
+
+        public bool FoulsHomeUpToDate => scoreboardService.FoulsHomeUpToDate;
+
+        public bool FoulsNotFromClip
+        {
+            get => scoreboardService.FoulsNotFromClip;
+            set
+            {
+                if (scoreboardService.FoulsNotFromClip == value) return;
+
+                scoreboardService.FoulsNotFromClip = value;
+                RaisePropertyChanged(nameof(FoulsNotFromClip));
+            }
+        }
 
         public bool IsGameOver
         {
             get => scoreboardService.IsGameOver;
             set
             {
-                if (scoreboardService.IsGameOver != value)
-                {
-                    scoreboardService.IsGameOver = value;
-                    scoreboardModifiedEvent.Publish();
+                if (scoreboardService.IsGameOver == value) return;
 
-                    RaisePropertyChanged(nameof(IsGameOver));
-                    RaisePropertyChanged(nameof(IsGameOverUpToDate));
-                }
+                scoreboardService.IsGameOver = value;
+                scoreboardModifiedEvent.Publish();
+
+                RaisePropertyChanged(nameof(IsGameOver));
+                RaisePropertyChanged(nameof(IsGameOverUpToDate));
             }
         }
 
@@ -130,14 +176,13 @@ namespace Score2Stream.ScoreboardModule.ViewModels
             get => scoreboardService.Period;
             set
             {
-                if (scoreboardService.Period != value)
-                {
-                    scoreboardService.Period = value;
-                    scoreboardModifiedEvent.Publish();
+                if (scoreboardService.Period == value) return;
 
-                    RaisePropertyChanged(nameof(Period));
-                    RaisePropertyChanged(nameof(PeriodUpToDate));
-                }
+                scoreboardService.Period = value;
+                scoreboardModifiedEvent.Publish();
+
+                RaisePropertyChanged(nameof(Period));
+                RaisePropertyChanged(nameof(PeriodUpToDate));
             }
         }
 
@@ -146,12 +191,10 @@ namespace Score2Stream.ScoreboardModule.ViewModels
             get => scoreboardService.PeriodNotFromClip;
             set
             {
-                if (scoreboardService.PeriodNotFromClip != value)
-                {
-                    scoreboardService.PeriodNotFromClip = value;
+                if (scoreboardService.PeriodNotFromClip == value) return;
 
-                    RaisePropertyChanged(nameof(PeriodNotFromClip));
-                }
+                scoreboardService.PeriodNotFromClip = value;
+                RaisePropertyChanged(nameof(PeriodNotFromClip));
             }
         }
 
@@ -160,14 +203,13 @@ namespace Score2Stream.ScoreboardModule.ViewModels
             get => scoreboardService.Periods;
             set
             {
-                if (scoreboardService.Periods != value)
-                {
-                    scoreboardService.Periods = value;
-                    scoreboardModifiedEvent.Publish();
+                if (scoreboardService.Periods == value) return;
 
-                    RaisePropertyChanged(nameof(Periods));
-                    RaisePropertyChanged(nameof(PeriodsUpToDate));
-                }
+                scoreboardService.Periods = value;
+                scoreboardModifiedEvent.Publish();
+
+                RaisePropertyChanged(nameof(Periods));
+                RaisePropertyChanged(nameof(PeriodsUpToDate));
             }
         }
 
@@ -180,14 +222,13 @@ namespace Score2Stream.ScoreboardModule.ViewModels
             get => scoreboardService.ScoreGuest;
             set
             {
-                if (scoreboardService.ScoreGuest != value)
-                {
-                    scoreboardService.ScoreGuest = value;
-                    scoreboardModifiedEvent.Publish();
+                if (scoreboardService.ScoreGuest == value) return;
 
-                    RaisePropertyChanged(nameof(ScoreGuest));
-                    RaisePropertyChanged(nameof(ScoreGuestUpToDate));
-                }
+                scoreboardService.ScoreGuest = value;
+                scoreboardModifiedEvent.Publish();
+
+                RaisePropertyChanged(nameof(ScoreGuest));
+                RaisePropertyChanged(nameof(ScoreGuestUpToDate));
             }
         }
 
@@ -198,14 +239,13 @@ namespace Score2Stream.ScoreboardModule.ViewModels
             get => scoreboardService.ScoreHome;
             set
             {
-                if (scoreboardService.ScoreHome != value)
-                {
-                    scoreboardService.ScoreHome = value;
-                    scoreboardModifiedEvent.Publish();
+                if (scoreboardService.ScoreHome == value) return;
 
-                    RaisePropertyChanged(nameof(ScoreHome));
-                    RaisePropertyChanged(nameof(ScoreHomeUpToDate));
-                }
+                scoreboardService.ScoreHome = value;
+                scoreboardModifiedEvent.Publish();
+
+                RaisePropertyChanged(nameof(ScoreHome));
+                RaisePropertyChanged(nameof(ScoreHomeUpToDate));
             }
         }
 
@@ -216,12 +256,10 @@ namespace Score2Stream.ScoreboardModule.ViewModels
             get => scoreboardService.ScoreNotFromClip;
             set
             {
-                if (scoreboardService.ScoreNotFromClip != value)
-                {
-                    scoreboardService.ScoreNotFromClip = value;
+                if (scoreboardService.ScoreNotFromClip == value) return;
 
-                    RaisePropertyChanged(nameof(ScoreNotFromClip));
-                }
+                scoreboardService.ScoreNotFromClip = value;
+                RaisePropertyChanged(nameof(ScoreNotFromClip));
             }
         }
 
@@ -230,8 +268,9 @@ namespace Score2Stream.ScoreboardModule.ViewModels
             get => scoreboardService.ShotNotFromClip;
             set
             {
-                scoreboardService.ShotNotFromClip = value;
+                if (scoreboardService.ShotNotFromClip == value) return;
 
+                scoreboardService.ShotNotFromClip = value;
                 RaisePropertyChanged(nameof(ShotNotFromClip));
             }
         }
@@ -241,12 +280,10 @@ namespace Score2Stream.ScoreboardModule.ViewModels
             get => scoreboardService.ShowTenthOfSecs;
             set
             {
-                if (scoreboardService.ShowTenthOfSecs != value)
-                {
-                    scoreboardService.ShowTenthOfSecs = value;
+                if (scoreboardService.ShowTenthOfSecs == value) return;
 
-                    RaisePropertyChanged(nameof(ShowTenthOfSecs));
-                }
+                scoreboardService.ShowTenthOfSecs = value;
+                RaisePropertyChanged(nameof(ShowTenthOfSecs));
             }
         }
 
@@ -255,14 +292,13 @@ namespace Score2Stream.ScoreboardModule.ViewModels
             get => scoreboardService.TeamGuest;
             set
             {
-                if (scoreboardService.TeamGuest != value)
-                {
-                    scoreboardService.TeamGuest = value;
-                    scoreboardModifiedEvent.Publish();
+                if (scoreboardService.TeamGuest == value) return;
 
-                    RaisePropertyChanged(nameof(TeamGuest));
-                    RaisePropertyChanged(nameof(TeamGuestUpToDate));
-                }
+                scoreboardService.TeamGuest = value;
+                scoreboardModifiedEvent.Publish();
+
+                RaisePropertyChanged(nameof(TeamGuest));
+                RaisePropertyChanged(nameof(TeamGuestUpToDate));
             }
         }
 
@@ -273,49 +309,43 @@ namespace Score2Stream.ScoreboardModule.ViewModels
             get => scoreboardService.TeamHome;
             set
             {
-                if (scoreboardService.TeamHome != value)
-                {
-                    scoreboardService.TeamHome = value;
-                    scoreboardModifiedEvent.Publish();
+                if (scoreboardService.TeamHome == value) return;
 
-                    RaisePropertyChanged(nameof(TeamHome));
-                    RaisePropertyChanged(nameof(TeamHomeUpToDate));
-                }
+                scoreboardService.TeamHome = value;
+                scoreboardModifiedEvent.Publish();
+
+                RaisePropertyChanged(nameof(TeamHome));
+                RaisePropertyChanged(nameof(TeamHomeUpToDate));
             }
         }
 
         public bool TeamHomeUpToDate => scoreboardService.TeamHomeUpToDate;
+
+        public ObservableCollection<TickerViewModel> Tickers { get; } = [];
 
         public int TickersFrequency
         {
             get => scoreboardService.TickersFrequency;
             set
             {
-                if (scoreboardService.TickersFrequency != value)
-                {
-                    scoreboardService.TickersFrequency = value;
+                if (scoreboardService.TickersFrequency == value) return;
 
-                    RaisePropertyChanged(nameof(TickersFrequency));
-                }
+                scoreboardService.TickersFrequency = value;
+                RaisePropertyChanged(nameof(TickersFrequency));
             }
         }
 
-        public bool TickersUpToDate => scoreboardService
-            .TickersUpToDate.All(t => t);
+        public bool TickersUpToDate => scoreboardService.TickersUpToDate.All(t => t);
 
         #endregion Public Properties
-
-        #region Private Properties
-
-        private ObservableCollection<TickerViewModel> Tickers { get; } = [];
-
-        #endregion Private Properties
 
         #region Private Methods
 
         private void InitializeTickers()
         {
-            for (var index = 0; index < settingsService.Contents.Scoreboard.Tickers.Length; index++)
+            var length = settingsService.Contents.Scoreboard.Tickers.Length;
+
+            for (var index = 0; index < length; index++)
             {
                 var current = containerProvider.Resolve<TickerViewModel>();
 
@@ -327,9 +357,11 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         private void UpdateValues()
         {
+            // Read-only display values: always pull from service
             ClockGame = scoreboardService.ClockGame;
             ClockShot = scoreboardService.ClockShot;
 
+            // Clip-controlled values: only overwrite when the clip is the source
             if (!PeriodNotFromClip)
             {
                 Period = scoreboardService.Period;
@@ -341,33 +373,35 @@ namespace Score2Stream.ScoreboardModule.ViewModels
                 ScoreGuest = scoreboardService.ScoreGuest;
             }
 
+            if (!FoulsNotFromClip)
+            {
+                FoulsHome = scoreboardService.FoulsHome;
+                FoulsGuest = scoreboardService.FoulsGuest;
+            }
+
+            // Notify all read-only and UpToDate properties
             RaisePropertyChanged(nameof(ClockGame));
             RaisePropertyChanged(nameof(ClockShot));
 
             RaisePropertyChanged(nameof(ColorGuest));
             RaisePropertyChanged(nameof(ColorGuestUpToDate));
-
             RaisePropertyChanged(nameof(ColorHome));
             RaisePropertyChanged(nameof(ColorHomeUpToDate));
+
+            RaisePropertyChanged(nameof(FoulsGuestUpToDate));
+            RaisePropertyChanged(nameof(FoulsHomeUpToDate));
 
             RaisePropertyChanged(nameof(IsGameOver));
             RaisePropertyChanged(nameof(IsGameOverUpToDate));
 
-            RaisePropertyChanged(nameof(Period));
             RaisePropertyChanged(nameof(PeriodUpToDate));
-
-            RaisePropertyChanged(nameof(Periods));
             RaisePropertyChanged(nameof(PeriodsUpToDate));
 
-            RaisePropertyChanged(nameof(ScoreGuest));
             RaisePropertyChanged(nameof(ScoreGuestUpToDate));
-
-            RaisePropertyChanged(nameof(ScoreHome));
             RaisePropertyChanged(nameof(ScoreHomeUpToDate));
 
             RaisePropertyChanged(nameof(TeamGuest));
             RaisePropertyChanged(nameof(TeamGuestUpToDate));
-
             RaisePropertyChanged(nameof(TeamHome));
             RaisePropertyChanged(nameof(TeamHomeUpToDate));
 

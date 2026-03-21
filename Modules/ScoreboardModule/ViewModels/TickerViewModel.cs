@@ -38,50 +38,44 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         public bool IsActive
         {
-            get
-            {
-                return scoreboardService.Tickers[number].Item2;
-            }
+            get => scoreboardService.Tickers[number].Item2;
             set
             {
-                if (value != scoreboardService.Tickers[number].Item2
-                    && !string.IsNullOrWhiteSpace(Text))
-                {
-                    scoreboardService.SetTicker(
-                        number: number,
-                        isActive: value);
+                // Allow deactivating even when text is empty; only block activation without text
+                if (value == scoreboardService.Tickers[number].Item2
+                    || (value && string.IsNullOrWhiteSpace(Text))) return;
 
-                    scoreboardModifiedEvent.Publish();
+                scoreboardService.SetTicker(
+                    number: number,
+                    isActive: value);
 
-                    RaisePropertyChanged(nameof(IsActive));
-                    RaisePropertyChanged(nameof(UpToDate));
-                }
+                scoreboardModifiedEvent.Publish();
+
+                RaisePropertyChanged(nameof(IsActive));
+                RaisePropertyChanged(nameof(UpToDate));
             }
         }
 
         public string Text
         {
-            get
-            {
-                return scoreboardService.Tickers[number].Item1;
-            }
+            get => scoreboardService.Tickers[number].Item1;
             set
             {
-                if (value != scoreboardService.Tickers[number].Item1)
-                {
-                    scoreboardService.SetTicker(
-                        number: number,
-                        text: value);
+                if (value == scoreboardService.Tickers[number].Item1) return;
 
-                    scoreboardModifiedEvent.Publish();
+                scoreboardService.SetTicker(
+                    number: number,
+                    text: value);
 
-                    RaisePropertyChanged(nameof(Text));
-                    RaisePropertyChanged(nameof(UpToDate));
-                }
+                scoreboardModifiedEvent.Publish();
+
+                RaisePropertyChanged(nameof(Text));
+                RaisePropertyChanged(nameof(UpToDate));
             }
         }
 
-        public bool UpToDate => scoreboardService?.TickersUpToDate?.Length == 0
+        // TickersUpToDate null or empty => no tickers configured => treat as up to date
+        public bool UpToDate => scoreboardService.TickersUpToDate is not { Length: > 0 }
             || scoreboardService.TickersUpToDate[number];
 
         #endregion Public Properties
@@ -92,7 +86,12 @@ namespace Score2Stream.ScoreboardModule.ViewModels
         {
             this.number = number;
 
-            RaisePropertyChanged();
+            // Notify all properties explicitly; RaisePropertyChanged() without argument
+            // uses CallerMemberName (= "Initialize") which no binding listens to.
+
+            RaisePropertyChanged(nameof(IsActive));
+            RaisePropertyChanged(nameof(Text));
+            RaisePropertyChanged(nameof(UpToDate));
         }
 
         #endregion Public Methods

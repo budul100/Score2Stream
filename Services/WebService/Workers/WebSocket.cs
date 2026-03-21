@@ -92,10 +92,7 @@ namespace Score2Stream.WebService.Workers
 
         #region Private Methods
 
-        private RequestDelegate SendRequest()
-        {
-            return SendRequestAsyn;
-        }
+        private RequestDelegate SendRequest() => SendRequestAsyn;
 
         private async Task SendRequestAsyn(HttpContext context)
         {

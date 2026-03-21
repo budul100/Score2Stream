@@ -6,7 +6,7 @@
 
         public string Color { get; set; }
 
-        public int Fouls { get; set; }
+        public string Fouls { get; set; }
 
         public string ImagePath { get; set; }
 

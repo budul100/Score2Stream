@@ -71,9 +71,9 @@ namespace Score2Stream.Commons.Enums
         ScoreGuest3,
 
         [Description("Fouls home")]
-        FoulHome,
+        FoulsHome,
 
         [Description("Fouls guest")]
-        FoulGuest
+        FoulsGuest
     }
 }

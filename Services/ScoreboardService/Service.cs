@@ -26,9 +26,9 @@ namespace Score2Stream.ScoreboardService
         #region Private Fields
 
         private readonly AreaModifiedEvent areaModifiedEvent;
-        private readonly SegmentModifiedEvent clipModifiedEvent;
-        private readonly Dictionary<SegmentType, Segment> clips = [];
         private readonly ScoreboardUpdatedEvent scoreboardUpdatedEvent;
+        private readonly SegmentModifiedEvent segmentModifiedEvent;
+        private readonly Dictionary<SegmentType, Segment> segments = [];
         private readonly JsonSerializerOptions serializeOptions;
         private readonly ISettingsService<Session> settingsService;
 
@@ -36,6 +36,8 @@ namespace Score2Stream.ScoreboardService
         private string clockShot;
         private Color colorGuest;
         private Color colorHome;
+        private string foulsGuest;
+        private string foulsHome;
         private bool isGameOver;
         private string period;
         private string periods;
@@ -65,19 +67,19 @@ namespace Score2Stream.ScoreboardService
             };
 
             areaModifiedEvent = eventAggregator.GetEvent<AreaModifiedEvent>();
-            clipModifiedEvent = eventAggregator.GetEvent<SegmentModifiedEvent>();
+            segmentModifiedEvent = eventAggregator.GetEvent<SegmentModifiedEvent>();
             scoreboardUpdatedEvent = eventAggregator.GetEvent<ScoreboardUpdatedEvent>();
-
-            eventAggregator.GetEvent<InputUpdatedEvent>().Subscribe(
-                action: UpdateBoard,
-                keepSubscriberReferenceAlive: true);
 
             // Send first message to keep the web socket running
             eventAggregator.GetEvent<ServerStartedEvent>().Subscribe(
                 action: UpdateBoard,
                 keepSubscriberReferenceAlive: true);
 
-            clips = Commons.Extensions.EnumExtensions.GetValues<SegmentType>()
+            eventAggregator.GetEvent<InputUpdatedEvent>().Subscribe(
+                action: UpdateBoard,
+                keepSubscriberReferenceAlive: true);
+
+            segments = Commons.Extensions.EnumExtensions.GetValues<SegmentType>()
                 .Where(t => t != SegmentType.None).ToDictionary(
                     keySelector: t => t,
                     elementSelector: _ => default(Segment));
@@ -157,6 +159,16 @@ namespace Score2Stream.ScoreboardService
 
         public bool ColorHomeUpToDate => ColorHome == colorHome;
 
+        public string FoulsGuest { get; set; }
+
+        public bool FoulsGuestUpToDate => FoulsGuest == foulsGuest;
+
+        public string FoulsHome { get; set; }
+
+        public bool FoulsHomeUpToDate => FoulsHome == foulsHome;
+
+        public bool FoulsNotFromClip { get; set; }
+
         public bool IsGameOver { get; set; }
 
         public bool IsGameOverUpToDate => IsGameOver == isGameOver;
@@ -164,6 +176,8 @@ namespace Score2Stream.ScoreboardService
         public bool IsUpToDate => IsGameOverUpToDate
             && ColorGuestUpToDate
             && ColorHomeUpToDate
+            && FoulsGuestUpToDate
+            && FoulsHomeUpToDate
             && PeriodsUpToDate
             && PeriodUpToDate
             && ScoreGuestUpToDate
@@ -215,7 +229,6 @@ namespace Score2Stream.ScoreboardService
                 if (settingsService.Contents.Scoreboard.ShowTenthOfSecs != value)
                 {
                     settingsService.Contents.Scoreboard.ShowTenthOfSecs = value;
-
                     settingsService.Save();
                 }
             }
@@ -261,7 +274,6 @@ namespace Score2Stream.ScoreboardService
                 if (settingsService.Contents.Scoreboard.TickersFrequency != value)
                 {
                     settingsService.Contents.Scoreboard.TickersFrequency = value;
-
                     settingsService.Save();
                 }
             }
@@ -277,14 +289,12 @@ namespace Score2Stream.ScoreboardService
         {
             if (area != default)
             {
-                if (type == AreaType.None)
-                {
-                    ReleaseArea(area);
-                }
-                else
+                ReleaseArea(area);
+
+                if (type != AreaType.None)
                 {
                     var clipTypes = type
-                        .GetClipTypes().ToArray();
+                        .GetSegmentTypes().ToArray();
 
                     if (area.Size != clipTypes.Length)
                     {
@@ -296,11 +306,10 @@ namespace Score2Stream.ScoreboardService
                     if (area.Type != type)
                     {
                         area.Type = type;
-
                         areaModifiedEvent.Publish(area);
                     }
 
-                    var releasedAreas = clips
+                    var releasedAreas = segments
                         .Where(c => c.Value != default
                             && c.Value?.Area != area
                             && clipTypes.Contains(c.Key))
@@ -316,13 +325,12 @@ namespace Score2Stream.ScoreboardService
                     {
                         var clip = area.Segments.ElementAt(index);
 
-                        clips[clipTypes[index]] = clip;
+                        segments[clipTypes[index]] = clip;
 
                         if (clip.Type != clipTypes[index])
                         {
                             clip.Type = clipTypes[index];
-
-                            clipModifiedEvent.Publish(clip);
+                            segmentModifiedEvent.Publish(clip);
                         }
                     }
                 }
@@ -336,23 +344,20 @@ namespace Score2Stream.ScoreboardService
                 if (area.Type != AreaType.None)
                 {
                     area.Type = AreaType.None;
-
                     areaModifiedEvent.Publish(area);
                 }
 
-                var releasedClips = clips
-                    .Where(c => area.Segments.Contains(c.Value))
-                    .Distinct().ToArray();
+                var releasedSegments = segments
+                    .Where(c => area.Segments.Contains(c.Value)).ToArray();
 
-                foreach (var releasedClip in releasedClips)
+                foreach (var releaseSegment in releasedSegments)
                 {
-                    clips[releasedClip.Key] = default;
+                    segments[releaseSegment.Key] = default;
 
-                    if (releasedClip.Value.Type != SegmentType.None)
+                    if (releaseSegment.Value.Type != SegmentType.None)
                     {
-                        releasedClip.Value.Type = SegmentType.None;
-
-                        clipModifiedEvent.Publish(releasedClip.Value);
+                        releaseSegment.Value.Type = SegmentType.None;
+                        segmentModifiedEvent.Publish(releaseSegment.Value);
                     }
                 }
             }
@@ -390,21 +395,29 @@ namespace Score2Stream.ScoreboardService
             this.colorGuest = ColorGuest;
 
             if (PeriodNotFromClip
-                || clips[SegmentType.Period] == default)
+                || segments[SegmentType.Period] == default)
             {
                 period = Period;
             }
 
             if (ScoreNotFromClip
-                || clips[SegmentType.ScoreHome1] == default
-                || clips[SegmentType.ScoreHome2] == default
-                || clips[SegmentType.ScoreHome3] == default
-                || clips[SegmentType.ScoreGuest1] == default
-                || clips[SegmentType.ScoreGuest2] == default
-                || clips[SegmentType.ScoreGuest3] == default)
+                || segments[SegmentType.ScoreHome1] == default
+                || segments[SegmentType.ScoreHome2] == default
+                || segments[SegmentType.ScoreHome3] == default
+                || segments[SegmentType.ScoreGuest1] == default
+                || segments[SegmentType.ScoreGuest2] == default
+                || segments[SegmentType.ScoreGuest3] == default)
             {
                 scoreHome = ScoreHome;
                 scoreGuest = ScoreGuest;
+            }
+
+            if (FoulsNotFromClip
+                || segments[SegmentType.FoulsHome] == default
+                || segments[SegmentType.FoulsGuest] == default)
+            {
+                foulsHome = FoulsHome;
+                foulsGuest = FoulsGuest;
             }
 
             tickers = Tickers?.ToArray();
@@ -432,7 +445,7 @@ namespace Score2Stream.ScoreboardService
             var home = new Home
             {
                 Color = colorHome.GetColorHex(),
-                Fouls = default,
+                Fouls = foulsHome,
                 ImagePath = default,
                 Name = teamHome,
                 Score = scoreHome,
@@ -441,7 +454,7 @@ namespace Score2Stream.ScoreboardService
             var guest = new Guest
             {
                 Color = colorGuest.GetColorHex(),
-                Fouls = default,
+                Fouls = foulsGuest,
                 ImagePath = default,
                 Name = teamGuest,
                 Score = scoreGuest,
@@ -464,20 +477,20 @@ namespace Score2Stream.ScoreboardService
         {
             var result = new StringBuilder();
 
-            if (!string.IsNullOrWhiteSpace(clips[SegmentType.ClockGameMin1]?.Value))
+            if (!string.IsNullOrWhiteSpace(segments[SegmentType.ClockGameMin1]?.Value))
             {
-                result.Append(clips[SegmentType.ClockGameMin1].Value);
+                result.Append(segments[SegmentType.ClockGameMin1].Value);
             }
-            if (!string.IsNullOrWhiteSpace(clips[SegmentType.ClockGameMin2]?.Value))
+            if (!string.IsNullOrWhiteSpace(segments[SegmentType.ClockGameMin2]?.Value))
             {
-                result.Append(clips[SegmentType.ClockGameMin2].Value);
+                result.Append(segments[SegmentType.ClockGameMin2].Value);
             }
 
             if (result.Length > 0)
             {
-                if (clips[SegmentType.ClockGameSplit] != default)
+                if (segments[SegmentType.ClockGameSplit] != default)
                 {
-                    result.Append(clips[SegmentType.ClockGameSplit].Value);
+                    result.Append(segments[SegmentType.ClockGameSplit].Value);
                 }
                 else
                 {
@@ -487,13 +500,13 @@ namespace Score2Stream.ScoreboardService
 
             var seconds = new StringBuilder();
 
-            if (!string.IsNullOrWhiteSpace(clips[SegmentType.ClockGameSec1]?.Value))
+            if (!string.IsNullOrWhiteSpace(segments[SegmentType.ClockGameSec1]?.Value))
             {
-                seconds.Append(clips[SegmentType.ClockGameSec1].Value);
+                seconds.Append(segments[SegmentType.ClockGameSec1].Value);
             }
-            if (!string.IsNullOrWhiteSpace(clips[SegmentType.ClockGameSec2]?.Value))
+            if (!string.IsNullOrWhiteSpace(segments[SegmentType.ClockGameSec2]?.Value))
             {
-                seconds.Append(clips[SegmentType.ClockGameSec2].Value);
+                seconds.Append(segments[SegmentType.ClockGameSec2].Value);
             }
 
             var currentTime = DateTime.Now;
@@ -521,43 +534,51 @@ namespace Score2Stream.ScoreboardService
         {
             var result = new StringBuilder();
 
-            if (clips[SegmentType.ClockShot1] != default)
+            if (segments[SegmentType.ClockShot1] != default)
             {
-                result.Append(clips[SegmentType.ClockShot1].Value);
+                result.Append(segments[SegmentType.ClockShot1].Value);
             }
 
-            if (clips[SegmentType.ClockShot2] != default)
+            if (segments[SegmentType.ClockShot2] != default)
             {
-                result.Append(clips[SegmentType.ClockShot2].Value);
+                result.Append(segments[SegmentType.ClockShot2].Value);
             }
 
             return result.ToString();
         }
 
+        private string GetFoulsGuest()
+        {
+            return segments[SegmentType.FoulsGuest]?.Value;
+        }
+
+        private string GetFoulsHome()
+        {
+            return segments[SegmentType.FoulsHome]?.Value;
+        }
+
         private string GetPeriod()
         {
-            var result = clips[SegmentType.Period]?.Value;
-
-            return result;
+            return segments[SegmentType.Period]?.Value;
         }
 
         private string GetScoreGuest()
         {
             var result = new StringBuilder();
 
-            if (clips[SegmentType.ScoreGuest1] != default)
+            if (segments[SegmentType.ScoreGuest1] != default)
             {
-                result.Append(clips[SegmentType.ScoreGuest1].Value);
+                result.Append(segments[SegmentType.ScoreGuest1].Value);
             }
 
-            if (clips[SegmentType.ScoreGuest2] != default)
+            if (segments[SegmentType.ScoreGuest2] != default)
             {
-                result.Append(clips[SegmentType.ScoreGuest2].Value);
+                result.Append(segments[SegmentType.ScoreGuest2].Value);
             }
 
-            if (clips[SegmentType.ScoreGuest3] != default)
+            if (segments[SegmentType.ScoreGuest3] != default)
             {
-                result.Append(clips[SegmentType.ScoreGuest3].Value);
+                result.Append(segments[SegmentType.ScoreGuest3].Value);
             }
 
             return result.ToString();
@@ -567,19 +588,19 @@ namespace Score2Stream.ScoreboardService
         {
             var result = new StringBuilder();
 
-            if (clips[SegmentType.ScoreHome1] != default)
+            if (segments[SegmentType.ScoreHome1] != default)
             {
-                result.Append(clips[SegmentType.ScoreHome1].Value);
+                result.Append(segments[SegmentType.ScoreHome1].Value);
             }
 
-            if (clips[SegmentType.ScoreHome2] != default)
+            if (segments[SegmentType.ScoreHome2] != default)
             {
-                result.Append(clips[SegmentType.ScoreHome2].Value);
+                result.Append(segments[SegmentType.ScoreHome2].Value);
             }
 
-            if (clips[SegmentType.ScoreHome3] != default)
+            if (segments[SegmentType.ScoreHome3] != default)
             {
-                result.Append(clips[SegmentType.ScoreHome3].Value);
+                result.Append(segments[SegmentType.ScoreHome3].Value);
             }
 
             return result.ToString();
@@ -589,11 +610,14 @@ namespace Score2Stream.ScoreboardService
         {
             if (tickers?.Any() == true)
             {
-                for (var index = 0; index < tickers.Count(); index++)
+                var current = tickers.ToArray();
+
+                var settingsTickers = settingsService.Contents.Scoreboard.Tickers;
+
+                for (var index = 0; index < current.Length; index++)
                 {
-                    var result = settingsService.Contents.Scoreboard.Tickers[index].Item2 == tickers.ElementAt(index).Item2
-                        && (!settingsService.Contents.Scoreboard.Tickers[index].Item2
-                        || settingsService.Contents.Scoreboard.Tickers[index].Item1 == tickers.ElementAt(index).Item1);
+                    var result = settingsTickers[index].Item2 == current[index].Item2
+                        && (!settingsTickers[index].Item2 || settingsTickers[index].Item1 == current[index].Item1);
 
                     yield return result;
                 }
@@ -603,28 +627,42 @@ namespace Score2Stream.ScoreboardService
         private void UpdateBoard()
         {
             ClockGame = GetClockGame();
+
             clockGame = !ClockNotFromClip && !IsGameOver
                 ? ClockGame
                 : default;
 
             ClockShot = GetClockShot();
+
             clockShot = !ShotNotFromClip && !IsGameOver
                 ? ClockShot
                 : default;
 
-            Period = GetPeriod();
+            if (!PeriodNotFromClip)
+            {
+                Period = GetPeriod();
+            }
+
             period = !PeriodNotFromClip && !IsGameOver
                 ? Period
                 : default;
 
-            if (!ScoreNotFromClip
-                && !IsGameOver)
+            if (!ScoreNotFromClip && !IsGameOver)
             {
                 ScoreHome = GetScoreHome();
                 scoreHome = ScoreHome;
 
                 ScoreGuest = GetScoreGuest();
                 scoreGuest = ScoreGuest;
+            }
+
+            if (!FoulsNotFromClip && !IsGameOver)
+            {
+                FoulsHome = GetFoulsHome();
+                foulsHome = FoulsHome;
+
+                FoulsGuest = GetFoulsGuest();
+                foulsGuest = FoulsGuest;
             }
 
             var frequencyTime = new TimeSpan(

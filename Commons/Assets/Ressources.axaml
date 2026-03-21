@@ -10,6 +10,8 @@
     <SolidColorBrush x:Key="LoadingBackground" Color="#80000000" />
     <SolidColorBrush x:Key="LoadingForeground" Color="White" />
 
+    <SolidColorBrush x:Key="UpdateBackground" Color="Orange" />
+
     <!-- Tab control resources -->
     <x:Double x:Key="TabFontSize">10</x:Double>
     <SolidColorBrush x:Key="TabBorderBrush" Color="#AAAAAA" />

@@ -34,8 +34,8 @@ namespace Score2Stream.AreaModule.Extensions
                     yield return AreaType.ScoreGuest2;
                     yield return AreaType.ScoreGuest3;
 
-                    yield return AreaType.FoulHome;
-                    yield return AreaType.FoulGuest;
+                    yield return AreaType.FoulsHome;
+                    yield return AreaType.FoulsGuest;
 
                     break;
 

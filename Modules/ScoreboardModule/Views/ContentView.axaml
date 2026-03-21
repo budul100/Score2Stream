@@ -1,637 +1,324 @@
-<UserControl
+﻿<UserControl
     x:Class="Score2Stream.ScoreboardModule.Views.ContentView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:i="using:Avalonia.Xaml.Interactivity"
-    xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
     xmlns:cl="clr-namespace:AvaloniaColorPicker;assembly=AvaloniaColorPicker"
+    xmlns:conv="using:Score2Stream.Commons.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:v="using:Score2Stream.ScoreboardModule.Views"
     xmlns:vm="using:Score2Stream.ScoreboardModule.ViewModels"
-    d:DesignWidth="500"
+    d:DesignWidth="600"
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <conv:BoolToHighlightBrushConverter x:Key="BoolToHighlight" />
+    </UserControl.Resources>
+
     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
         <StackPanel>
-            <Grid Margin="5">
+            <!--
+            Grid.IsSharedSizeScope="True" activates SharedSizeGroup.
+            Col 0 and Col 2 share the group "LabelCol": both are always
+            exactly as wide as the widest label in either column.
+            -->
+            <Grid Margin="5" Grid.IsSharedSizeScope="True">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="85" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="85" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="120" />
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="LabelCol" />  <!-- Col 0: Home label -->
+                    <ColumnDefinition Width="*" />                                <!-- Col 1: Home input -->
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="LabelCol" />  <!-- Col 2: Guest label -->
+                    <ColumnDefinition Width="*" />                                <!-- Col 3: Guest input -->
+                    <ColumnDefinition Width="120" />                              <!-- Col 4: Checkbox -->
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="10" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="10" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />  <!-- 0:  Color -->
+                    <RowDefinition Height="*" />  <!-- 1:  Team name -->
+                    <RowDefinition Height="*" />  <!-- 2:  Score -->
+                    <RowDefinition Height="*" />  <!-- 3:  Fouls -->
+                    <RowDefinition Height="10" /> <!-- 4:  Spacer -->
+                    <RowDefinition Height="*" />  <!-- 5:  Game header -->
+                    <RowDefinition Height="*" />  <!-- 6:  Game clock -->
+                    <RowDefinition Height="*" />  <!-- 7:  Shot clock -->
+                    <RowDefinition Height="*" />  <!-- 8:  Period / Periods -->
+                    <RowDefinition Height="*" />  <!-- 9:  Game over -->
+                    <RowDefinition Height="10" /> <!-- 10: Spacer -->
+                    <RowDefinition Height="*" />  <!-- 11: Tickers header -->
+                    <RowDefinition Height="*" />  <!-- 12: Ticker frequency -->
                 </Grid.RowDefinitions>
 
+                <!--
+                Highlight rectangles: declared first so they render behind all controls.
+                Each spans the columns of the field it covers and changes color via converter.
+                -->
+                <Rectangle Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="1" Fill="{Binding ColorHomeUpToDate,  Converter={StaticResource BoolToHighlight}, ConverterParameter={StaticResource UpdateBackground}}" />
+                <Rectangle Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="1" Fill="{Binding ColorGuestUpToDate, Converter={StaticResource BoolToHighlight}, ConverterParameter={StaticResource UpdateBackground}}" />
+                <Rectangle Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Fill="{Binding TeamHomeUpToDate,   Converter={StaticResource BoolToHighlight}, ConverterParameter={StaticResource UpdateBackground}}" />
+                <Rectangle Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Fill="{Binding TeamGuestUpToDate,  Converter={StaticResource BoolToHighlight}, ConverterParameter={StaticResource UpdateBackground}}" />
+                <Rectangle Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Fill="{Binding ScoreHomeUpToDate,  Converter={StaticResource BoolToHighlight}, ConverterParameter={StaticResource UpdateBackground}}" />
+                <Rectangle Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Fill="{Binding ScoreGuestUpToDate, Converter={StaticResource BoolToHighlight}, ConverterParameter={StaticResource UpdateBackground}}" />
+                <Rectangle Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Fill="{Binding FoulsHomeUpToDate,  Converter={StaticResource BoolToHighlight}, ConverterParameter={StaticResource UpdateBackground}}" />
+                <Rectangle Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" Fill="{Binding FoulsGuestUpToDate, Converter={StaticResource BoolToHighlight}, ConverterParameter={StaticResource UpdateBackground}}" />
+                <Rectangle Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Fill="{Binding PeriodUpToDate,     Converter={StaticResource BoolToHighlight}, ConverterParameter={StaticResource UpdateBackground}}" />
+                <Rectangle Grid.Row="8" Grid.Column="2" Grid.ColumnSpan="2" Fill="{Binding PeriodsUpToDate,    Converter={StaticResource BoolToHighlight}, ConverterParameter={StaticResource UpdateBackground}}" />
+                <Rectangle Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="4" Fill="{Binding IsGameOverUpToDate, Converter={StaticResource BoolToHighlight}, ConverterParameter={StaticResource UpdateBackground}}" />
+
+                <!-- ══════════════════════════════════════════════ Row 0: Colors ══ -->
+
                 <TextBlock
-                    Grid.Row="0"
-                    Grid.Column="0"
+                    Grid.Row="0" Grid.Column="0"
                     Margin="5"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    Text="Home" />
-                <Grid
-                    Name="ColorHomeGrid"
-                    Grid.Row="0"
-                    Grid.Column="1">
-                    <i:Interaction.Behaviors>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding ColorHomeUpToDate}"
-                            ComparisonCondition="Equal"
-                            Value="True">
-                            <ia:ChangePropertyAction
-                                PropertyName="Background"
-                                TargetObject="ColorHomeGrid"
-                                Value="Transparent" />
-                        </ia:DataTriggerBehavior>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding ColorHomeUpToDate}"
-                            ComparisonCondition="NotEqual"
-                            Value="True">
-                            <ia:ChangePropertyAction
-                                PropertyName="Background"
-                                TargetObject="ColorHomeGrid"
-                                Value="Orange" />
-                        </ia:DataTriggerBehavior>
-                    </i:Interaction.Behaviors>
-                </Grid>
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                    FontWeight="Bold" Text="Home" />
                 <cl:ColorButton
-                    Grid.Row="0"
-                    Grid.Column="1"
-                    Height="20"
-                    Margin="5"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
+                    Grid.Row="0" Grid.Column="1"
+                    Height="20" Margin="5"
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
                     Color="{Binding ColorHome, Mode=TwoWay}" />
 
                 <TextBlock
-                    Grid.Row="0"
-                    Grid.Column="2"
+                    Grid.Row="0" Grid.Column="2"
                     Margin="5"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    Text="Guest" />
-                <Grid
-                    Name="ColorGuestGrid"
-                    Grid.Row="0"
-                    Grid.Column="3">
-                    <i:Interaction.Behaviors>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding ColorGuestUpToDate}"
-                            ComparisonCondition="Equal"
-                            Value="True">
-                            <ia:ChangePropertyAction
-                                PropertyName="Background"
-                                TargetObject="ColorGuestGrid"
-                                Value="Transparent" />
-                        </ia:DataTriggerBehavior>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding ColorGuestUpToDate}"
-                            ComparisonCondition="NotEqual"
-                            Value="True">
-                            <ia:ChangePropertyAction
-                                PropertyName="Background"
-                                TargetObject="ColorGuestGrid"
-                                Value="Orange" />
-                        </ia:DataTriggerBehavior>
-                    </i:Interaction.Behaviors>
-                </Grid>
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                    FontWeight="Bold" Text="Guest" />
                 <cl:ColorButton
-                    Grid.Row="0"
-                    Grid.Column="3"
-                    Height="20"
-                    Margin="5"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
+                    Grid.Row="0" Grid.Column="3"
+                    Height="20" Margin="5"
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
                     Color="{Binding ColorGuest, Mode=TwoWay}" />
 
-                <Grid
-                    Name="TeamHomeGrid"
-                    Grid.Row="1"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="2">
-                    <i:Interaction.Behaviors>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding TeamHomeUpToDate}"
-                            ComparisonCondition="Equal"
-                            Value="True">
-                            <ia:ChangePropertyAction
-                                PropertyName="Background"
-                                TargetObject="TeamHomeGrid"
-                                Value="Transparent" />
-                        </ia:DataTriggerBehavior>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding TeamHomeUpToDate}"
-                            ComparisonCondition="NotEqual"
-                            Value="True">
-                            <ia:ChangePropertyAction
-                                PropertyName="Background"
-                                TargetObject="TeamHomeGrid"
-                                Value="Orange" />
-                        </ia:DataTriggerBehavior>
-                    </i:Interaction.Behaviors>
-                </Grid>
+                <!-- ══════════════════════════════════════════ Row 1: Team names ══ -->
+
                 <TextBlock
-                    Grid.Row="1"
-                    Grid.Column="0"
+                    Grid.Row="1" Grid.Column="0"
                     Margin="5"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
                     Text="Name" />
                 <TextBox
-                    Grid.Row="1"
-                    Grid.Column="1"
+                    Grid.Row="1" Grid.Column="1"
                     Margin="5"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Center"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Center"
                     MaxLength="{Binding MaxLengthTeam}"
                     Text="{Binding TeamHome}" />
 
-                <Grid
-                    Name="TeamGuestGrid"
-                    Grid.Row="1"
-                    Grid.Column="2"
-                    Grid.ColumnSpan="2">
-                    <i:Interaction.Behaviors>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding TeamGuestUpToDate}"
-                            ComparisonCondition="Equal"
-                            Value="True">
-                            <ia:ChangePropertyAction
-                                PropertyName="Background"
-                                TargetObject="TeamGuestGrid"
-                                Value="Transparent" />
-                        </ia:DataTriggerBehavior>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding TeamGuestUpToDate}"
-                            ComparisonCondition="NotEqual"
-                            Value="True">
-                            <ia:ChangePropertyAction
-                                PropertyName="Background"
-                                TargetObject="TeamGuestGrid"
-                                Value="Orange" />
-                        </ia:DataTriggerBehavior>
-                    </i:Interaction.Behaviors>
-                </Grid>
                 <TextBlock
-                    Grid.Row="1"
-                    Grid.Column="2"
+                    Grid.Row="1" Grid.Column="2"
                     Margin="5"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
                     Text="Name" />
                 <TextBox
-                    Grid.Row="1"
-                    Grid.Column="3"
+                    Grid.Row="1" Grid.Column="3"
                     Margin="5"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Center"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Center"
                     MaxLength="{Binding MaxLengthTeam}"
                     Text="{Binding TeamGuest}" />
 
-                <Grid
-                    Name="ScoreHomeGrid"
-                    Grid.Row="2"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="2">
-                    <i:Interaction.Behaviors>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding ScoreHomeUpToDate}"
-                            ComparisonCondition="Equal"
-                            Value="True">
-                            <ia:ChangePropertyAction
-                                PropertyName="Background"
-                                TargetObject="ScoreHomeGrid"
-                                Value="Transparent" />
-                        </ia:DataTriggerBehavior>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding ScoreHomeUpToDate}"
-                            ComparisonCondition="NotEqual"
-                            Value="True">
-                            <ia:ChangePropertyAction
-                                PropertyName="Background"
-                                TargetObject="ScoreHomeGrid"
-                                Value="Orange" />
-                        </ia:DataTriggerBehavior>
-                    </i:Interaction.Behaviors>
-                </Grid>
-                <TextBlock
-                    Grid.Row="2"
-                    Grid.Column="0"
-                    Margin="5"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    Text="Score" />
-                <TextBox
-                    Name="ScoreHomeTextBox"
-                    Grid.Row="2"
-                    Grid.Column="1"
-                    Margin="5"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Center"
-                    MaxLength="{Binding MaxLengthScore}"
-                    Text="{Binding ScoreHome}">
-                    <i:Interaction.Behaviors>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding #ScoreNotFromClip.IsChecked}"
-                            ComparisonCondition="Equal"
-                            Value="True">
-                            <ia:ChangePropertyAction
-                                PropertyName="IsEnabled"
-                                TargetObject="ScoreHomeTextBox"
-                                Value="True" />
-                        </ia:DataTriggerBehavior>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding #ScoreNotFromClip.IsChecked}"
-                            ComparisonCondition="Equal"
-                            Value="False">
-                            <ia:ChangePropertyAction
-                                PropertyName="IsEnabled"
-                                TargetObject="ScoreHomeTextBox"
-                                Value="False" />
-                        </ia:DataTriggerBehavior>
-                    </i:Interaction.Behaviors>
-                </TextBox>
+                <!-- ════════════════════════════════════════════════ Row 2: Score ══ -->
 
-                <Grid
-                    Name="ScoreGuestGrid"
-                    Grid.Row="2"
-                    Grid.Column="2"
-                    Grid.ColumnSpan="2">
-                    <i:Interaction.Behaviors>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding ScoreGuestUpToDate}"
-                            ComparisonCondition="Equal"
-                            Value="True">
-                            <ia:ChangePropertyAction
-                                PropertyName="Background"
-                                TargetObject="ScoreGuestGrid"
-                                Value="Transparent" />
-                        </ia:DataTriggerBehavior>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding ScoreGuestUpToDate}"
-                            ComparisonCondition="NotEqual"
-                            Value="True">
-                            <ia:ChangePropertyAction
-                                PropertyName="Background"
-                                TargetObject="ScoreGuestGrid"
-                                Value="Orange" />
-                        </ia:DataTriggerBehavior>
-                    </i:Interaction.Behaviors>
-                </Grid>
                 <TextBlock
-                    Grid.Row="2"
-                    Grid.Column="2"
+                    Grid.Row="2" Grid.Column="0"
                     Margin="5"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
                     Text="Score" />
                 <TextBox
-                    Name="ScoreGuestTextBox"
-                    Grid.Row="2"
-                    Grid.Column="3"
+                    Grid.Row="2" Grid.Column="1"
                     Margin="5"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Center"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                    IsEnabled="{Binding #ScoreNotFromClip.IsChecked}"
                     MaxLength="{Binding MaxLengthScore}"
-                    Text="{Binding ScoreGuest}">
-                    <i:Interaction.Behaviors>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding #ScoreNotFromClip.IsChecked}"
-                            ComparisonCondition="Equal"
-                            Value="True">
-                            <ia:ChangePropertyAction
-                                PropertyName="IsEnabled"
-                                TargetObject="ScoreGuestTextBox"
-                                Value="True" />
-                        </ia:DataTriggerBehavior>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding #ScoreNotFromClip.IsChecked}"
-                            ComparisonCondition="Equal"
-                            Value="False">
-                            <ia:ChangePropertyAction
-                                PropertyName="IsEnabled"
-                                TargetObject="ScoreGuestTextBox"
-                                Value="False" />
-                        </ia:DataTriggerBehavior>
-                    </i:Interaction.Behaviors>
-                </TextBox>
+                    Text="{Binding ScoreHome}" />
+
+                <TextBlock
+                    Grid.Row="2" Grid.Column="2"
+                    Margin="5"
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                    Text="Score" />
+                <TextBox
+                    Grid.Row="2" Grid.Column="3"
+                    Margin="5"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                    IsEnabled="{Binding #ScoreNotFromClip.IsChecked}"
+                    MaxLength="{Binding MaxLengthScore}"
+                    Text="{Binding ScoreGuest}" />
 
                 <CheckBox
                     x:Name="ScoreNotFromClip"
-                    Grid.Row="2"
-                    Grid.Column="4"
-                    Margin="5"
-                    VerticalAlignment="Center"
+                    Grid.Row="2" Grid.Column="4"
+                    Margin="5" VerticalAlignment="Center"
                     Content="Ignore clip"
                     IsChecked="{Binding ScoreNotFromClip}" />
 
-                <TextBlock
-                    Grid.Row="4"
-                    Grid.Column="0"
-                    Margin="5"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    Text="Game" />
+                <!-- ════════════════════════════════════════════════ Row 3: Fouls ══ -->
 
                 <TextBlock
-                    Grid.Row="5"
-                    Grid.Column="0"
+                    Grid.Row="3" Grid.Column="0"
                     Margin="5"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    IsEnabled="False"
-                    Text="Game clock" />
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                    Text="Fouls" />
                 <TextBox
-                    Grid.Row="5"
-                    Grid.Column="1"
+                    Grid.Row="3" Grid.Column="1"
                     Margin="5"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Center"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                    IsEnabled="{Binding #FoulsNotFromClip.IsChecked}"
+                    MaxLength="{Binding MaxLengthFouls}"
+                    Text="{Binding FoulsHome}" />
+
+                <TextBlock
+                    Grid.Row="3" Grid.Column="2"
+                    Margin="5"
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                    Text="Fouls" />
+                <TextBox
+                    Grid.Row="3" Grid.Column="3"
+                    Margin="5"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                    IsEnabled="{Binding #FoulsNotFromClip.IsChecked}"
+                    MaxLength="{Binding MaxLengthFouls}"
+                    Text="{Binding FoulsGuest}" />
+
+                <CheckBox
+                    x:Name="FoulsNotFromClip"
+                    Grid.Row="3" Grid.Column="4"
+                    Margin="5" VerticalAlignment="Center"
+                    Content="Ignore clip"
+                    IsChecked="{Binding FoulsNotFromClip}" />
+
+                <!-- ══════════════════════════════════════════ Row 5: Game header ══ -->
+
+                <TextBlock
+                    Grid.Row="5" Grid.Column="0"
+                    Margin="5"
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                    FontWeight="Bold" Text="Game" />
+
+                <!-- ═══════════════════════════════════════════ Row 6: Game clock ══ -->
+
+                <TextBlock
+                    Grid.Row="6" Grid.Column="0"
+                    Margin="5"
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                    IsEnabled="False" Text="Game clock" />
+                <TextBox
+                    Grid.Row="6" Grid.Column="1"
+                    Margin="5"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Center"
                     IsEnabled="False"
                     Text="{Binding ClockGame, Mode=OneWay}" />
 
                 <CheckBox
                     x:Name="ShowTenthOfSecsCheckbox"
-                    Grid.Row="5"
-                    Grid.Column="2"
-                    Grid.ColumnSpan="2"
-                    Margin="5"
-                    VerticalAlignment="Center"
+                    Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="2"
+                    Margin="5" VerticalAlignment="Center"
                     Content="Show tenth of seconds"
-                    IsChecked="{Binding ShowTenthOfSecs}">
-                    <i:Interaction.Behaviors>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding #ClockNotFromClip.IsChecked}"
-                            ComparisonCondition="Equal"
-                            Value="False">
-                            <ia:ChangePropertyAction
-                                PropertyName="IsEnabled"
-                                TargetObject="ShowTenthOfSecsCheckbox"
-                                Value="True" />
-                        </ia:DataTriggerBehavior>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding #ClockNotFromClip.IsChecked}"
-                            ComparisonCondition="Equal"
-                            Value="True">
-                            <ia:ChangePropertyAction
-                                PropertyName="IsEnabled"
-                                TargetObject="ShowTenthOfSecsCheckbox"
-                                Value="False" />
-                        </ia:DataTriggerBehavior>
-                    </i:Interaction.Behaviors>
-                </CheckBox>
+                    IsChecked="{Binding ShowTenthOfSecs}"
+                    IsEnabled="{Binding !#ClockNotFromClip.IsChecked}" />
 
                 <CheckBox
                     x:Name="ClockNotFromClip"
-                    Grid.Row="5"
-                    Grid.Column="4"
-                    Margin="5"
-                    VerticalAlignment="Center"
+                    Grid.Row="6" Grid.Column="4"
+                    Margin="5" VerticalAlignment="Center"
                     Content="Ignore clip"
                     IsChecked="{Binding ClockNotFromClip}" />
 
+                <!-- ═══════════════════════════════════════════ Row 7: Shot clock ══ -->
+
                 <TextBlock
-                    Grid.Row="6"
-                    Grid.Column="0"
+                    Grid.Row="7" Grid.Column="0"
                     Margin="5"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    IsEnabled="False"
-                    Text="Shot clock" />
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                    IsEnabled="False" Text="Shot clock" />
                 <TextBox
-                    Grid.Row="6"
-                    Grid.Column="1"
+                    Grid.Row="7" Grid.Column="1"
                     Margin="5"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Center"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Center"
                     IsEnabled="False"
                     Text="{Binding ClockShot, Mode=OneWay}" />
+
                 <CheckBox
                     x:Name="ShotNotFromClip"
-                    Grid.Row="6"
-                    Grid.Column="4"
-                    Margin="5"
-                    VerticalAlignment="Center"
+                    Grid.Row="7" Grid.Column="4"
+                    Margin="5" VerticalAlignment="Center"
                     Content="Ignore clip"
                     IsChecked="{Binding ShotNotFromClip}" />
 
-                <Grid
-                    Name="PeriodGrid"
-                    Grid.Row="7"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="2">
-                    <i:Interaction.Behaviors>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding PeriodUpToDate}"
-                            ComparisonCondition="Equal"
-                            Value="True">
-                            <ia:ChangePropertyAction
-                                PropertyName="Background"
-                                TargetObject="PeriodGrid"
-                                Value="Transparent" />
-                        </ia:DataTriggerBehavior>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding PeriodUpToDate}"
-                            ComparisonCondition="NotEqual"
-                            Value="True">
-                            <ia:ChangePropertyAction
-                                PropertyName="Background"
-                                TargetObject="PeriodGrid"
-                                Value="Orange" />
-                        </ia:DataTriggerBehavior>
-                    </i:Interaction.Behaviors>
-                </Grid>
+                <!-- ══════════════════════════════════════ Row 8: Period / Periods ══ -->
+
                 <TextBlock
-                    Grid.Row="7"
-                    Grid.Column="0"
+                    Grid.Row="8" Grid.Column="0"
                     Margin="5"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
                     Text="Period" />
                 <TextBox
-                    Name="PeriodTextBox"
-                    Grid.Row="7"
-                    Grid.Column="1"
+                    Grid.Row="8" Grid.Column="1"
                     Margin="5"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Center"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                    IsEnabled="{Binding #PeriodNotFromClip.IsChecked}"
                     MaxLength="{Binding MaxLengthPeriod}"
-                    Text="{Binding Period}">
-                    <i:Interaction.Behaviors>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding #PeriodNotFromClip.IsChecked}"
-                            ComparisonCondition="Equal"
-                            Value="True">
-                            <ia:ChangePropertyAction
-                                PropertyName="IsEnabled"
-                                TargetObject="PeriodTextBox"
-                                Value="True" />
-                        </ia:DataTriggerBehavior>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding #PeriodNotFromClip.IsChecked}"
-                            ComparisonCondition="Equal"
-                            Value="False">
-                            <ia:ChangePropertyAction
-                                PropertyName="IsEnabled"
-                                TargetObject="PeriodTextBox"
-                                Value="False" />
-                        </ia:DataTriggerBehavior>
-                    </i:Interaction.Behaviors>
-                </TextBox>
+                    Text="{Binding Period}" />
 
-                <Grid
-                    Name="PeriodsGrid"
-                    Grid.Row="7"
-                    Grid.Column="2"
-                    Grid.ColumnSpan="2">
-                    <i:Interaction.Behaviors>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding PeriodsUpToDate}"
-                            ComparisonCondition="Equal"
-                            Value="True">
-                            <ia:ChangePropertyAction
-                                PropertyName="Background"
-                                TargetObject="PeriodsGrid"
-                                Value="Transparent" />
-                        </ia:DataTriggerBehavior>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding PeriodsUpToDate}"
-                            ComparisonCondition="NotEqual"
-                            Value="True">
-                            <ia:ChangePropertyAction
-                                PropertyName="Background"
-                                TargetObject="PeriodsGrid"
-                                Value="Orange" />
-                        </ia:DataTriggerBehavior>
-                    </i:Interaction.Behaviors>
-                </Grid>
                 <TextBlock
-                    Grid.Row="7"
-                    Grid.Column="2"
+                    Grid.Row="8" Grid.Column="2"
                     Margin="5"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
                     Text="Periods" />
                 <TextBox
-                    Grid.Row="7"
-                    Grid.Column="3"
+                    Grid.Row="8" Grid.Column="3"
                     Margin="5"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Center"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Center"
                     MaxLength="{Binding MaxLengthPeriod}"
                     Text="{Binding Periods}" />
 
                 <CheckBox
-                    Name="PeriodNotFromClip"
-                    Grid.Row="7"
-                    Grid.Column="4"
-                    Margin="5"
-                    VerticalAlignment="Center"
+                    x:Name="PeriodNotFromClip"
+                    Grid.Row="8" Grid.Column="4"
+                    Margin="5" VerticalAlignment="Center"
                     Content="Ignore clip"
                     IsChecked="{Binding PeriodNotFromClip}" />
 
-                <Grid
-                    Name="IsGameOverGrid"
-                    Grid.Row="8"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="4">
-                    <i:Interaction.Behaviors>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding IsGameOverUpToDate}"
-                            ComparisonCondition="Equal"
-                            Value="True">
-                            <ia:ChangePropertyAction
-                                PropertyName="Background"
-                                TargetObject="IsGameOverGrid"
-                                Value="Transparent" />
-                        </ia:DataTriggerBehavior>
-                        <ia:DataTriggerBehavior
-                            Binding="{Binding IsGameOverUpToDate}"
-                            ComparisonCondition="NotEqual"
-                            Value="True">
-                            <ia:ChangePropertyAction
-                                PropertyName="Background"
-                                TargetObject="IsGameOverGrid"
-                                Value="Orange" />
-                        </ia:DataTriggerBehavior>
-                    </i:Interaction.Behaviors>
-                </Grid>
+                <!-- ══════════════════════════════════════════════ Row 9: Game over ══ -->
+
                 <CheckBox
-                    Grid.Row="8"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="4"
-                    Margin="5"
-                    VerticalAlignment="Center"
+                    Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="4"
+                    Margin="5" VerticalAlignment="Center"
                     Content="Game is over"
                     IsChecked="{Binding IsGameOver}" />
 
-                <TextBlock
-                    Grid.Row="10"
-                    Grid.Column="0"
-                    Margin="5"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    Text="Tickers" />
+                <!-- ══════════════════════════════════════ Row 11: Tickers header ══ -->
 
                 <TextBlock
-                    Grid.Row="11"
-                    Grid.Column="0"
+                    Grid.Row="11" Grid.Column="0"
                     Margin="5"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                    FontWeight="Bold" Text="Tickers" />
+
+                <!-- ═══════════════════════════════════════ Row 12: Ticker frequency ══ -->
+
+                <TextBlock
+                    Grid.Row="12" Grid.Column="0"
+                    Margin="5"
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
                     Text="Frequency [s]" />
                 <NumericUpDown
-                    Grid.Row="11"
-                    Grid.Column="1"
-                    Width="120"
-                    Margin="5"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    Increment="5"
-                    Maximum="60"
-                    Minimum="5"
+                    Grid.Row="12" Grid.Column="1"
+                    Width="120" Margin="5"
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                    Increment="5" Maximum="60" Minimum="5"
                     Value="{Binding TickersFrequency, Mode=TwoWay}" />
             </Grid>
 
-            <Panel Margin="5">
-                <ItemsControl ItemsSource="{Binding Tickers}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="vm:TickerViewModel">
-                            <v:TickerView />
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </Panel>
+            <ItemsControl Margin="5" ItemsSource="{Binding Tickers}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:TickerViewModel">
+                        <v:TickerView />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

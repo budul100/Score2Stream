@@ -2,6 +2,7 @@
 
 ## Version 1.12.1
 
+* Fouls can now also be detected and published
 * Refactor template management
 * Modularize Ribbon menu into separate tab components
 * Refactor WebSocket client handling and message dispatch

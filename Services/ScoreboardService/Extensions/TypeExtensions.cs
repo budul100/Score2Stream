@@ -7,7 +7,7 @@ namespace Score2Stream.ScoreboardService.Extensions
     {
         #region Public Methods
 
-        public static IEnumerable<SegmentType> GetClipTypes(this AreaType areaType)
+        public static IEnumerable<SegmentType> GetSegmentTypes(this AreaType areaType)
         {
             switch (areaType)
             {
@@ -64,14 +64,14 @@ namespace Score2Stream.ScoreboardService.Extensions
                     yield return SegmentType.ClockShot2;
                     break;
 
-                case AreaType.FoulHome:
+                case AreaType.FoulsHome:
 
-                    yield return SegmentType.FoulHome;
+                    yield return SegmentType.FoulsHome;
                     break;
 
-                case AreaType.FoulGuest:
+                case AreaType.FoulsGuest:
 
-                    yield return SegmentType.FoulGuest;
+                    yield return SegmentType.FoulsGuest;
                     break;
 
                 case AreaType.Period:

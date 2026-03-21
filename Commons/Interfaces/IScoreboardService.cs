@@ -26,11 +26,22 @@ namespace Score2Stream.Commons.Interfaces
 
         bool ColorHomeUpToDate { get; }
 
+        string FoulsGuest { get; set; }
+
+        bool FoulsGuestUpToDate { get; }
+
+        string FoulsHome { get; set; }
+
+        bool FoulsHomeUpToDate { get; }
+
+        bool FoulsNotFromClip { get; set; }
+
         bool IsGameOver { get; set; }
 
         bool IsGameOverUpToDate { get; }
 
         bool IsUpToDate { get; }
+
         string Message { get; }
 
         string Period { get; set; }

@@ -2,101 +2,41 @@
     x:Class="Score2Stream.ScoreboardModule.Views.TickerView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:i="using:Avalonia.Xaml.Interactivity"
-    xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
+    xmlns:conv="using:Score2Stream.Commons.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="50"
     d:DesignWidth="500"
     mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <conv:BoolToHighlightBrushConverter x:Key="BoolToHighlight" />
+    </UserControl.Resources>
+
     <Grid Margin="5">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="120" />
         </Grid.ColumnDefinitions>
 
-        <i:Interaction.Behaviors>
-
-            <ia:DataTriggerBehavior
-                Binding="{Binding IsActive}"
-                ComparisonCondition="Equal"
-                Value="True">
-                <ia:ChangePropertyAction
-                    PropertyName="IsEnabled"
-                    TargetObject="TickerTextBox"
-                    Value="False" />
-            </ia:DataTriggerBehavior>
-            <ia:DataTriggerBehavior
-                Binding="{Binding IsActive}"
-                ComparisonCondition="Equal"
-                Value="False">
-                <ia:ChangePropertyAction
-                    PropertyName="IsEnabled"
-                    TargetObject="TickerTextBox"
-                    Value="True" />
-            </ia:DataTriggerBehavior>
-
-            <ia:DataTriggerBehavior
-                Binding="{Binding Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-                ComparisonCondition="Equal"
-                Value="True">
-                <ia:ChangePropertyAction
-                    PropertyName="IsEnabled"
-                    TargetObject="IsActiveCheckBox"
-                    Value="True" />
-            </ia:DataTriggerBehavior>
-            <ia:DataTriggerBehavior
-                Binding="{Binding Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-                ComparisonCondition="Equal"
-                Value="False">
-                <ia:ChangePropertyAction
-                    PropertyName="IsEnabled"
-                    TargetObject="IsActiveCheckBox"
-                    Value="False" />
-            </ia:DataTriggerBehavior>
-        </i:Interaction.Behaviors>
-
-        <Grid
-            Name="TickerGrid"
-            Grid.Column="0"
-            Grid.ColumnSpan="2">
-            <i:Interaction.Behaviors>
-                <ia:DataTriggerBehavior
-                    Binding="{Binding UpToDate}"
-                    ComparisonCondition="Equal"
-                    Value="True">
-                    <ia:ChangePropertyAction
-                        PropertyName="Background"
-                        TargetObject="TickerGrid"
-                        Value="Transparent" />
-                </ia:DataTriggerBehavior>
-                <ia:DataTriggerBehavior
-                    Binding="{Binding UpToDate}"
-                    ComparisonCondition="NotEqual"
-                    Value="True">
-                    <ia:ChangePropertyAction
-                        PropertyName="Background"
-                        TargetObject="TickerGrid"
-                        Value="Orange" />
-                </ia:DataTriggerBehavior>
-            </i:Interaction.Behaviors>
-        </Grid>
+        <!-- Highlight rectangle behind all controls -->
+        <Rectangle
+            Grid.Column="0" Grid.ColumnSpan="2"
+            Fill="{Binding UpToDate, Converter={StaticResource BoolToHighlight}}" />
 
         <TextBox
-            Name="TickerTextBox"
             Grid.Column="0"
             Margin="5"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Center"
+            HorizontalAlignment="Stretch" VerticalAlignment="Center"
+            IsEnabled="{Binding !IsActive}"
             MaxLength="{Binding MaxLengthTicker}"
             Text="{Binding Text}" />
 
         <CheckBox
-            Name="IsActiveCheckBox"
             Grid.Column="1"
-            Margin="5"
-            VerticalAlignment="Center"
+            Margin="5" VerticalAlignment="Center"
             Content="Active"
-            IsChecked="{Binding IsActive}" />
+            IsChecked="{Binding IsActive}"
+            IsEnabled="{Binding Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
     </Grid>
 </UserControl>
