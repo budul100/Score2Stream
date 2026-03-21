@@ -13,10 +13,6 @@
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
 
-    <UserControl.Resources>
-        <conv:BoolToHighlightBrushConverter x:Key="BoolToHighlight" />
-    </UserControl.Resources>
-
     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
         <StackPanel>
             <!--

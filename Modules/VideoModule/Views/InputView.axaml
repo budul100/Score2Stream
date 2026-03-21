@@ -39,17 +39,17 @@
         </Style>
     </UserControl.Styles>
 
-    <Grid>
+    <Grid Background="{StaticResource InputBackground}">
         <ScrollViewer
-            Margin="5"
-            BorderBrush="LightSlateGray"
+            Margin="2"
+            BorderBrush="{StaticResource InputBorderBrush}"
             BorderThickness="2"
             HorizontalScrollBarVisibility="Auto"
             VerticalScrollBarVisibility="Auto">
 
             <paz:ZoomBorder
                 Name="InputBorder"
-                Background="LightGray"
+                Background="Black"
                 Focusable="True"
                 MaxZoomX="{Binding ZoomMax, Mode=OneWay}"
                 MaxZoomY="{Binding ZoomMax, Mode=OneWay}"
@@ -60,25 +60,21 @@
                 ZoomSpeed="1.2">
 
                 <i:Interaction.Behaviors>
-
                     <ia:EventTriggerBehavior EventName="ZoomChanged" SourceObject="InputBorder">
                         <ia:InvokeCommandAction Command="{Binding ZoomChangedCommand}" PassEventArgsToCommand="True" />
                     </ia:EventTriggerBehavior>
-
                     <bv:SizeChangeBehavior Width="{Binding FullWidth, Mode=TwoWay}" Height="{Binding FullHeight, Mode=TwoWay}" />
                 </i:Interaction.Behaviors>
 
                 <Panel Name="VideoPanel">
 
                     <i:Interaction.Behaviors>
-
                         <ia:EventTriggerBehavior EventName="PointerPressed" SourceObject="VideoPanel">
                             <ia:InvokeCommandAction Command="{Binding MousePressedCommand}" PassEventArgsToCommand="True" />
                         </ia:EventTriggerBehavior>
                         <ia:EventTriggerBehavior EventName="PointerReleased" SourceObject="VideoPanel">
                             <ia:InvokeCommandAction Command="{Binding MouseReleasedCommand}" PassEventArgsToCommand="True" />
                         </ia:EventTriggerBehavior>
-
                         <bv:PointerPositionBehavior PointerX="{Binding MouseX, Mode=TwoWay}" PointerY="{Binding MouseY, Mode=TwoWay}" />
                     </i:Interaction.Behaviors>
 
@@ -93,19 +89,16 @@
                     </Image>
 
                     <ItemsControl ItemsSource="{Binding Areas}">
-
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <Canvas />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
-
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <v:AreaView />
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
-
                         <ItemsControl.Styles>
                             <Style Selector="ItemsControl > ContentPresenter">
                                 <Setter Property="Canvas.Left">
@@ -129,11 +122,12 @@
                             </Style>
                         </ItemsControl.Styles>
                     </ItemsControl>
+
                 </Panel>
             </paz:ZoomBorder>
         </ScrollViewer>
 
-        <!-- Loading feedback with spinning circle -->
+        <!-- Loading overlay -->
         <Border
             Background="{StaticResource LoadingBackground}"
             IsVisible="{Binding IsLoading}">

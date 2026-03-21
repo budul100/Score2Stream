@@ -7,9 +7,6 @@
 
     <Thickness x:Key="ContentMargin">4</Thickness>
 
-    <SolidColorBrush x:Key="LoadingBackground" Color="#80000000" />
-    <SolidColorBrush x:Key="LoadingForeground" Color="White" />
-
     <SolidColorBrush x:Key="UpdateBackground" Color="Orange" />
 
     <!-- Tab control resources -->
@@ -21,5 +18,14 @@
     <SolidColorBrush x:Key="TabItemHoverBackground" Color="#ECECEC" />
     <SolidColorBrush x:Key="TabContentBackground" Color="#F5F5F5" />
 
+    <!-- Video input resources -->
+    <SolidColorBrush x:Key="InputBackground" Color="Black" />
+    <SolidColorBrush x:Key="InputBorderBrush" Color="#555555" />
+
+    <SolidColorBrush x:Key="LoadingBackground" Color="#80000000" />
+    <SolidColorBrush x:Key="LoadingForeground" Color="White" />
+
     <co:EnumToStringConverter x:Key="EnumToStringConverter" />
+    <co:BoolToHighlightBrushConverter x:Key="BoolToHighlight" />
+
 </ResourceDictionary>

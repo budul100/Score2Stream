@@ -5,9 +5,11 @@
     xmlns:v="using:Score2Stream.VideoModule.Views"
     xmlns:vm="using:Score2Stream.VideoModule.ViewModels"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    prism:ViewModelLocator.AutoWireViewModel="True">
+    prism:ViewModelLocator.AutoWireViewModel="True"
+    Background="{StaticResource TabStripBackground}">
 
     <TabControl
+        Margin="6,6,6,0"
         ItemsSource="{Binding Tabs}"
         SelectedItem="{Binding Tab, Mode=TwoWay}"
         BorderBrush="{StaticResource TabBorderBrush}"
@@ -15,7 +17,7 @@
 
         <TabControl.Styles>
             <!-- Tab header strip -->
-            <Style Selector="TabControl > TabStrip">
+            <Style Selector="TabStrip">
                 <Setter Property="Background" Value="{StaticResource TabStripBackground}" />
             </Style>
             <!-- Single tab header -->

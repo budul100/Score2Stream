@@ -9,10 +9,6 @@
     d:DesignWidth="500"
     mc:Ignorable="d">
 
-    <UserControl.Resources>
-        <conv:BoolToHighlightBrushConverter x:Key="BoolToHighlight" />
-    </UserControl.Resources>
-
     <Grid Margin="5">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
