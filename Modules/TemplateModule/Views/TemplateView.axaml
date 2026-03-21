@@ -2,8 +2,7 @@
     x:Class="Score2Stream.TemplateModule.Views.TemplateView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:i="using:Avalonia.Xaml.Interactivity"
-    xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
+    xmlns:conv="using:Score2Stream.Commons.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
@@ -14,10 +13,14 @@
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
 
+    <UserControl.Resources>
+        <conv:BoolToHighlightBrushConverter x:Key="BoolToHighlight" />
+    </UserControl.Resources>
+
     <Grid VerticalAlignment="Top">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <DockPanel
@@ -42,65 +45,37 @@
 
             <Grid Margin="5">
                 <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="90" />
-                    <ColumnDefinition />
+                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
                 <TextBlock
-                    Grid.Row="0"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="2"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    Text="{Binding Description}" />
-
-                <TextBlock
-                    Grid.Row="1"
-                    Grid.Column="0"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
+                    Grid.Row="0" Grid.Column="0"
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
                     Text="Empty value" />
                 <TextBox
-                    Grid.Row="1"
-                    Grid.Column="1"
+                    Grid.Row="0" Grid.Column="1"
                     Width="40"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
                     Text="{Binding Empty, Mode=TwoWay}" />
+
+                <TextBlock
+                    Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                    Text="{Binding Description}" />
             </Grid>
         </DockPanel>
 
         <ScrollViewer
-            Name="SamplesViewer"
             Grid.Row="1"
             Margin="5"
+            Background="{Binding !IsDetection, Converter={StaticResource BoolToHighlight}}"
             HorizontalScrollBarVisibility="Disabled"
             VerticalScrollBarVisibility="Auto">
-
-            <i:Interaction.Behaviors>
-                <ia:DataTriggerBehavior
-                    Binding="{Binding IsDetection}"
-                    ComparisonCondition="Equal"
-                    Value="False">
-                    <ia:ChangePropertyAction
-                        PropertyName="Background"
-                        TargetObject="SamplesViewer"
-                        Value="Transparent" />
-                </ia:DataTriggerBehavior>
-                <ia:DataTriggerBehavior
-                    Binding="{Binding IsDetection}"
-                    ComparisonCondition="Equal"
-                    Value="True">
-                    <ia:ChangePropertyAction
-                        PropertyName="Background"
-                        TargetObject="SamplesViewer"
-                        Value="Orange" />
-                </ia:DataTriggerBehavior>
-            </i:Interaction.Behaviors>
 
             <ItemsControl ItemsSource="{Binding Samples}">
                 <ItemsControl.ItemsPanel>

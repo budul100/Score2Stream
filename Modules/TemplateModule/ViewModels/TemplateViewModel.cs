@@ -70,7 +70,7 @@ namespace Score2Stream.TemplateModule.ViewModels
                 keepSubscriberReferenceAlive: true,
                 filter: s => s == inputService.AreaService?.Segment);
 
-            this.Template = templateService?.Active;
+            Template = templateService?.Active;
 
             RefreshSamples();
             OnSegmentSelected();
@@ -86,9 +86,11 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         public string Empty
         {
-            get { return Template?.Empty; }
+            get => Template?.Empty;
             set
             {
+                if (Template == null || Template.Empty == value) return;
+
                 Template.Empty = value;
                 RaisePropertyChanged(nameof(Empty));
             }
@@ -96,8 +98,8 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         public bool IsDetection
         {
-            get { return isDetection; }
-            set { SetProperty(ref isDetection, value); }
+            get => isDetection;
+            set => SetProperty(ref isDetection, value);
         }
 
         public ObservableCollection<SampleViewModel> Samples { get; private set; } = [];
@@ -112,7 +114,6 @@ namespace Score2Stream.TemplateModule.ViewModels
         {
             RaisePropertyChanged(nameof(Description));
             RaisePropertyChanged(nameof(Bitmap));
-            RaisePropertyChanged(nameof(IsDetection));
         }
 
         private void OrderSamples()
@@ -125,7 +126,7 @@ namespace Score2Stream.TemplateModule.ViewModels
         private void RefreshSamples()
         {
             var toBeRemoveds = Samples
-                .Where(s => Template.Samples?.Contains(s.Sample) != true).ToArray();
+                .Where(s => Template?.Samples?.Contains(s.Sample) != true).ToArray();
 
             foreach (var toBeRemoved in toBeRemoveds)
             {
