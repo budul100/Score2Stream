@@ -241,12 +241,10 @@ html {
     }
 
     #scoreboard .foul {
-        position: absolute;
         background-color: yellow;
         width: 15px;
         height: 6px;
         z-index: 100;
-        top: 55px;
     }
 
     #scoreboard .foul--active {
@@ -256,8 +254,10 @@ html {
     #scoreboard #home_fouls, #scoreboard #guest_fouls {
         display: flex;
         flex-direction: row;
-        gap: 25px;
         position: absolute;
+        align-items: center;
+        gap: 5px;
+        top: 55px;
     }
 
     #scoreboard #home_fouls {
@@ -266,6 +266,10 @@ html {
 
     #scoreboard #guest_fouls {
         left: 440px;
+    }
+
+    #scoreboard .foul--warning {
+        background-color: yellow;
     }
 
 .score_h3 {

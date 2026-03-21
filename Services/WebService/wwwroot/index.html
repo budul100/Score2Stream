@@ -19,13 +19,13 @@
 
             <div id="home_fouls">
                 <!-- ko foreach: ko.utils.range(1, 5) -->
-                <div class="foul" data-bind="visible: $parent.homeFouls() &gt;= $data, css: { 'foul--active': $parent.homeFouls() &gt;= $data }"></div>
+                <div class="foul foul--active" data-bind="visible: $root.homeFouls() >= $data, css: { 'foul--warning': $root.homeFouls() < 5 }"></div>
                 <!-- /ko -->
             </div>
 
             <div id="guest_fouls">
                 <!-- ko foreach: ko.utils.range(1, 5) -->
-                <div class="foul" data-bind="visible: $parent.guestFouls() &gt;= $data, css: { 'foul--active': $parent.guestFouls() &gt;= $data }"></div>
+                <div class="foul foul--active" data-bind="visible: $root.guestFouls() >= $data, css: { 'foul--warning': $root.guestFouls() < 5 }"></div>
                 <!-- /ko -->
             </div>
 
