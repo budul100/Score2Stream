@@ -357,53 +357,46 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         private void UpdateValues()
         {
-            // Read-only display values: always pull from service
-            ClockGame = scoreboardService.ClockGame;
-            ClockShot = scoreboardService.ClockShot;
-
-            // Clip-controlled values: only overwrite when the clip is the source
-            if (!PeriodNotFromClip)
-            {
-                Period = scoreboardService.Period;
-            }
-
-            if (!ScoreNotFromClip)
-            {
-                ScoreHome = scoreboardService.ScoreHome;
-                ScoreGuest = scoreboardService.ScoreGuest;
-            }
-
-            if (!FoulsNotFromClip)
-            {
-                FoulsHome = scoreboardService.FoulsHome;
-                FoulsGuest = scoreboardService.FoulsGuest;
-            }
-
-            // Notify all read-only and UpToDate properties
-            RaisePropertyChanged(nameof(ClockGame));
-            RaisePropertyChanged(nameof(ClockShot));
+            RaisePropertyChanged(nameof(TeamGuest));
+            RaisePropertyChanged(nameof(TeamGuestUpToDate));
+            RaisePropertyChanged(nameof(TeamHome));
+            RaisePropertyChanged(nameof(TeamHomeUpToDate));
 
             RaisePropertyChanged(nameof(ColorGuest));
             RaisePropertyChanged(nameof(ColorGuestUpToDate));
             RaisePropertyChanged(nameof(ColorHome));
             RaisePropertyChanged(nameof(ColorHomeUpToDate));
 
-            RaisePropertyChanged(nameof(FoulsGuestUpToDate));
-            RaisePropertyChanged(nameof(FoulsHomeUpToDate));
+            ClockGame = scoreboardService.ClockGame;
+            ClockShot = scoreboardService.ClockShot;
+
+            RaisePropertyChanged(nameof(ClockGame));
+            RaisePropertyChanged(nameof(ClockShot));
+
+            Period = scoreboardService.Period;
+
+            RaisePropertyChanged(nameof(Period));
+            RaisePropertyChanged(nameof(PeriodUpToDate));
+            RaisePropertyChanged(nameof(PeriodsUpToDate));
 
             RaisePropertyChanged(nameof(IsGameOver));
             RaisePropertyChanged(nameof(IsGameOverUpToDate));
 
-            RaisePropertyChanged(nameof(PeriodUpToDate));
-            RaisePropertyChanged(nameof(PeriodsUpToDate));
+            ScoreHome = scoreboardService.ScoreHome;
+            ScoreGuest = scoreboardService.ScoreGuest;
 
-            RaisePropertyChanged(nameof(ScoreGuestUpToDate));
+            RaisePropertyChanged(nameof(ScoreHome));
             RaisePropertyChanged(nameof(ScoreHomeUpToDate));
+            RaisePropertyChanged(nameof(ScoreGuest));
+            RaisePropertyChanged(nameof(ScoreGuestUpToDate));
 
-            RaisePropertyChanged(nameof(TeamGuest));
-            RaisePropertyChanged(nameof(TeamGuestUpToDate));
-            RaisePropertyChanged(nameof(TeamHome));
-            RaisePropertyChanged(nameof(TeamHomeUpToDate));
+            FoulsHome = scoreboardService.FoulsHome;
+            FoulsGuest = scoreboardService.FoulsGuest;
+
+            RaisePropertyChanged(nameof(FoulsHome));
+            RaisePropertyChanged(nameof(FoulsHomeUpToDate));
+            RaisePropertyChanged(nameof(FoulsGuest));
+            RaisePropertyChanged(nameof(FoulsGuestUpToDate));
 
             RaisePropertyChanged(nameof(TickersUpToDate));
         }

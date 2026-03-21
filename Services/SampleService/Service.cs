@@ -149,9 +149,6 @@ namespace Score2Stream.SampleService
 
                 if (sample != default)
                 {
-                    sample.Value = recognitionService
-                        .GetFromBase(sample)?.Value;
-
                     Select(sample);
                 }
             }
@@ -276,6 +273,9 @@ namespace Score2Stream.SampleService
                 };
 
                 Add(result);
+
+                result.Value = recognitionService
+                    .GetFromBase(result)?.Value;
 
                 if (segment.Area.Template == default)
                 {
