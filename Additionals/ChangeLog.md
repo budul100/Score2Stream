@@ -4,6 +4,7 @@
 
 * Refactor template management
 * Modularize Ribbon menu into separate tab components
+* Refactor WebSocket client handling and message dispatch
 
 ## Version 1.12.0
 

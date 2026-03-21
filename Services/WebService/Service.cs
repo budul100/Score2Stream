@@ -175,9 +175,7 @@ namespace Score2Stream.WebService
         {
             if (IsActive)
             {
-                webSocket.Set(
-                    message: message,
-                    requestDelay: settingsService.Contents.Server.DelaySocket);
+                webSocket.Set(message);
             }
         }
 
