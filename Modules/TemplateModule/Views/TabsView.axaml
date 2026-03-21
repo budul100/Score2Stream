@@ -1,40 +1,42 @@
 ﻿<UserControl
     x:Class="Score2Stream.TemplateModule.Views.TabsView"
     xmlns="https://github.com/avaloniaui"
+    xmlns:co="using:Score2Stream.Commons.Converters"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:v="using:Score2Stream.TemplateModule.Views"
     xmlns:vm="using:Score2Stream.TemplateModule.ViewModels"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     prism:ViewModelLocator.AutoWireViewModel="True">
 
+    <UserControl.Resources>
+        <co:CountToBackgroundConverter
+            x:Key="CountToBackground"
+            EmptyBrush="{StaticResource TemplateBackground}"
+            FilledBrush="{StaticResource TabStripBackground}" />
+    </UserControl.Resources>
+
     <TabControl
         ItemsSource="{Binding Tabs}"
-        SelectedItem="{Binding Tab, Mode=TwoWay}">
+        SelectedItem="{Binding Tab, Mode=TwoWay}"
+        Padding="0"
+        Background="{Binding Tabs.Count, Converter={StaticResource CountToBackground}}">
 
         <TabControl.Styles>
-            <!-- Tab header strip -->
-            <Style Selector="TabControl > TabStrip">
+            <Style Selector="TabStrip">
                 <Setter Property="Background" Value="{StaticResource TabStripBackground}" />
             </Style>
-            <!-- Single tab header -->
             <Style Selector="TabItem">
                 <Setter Property="Background" Value="{StaticResource TabItemBackground}" />
                 <Setter Property="BorderBrush" Value="{StaticResource TabBorderBrush}" />
-                <Setter Property="Padding" Value="8,4" />
             </Style>
-            <!-- Active tab header -->
             <Style Selector="TabItem:selected">
                 <Setter Property="Background" Value="{StaticResource TabItemSelectedBackground}" />
             </Style>
-            <!-- Hover -->
             <Style Selector="TabItem:pointerover">
                 <Setter Property="Background" Value="{StaticResource TabItemHoverBackground}" />
             </Style>
-            <!-- Content area -->
-            <Style Selector="TabControl > Border">
-                <Setter Property="Background" Value="{StaticResource TabContentBackground}" />
-                <Setter Property="BorderBrush" Value="{StaticResource TabBorderBrush}" />
-                <Setter Property="BorderThickness" Value="1" />
+            <Style Selector="TabControl">
+                <Setter Property="Padding" Value="0" />
             </Style>
         </TabControl.Styles>
 

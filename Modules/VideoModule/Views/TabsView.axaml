@@ -9,11 +9,9 @@
     Background="{StaticResource TabStripBackground}">
 
     <TabControl
-        Margin="6,6,6,0"
         ItemsSource="{Binding Tabs}"
         SelectedItem="{Binding Tab, Mode=TwoWay}"
-        BorderBrush="{StaticResource TabBorderBrush}"
-        BorderThickness="1">
+        Padding="0">
 
         <TabControl.Styles>
             <!-- Tab header strip -->
@@ -24,7 +22,6 @@
             <Style Selector="TabItem">
                 <Setter Property="Background" Value="{StaticResource TabItemBackground}" />
                 <Setter Property="BorderBrush" Value="{StaticResource TabBorderBrush}" />
-                <Setter Property="Padding" Value="8,4" />
             </Style>
             <!-- Active tab header -->
             <Style Selector="TabItem:selected">
@@ -34,11 +31,8 @@
             <Style Selector="TabItem:pointerover">
                 <Setter Property="Background" Value="{StaticResource TabItemHoverBackground}" />
             </Style>
-            <!-- Content area -->
-            <Style Selector="TabControl > Border">
-                <Setter Property="Background" Value="{StaticResource TabContentBackground}" />
-                <Setter Property="BorderBrush" Value="{StaticResource TabBorderBrush}" />
-                <Setter Property="BorderThickness" Value="1" />
+            <Style Selector="TabControl">
+                <Setter Property="Padding" Value="0" />
             </Style>
         </TabControl.Styles>
 

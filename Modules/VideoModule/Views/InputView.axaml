@@ -14,7 +14,8 @@
     d:DesignHeight="200"
     d:DesignWidth="300"
     prism:ViewModelLocator.AutoWireViewModel="True"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    Background="{StaticResource InputBackground}">
 
     <UserControl.Resources>
         <co:ExpandedSizeConverter x:Key="ExpandedSizeConverter" />
@@ -39,11 +40,8 @@
         </Style>
     </UserControl.Styles>
 
-    <Grid Background="{StaticResource InputBackground}">
+    <Grid Margin="5">
         <ScrollViewer
-            Margin="2"
-            BorderBrush="{StaticResource InputBorderBrush}"
-            BorderThickness="2"
             HorizontalScrollBarVisibility="Auto"
             VerticalScrollBarVisibility="Auto">
 

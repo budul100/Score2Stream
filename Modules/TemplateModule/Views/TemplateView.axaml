@@ -11,9 +11,12 @@
     d:DesignHeight="200"
     d:DesignWidth="500"
     prism:ViewModelLocator.AutoWireViewModel="True"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    Background="{StaticResource TemplateBackground}">
 
-    <Grid VerticalAlignment="Top">
+    <Grid
+        VerticalAlignment="Top"
+        Margin="4">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />

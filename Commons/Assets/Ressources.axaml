@@ -3,29 +3,35 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:co="using:Score2Stream.Commons.Converters">
 
+    <co:EnumToStringConverter x:Key="EnumToStringConverter" />
+    <co:BoolToHighlightBrushConverter x:Key="BoolToHighlight" />
+
     <x:Double x:Key="SplashViewSize">500</x:Double>
 
     <Thickness x:Key="ContentMargin">4</Thickness>
 
     <SolidColorBrush x:Key="UpdateBackground" Color="Orange" />
 
-    <!-- Tab control resources -->
-    <x:Double x:Key="TabFontSize">10</x:Double>
+    <!-- Tabs resources -->
+
+    <x:Double x:Key="TabFontSize">14</x:Double>
+
     <SolidColorBrush x:Key="TabBorderBrush" Color="#AAAAAA" />
     <SolidColorBrush x:Key="TabStripBackground" Color="#E8E8E8" />
     <SolidColorBrush x:Key="TabItemBackground" Color="#DEDEDE" />
     <SolidColorBrush x:Key="TabItemSelectedBackground" Color="#F5F5F5" />
     <SolidColorBrush x:Key="TabItemHoverBackground" Color="#ECECEC" />
-    <SolidColorBrush x:Key="TabContentBackground" Color="#F5F5F5" />
 
-    <!-- Video input resources -->
+    <!-- Input resources -->
+
     <SolidColorBrush x:Key="InputBackground" Color="Black" />
     <SolidColorBrush x:Key="InputBorderBrush" Color="#555555" />
 
     <SolidColorBrush x:Key="LoadingBackground" Color="#80000000" />
     <SolidColorBrush x:Key="LoadingForeground" Color="White" />
 
-    <co:EnumToStringConverter x:Key="EnumToStringConverter" />
-    <co:BoolToHighlightBrushConverter x:Key="BoolToHighlight" />
+    <!-- Template resources -->
+
+    <SolidColorBrush x:Key="TemplateBackground" Color="White" />
 
 </ResourceDictionary>
