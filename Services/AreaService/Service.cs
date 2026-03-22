@@ -8,7 +8,6 @@ using Prism.Events;
 using Score2Stream.AreaService.Extensions;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Events.Area;
-using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Segment;
 using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Extensions;
@@ -51,7 +50,6 @@ namespace Score2Stream.AreaService
             areasChangedEvent = eventAggregator.GetEvent<AreasChangedEvent>();
             areasOrderedEvent = eventAggregator.GetEvent<AreasOrderedEvent>();
             areaSelectedEvent = eventAggregator.GetEvent<AreaSelectedEvent>();
-
             areaModifiedEvent = eventAggregator.GetEvent<AreaModifiedEvent>();
 
             segmentSelectedEvent = eventAggregator.GetEvent<SegmentSelectedEvent>();

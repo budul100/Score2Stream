@@ -26,14 +26,13 @@ namespace Score2Stream.InputService
         #region Private Fields
 
         private readonly AreasChangedEvent areasChangedEvent;
-        private readonly IContainerProvider containerProvider;
         private readonly IDeviceEnumerator deviceEnumerator;
         private readonly IDialogService dialogService;
         private readonly InputSelectedEvent inputSelectedEvent;
         private readonly ILogger<Service> logger;
         private readonly ISettingsService<Session> settingsService;
         private readonly ITemplateService templateService;
-
+        private readonly Func<IVideoService> videoServiceGetter;
         private ImmutableList<Input> inputs = [];
         private bool isInitializing;
 
@@ -43,14 +42,14 @@ namespace Score2Stream.InputService
 
         public Service(ISettingsService<Session> settingsService, IDialogService dialogService,
             ITemplateService templateService, IDeviceEnumerator deviceEnumerator,
-            IContainerProvider containerProvider, IEventAggregator eventAggregator,
+            IEventAggregator eventAggregator, Func<IVideoService> videoServiceGetter,
             ILogger<Service> logger = default)
         {
             this.settingsService = settingsService;
             this.dialogService = dialogService;
             this.templateService = templateService;
             this.deviceEnumerator = deviceEnumerator;
-            this.containerProvider = containerProvider;
+            this.videoServiceGetter = videoServiceGetter;
             this.logger = logger;
 
             inputSelectedEvent = eventAggregator.GetEvent<InputSelectedEvent>();
@@ -394,7 +393,7 @@ namespace Score2Stream.InputService
             {
                 if (input.VideoService == default)
                 {
-                    input.VideoService = containerProvider.Resolve<IVideoService>();
+                    input.VideoService = videoServiceGetter();
 
                     input.AreaService.Initialize(input);
                 }

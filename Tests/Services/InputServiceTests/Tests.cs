@@ -7,7 +7,6 @@ using Avalonia.Controls;
 using Moq;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
-using Prism.Ioc;
 using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Events.Sample;
@@ -29,7 +28,6 @@ namespace Score2Stream.Tests.InputServiceTests
         private readonly AreaModifiedEvent areaModifiedEvent = new();
         private readonly AreasChangedEvent areasChangedEvent = new();
         private readonly AreasOrderedEvent areasOrderedEvent = new();
-        private readonly Mock<IContainerProvider> containerProviderMock;
         private readonly Mock<IDeviceEnumerator> deviceEnumeratorMock;
         private readonly Mock<IDialogService> dialogServiceMock;
         private readonly Mock<IEventAggregator> eventAggregatorMock;
@@ -46,6 +44,7 @@ namespace Score2Stream.Tests.InputServiceTests
         private readonly List<string> tempFiles = [];
         private readonly TemplatesChangedEvent templatesChangedEvent = new();
         private readonly Mock<ITemplateService> templateServiceMock;
+        private readonly Mock<IVideoService> videoServiceMock;
 
         #endregion Private Fields
 
@@ -53,13 +52,13 @@ namespace Score2Stream.Tests.InputServiceTests
 
         public Tests()
         {
-            containerProviderMock = new Mock<IContainerProvider>();
             deviceEnumeratorMock = new Mock<IDeviceEnumerator>();
             dialogServiceMock = new Mock<IDialogService>();
             eventAggregatorMock = new Mock<IEventAggregator>();
             loggerMock = new Mock<ILogger<Service>>();
             settingsServiceMock = new Mock<ISettingsService<Session>>();
             templateServiceMock = new Mock<ITemplateService>();
+            videoServiceMock = CreateVideoServiceMock();
 
             session = new Session { Inputs = [] };
             settingsServiceMock.Setup(s => s.Contents).Returns(session);
@@ -88,7 +87,7 @@ namespace Score2Stream.Tests.InputServiceTests
                 dialogService: dialogServiceMock.Object,
                 templateService: templateServiceMock.Object,
                 deviceEnumerator: deviceEnumeratorMock.Object,
-                containerProvider: containerProviderMock.Object,
+                videoServiceGetter: () => videoServiceMock.Object,
                 eventAggregator: eventAggregatorMock.Object,
                 logger: loggerMock.Object);
         }
@@ -199,30 +198,24 @@ namespace Score2Stream.Tests.InputServiceTests
                 { 0, "TestCam" }
             });
 
-            var videoServiceMock = CreateVideoServiceMock();
+            var runCalled = new TaskCompletionSource<bool>();
+
             videoServiceMock.Setup(v => v.IsStarted).Returns(false);
             videoServiceMock.Setup(v => v.IsActive).Returns(false);
-
-            var runCalled = new TaskCompletionSource<bool>();
             videoServiceMock
                 .Setup(v => v.RunAsync(It.IsAny<Input>()))
                 .Callback(() => runCalled.TrySetResult(true))
                 .Returns(Task.CompletedTask);
 
-            containerProviderMock
-                .Setup(c => c.Resolve(typeof(IVideoService)))
-                .Returns(videoServiceMock.Object);
-
             // Act
             inputService.Initialize();
 
-            // Wait for fire-and-forget to complete
+            // Assert/Wait
             await runCalled.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
-            // Assert
             Assert.NotNull(inputService.Active);
             Assert.Equal("TestCam", inputService.Active.DeviceName);
-            videoServiceMock.Verify(v => v.RunAsync(It.IsAny<Input>()), Times.Once);
+            this.videoServiceMock.Verify(v => v.RunAsync(It.IsAny<Input>()), Times.Once);
         }
 
         [Fact]
@@ -234,10 +227,9 @@ namespace Score2Stream.Tests.InputServiceTests
                 { 1, "EventCam" }
             });
 
-            var videoServiceMock = CreateVideoServiceMock();
-            videoServiceMock.Setup(v => v.IsStarted).Returns(false);
-
             var runCalled = new TaskCompletionSource<bool>();
+
+            videoServiceMock.Setup(v => v.IsStarted).Returns(false);
             videoServiceMock
                 .Setup(v => v.RunAsync(It.IsAny<Input>()))
                 .Callback<Input>(inp =>
@@ -247,10 +239,6 @@ namespace Score2Stream.Tests.InputServiceTests
                     runCalled.TrySetResult(true);
                 })
                 .Returns(Task.CompletedTask);
-
-            containerProviderMock
-                .Setup(c => c.Resolve(typeof(IVideoService)))
-                .Returns(videoServiceMock.Object);
 
             inputService.SelectDevice("EventCam");
             await runCalled.Task.WaitAsync(TimeSpan.FromSeconds(2));
@@ -272,36 +260,41 @@ namespace Score2Stream.Tests.InputServiceTests
         {
             // Arrange — two inputs, first is Active
             deviceEnumeratorMock.Setup(d => d.GetVideoDevices()).Returns(new Dictionary<int, string>
-    {
-        { 1, "Cam1" },
-        { 2, "Cam2" },
-    });
+            {
+                { 1, "Cam1" },
+                { 2, "Cam2" },
+            });
+
+            var runCount = 0;
+            var runCalled = new TaskCompletionSource<bool>();
+
+            videoServiceMock.Setup(v => v.IsStarted).Returns(false);
+            videoServiceMock.Setup(v => v.IsActive).Returns(false);
+            videoServiceMock
+                .Setup(v => v.RunAsync(It.IsAny<Input>()))
+                .Callback<Input>(inp =>
+                {
+                    videoServiceMock.Setup(v => v.IsStarted).Returns(true);
+                    videoServiceMock.Setup(v => v.IsActive).Returns(true);
+                    inputStartedEvent.Publish(inp);
+                    runCount++;
+                    if (runCount >= 2)
+                        runCalled.TrySetResult(true);
+                })
+                .Returns(Task.CompletedTask);
 
             Input firstInput = null;
             Input secondInput = null;
-
-            containerProviderMock
-                .Setup(c => c.Resolve(typeof(IVideoService)))
-                .Returns(() =>
-                {
-                    var vm = CreateVideoServiceMock();
-                    vm.Setup(v => v.IsStarted).Returns(false);
-                    vm.Setup(v => v.RunAsync(It.IsAny<Input>()))
-                      .Callback<Input>(inp =>
-                      {
-                          vm.Setup(v => v.IsStarted).Returns(true);
-                          inputStartedEvent.Publish(inp);
-                      })
-                      .Returns(Task.CompletedTask);
-                    return vm.Object;
-                });
 
             inputService.SelectDevice("Cam1");
             await Task.Delay(100);
             firstInput = inputService.Active;
 
+            // Nach dem ersten Run: IsStarted zurücksetzen, damit der zweite Input auch gestartet wird
+            videoServiceMock.Setup(v => v.IsStarted).Returns(false);
+
             inputService.SelectDevice("Cam2");
-            await Task.Delay(100);
+            await runCalled.Task.WaitAsync(TimeSpan.FromSeconds(2));
             secondInput = inputService.Active;
 
             // Select first as Active
@@ -331,10 +324,9 @@ namespace Score2Stream.Tests.InputServiceTests
                 { 1, "OnlyCam" }
             });
 
-            var videoServiceMock = CreateVideoServiceMock();
-            videoServiceMock.Setup(v => v.IsStarted).Returns(false);
-
             var runCalled = new TaskCompletionSource<bool>();
+
+            videoServiceMock.Setup(v => v.IsStarted).Returns(false);
             videoServiceMock
                 .Setup(v => v.RunAsync(It.IsAny<Input>()))
                 .Callback<Input>(inp =>
@@ -344,10 +336,6 @@ namespace Score2Stream.Tests.InputServiceTests
                     runCalled.TrySetResult(true);
                 })
                 .Returns(Task.CompletedTask);
-
-            containerProviderMock
-                .Setup(c => c.Resolve(typeof(IVideoService)))
-                .Returns(videoServiceMock.Object);
 
             inputService.SelectDevice("OnlyCam");
             await runCalled.Task.WaitAsync(TimeSpan.FromSeconds(2));
@@ -474,19 +462,14 @@ namespace Score2Stream.Tests.InputServiceTests
                 { 1, "Cam 1" }
             });
 
-            var videoServiceMock = CreateVideoServiceMock();
+            var runCalled = new TaskCompletionSource<bool>();
+
             videoServiceMock.Setup(v => v.IsStarted).Returns(false);
             videoServiceMock.Setup(v => v.IsActive).Returns(false);
-
-            var runCalled = new TaskCompletionSource<bool>();
             videoServiceMock
                 .Setup(v => v.RunAsync(It.IsAny<Input>()))
                 .Callback(() => runCalled.TrySetResult(true))
                 .Returns(Task.CompletedTask);
-
-            containerProviderMock
-                .Setup(c => c.Resolve(typeof(IVideoService)))
-                .Returns(videoServiceMock.Object);
 
             inputService.SelectDevice("Cam 1");
             await runCalled.Task.WaitAsync(TimeSpan.FromSeconds(2));
@@ -504,7 +487,6 @@ namespace Score2Stream.Tests.InputServiceTests
         public void Select_SameActiveStartedInput_DoesNotPublishEvent()
         {
             // Arrange
-            var videoServiceMock = CreateVideoServiceMock();
             videoServiceMock.Setup(v => v.IsStarted).Returns(true);
 
             var input = new Input
@@ -528,10 +510,6 @@ namespace Score2Stream.Tests.InputServiceTests
                 { 1, "Cam 1" }
             });
 
-            containerProviderMock
-                .Setup(c => c.Resolve(typeof(IVideoService)))
-                .Returns(videoServiceMock.Object);
-
             inputService.SelectDevice("Cam 1"); // sets Active
 
             var eventCount = 0;
@@ -553,12 +531,11 @@ namespace Score2Stream.Tests.InputServiceTests
                 { 1, "RunningCam" }
             });
 
-            var videoServiceMock = CreateVideoServiceMock();
+            var runCalled = new TaskCompletionSource<bool>();
 
             // First call: not started yet
             videoServiceMock.Setup(v => v.IsStarted).Returns(false);
 
-            var runCalled = new TaskCompletionSource<bool>();
             videoServiceMock
                 .Setup(v => v.RunAsync(It.IsAny<Input>()))
                 .Callback(() =>
@@ -568,10 +545,6 @@ namespace Score2Stream.Tests.InputServiceTests
                     runCalled.TrySetResult(true);
                 })
                 .Returns(Task.CompletedTask);
-
-            containerProviderMock
-                .Setup(c => c.Resolve(typeof(IVideoService)))
-                .Returns(videoServiceMock.Object);
 
             inputService.SelectDevice("RunningCam");
             await runCalled.Task.WaitAsync(TimeSpan.FromSeconds(2));
@@ -618,26 +591,6 @@ namespace Score2Stream.Tests.InputServiceTests
 
             deviceEnumeratorMock.Setup(d => d.GetVideoDevices()).Returns(devices);
 
-            // Each Resolve call returns a fresh mock with IsStarted=false initially
-            var callCount = 0;
-            containerProviderMock
-                .Setup(c => c.Resolve(typeof(IVideoService)))
-                .Returns(() =>
-                {
-                    callCount++;
-                    var vm = CreateVideoServiceMock();
-                    vm.Setup(v => v.IsStarted).Returns(false);
-                    vm.Setup(v => v.RunAsync(It.IsAny<Input>()))
-                      .Callback<Input>(inp =>
-                      {
-                          // Mark as started so AddInput guard works on re-entry
-                          vm.Setup(v => v.IsStarted).Returns(true);
-                          inputStartedEvent.Publish(inp);
-                      })
-                      .Returns(Task.CompletedTask);
-                    return vm.Object;
-                });
-
             // Fill up to max
             for (var i = 1; i <= max; i++)
                 inputService.SelectDevice($"Cam{i}");
@@ -663,11 +616,10 @@ namespace Score2Stream.Tests.InputServiceTests
                 { 1, "ValidCam" }
             });
 
-            var videoServiceMock = CreateVideoServiceMock();
+            var runCalled = new TaskCompletionSource<bool>();
+
             videoServiceMock.Setup(v => v.IsStarted).Returns(false);
             videoServiceMock.Setup(v => v.IsActive).Returns(false);
-
-            var runCalled = new TaskCompletionSource<bool>();
             videoServiceMock
                 .Setup(v => v.RunAsync(It.IsAny<Input>()))
                 .Callback<Input>(i =>
@@ -678,10 +630,6 @@ namespace Score2Stream.Tests.InputServiceTests
                     runCalled.TrySetResult(true);
                 })
                 .Returns(Task.CompletedTask);
-
-            containerProviderMock
-                .Setup(c => c.Resolve(typeof(IVideoService)))
-                .Returns(videoServiceMock.Object);
 
             var eventPublished = false;
             inputSelectedEvent.Subscribe(_ => eventPublished = true);
@@ -717,22 +665,6 @@ namespace Score2Stream.Tests.InputServiceTests
 
             deviceEnumeratorMock.Setup(d => d.GetVideoDevices()).Returns(devices);
 
-            containerProviderMock
-                .Setup(c => c.Resolve(typeof(IVideoService)))
-                .Returns(() =>
-                {
-                    var vm = CreateVideoServiceMock();
-                    vm.Setup(v => v.IsStarted).Returns(false);
-                    vm.Setup(v => v.RunAsync(It.IsAny<Input>()))
-                      .Callback<Input>(inp =>
-                      {
-                          vm.Setup(v => v.IsStarted).Returns(true);
-                          inputStartedEvent.Publish(inp);
-                      })
-                      .Returns(Task.CompletedTask);
-                    return vm.Object;
-                });
-
             for (var i = 1; i <= max; i++)
                 inputService.SelectDevice($"Cam{i}");
 
@@ -758,18 +690,13 @@ namespace Score2Stream.Tests.InputServiceTests
             var tempFile = Path.GetTempFileName();
             tempFiles.Add(tempFile);
 
-            var videoServiceMock = CreateVideoServiceMock();
-            videoServiceMock.Setup(v => v.IsStarted).Returns(false);
-
             var runCalled = new TaskCompletionSource<bool>();
+
+            videoServiceMock.Setup(v => v.IsStarted).Returns(false);
             videoServiceMock
                 .Setup(v => v.RunAsync(It.IsAny<Input>()))
                 .Callback(() => runCalled.TrySetResult(true))
                 .Returns(Task.CompletedTask);
-
-            containerProviderMock
-                .Setup(c => c.Resolve(typeof(IVideoService)))
-                .Returns(videoServiceMock.Object);
 
             // Act
             inputService.SelectFile(tempFile);
