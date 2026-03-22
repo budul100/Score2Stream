@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Prism.Commands;
 using Prism.Events;
@@ -15,8 +16,8 @@ namespace Score2Stream.TemplateModule.ViewModels
     {
         #region Private Fields
 
-        private readonly IContainerProvider containerProvider;
         private readonly ITemplateService templateService;
+        private readonly Func<TemplateViewModel> templateViewModelFactory;
 
         private bool isRefreshing;
         private TabViewModel selectedTab;
@@ -25,12 +26,12 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         #region Public Constructors
 
-        public TabsViewModel(ITemplateService templateService, IContainerProvider containerProvider,
+        public TabsViewModel(ITemplateService templateService, Func<TemplateViewModel> templateViewModelFactory,
             IEventAggregator eventAggregator, IRegionManager regionManager)
             : base(regionManager)
         {
-            this.containerProvider = containerProvider;
             this.templateService = templateService;
+            this.templateViewModelFactory = templateViewModelFactory;
 
             eventAggregator.GetEvent<TemplatesChangedEvent>().Subscribe(
                 action: RefreshTabs,
@@ -92,8 +93,9 @@ namespace Score2Stream.TemplateModule.ViewModels
 
             foreach (var relevant in relevants)
             {
-                var viewModel = containerProvider.Resolve<TemplateViewModel>();
-                var closeCommand = new DelegateCommand(async () => await templateService.RemoveAsync(relevant));
+                var viewModel = templateViewModelFactory.Invoke();
+                var closeCommand = new DelegateCommand(async () =>
+                    await templateService.RemoveAsync(relevant));
 
                 var tab = new TabViewModel(
                     Template: relevant,

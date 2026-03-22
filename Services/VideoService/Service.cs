@@ -407,7 +407,7 @@ namespace Score2Stream.VideoService
             {
                 await UpdateVideoAsync();
 
-                using var video = videoCaptureFactory();
+                using var video = videoCaptureFactory.Invoke();
 
                 if (deviceId.HasValue)
                 {

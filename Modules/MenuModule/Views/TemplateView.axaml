@@ -56,87 +56,6 @@
             </rib:RibbonButton>
         </rib:RibbonGroupBox>
 
-        <rib:RibbonGroupBox Header="Samples detection" IsEnabled="{Binding IsActive}">
-            <rib:RibbonToggleButton
-                Classes.IsActive="{Binding IsSampleDetection}"
-                Classes.IsNotActive="{Binding !IsSampleDetection}"
-                Content="Detect samples"
-                FontSize="{StaticResource FontSize}"
-                IsChecked="{Binding IsSampleDetection}"
-                MinSize="Large"
-                IsEnabled="{Binding IsActiveSample}">
-                <rib:RibbonToggleButton.Styles>
-                    <Style Selector="RibbonToggleButton.IsActive">
-                        <Style.Setters>
-                            <Setter Property="LargeIcon">
-                                <Setter.Value>
-                                    <ControlTemplate>
-                                        <mat:MaterialIcon
-                                            Width="{StaticResource IconWidth}"
-                                            Height="{StaticResource IconHeight}"
-                                            Kind="ImageSearch" />
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style.Setters>
-                    </Style>
-                    <Style Selector="RibbonToggleButton.IsNotActive">
-                        <Style.Setters>
-                            <Setter Property="LargeIcon">
-                                <Setter.Value>
-                                    <ControlTemplate>
-                                        <mat:MaterialIcon
-                                            Width="{StaticResource IconWidth}"
-                                            Height="{StaticResource IconHeight}"
-                                            Kind="ImageSearchOutline" />
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style.Setters>
-                    </Style>
-                </rib:RibbonToggleButton.Styles>
-            </rib:RibbonToggleButton>
-
-            <StackPanel
-                Margin="0,0,4,4"
-                IsEnabled="{Binding IsActive}"
-                Orientation="Horizontal">
-                <TextBlock
-                    Width="100"
-                    Margin="0,0,4,0"
-                    VerticalAlignment="Center"
-                    FontSize="{StaticResource FontSize}"
-                    Text="New sample at [%]" />
-                <NumericUpDown
-                    Width="130"
-                    MaxHeight="5"
-                    Increment="5"
-                    Maximum="{Binding ThresholdMax}"
-                    Minimum="0"
-                    Value="{Binding ThresholdDetecting, Mode=TwoWay}" />
-            </StackPanel>
-
-            <StackPanel
-                Margin="0,0,4,4"
-                IsEnabled="{Binding IsActive}"
-                Orientation="Horizontal">
-                <TextBlock
-                    Width="100"
-                    Margin="0,0,4,0"
-                    VerticalAlignment="Center"
-                    FontSize="{StaticResource FontSize}"
-                    Text="Max nr undetects" />
-                <NumericUpDown
-                    Width="130"
-                    MaxHeight="5"
-                    Increment="1"
-                    Maximum="{Binding UnverifiedsCountMax}"
-                    Minimum="0"
-                    Value="{Binding UnverifiedsCount, Mode=TwoWay}" />
-            </StackPanel>
-
-        </rib:RibbonGroupBox>
-
         <rib:RibbonGroupBox Header="Samples handling" IsEnabled="{Binding IsActive}">
 
             <rib:RibbonButton
@@ -235,6 +154,88 @@
                     </Style>
                 </rib:RibbonToggleButton.Styles>
             </rib:RibbonToggleButton>
+
+        </rib:RibbonGroupBox>
+
+        <rib:RibbonGroupBox Header="Samples detection" IsEnabled="{Binding IsActive}">
+
+            <rib:RibbonToggleButton
+                Classes.IsActive="{Binding IsSampleDetection}"
+                Classes.IsNotActive="{Binding !IsSampleDetection}"
+                Content="Detect samples"
+                FontSize="{StaticResource FontSize}"
+                IsChecked="{Binding IsSampleDetection}"
+                MinSize="Large"
+                IsEnabled="{Binding IsActiveSample}">
+                <rib:RibbonToggleButton.Styles>
+                    <Style Selector="RibbonToggleButton.IsActive">
+                        <Style.Setters>
+                            <Setter Property="LargeIcon">
+                                <Setter.Value>
+                                    <ControlTemplate>
+                                        <mat:MaterialIcon
+                                            Width="{StaticResource IconWidth}"
+                                            Height="{StaticResource IconHeight}"
+                                            Kind="ImageSearch" />
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style.Setters>
+                    </Style>
+                    <Style Selector="RibbonToggleButton.IsNotActive">
+                        <Style.Setters>
+                            <Setter Property="LargeIcon">
+                                <Setter.Value>
+                                    <ControlTemplate>
+                                        <mat:MaterialIcon
+                                            Width="{StaticResource IconWidth}"
+                                            Height="{StaticResource IconHeight}"
+                                            Kind="ImageSearchOutline" />
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style.Setters>
+                    </Style>
+                </rib:RibbonToggleButton.Styles>
+            </rib:RibbonToggleButton>
+
+            <StackPanel
+                Margin="0,0,4,4"
+                IsEnabled="{Binding IsActive}"
+                Orientation="Horizontal">
+                <TextBlock
+                    Width="100"
+                    Margin="0,0,4,0"
+                    VerticalAlignment="Center"
+                    FontSize="{StaticResource FontSize}"
+                    Text="New sample at [%]" />
+                <NumericUpDown
+                    Width="130"
+                    MaxHeight="5"
+                    Increment="5"
+                    Maximum="{Binding ThresholdMax}"
+                    Minimum="0"
+                    Value="{Binding ThresholdDetecting, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel
+                Margin="0,0,4,4"
+                IsEnabled="{Binding IsActive}"
+                Orientation="Horizontal">
+                <TextBlock
+                    Width="100"
+                    Margin="0,0,4,0"
+                    VerticalAlignment="Center"
+                    FontSize="{StaticResource FontSize}"
+                    Text="Max nr undetects" />
+                <NumericUpDown
+                    Width="130"
+                    MaxHeight="5"
+                    Increment="1"
+                    Maximum="{Binding UnverifiedsCountMax}"
+                    Minimum="0"
+                    Value="{Binding UnverifiedsCount, Mode=TwoWay}" />
+            </StackPanel>
 
         </rib:RibbonGroupBox>
 

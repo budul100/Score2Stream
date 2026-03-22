@@ -100,19 +100,19 @@ namespace Score2Stream.TemplateService
 
             if (template != default)
             {
-                var result = await dialogService.GetMessageBoxResultAsync(
-                    contentMessage: $"Shall {template.Name} be removed?",
-                    contentTitle: "Remove template");
+                var canBeRemoved = !((Active?.Samples?.Count > 0) || !string.IsNullOrWhiteSpace(Active.Empty));
 
-                if (result == ButtonResult.Yes)
+                if (!canBeRemoved)
                 {
-                    if (template.SampleService != default)
-                    {
-                        template.SampleService.Clear();
+                    var messageBoxResult = await dialogService.GetMessageBoxResultAsync(
+                        contentMessage: $"Shall {template.Name} be removed?",
+                        contentTitle: "Remove template");
 
-                        template.SampleService = default;
-                    }
+                    canBeRemoved = messageBoxResult == ButtonResult.Yes;
+                }
 
+                if (canBeRemoved)
+                {
                     RemoveTemplate(template);
                 }
             }
@@ -149,7 +149,7 @@ namespace Score2Stream.TemplateService
 
             if (template.SampleService == default)
             {
-                template.SampleService = sampleServiceFactory();
+                template.SampleService = sampleServiceFactory.Invoke();
 
                 template.SampleService.Initialize(
                     template: template);
@@ -224,6 +224,12 @@ namespace Score2Stream.TemplateService
                     : default;
 
                 Select(next);
+            }
+
+            if (template.SampleService != default)
+            {
+                template.SampleService.Clear();
+                template.SampleService = default;
             }
 
             ImmutableList<Template> remove(ImmutableList<Template> c) => c.Contains(template)

@@ -7,7 +7,6 @@ using Avalonia.Media.Imaging;
 using MsBox.Avalonia.Enums;
 using Prism.Commands;
 using Prism.Events;
-using Prism.Ioc;
 using Prism.Mvvm;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
@@ -23,7 +22,7 @@ namespace Score2Stream.VideoModule.ViewModels
     {
         #region Private Fields
 
-        private readonly IContainerProvider containerProvider;
+        private readonly Func<AreaViewModel> areaViewModelFactory;
         private readonly IDialogService dialogService;
         private readonly IInputService inputService;
         private readonly INavigationService navigationService;
@@ -50,12 +49,13 @@ namespace Score2Stream.VideoModule.ViewModels
         #region Public Constructors
 
         public InputViewModel(IInputService inputService, INavigationService navigationService,
-            IDialogService dialogService, IContainerProvider containerProvider, IEventAggregator eventAggregator)
+            IDialogService dialogService, Func<AreaViewModel> areaViewModelFactory,
+            IEventAggregator eventAggregator)
         {
             this.inputService = inputService;
             this.navigationService = navigationService;
             this.dialogService = dialogService;
-            this.containerProvider = containerProvider;
+            this.areaViewModelFactory = areaViewModelFactory;
 
             MousePressedCommand = new DelegateCommand<PointerPressedEventArgs>(OnMousePressed);
             MouseReleasedCommand = new DelegateCommand<PointerReleasedEventArgs>(OnMouseReleasedAsync);
@@ -279,7 +279,7 @@ namespace Score2Stream.VideoModule.ViewModels
                     if (!canBeResized)
                     {
                         var messageBoxResult = await dialogService.GetMessageBoxResultAsync(
-                            contentMessage: "Shall the dimension of the clip be changed?",
+                            contentMessage: "Shall the dimensions of the area be changed?",
                             contentTitle: "Change dimension");
 
                         canBeResized = messageBoxResult == ButtonResult.Yes;
@@ -376,7 +376,7 @@ namespace Score2Stream.VideoModule.ViewModels
             {
                 foreach (var area in inputService.AreaService.Areas)
                 {
-                    var current = containerProvider.Resolve<AreaViewModel>();
+                    var current = areaViewModelFactory.Invoke();
 
                     current.Initialize(
                         area: area,

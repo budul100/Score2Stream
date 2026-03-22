@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Markup.Xaml.Templates;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Score2Stream.AreaService.Extensions;
@@ -212,28 +213,24 @@ namespace Score2Stream.AreaService
 
         public async Task RemoveAsync()
         {
-            if (Active != default)
+            var template = Active;
+
+            if (template != default)
             {
-                var canBeRemoved = !Active.HasDimensions;
+                var canBeRemoved = !template.HasDimensions;
 
                 if (!canBeRemoved)
                 {
                     var messageBoxResult = await dialogService.GetMessageBoxResultAsync(
-                        contentMessage: "Shall the selected clip be removed?",
-                        contentTitle: "Remove clip");
+                        contentMessage: "Shall the selected area be removed?",
+                        contentTitle: "Remove area");
 
                     canBeRemoved = messageBoxResult == ButtonResult.Yes;
                 }
 
                 if (canBeRemoved)
                 {
-                    var next = Areas.Count > 1
-                        ? Areas.GetNext(Active)
-                        : default;
-
-                    RemoveArea(Active);
-
-                    Select(next);
+                    RemoveArea(template);
                 }
             }
         }
@@ -369,22 +366,30 @@ namespace Score2Stream.AreaService
 
         private void RemoveArea(Area area)
         {
-            if (area != default)
+            if (area == default) return;
+
+            if (area == Active)
             {
-                scoreboardService.ReleaseArea(area);
+                var next = Areas.Count > 1
+                    ? Areas.GetNext(Active)
+                    : default;
 
-                ImmutableList<Area> remove(ImmutableList<Area> c) => c.Contains(area)
-                    ? c.Remove(area)
-                    : c;
-
-                ImmutableInterlocked.Update(
-                    location: ref areas,
-                    transformer: remove);
-
-                SaveAreas();
-
-                areasChangedEvent.Publish();
+                Select(next);
             }
+
+            scoreboardService.ReleaseArea(area);
+
+            ImmutableList<Area> remove(ImmutableList<Area> c) => c.Contains(area)
+                ? c.Remove(area)
+                : c;
+
+            ImmutableInterlocked.Update(
+                location: ref areas,
+                transformer: remove);
+
+            SaveAreas();
+
+            areasChangedEvent.Publish();
         }
 
         private bool ResizeHorizontal(double? x1, double? x2)
@@ -392,21 +397,19 @@ namespace Score2Stream.AreaService
             var result = false;
 
             if (x1.HasValue
-                && x2.HasValue)
+                && x2.HasValue
+                && (Active.X1 != x1 || Active.X2 != x2))
             {
-                if (Active.X1 != x1 || Active.X2 != x2)
-                {
-                    Active.X1Last = Active.X1;
-                    Active.X2Last = Active.X2;
+                Active.X1Last = Active.X1;
+                Active.X2Last = Active.X2;
 
-                    Active.X1 = x1.Value;
-                    Active.X2 = x2.Value;
+                Active.X1 = x1.Value;
+                Active.X2 = x2.Value;
 
-                    result = true;
-                }
-
-                Active.HasDimensions = true;
+                result = true;
             }
+
+            Active.HasDimensions = Active.X2 != Active.X1;
 
             return result;
         }
@@ -416,21 +419,19 @@ namespace Score2Stream.AreaService
             var result = false;
 
             if (y1.HasValue
-                && y2.HasValue)
+                && y2.HasValue
+                && (Active.Y1 != y1 || Active.Y2 != y2))
             {
-                if (Active.Y1 != y1 || Active.Y2 != y2)
-                {
-                    Active.Y1Last = Active.Y1;
-                    Active.Y2Last = Active.Y2;
+                Active.Y1Last = Active.Y1;
+                Active.Y2Last = Active.Y2;
 
-                    Active.Y1 = y1.Value;
-                    Active.Y2 = y2.Value;
+                Active.Y1 = y1.Value;
+                Active.Y2 = y2.Value;
 
-                    result = true;
-                }
-
-                Active.HasDimensions = true;
+                result = true;
             }
+
+            Active.HasDimensions = Active.Y2 != Active.Y1;
 
             return result;
         }

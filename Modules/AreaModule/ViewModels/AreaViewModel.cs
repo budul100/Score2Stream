@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Prism.Commands;
 using Prism.Events;
-using Prism.Ioc;
 using Prism.Mvvm;
 using Score2Stream.AreaModule.Extensions;
 using Score2Stream.Commons.Assets;
@@ -21,10 +21,10 @@ namespace Score2Stream.AreaModule.ViewModels
         #region Private Fields
 
         private readonly AreaModifiedEvent areaModifiedEvent;
-        private readonly IContainerProvider containerProvider;
         private readonly IScoreboardService scoreboardService;
-
+        private readonly Func<SegmentViewModel> segmentViewModelFactory;
         private IAreaService areaService;
+
         private bool isActive;
         private bool isInitializing;
         private bool isUpdatingType;
@@ -34,12 +34,11 @@ namespace Score2Stream.AreaModule.ViewModels
 
         #region Public Constructors
 
-        public AreaViewModel(IScoreboardService scoreboardService, IContainerProvider containerProvider,
-            IEventAggregator eventAggregator)
+        public AreaViewModel(IScoreboardService scoreboardService,
+            Func<SegmentViewModel> segmentViewModelFactory, IEventAggregator eventAggregator)
         {
             this.scoreboardService = scoreboardService;
-            this.containerProvider = containerProvider;
-
+            this.segmentViewModelFactory = segmentViewModelFactory;
             OnSelectionCommand = new DelegateCommand(
                 executeMethod: ActivateArea);
 
@@ -211,7 +210,7 @@ namespace Score2Stream.AreaModule.ViewModels
         {
             foreach (var clip in Area.Segments)
             {
-                var current = containerProvider.Resolve<SegmentViewModel>();
+                var current = segmentViewModelFactory.Invoke();
 
                 current.Initialize(clip);
 

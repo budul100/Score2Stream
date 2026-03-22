@@ -93,7 +93,7 @@ namespace Score2Stream.AreaModule.ViewModels
 
                 foreach (var toBeAdded in toBeAddeds)
                 {
-                    var current = areaViewModelFactory();
+                    var current = areaViewModelFactory.Invoke();
 
                     current.Initialize(
                         area: toBeAdded,

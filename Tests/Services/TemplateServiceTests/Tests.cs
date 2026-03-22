@@ -252,6 +252,7 @@ namespace Score2Stream.Tests.TemplateServiceTests
             // Arrange
             templateService.Create();
             var template = templateService.Active;
+            template.Empty = "Test"; // Ensure template is not empty, so we can check if it remains unchanged
             SetupDialogResult(ButtonResult.No);
 
             // Act
@@ -267,6 +268,7 @@ namespace Score2Stream.Tests.TemplateServiceTests
             // Arrange
             templateService.Create();
             var template = templateService.Active;
+            template.Empty = "Test"; // Ensure template is not empty, so we can check if it remains unchanged
             SetupDialogResult(ButtonResult.No);
 
             // Reset invocation count after Create()

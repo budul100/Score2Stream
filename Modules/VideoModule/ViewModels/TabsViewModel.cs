@@ -1,5 +1,7 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
+using Avalonia.Xaml.Interactions.Custom;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
@@ -15,8 +17,8 @@ namespace Score2Stream.VideoModule.ViewModels
     {
         #region Private Fields
 
-        private readonly IContainerProvider containerProvider;
         private readonly IInputService inputService;
+        private readonly Func<InputViewModel> inputViewModelFactory;
 
         private bool isRefreshing;
         private TabViewModel selectedTab;
@@ -25,12 +27,12 @@ namespace Score2Stream.VideoModule.ViewModels
 
         #region Public Constructors
 
-        public TabsViewModel(IInputService inputService, IContainerProvider containerProvider,
+        public TabsViewModel(IInputService inputService, Func<InputViewModel> inputViewModelFactory,
             IEventAggregator eventAggregator, IRegionManager regionManager)
             : base(regionManager)
         {
             this.inputService = inputService;
-            this.containerProvider = containerProvider;
+            this.inputViewModelFactory = inputViewModelFactory;
 
             eventAggregator.GetEvent<InputSelectedEvent>().Subscribe(
                 action: _ => RefreshTabs(),
@@ -97,8 +99,9 @@ namespace Score2Stream.VideoModule.ViewModels
 
             foreach (var relevant in relevants)
             {
-                var viewModel = containerProvider.Resolve<InputViewModel>();
-                var closeCommand = new DelegateCommand(async () => await inputService.RemoveAsync(relevant));
+                var viewModel = inputViewModelFactory.Invoke();
+                var closeCommand = new DelegateCommand(async () =>
+                    await inputService.RemoveAsync(relevant));
 
                 var tab = new TabViewModel(
                     Input: relevant,
