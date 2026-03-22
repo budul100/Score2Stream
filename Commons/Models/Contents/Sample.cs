@@ -21,6 +21,9 @@ namespace Score2Stream.Commons.Models.Contents
         public bool IsVerified { get; set; }
 
         [JsonIgnore]
+        public Match Match { get; set; }
+
+        [JsonIgnore]
         public Template Template { get; set; }
 
         public string Value { get; set; }

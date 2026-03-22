@@ -8,10 +8,10 @@ using Prism.Events;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Events.Area;
-using Score2Stream.Commons.Events.Clip;
 using Score2Stream.Commons.Events.Graphics;
 using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Events.Scoreboard;
+using Score2Stream.Commons.Events.Segment;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Scoreboard;
@@ -285,7 +285,7 @@ namespace Score2Stream.ScoreboardService
 
         #region Public Methods
 
-        public void BindArea(Area area, AreaType type)
+        public void Bind(Area area, AreaType type)
         {
             if (area != default)
             {

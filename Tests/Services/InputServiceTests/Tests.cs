@@ -59,8 +59,6 @@ namespace Score2Stream.Tests.InputServiceTests
             eventAggregatorMock = new Mock<IEventAggregator>();
             loggerMock = new Mock<ILogger<Service>>();
             settingsServiceMock = new Mock<ISettingsService<Session>>();
-
-            // FIX 1 (continued): Initialize the shared template service mock.
             templateServiceMock = new Mock<ITemplateService>();
 
             session = new Session { Inputs = [] };

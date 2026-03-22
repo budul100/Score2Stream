@@ -34,7 +34,7 @@ namespace Score2Stream.Commons.Interfaces
 
         Task RemoveAsync();
 
-        void Select(Sample sample);
+        void Select(Sample sample = default);
 
         #endregion Public Methods
     }

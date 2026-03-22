@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using OpenCvSharp;
 using Score2Stream.Commons.Models.Base;
 using Score2Stream.Commons.Models.Contents;
 
@@ -11,13 +10,13 @@ namespace Score2Stream.Commons.Interfaces
     {
         #region Public Methods
 
-        Match GetFromBase(Imageable imageable);
+        void Bind(Imageable imageable);
 
-        IEnumerable<Match> GetFromSamples(Segment segment);
+        IEnumerable<(Match Match, Sample Sample)> Compare(Segment segment, IEnumerable<Sample> samples);
 
-        bool HasSimilars(Segment segment);
+        Match Detect(Imageable imageable);
 
-        void Update(Imageable imageable);
+        bool HasSimilars(Segment segment, IEnumerable<Sample> samples);
 
         #endregion Public Methods
     }

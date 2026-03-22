@@ -2,13 +2,12 @@
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
-using Avalonia.Media.Imaging;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Score2Stream.Commons.Assets;
-using Score2Stream.Commons.Events.Clip;
 using Score2Stream.Commons.Events.Menu;
 using Score2Stream.Commons.Events.Sample;
+using Score2Stream.Commons.Events.Segment;
 using Score2Stream.Commons.Events.Template;
 using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Extensions;
@@ -27,13 +26,13 @@ namespace Score2Stream.SampleService
         private readonly IRecognitionService recognitionService;
         private readonly SamplesChangedEvent samplesChangedEvent;
         private readonly SampleSelectedEvent sampleSelectedEvent;
-        private readonly object samplesLock = new();
         private readonly SamplesOrderedEvent samplesOrderedEvent;
         private readonly ISettingsService<Session> settingsService;
         private readonly TemplateSelectedEvent templateSelectedEvent;
 
         private int index;
         private bool orderDescending;
+        private ImmutableList<Sample> samples = [];
         private Template template;
 
         #endregion Private Fields
@@ -62,6 +61,10 @@ namespace Score2Stream.SampleService
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: _ => IsDetection);
+
+            eventAggregator.GetEvent<SampleModifiedEvent>().Subscribe(
+                action: _ => SaveSamples(),
+                keepSubscriberReferenceAlive: true);
         }
 
         #endregion Public Constructors
@@ -72,10 +75,7 @@ namespace Score2Stream.SampleService
 
         public bool IsDetection { get; set; }
 
-        public IReadOnlyList<Sample> Samples
-        {
-            get { lock (samplesLock) return template.Samples.ToList(); }
-        }
+        public IReadOnlyList<Sample> Samples => samples;
 
         #endregion Public Properties
 
@@ -97,7 +97,7 @@ namespace Score2Stream.SampleService
                     RemoveSample(relevant);
                 }
 
-                if (Samples.Count() >= Constants.MaxCountSamples)
+                if (Samples.Count >= Constants.MaxCountSamples)
                 {
                     throw new MaxCountExceededException(
                         type: typeof(Sample),
@@ -109,23 +109,33 @@ namespace Score2Stream.SampleService
 
                 // Bitmap and normalized data must be assigned here rather than in the model
                 // because samples loaded from saved settings also need this initialization.
-                recognitionService.Update(sample);
+                recognitionService.Bind(sample);
 
-                lock (samplesLock) template.Samples.Add(sample);
+                ImmutableList<Sample> add(ImmutableList<Sample> c) => !c.Contains(sample)
+                    ? c.Add(sample)
+                    : c;
 
-                samplesChangedEvent.Publish();
+                ImmutableInterlocked.Update(
+                    location: ref samples,
+                    transformer: add);
             }
         }
 
         public void Clear()
         {
-            if (Samples.Any())
+            if (Samples.Count > 0)
             {
-                lock (samplesLock) template.Samples.Clear();
+                static ImmutableList<Sample> clear(ImmutableList<Sample> c) => c.Clear();
+
+                ImmutableInterlocked.Update(
+                    location: ref samples,
+                    transformer: clear);
+
+                SaveSamples();
 
                 samplesChangedEvent.Publish();
 
-                Select(default);
+                Select();
             }
         }
 
@@ -147,10 +157,15 @@ namespace Score2Stream.SampleService
             {
                 var sample = CreateSample(segment);
 
-                if (sample != default)
+                if (segment.Area.Template == default)
                 {
-                    Select(sample);
+                    segment.Area.Template = sample.Template;
+                    segment.Area.TemplateName = sample.Template.Name;
+
+                    templateSelectedEvent.Publish(sample.Template);
                 }
+
+                Select(sample);
             }
             catch (MaxCountExceededException exception)
             {
@@ -233,7 +248,9 @@ namespace Score2Stream.SampleService
 
                 if (result == ButtonResult.Yes)
                 {
-                    var next = Samples.GetNext(Active);
+                    var next = Samples.Count > 1
+                        ? Samples.GetNext(Active)
+                        : default;
 
                     RemoveSample(Active);
 
@@ -242,13 +259,11 @@ namespace Score2Stream.SampleService
             }
         }
 
-        public void Select(Sample sample)
+        public void Select(Sample sample = default)
         {
             if (Active != sample)
             {
-                Active = Active != sample
-                    ? sample
-                    : default;
+                Active = sample;
 
                 sampleSelectedEvent.Publish(Active);
             }
@@ -275,15 +290,11 @@ namespace Score2Stream.SampleService
                 Add(result);
 
                 result.Value = recognitionService
-                    .GetFromBase(result)?.Value;
+                    .Detect(result)?.Value;
 
-                if (segment.Area.Template == default)
-                {
-                    segment.Area.Template = result.Template;
-                    segment.Area.TemplateName = result.Template.Name;
+                SaveSamples();
 
-                    templateSelectedEvent.Publish(result.Template);
-                }
+                samplesChangedEvent.Publish();
             }
 
             return result;
@@ -291,8 +302,12 @@ namespace Score2Stream.SampleService
 
         private void DetectSample(Segment segment)
         {
+            var samples = Samples?.ToArray();
+
             if (segment?.IsEmpty == false
-                && !recognitionService.HasSimilars(segment))
+                && !recognitionService.HasSimilars(
+                    segment: segment,
+                    samples: samples))
             {
                 try
                 {
@@ -307,10 +322,34 @@ namespace Score2Stream.SampleService
         {
             if (sample != default)
             {
-                lock (samplesLock) template.Samples.Remove(sample);
+                ImmutableList<Sample> remove(ImmutableList<Sample> c) => c.Contains(sample)
+                    ? c.Remove(sample)
+                    : c;
+
+                ImmutableInterlocked.Update(
+                    location: ref samples,
+                    transformer: remove);
+
+                SaveSamples();
 
                 samplesChangedEvent.Publish();
             }
+        }
+
+        private void SaveSamples()
+        {
+            var untransformeds = Samples
+                .Where(s => s.Image != default
+                    && s.Bytes == default).ToArray();
+
+            foreach (var untransformed in untransformeds)
+            {
+                untransformed.Bytes = untransformed.Image.ToBytes();
+            }
+
+            template.Samples = Samples?.ToList();
+
+            settingsService.Save();
         }
 
         #endregion Private Methods

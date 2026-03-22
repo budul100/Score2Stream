@@ -3,8 +3,8 @@ using Prism.Events;
 using Prism.Mvvm;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Events.Area;
-using Score2Stream.Commons.Events.Clip;
 using Score2Stream.Commons.Events.Menu;
+using Score2Stream.Commons.Events.Segment;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 
@@ -127,7 +127,7 @@ namespace Score2Stream.VideoModule.ViewModels
                 case ViewType.Templates:
 
                     IsActive = areaService.Active == Segment.Area;
-                    IsSelected = areaService.Segment == Segment;
+                    IsSelected = areaService.ActiveSegment == Segment;
 
                     break;
             }

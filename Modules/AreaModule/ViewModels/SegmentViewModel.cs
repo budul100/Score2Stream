@@ -1,7 +1,7 @@
 ﻿using Avalonia.Media.Imaging;
 using Prism.Events;
 using Prism.Mvvm;
-using Score2Stream.Commons.Events.Clip;
+using Score2Stream.Commons.Events.Segment;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Models.Contents;
 

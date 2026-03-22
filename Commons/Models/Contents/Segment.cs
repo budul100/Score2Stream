@@ -19,8 +19,6 @@ namespace Score2Stream.Commons.Models.Contents
 
         public Queue<Mat> Images { get; set; } = new Queue<Mat>();
 
-        public IEnumerable<Match> Matches { get; set; }
-
         public int Position { get; set; }
 
         public Rect? Rect { get; set; }

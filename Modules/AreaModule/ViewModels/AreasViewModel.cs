@@ -6,6 +6,7 @@ using Prism.Regions;
 using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Interfaces;
+using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Prism;
 
 namespace Score2Stream.AreaModule.ViewModels
@@ -74,23 +75,32 @@ namespace Score2Stream.AreaModule.ViewModels
 
         private void UpdateAreas()
         {
-            Areas.Clear();
+            var currents = inputService?.AreaService?.Areas?.ToArray();
+
+            var toBeRemoveds = Areas
+                .Where(v => currents?.Contains(v.Area) != true).ToArray();
+
+            foreach (var toBeRemoved in toBeRemoveds)
+            {
+                Areas.Remove(toBeRemoved);
+            }
 
             if (inputService.AreaService?.Areas?.Count > 0)
             {
-                foreach (var area in inputService.AreaService.Areas)
+                var toBeAddeds = currents
+                    .Where(a => !Areas.Any(v => v.Area == a)).ToArray();
+
+                foreach (var toBeAdded in toBeAddeds)
                 {
                     var current = containerProvider.Resolve<AreaViewModel>();
 
                     current.Initialize(
-                        area: area,
+                        area: toBeAdded,
                         areaService: inputService.AreaService,
                         templateService: templateService);
 
                     Areas.Add(current);
                 }
-
-                OrderAreas();
             }
         }
 

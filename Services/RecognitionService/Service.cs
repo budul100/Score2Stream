@@ -4,7 +4,9 @@ using System.IO;
 using System.Linq;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
+using Prism.Events;
 using Score2Stream.Commons.Assets;
+using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Base;
@@ -35,6 +37,8 @@ namespace Score2Stream.RecognitionService
 
         public Service(ISettingsService<Session> settingsService)
         {
+            this.settingsService = settingsService;
+
             var modelPath = Path.Combine(
                 path1: AppContext.BaseDirectory,
                 path2: FolderData,
@@ -58,116 +62,13 @@ namespace Score2Stream.RecognitionService
             {
                 sessionFeature = new InferenceSession(featurePath);
             }
-
-            this.settingsService = settingsService;
         }
 
         #endregion Public Constructors
 
         #region Public Methods
 
-        public void Dispose()
-        {
-            Dispose(isDisposing: true);
-            GC.SuppressFinalize(this);
-        }
-
-        public Match GetFromBase(Imageable imageable)
-        {
-            var result = default(Match);
-
-            if (!imageable.IsEmpty)
-            {
-                var (value, confidence) = GetValue(imageable.Normalized);
-
-                var thresholdMatching = Math.Abs(settingsService.Contents.Detection.ThresholdMatching)
-                    / Constants.ThresholdDivider;
-
-                if (confidence >= thresholdMatching)
-                {
-                    result = new Match
-                    {
-                        Value = value,
-                        Sample = null,
-                        Similarity = confidence,
-                        Type = Commons.Enums.MatchType.Similar,
-                    };
-                }
-            }
-
-            return result;
-        }
-
-        public IEnumerable<Match> GetFromSamples(Segment segment)
-        {
-            if (segment?.IsEmpty == false)
-            {
-                var hasSimilar = false;
-
-                var samples = segment?.Area?.Template?.SampleService?.Samples;
-
-                if (samples?.Count > 0)
-                {
-                    var thresholdMatching = Math.Abs(settingsService.Contents.Detection.ThresholdMatching)
-                        / Constants.ThresholdDivider;
-
-                    foreach (var sample in samples)
-                    {
-                        var similarity = sample.Features.CosineSimilarity(segment.Features);
-
-                        var type = similarity >= thresholdMatching
-                            ? Commons.Enums.MatchType.Similar
-                            : Commons.Enums.MatchType.None;
-
-                        hasSimilar = hasSimilar || type == Commons.Enums.MatchType.Similar;
-
-                        var result = new Match
-                        {
-                            Value = sample.Value,
-                            Sample = sample,
-                            Similarity = similarity,
-                            Type = type,
-                        };
-
-                        yield return result;
-                    }
-                }
-
-                if (!hasSimilar)
-                {
-                    var match = GetFromBase(segment);
-
-                    if (match != default)
-                    {
-                        yield return match;
-                    }
-                }
-            }
-        }
-
-        public bool HasSimilars(Segment segment)
-        {
-            var result = false;
-
-            if (segment?.IsEmpty == false)
-            {
-                var samples = segment?.Area?.Template?.SampleService?.Samples;
-
-                if (samples?.Count > 0)
-                {
-                    var thresholdDetecting = Math.Abs(settingsService.Contents.Detection.ThresholdDetecting)
-                        / Constants.ThresholdDivider;
-
-                    result = samples
-                        .Select(s => s.Features.CosineSimilarity(segment.Features))
-                        .Any(s => s >= thresholdDetecting);
-                }
-            }
-
-            return result;
-        }
-
-        public void Update(Imageable imageable)
+        public void Bind(Imageable imageable)
         {
             imageable.Normalized = imageable.Image.GetNormalized(
                 Constants.NormalizedHeight,
@@ -192,6 +93,83 @@ namespace Score2Stream.RecognitionService
                 imageable.Features = outputs[0]
                     .AsEnumerable<float>().ToArray();
             }
+        }
+
+        public IEnumerable<(Match Match, Sample Sample)> Compare(Segment segment, IEnumerable<Sample> samples)
+        {
+            if (samples?.Count() > 0
+                && segment?.IsEmpty == false)
+            {
+                var thresholdMatching = Math.Abs(settingsService.Contents.Detection.ThresholdMatching)
+                    / Constants.ThresholdDivider;
+
+                foreach (var sample in samples)
+                {
+                    var similarity = sample.Features.CosineSimilarity(segment.Features);
+
+                    var type = similarity >= thresholdMatching
+                        ? Commons.Enums.MatchType.Similar
+                        : Commons.Enums.MatchType.None;
+
+                    var match = new Match
+                    {
+                        Value = sample.Value,
+                        Similarity = similarity,
+                        Type = type,
+                    };
+
+                    yield return (match, sample);
+                }
+            }
+        }
+
+        public Match Detect(Imageable imageable)
+        {
+            var result = default(Match);
+
+            if (!imageable.IsEmpty)
+            {
+                var (value, confidence) = GetValue(imageable.Normalized);
+
+                var thresholdMatching = Math.Abs(settingsService.Contents.Detection.ThresholdMatching)
+                    / Constants.ThresholdDivider;
+
+                if (confidence >= thresholdMatching)
+                {
+                    result = new Match
+                    {
+                        Value = value,
+                        Similarity = confidence,
+                        Type = Commons.Enums.MatchType.Similar,
+                    };
+                }
+            }
+
+            return result;
+        }
+
+        public void Dispose()
+        {
+            Dispose(isDisposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        public bool HasSimilars(Segment segment, IEnumerable<Sample> samples)
+        {
+            var result = false;
+
+            if (segment?.IsEmpty == false
+                && samples?.Count() > 0)
+            {
+                var thresholdDetecting = Math.Abs(settingsService.Contents.Detection.ThresholdDetecting)
+                    / Constants.ThresholdDivider;
+
+                result = samples
+                    .Select(s => s.Features.CosineSimilarity(segment.Features))
+                    .Any(s => s >= thresholdDetecting);
+            }
+
+            return result;
         }
 
         #endregion Public Methods

@@ -225,7 +225,7 @@ namespace Score2Stream.Tests.MenuModuleTests
             templateServiceMock.Setup(m => m.SampleService).Returns(sampleService);
 
             var inputServiceMock = new Mock<IInputService>();
-            inputServiceMock.Setup(m => m.AreaService.Segment).Returns((Segment)null);
+            inputServiceMock.Setup(m => m.AreaService.ActiveSegment).Returns((Segment)null);
 
             var viewModel = new MenuViewModel(
                 settingsService: sessionSettingsServiceMock.Object,
@@ -268,7 +268,7 @@ namespace Score2Stream.Tests.MenuModuleTests
             templateServiceMock.Setup(m => m.SampleService).Returns(sampleService);
 
             var inputServiceMock = new Mock<IInputService>();
-            inputServiceMock.Setup(m => m.AreaService.Segment).Returns(segment);
+            inputServiceMock.Setup(m => m.AreaService.ActiveSegment).Returns(segment);
             inputServiceMock.Setup(m => m.IsActive).Returns(true);
 
             var viewModel = new MenuViewModel(

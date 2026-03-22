@@ -10,11 +10,11 @@ namespace Score2Stream.Commons.Interfaces
 
         Area Active { get; }
 
-        List<Area> Areas { get; }
+        IReadOnlyList<Area> Areas { get; }
 
         bool CanUndo { get; }
 
-        Segment Segment { get; }
+        Segment ActiveSegment { get; }
 
         #endregion Public Properties
 
@@ -27,6 +27,8 @@ namespace Score2Stream.Commons.Interfaces
         Task ClearAsync();
 
         void Create(int size);
+
+        void Initialize(Input input);
 
         void Next(bool backward);
 

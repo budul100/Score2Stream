@@ -10,8 +10,9 @@ using Prism.Events;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Events.Area;
-using Score2Stream.Commons.Events.Clip;
 using Score2Stream.Commons.Events.Input;
+using Score2Stream.Commons.Events.Sample;
+using Score2Stream.Commons.Events.Segment;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
@@ -32,6 +33,7 @@ namespace Score2Stream.VideoService
         private readonly InputStartedEvent inputStartedEvent;
         private readonly InputUpdatedEvent inputUpdatedEvent;
         private readonly ILogger<Service> logger;
+        private readonly SampleUpdatedEvent sampleUpdatedEvent;
         private readonly SegmentDrawnEvent segmentDrawnEvent;
         private readonly SegmentUpdatedEvent segmentUpdatedEvent;
         private readonly ISettingsService<Session> settingsService;
@@ -72,6 +74,8 @@ namespace Score2Stream.VideoService
             segmentDrawnEvent = eventAggregator.GetEvent<SegmentDrawnEvent>();
             segmentUpdatedEvent = eventAggregator.GetEvent<SegmentUpdatedEvent>();
 
+            sampleUpdatedEvent = eventAggregator.GetEvent<SampleUpdatedEvent>();
+
             eventAggregator.GetEvent<AreaModifiedEvent>().Subscribe(
                 action: UpdateRectangles,
                 keepSubscriberReferenceAlive: true);
@@ -94,6 +98,7 @@ namespace Score2Stream.VideoService
         public TimeSpan? ProcessingTime { get; private set; }
 
         public IRecognitionService RecognitionService { get; }
+
         public ITemplateService TemplateService { get; }
 
         #endregion Public Properties
@@ -522,9 +527,65 @@ namespace Score2Stream.VideoService
                 action: () => segmentDrawnEvent.Publish(segment),
                 cancellationToken: cancellationToken);
 
-            await UpdateValueAsync(
+            await UpdateMatchesAsync(
                 segment: segment,
                 cancellationToken: cancellationToken);
+        }
+
+        private async Task UpdateMatchesAsync(Segment segment, CancellationToken cancellationToken)
+        {
+            var waitingDurationMS = Math.Abs(settingsService.Contents.Detection.DurationDetectionWait);
+            var waitingDuration = TimeSpan.FromMilliseconds(waitingDurationMS);
+
+            RecognitionService.Bind(segment);
+
+            var samples = segment?.Area?.Template?.Samples?.ToArray();
+
+            var compares = RecognitionService.Compare(
+                segment: segment,
+                samples: samples).ToArray();
+
+            var match = compares?
+                .Where(s => s.Match?.Type != MatchType.None)
+                .OrderByDescending(s => s.Match?.Similarity)?.FirstOrDefault().Match;
+
+            match ??= RecognitionService.Detect(segment);
+
+            if (match != default)
+            {
+                match.Type = MatchType.Match;
+
+                segment.SetValue(
+                    value: match.Value,
+                    hasValue: true,
+                    similarity: match.Similarity,
+                    waitingDuration: waitingDuration);
+            }
+            else
+            {
+                var value = segment.Area?.Template?.Empty;
+
+                segment.SetValue(
+                    value: value,
+                    hasValue: false,
+                    similarity: 0.0,
+                    waitingDuration: waitingDuration);
+            }
+
+            await dispatcherService.InvokeAsync(
+                action: () => segmentUpdatedEvent.Publish(segment),
+                cancellationToken: cancellationToken);
+
+            if (segment == AreaService?.ActiveSegment
+                && compares?.Length > 0)
+            {
+                foreach (var compare in compares)
+                {
+                    compare.Sample.Match = compare.Match;
+
+                    sampleUpdatedEvent.Publish(compare.Sample);
+                }
+            }
         }
 
         private void UpdateRectangles(Area area)
@@ -570,46 +631,6 @@ namespace Score2Stream.VideoService
             {
                 frameLock.ExitReadLock();
             }
-        }
-
-        private async Task UpdateValueAsync(Segment segment, CancellationToken cancellationToken)
-        {
-            var waitingDurationMS = Math.Abs(settingsService.Contents.Detection.DurationDetectionWait);
-            var waitingDuration = TimeSpan.FromMilliseconds(waitingDurationMS);
-
-            RecognitionService.Update(segment);
-
-            segment.Matches = RecognitionService
-                .GetFromSamples(segment).ToArray();
-
-            var match = segment.Matches?
-                .Where(m => m.Type != MatchType.None)
-                .OrderByDescending(m => m.Similarity).FirstOrDefault();
-
-            if (match != default)
-            {
-                match.Type = MatchType.Match;
-
-                segment.SetValue(
-                    value: match.Value,
-                    hasValue: true,
-                    similarity: match.Similarity,
-                    waitingDuration: waitingDuration);
-            }
-            else
-            {
-                var value = segment.Area?.Template?.Empty;
-
-                segment.SetValue(
-                    value: value,
-                    hasValue: false,
-                    similarity: 0.0,
-                    waitingDuration: waitingDuration);
-            }
-
-            await dispatcherService.InvokeAsync(
-                action: () => segmentUpdatedEvent.Publish(segment),
-                cancellationToken: cancellationToken);
         }
 
         private async Task UpdateVideoAsync(DateTime? capturingStart = default)

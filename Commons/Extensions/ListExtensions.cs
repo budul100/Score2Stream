@@ -15,7 +15,7 @@ namespace Score2Stream.Commons.Extensions
             var array = values as T[]
                 ?? values.ToArray();
 
-            if (array.Length > 0)
+            if (array.Length > 1)
             {
                 var index = Array.IndexOf(
                     array: array,

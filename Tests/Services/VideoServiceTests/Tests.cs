@@ -7,13 +7,13 @@ using Moq;
 using OpenCvSharp;
 using Prism.Events;
 using Score2Stream.Commons.Events.Area;
-using Score2Stream.Commons.Events.Clip;
 using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
 using Score2Stream.VideoService;
 using Xunit;
+using Score2Stream.Commons.Events.Segment;
 
 namespace Score2Stream.Tests.VideoServiceTests
 {

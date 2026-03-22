@@ -7,12 +7,12 @@ using Moq;
 using Prism.Events;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Events.Area;
-using Score2Stream.Commons.Events.Clip;
 using Score2Stream.Commons.Events.Graphics;
 using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Events.Menu;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Scoreboard;
+using Score2Stream.Commons.Events.Segment;
 using Score2Stream.Commons.Events.Template;
 using Score2Stream.Commons.Models.Contents;
 
@@ -36,6 +36,7 @@ namespace Score2Stream.Tests.MenuModuleTests
             mock.RegisterNewMockedEvent<InputSelectedEvent, Input>();
             mock.RegisterNewMockedEvent<InputStartedEvent, Input>();
             mock.RegisterNewMockedEvent<InputUpdatedEvent>();
+            mock.RegisterNewMockedEvent<SampleModifiedEvent, Sample>();
             mock.RegisterNewMockedEvent<SamplesChangedEvent>();
             mock.RegisterNewMockedEvent<SampleSelectedEvent, Sample>();
             mock.RegisterNewMockedEvent<SamplesOrderedEvent>();
@@ -88,6 +89,7 @@ namespace Score2Stream.Tests.MenuModuleTests
             EnableCallBase<InputSelectedEvent>(mock);
             EnableCallBase<InputStartedEvent>(mock);
             EnableCallBase<InputUpdatedEvent>(mock);
+            EnableCallBase<SampleModifiedEvent>(mock);
             EnableCallBase<SamplesChangedEvent>(mock);
             EnableCallBase<SampleSelectedEvent>(mock);
             EnableCallBase<SamplesOrderedEvent>(mock);

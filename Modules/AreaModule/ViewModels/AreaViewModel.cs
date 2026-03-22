@@ -41,7 +41,7 @@ namespace Score2Stream.AreaModule.ViewModels
             this.containerProvider = containerProvider;
 
             OnSelectionCommand = new DelegateCommand(
-                executeMethod: () => ActivateArea());
+                executeMethod: ActivateArea);
 
             areaModifiedEvent = eventAggregator.GetEvent<AreaModifiedEvent>();
 
@@ -149,7 +149,7 @@ namespace Score2Stream.AreaModule.ViewModels
 
                     isUpdatingType = true;
 
-                    scoreboardService.BindArea(
+                    scoreboardService.Bind(
                         area: Area,
                         type: value);
 
@@ -226,14 +226,13 @@ namespace Score2Stream.AreaModule.ViewModels
 
         private void UpdateTemplates()
         {
-            var template = Area.Template;
-
             isInitializing = true;
 
-            Template = default;
+            var currents = templateService?.Templates?.ToArray();
 
             var toBeRemoveds = Templates
-                .Where(t => t != null && templateService?.Templates?.Contains(t) != true).ToArray();
+                .Where(v => v != default
+                    && currents?.Contains(v) != true).ToArray();
 
             foreach (var toBeRemoved in toBeRemoveds)
             {
@@ -249,13 +248,11 @@ namespace Score2Stream.AreaModule.ViewModels
                         item: default);
                 }
 
-                var toBeAddeds = templateService.Templates
+                var toBeAddeds = currents
                     .Where(t => !Templates.Contains(t)).ToArray();
 
                 Templates.AddRange(toBeAddeds);
             }
-
-            Template = template;
 
             isInitializing = false;
 

@@ -1,11 +1,9 @@
-﻿using System.Linq;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
-using Score2Stream.Commons.Events.Clip;
 using Score2Stream.Commons.Events.Menu;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Interfaces;
@@ -22,10 +20,8 @@ namespace Score2Stream.TemplateModule.ViewModels
         private readonly SampleModifiedEvent sampleModifiedEvent;
         private readonly ISettingsService<Session> settingsService;
 
-        private IAreaService areaService;
         private bool isSelected;
-        private Match match;
-        private ISampleService sampleService;
+        private ITemplateService templateService;
 
         #endregion Private Fields
 
@@ -36,35 +32,27 @@ namespace Score2Stream.TemplateModule.ViewModels
             this.settingsService = settingsService;
 
             OnRemoveCommand = new DelegateCommand(
-                executeMethod: () => sampleService.RemoveAsync());
+                executeMethod: () => templateService?.SampleService?.RemoveAsync());
 
             OnFocusGotCommand = new DelegateCommand(
-                executeMethod: () => sampleService.Select(Sample));
+                executeMethod: () => templateService?.SampleService?.Select(Sample));
             OnFocusLostCommand = new DelegateCommand(
                 executeMethod: SetVerified);
 
             OnSelectionCommand = new DelegateCommand(
                 executeMethod: SelectSample);
             OnSelectionNextCommand = new DelegateCommand(
-                executeMethod: () => sampleService.Next(false));
+                executeMethod: () => templateService?.SampleService?.Next(false));
             OnSelectionPreviousCommand = new DelegateCommand(
-                executeMethod: () => sampleService.Next(true));
+                executeMethod: () => templateService?.SampleService?.Next(true));
 
             sampleModifiedEvent = eventAggregator.GetEvent<SampleModifiedEvent>();
 
-            eventAggregator.GetEvent<SegmentSelectedEvent>().Subscribe(
-                action: UpdateMatch,
+            eventAggregator.GetEvent<SampleUpdatedEvent>().Subscribe(
+                action: _ => UpdateMatch(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: s => areaService?.Segment == s
-                    && s?.Matches?.Any(m => m?.Sample == Sample) == true);
-
-            eventAggregator.GetEvent<SegmentUpdatedEvent>().Subscribe(
-                action: UpdateMatch,
-                threadOption: ThreadOption.PublisherThread,
-                keepSubscriberReferenceAlive: true,
-                filter: s => areaService?.Segment == s
-                    && s?.Matches?.Any(m => m?.Sample == Sample) == true);
+                filter: s => s == Sample);
 
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
                 action: s => IsSelected = s == Sample,
@@ -109,11 +97,11 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         public Sample Sample { get; private set; }
 
-        public string Similarity => match != default
-            ? $"Similarity: {(int)(match.Similarity * Constants.ThresholdDivider)}%"
+        public string Similarity => Sample?.Match != default
+            ? $"Similarity: {(int)(Sample.Match.Similarity * Constants.ThresholdDivider)}%"
             : default;
 
-        public MatchType Type => (match?.Type) ?? MatchType.None;
+        public MatchType Type => (Sample.Match?.Type) ?? MatchType.None;
 
         public string Value
         {
@@ -135,14 +123,12 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         #region Public Methods
 
-        public void Initialize(Sample sample, IAreaService areaService, ISampleService sampleService)
+        public void Initialize(Sample sample, ITemplateService templateService)
         {
-            this.Sample = sample;
-
-            this.areaService = areaService;
-            this.sampleService = sampleService;
-
+            Sample = sample;
             Value = sample.Value;
+
+            this.templateService = templateService;
 
             RaisePropertyChanged(nameof(Bitmap));
         }
@@ -158,7 +144,7 @@ namespace Score2Stream.TemplateModule.ViewModels
                 SetVerified();
             }
 
-            sampleService.Select(Sample);
+            templateService.SampleService.Select(Sample);
         }
 
         private void SetVerified()
@@ -171,11 +157,8 @@ namespace Score2Stream.TemplateModule.ViewModels
             }
         }
 
-        private void UpdateMatch(Segment segment)
+        private void UpdateMatch()
         {
-            match = segment?.Matches?
-                .SingleOrDefault(m => m.Sample == Sample);
-
             RaisePropertyChanged(nameof(Similarity));
             RaisePropertyChanged(nameof(Type));
         }

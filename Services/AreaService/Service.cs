@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using MsBox.Avalonia.Enums;
@@ -7,43 +8,73 @@ using Prism.Events;
 using Score2Stream.AreaService.Extensions;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Events.Area;
-using Score2Stream.Commons.Events.Clip;
+using Score2Stream.Commons.Events.Sample;
+using Score2Stream.Commons.Events.Segment;
 using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
+using Score2Stream.Commons.Models.Settings;
 
 namespace Score2Stream.AreaService
 {
-    public class Service(IScoreboardService scoreboardService, IDialogService dialogService,
-        IEventAggregator eventAggregator)
+    public class Service
         : IAreaService
     {
         #region Private Fields
 
-        private readonly AreaModifiedEvent areaModifiedEvent = eventAggregator.GetEvent<AreaModifiedEvent>();
-        private readonly AreasChangedEvent areasChangedEvent = eventAggregator.GetEvent<AreasChangedEvent>();
-        private readonly AreaSelectedEvent areaSelectedEvent = eventAggregator.GetEvent<AreaSelectedEvent>();
-        private readonly AreasOrderedEvent areasOrderedEvent = eventAggregator.GetEvent<AreasOrderedEvent>();
-        private readonly SegmentSelectedEvent clipSelectedEvent = eventAggregator.GetEvent<SegmentSelectedEvent>();
+        private readonly AreaModifiedEvent areaModifiedEvent;
+        private readonly AreasChangedEvent areasChangedEvent;
+        private readonly AreaSelectedEvent areaSelectedEvent;
+        private readonly AreasOrderedEvent areasOrderedEvent;
+        private readonly IDialogService dialogService;
+        private readonly IScoreboardService scoreboardService;
+        private readonly SegmentSelectedEvent segmentSelectedEvent;
+        private readonly ISettingsService<Session> settingsService;
 
+        private ImmutableList<Area> areas = [];
         private int index;
+        private Input input;
         private bool orderDescending;
 
         #endregion Private Fields
+
+        #region Public Constructors
+
+        public Service(ISettingsService<Session> settingsService, IScoreboardService scoreboardService,
+            IDialogService dialogService, IEventAggregator eventAggregator)
+        {
+            this.settingsService = settingsService;
+            this.scoreboardService = scoreboardService;
+            this.dialogService = dialogService;
+
+            areasChangedEvent = eventAggregator.GetEvent<AreasChangedEvent>();
+            areasOrderedEvent = eventAggregator.GetEvent<AreasOrderedEvent>();
+            areaSelectedEvent = eventAggregator.GetEvent<AreaSelectedEvent>();
+
+            areaModifiedEvent = eventAggregator.GetEvent<AreaModifiedEvent>();
+
+            segmentSelectedEvent = eventAggregator.GetEvent<SegmentSelectedEvent>();
+
+            eventAggregator.GetEvent<AreaModifiedEvent>().Subscribe(
+                action: _ => SaveAreas(),
+                keepSubscriberReferenceAlive: true);
+        }
+
+        #endregion Public Constructors
 
         #region Public Properties
 
         public Area Active { get; private set; }
 
-        public List<Area> Areas { get; } = [];
+        public Segment ActiveSegment { get; private set; }
+
+        public IReadOnlyList<Area> Areas => areas;
 
         public bool CanUndo => Active?.X1Last.HasValue == true
             && Active.X2Last.HasValue
             && Active.Y1Last.HasValue
             && Active.Y2Last.HasValue;
-
-        public Segment Segment { get; private set; }
 
         #endregion Public Properties
 
@@ -60,16 +91,24 @@ namespace Score2Stream.AreaService
                         maxCount: Constants.MaxCountAreas);
                 }
 
-                area.Segments = area.GetSegments().ToArray();
+                area.Segments = area
+                    .GetSegments().ToArray();
+
                 area.SetSegments();
 
-                Areas.Add(area);
-
-                scoreboardService.BindArea(
+                scoreboardService.Bind(
                     area: area,
                     type: area.Type);
 
                 orderDescending = false;
+
+                ImmutableList<Area> add(ImmutableList<Area> c) => !c.Contains(area)
+                    ? c.Add(area)
+                    : c;
+
+                ImmutableInterlocked.Update(
+                    location: ref areas,
+                    transformer: add);
             }
         }
 
@@ -77,11 +116,18 @@ namespace Score2Stream.AreaService
         {
             if (Areas.Count > 0)
             {
-                for (var index = Areas.Count; index > 0; index--)
+                foreach (var area in Areas)
                 {
-                    var area = Areas[index - 1];
-                    RemoveArea(area);
+                    scoreboardService.ReleaseArea(area);
                 }
+
+                static ImmutableList<Area> clear(ImmutableList<Area> c) => c.Clear();
+
+                ImmutableInterlocked.Update(
+                    location: ref areas,
+                    transformer: clear);
+
+                SaveAreas();
 
                 areasChangedEvent.Publish();
 
@@ -105,11 +151,7 @@ namespace Score2Stream.AreaService
         {
             try
             {
-                var area = GetArea(size);
-
-                Add(area);
-
-                areasChangedEvent.Publish();
+                var area = CreateArea(size);
 
                 Select(area);
             }
@@ -122,11 +164,18 @@ namespace Score2Stream.AreaService
             }
         }
 
+        public void Initialize(Input input)
+        {
+            this.input = input;
+        }
+
         public void Next(bool backward)
         {
-            var next = Areas.GetNext(
-                active: Active,
-                backward: backward);
+            var next = Areas
+                .OrderBy(s => s.Index)
+                .GetNext(
+                    active: Active,
+                    backward: backward);
 
             if (next != default)
             {
@@ -180,11 +229,11 @@ namespace Score2Stream.AreaService
 
                 if (canBeRemoved)
                 {
-                    var next = Areas.GetNext(Active);
+                    var next = Areas.Count > 1
+                        ? Areas.GetNext(Active)
+                        : default;
 
                     RemoveArea(Active);
-
-                    areasChangedEvent.Publish();
 
                     Select(next);
                 }
@@ -236,8 +285,8 @@ namespace Score2Stream.AreaService
 
                 areaSelectedEvent.Publish(Active);
 
-                if (Segment != default
-                    && Segment.Area != Active)
+                if (ActiveSegment != default
+                    && ActiveSegment.Area != Active)
                 {
                     Select();
                 }
@@ -246,15 +295,18 @@ namespace Score2Stream.AreaService
 
         public void Select(Segment segment = default)
         {
-            if (Segment != segment)
+            if (ActiveSegment != segment)
             {
-                Segment = segment;
+                ActiveSegment = segment;
 
-                clipSelectedEvent.Publish(Segment);
+                segmentSelectedEvent.Publish(ActiveSegment);
 
-                Active = Segment?.Area;
+                if (Active != ActiveSegment?.Area)
+                {
+                    Active = ActiveSegment?.Area;
 
-                areaSelectedEvent.Publish(Active);
+                    areaSelectedEvent.Publish(Active);
+                }
             }
         }
 
@@ -285,7 +337,7 @@ namespace Score2Stream.AreaService
 
         #region Private Methods
 
-        private Area GetArea(int size)
+        private Area CreateArea(int size)
         {
             if (size <= 0)
             {
@@ -308,6 +360,12 @@ namespace Score2Stream.AreaService
                 result.ThresholdMonochrome = Active.ThresholdMonochrome;
             }
 
+            Add(result);
+
+            SaveAreas();
+
+            areasChangedEvent.Publish();
+
             return result;
         }
 
@@ -317,7 +375,17 @@ namespace Score2Stream.AreaService
             {
                 scoreboardService.ReleaseArea(area);
 
-                Areas.Remove(area);
+                ImmutableList<Area> remove(ImmutableList<Area> c) => c.Contains(area)
+                    ? c.Remove(area)
+                    : c;
+
+                ImmutableInterlocked.Update(
+                    location: ref areas,
+                    transformer: remove);
+
+                SaveAreas();
+
+                areasChangedEvent.Publish();
             }
         }
 
@@ -367,6 +435,13 @@ namespace Score2Stream.AreaService
             }
 
             return result;
+        }
+
+        private void SaveAreas()
+        {
+            input.Areas = Areas?.ToList();
+
+            settingsService.Save();
         }
 
         #endregion Private Methods

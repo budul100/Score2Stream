@@ -27,6 +27,7 @@ namespace Score2Stream.TemplateService
         private readonly IContainerProvider containerProvider;
         private readonly DetectionChangedEvent detectionChangedEvent;
         private readonly IDialogService dialogService;
+        private readonly SamplesChangedEvent samplesChangedEvent;
         private readonly ISettingsService<Session> settingsService;
         private readonly TemplatesChangedEvent templatesChangedEvent;
         private readonly TemplateSelectedEvent templateSelectedEvent;
@@ -49,16 +50,7 @@ namespace Score2Stream.TemplateService
             templateSelectedEvent = eventAggregator.GetEvent<TemplateSelectedEvent>();
 
             detectionChangedEvent = eventAggregator.GetEvent<DetectionChangedEvent>();
-
-            eventAggregator.GetEvent<SamplesChangedEvent>().Subscribe(
-                action: SaveSamples,
-                keepSubscriberReferenceAlive: true);
-            eventAggregator.GetEvent<SamplesOrderedEvent>().Subscribe(
-                action: SaveSamples,
-                keepSubscriberReferenceAlive: true);
-            eventAggregator.GetEvent<SampleModifiedEvent>().Subscribe(
-                action: _ => SaveSamples(),
-                keepSubscriberReferenceAlive: true);
+            samplesChangedEvent = eventAggregator.GetEvent<SamplesChangedEvent>();
         }
 
         #endregion Public Constructors
@@ -79,9 +71,7 @@ namespace Score2Stream.TemplateService
         {
             try
             {
-                var template = GetTemplate();
-
-                InitializeTemplate(template);
+                var template = CreateTemplate();
 
                 Select(template);
             }
@@ -104,11 +94,13 @@ namespace Score2Stream.TemplateService
                 {
                     foreach (var template in settingsService.Contents.Templates)
                     {
-                        InitializeTemplate(template);
+                        AddTemplate(template);
                     }
                 }
                 catch (MaxCountExceededException)
                 { }
+
+                templatesChangedEvent.Publish();
             }
 
             if (Templates.Count > 0)
@@ -165,7 +157,54 @@ namespace Score2Stream.TemplateService
 
         #region Private Methods
 
-        private static void InitializeSamples(Template template)
+        private void AddTemplate(Template template)
+        {
+            if (Templates.Count >= Constants.MaxCountTemplates)
+            {
+                throw new MaxCountExceededException(
+                    type: typeof(Template),
+                    maxCount: Constants.MaxCountTemplates);
+            }
+
+            if (template.SampleService == default)
+            {
+                template.SampleService = containerProvider
+                    .Resolve<ISampleService>();
+
+                template.SampleService.Initialize(
+                    template: template);
+            }
+
+            InitializeSamples(template);
+
+            ImmutableList<Template> add(ImmutableList<Template> c) => !c.Contains(template)
+                ? c.Add(template)
+                : c;
+
+            ImmutableInterlocked.Update(
+                location: ref templates,
+                transformer: add);
+        }
+
+        private Template CreateTemplate()
+        {
+            var name = Templates.GetNextName();
+
+            var result = new Template()
+            {
+                Name = name,
+            };
+
+            AddTemplate(result);
+
+            SaveTemplates();
+
+            templatesChangedEvent.Publish();
+
+            return result;
+        }
+
+        private void InitializeSamples(Template template)
         {
             if (template.Samples?.Count > 0)
             {
@@ -189,58 +228,9 @@ namespace Score2Stream.TemplateService
                 { }
 
                 template.SampleService.Order();
+
+                samplesChangedEvent.Publish();
             }
-        }
-
-        private Template GetTemplate()
-        {
-            var name = Templates.GetNextName();
-
-            var result = new Template()
-            {
-                Name = name,
-            };
-
-            return result;
-        }
-
-        private void InitializeService(Template template)
-        {
-            if (template.SampleService == default)
-            {
-                template.SampleService = containerProvider
-                    .Resolve<ISampleService>();
-
-                template.SampleService.Initialize(
-                    template: template);
-            }
-        }
-
-        private void InitializeTemplate(Template template)
-        {
-            if (template.SampleService != default) return;
-
-            if (Templates.Count >= Constants.MaxCountTemplates)
-            {
-                throw new MaxCountExceededException(
-                    type: typeof(Template),
-                    maxCount: Constants.MaxCountTemplates);
-            }
-
-            InitializeService(template);
-            InitializeSamples(template);
-
-            ImmutableList<Template> add(ImmutableList<Template> c) => !c.Contains(template)
-                ? c.Add(template)
-                : c;
-
-            ImmutableInterlocked.Update(
-                location: ref templates,
-                transformer: add);
-
-            SaveTemplates();
-
-            templatesChangedEvent.Publish();
         }
 
         private void RemoveTemplate(Template template)
@@ -269,30 +259,12 @@ namespace Score2Stream.TemplateService
             templatesChangedEvent.Publish();
         }
 
-        private void SaveSamples()
-        {
-            if (isInitializing || Active == default) return;
-
-            var relevants = Active.Samples?
-                .Where(s => s.Image != default
-                    && s.Bytes == default).ToArray();
-
-            if (relevants?.Length > 0)
-            {
-                foreach (var relevant in relevants)
-                {
-                    relevant.Bytes = relevant.Image.ToBytes();
-                }
-            }
-
-            settingsService.Save();
-        }
-
         private void SaveTemplates()
         {
             if (isInitializing) return;
 
-            settingsService.Contents.Templates = Templates.ToList();
+            settingsService.Contents.Templates = Templates?.ToList();
+
             settingsService.Save();
         }
 

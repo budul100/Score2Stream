@@ -11,12 +11,12 @@ using Prism.Regions;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Events.Area;
-using Score2Stream.Commons.Events.Clip;
 using Score2Stream.Commons.Events.Graphics;
 using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Events.Menu;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Scoreboard;
+using Score2Stream.Commons.Events.Segment;
 using Score2Stream.Commons.Events.Template;
 using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Interfaces;
@@ -60,6 +60,8 @@ namespace Score2Stream.MenuModule.ViewModels
             this.regionManager = regionManager;
             this.dialogService = dialogService;
 
+            startLocationTask = InitializeStartLocationAsync();
+
             this.SelectTabCommand = new DelegateCommand<ViewType?>(
                 executeMethod: t => TabIndex = (int?)t);
 
@@ -98,17 +100,18 @@ namespace Score2Stream.MenuModule.ViewModels
                 executeMethod: AddTemplate);
 
             this.SampleAddCommand = new DelegateCommand(
-                executeMethod: () => templateService?.SampleService?.Create(inputService.AreaService.Segment),
-                canExecuteMethod: () => inputService?.AreaService?.Segment != default);
+                executeMethod: () => templateService?.SampleService?.Create(inputService.AreaService.ActiveSegment),
+                canExecuteMethod: () => templateService?.Active != default
+                    && inputService?.AreaService?.ActiveSegment != default);
             this.SampleRemoveCommand = new DelegateCommand(
                 executeMethod: () => templateService?.SampleService.RemoveAsync(),
                 canExecuteMethod: () => templateService?.SampleService?.Active != default);
             this.SampleRemoveAllCommand = new DelegateCommand(
                 executeMethod: () => templateService.SampleService.ClearAsync(),
-                canExecuteMethod: () => templateService?.SampleService?.Samples?.Count() > 0);
+                canExecuteMethod: () => templateService?.SampleService?.Samples?.Count > 0);
             this.SampleOrderCommand = new DelegateCommand(
                 executeMethod: () => templateService.SampleService.Order(true),
-                canExecuteMethod: () => templateService?.SampleService?.Samples?.Count() > 0);
+                canExecuteMethod: () => templateService?.SampleService?.Samples?.Count > 0);
 
             this.ServerOpenCommand = new DelegateCommand(
                 executeMethod: webService.OpenRoot);
@@ -127,15 +130,16 @@ namespace Score2Stream.MenuModule.ViewModels
 
             eventAggregator.GetEvent<ServerStartedEvent>().Subscribe(
                 action: OnServerStarted);
+
             eventAggregator.GetEvent<InputSelectedEvent>().Subscribe(
                 action: _ => OnInputChanged());
             eventAggregator.GetEvent<InputStartedEvent>().Subscribe(
                 action: _ => OnInputChanged());
 
-            eventAggregator.GetEvent<AreasChangedEvent>().Subscribe(
-                action: OnAreasChanged);
             eventAggregator.GetEvent<AreaSelectedEvent>().Subscribe(
                 action: _ => OnAreasChanged());
+            eventAggregator.GetEvent<AreasChangedEvent>().Subscribe(
+                action: OnAreasChanged);
             eventAggregator.GetEvent<AreaModifiedEvent>().Subscribe(
                 action: _ => OnAreasModified());
 
@@ -145,17 +149,15 @@ namespace Score2Stream.MenuModule.ViewModels
             eventAggregator.GetEvent<TemplateSelectedEvent>().Subscribe(
                 action: _ => OnTemplateSelected());
 
-            eventAggregator.GetEvent<SamplesChangedEvent>().Subscribe(
-                action: OnSamplesChanged);
             eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
                 action: _ => OnSampleSelected());
+            eventAggregator.GetEvent<SamplesChangedEvent>().Subscribe(
+                action: OnSamplesChanged);
 
             eventAggregator.GetEvent<ScoreboardUpdatedEvent>().Subscribe(
                 action: _ => RaisePropertyChanged(nameof(IsUpToDate)));
             eventAggregator.GetEvent<ScoreboardModifiedEvent>().Subscribe(
                 action: () => ScoreboardUpdateCommand.RaiseCanExecuteChanged());
-
-            startLocationTask = InitializeStartLocationAsync();
         }
 
         #endregion Public Constructors
@@ -407,6 +409,8 @@ namespace Score2Stream.MenuModule.ViewModels
 
                             tabSelectedEvent.Publish(ViewType.Inputs);
 
+                            OnAreasChanged();
+
                             break;
 
                         case (int)ViewType.Templates:
@@ -626,6 +630,7 @@ namespace Score2Stream.MenuModule.ViewModels
         {
             AreaRemoveCommand.RaiseCanExecuteChanged();
             AreaRemoveAllCommand.RaiseCanExecuteChanged();
+
             AreaOrderAllCommand.RaiseCanExecuteChanged();
 
             SampleAddCommand.RaiseCanExecuteChanged();
@@ -656,7 +661,9 @@ namespace Score2Stream.MenuModule.ViewModels
 
         private void OnSamplesChanged()
         {
+            SampleRemoveCommand.RaiseCanExecuteChanged();
             SampleRemoveAllCommand.RaiseCanExecuteChanged();
+
             SampleOrderCommand.RaiseCanExecuteChanged();
         }
 

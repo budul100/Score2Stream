@@ -86,7 +86,7 @@ namespace Score2Stream.Commons.Interfaces
 
         #region Public Methods
 
-        void BindArea(Area area, AreaType type);
+        void Bind(Area area, AreaType type);
 
         void ReleaseArea(Area area);
 

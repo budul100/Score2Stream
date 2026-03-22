@@ -1,6 +1,8 @@
 using System.IO;
 using Moq;
 using OpenCvSharp;
+using Prism.Events;
+using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
@@ -15,6 +17,8 @@ namespace Score2Stream.Tests.RecognitionServiceTests
 
         private const string SamplesPath = @"..\..\..\..\..\Samples\Images";
 
+        private readonly Mock<IEventAggregator> eventAggregatorMock;
+        private readonly SampleUpdatedEvent sampleUpdatedEvent;
         private readonly Mock<ISettingsService<Session>> settingsServiceMock;
 
         #endregion Private Fields
@@ -23,6 +27,10 @@ namespace Score2Stream.Tests.RecognitionServiceTests
 
         public Tests()
         {
+            eventAggregatorMock = new Mock<IEventAggregator>();
+
+            eventAggregatorMock.Setup(e => e.GetEvent<SampleUpdatedEvent>()).Returns(sampleUpdatedEvent);
+
             settingsServiceMock = new Mock<ISettingsService<Session>>();
 
             var session = new Session
@@ -54,7 +62,9 @@ namespace Score2Stream.Tests.RecognitionServiceTests
         [Fact]
         public void RecognizeNumbers()
         {
-            var recognitionService = new RecognitionService.Service(settingsServiceMock.Object);
+            var recognitionService = new RecognitionService.Service(
+                settingsServiceMock.Object,
+                eventAggregatorMock.Object);
 
             Assert.Equal("0", Recognize(recognitionService, "SevenSegment-0.png"));
             Assert.Equal("3", Recognize(recognitionService, "SevenSegment-3.png"));
@@ -101,9 +111,9 @@ namespace Score2Stream.Tests.RecognitionServiceTests
                 Image = GetImage(Path.Combine(Path.GetFullPath(SamplesPath), fileName))
             };
 
-            recognitionService.Update(sample);
+            recognitionService.Bind(sample);
 
-            return recognitionService.GetFromBase(sample)?.Value;
+            return recognitionService.Detect(sample)?.Value;
         }
 
         #endregion Private Methods

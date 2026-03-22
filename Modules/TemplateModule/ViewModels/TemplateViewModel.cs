@@ -4,9 +4,9 @@ using Avalonia.Media.Imaging;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
-using Score2Stream.Commons.Events.Clip;
 using Score2Stream.Commons.Events.Menu;
 using Score2Stream.Commons.Events.Sample;
+using Score2Stream.Commons.Events.Segment;
 using Score2Stream.Commons.Events.Template;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
@@ -31,7 +31,8 @@ namespace Score2Stream.TemplateModule.ViewModels
         #region Public Constructors
 
         public TemplateViewModel(IInputService inputService, ITemplateService templateService,
-            IContainerProvider containerProvider, IRegionManager regionManager, IEventAggregator eventAggregator)
+            IContainerProvider containerProvider, IRegionManager regionManager,
+            IEventAggregator eventAggregator)
             : base(regionManager)
         {
             this.inputService = inputService;
@@ -62,13 +63,13 @@ namespace Score2Stream.TemplateModule.ViewModels
                 action: _ => RaisePropertyChanged(nameof(Description)),
                 threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
-                filter: s => s == inputService.AreaService?.Segment);
+                filter: s => s == inputService.AreaService?.ActiveSegment);
 
             eventAggregator.GetEvent<SegmentDrawnEvent>().Subscribe(
                 action: _ => RaisePropertyChanged(nameof(Bitmap)),
                 threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
-                filter: s => s == inputService.AreaService?.Segment);
+                filter: s => s == inputService.AreaService?.ActiveSegment);
 
             Template = templateService?.Active;
 
@@ -80,9 +81,9 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         #region Public Properties
 
-        public Bitmap Bitmap => inputService.AreaService?.Segment?.Bitmap;
+        public Bitmap Bitmap => inputService.AreaService?.ActiveSegment?.Bitmap;
 
-        public string Description => inputService.AreaService?.Segment?.GetDescription(true);
+        public string Description => inputService.AreaService?.ActiveSegment?.GetDescription(true);
 
         public string Empty
         {
@@ -125,20 +126,21 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         private void RefreshSamples()
         {
+            var currents = templateService?.SampleService?.Samples?.ToArray();
+
             var toBeRemoveds = Samples
-                .Where(s => Template?.Samples?.Contains(s.Sample) != true).ToArray();
+                .Where(v => currents?.Contains(v.Sample) != true).ToArray();
 
             foreach (var toBeRemoved in toBeRemoveds)
             {
                 Samples.Remove(toBeRemoved);
             }
 
-            if (Template?.Samples?.Count > 0)
+            if (currents?.Length > 0)
             {
-                var toBeAddeds = Template.Samples
+                var toBeAddeds = currents
                     .Where(s => s.Image != default
-                        && !Samples.Any(m => m.Sample == s))
-                    .OrderBy(s => s.Index).ToArray();
+                        && !Samples.Any(v => v.Sample == s)).ToArray();
 
                 foreach (var toBeAdded in toBeAddeds)
                 {
@@ -146,8 +148,7 @@ namespace Score2Stream.TemplateModule.ViewModels
 
                     current.Initialize(
                         sample: toBeAdded,
-                        areaService: inputService.AreaService,
-                        sampleService: templateService.SampleService);
+                        templateService: templateService);
 
                     Samples.Add(current);
                 }

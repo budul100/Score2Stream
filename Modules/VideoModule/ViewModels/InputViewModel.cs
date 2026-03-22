@@ -273,7 +273,8 @@ namespace Score2Stream.VideoModule.ViewModels
 
                 if (area.IsVisible)
                 {
-                    var canBeResized = !area.Area.HasDimensions || area.Area?.Template?.Samples?.Count > 0;
+                    var canBeResized = !area.Area.HasDimensions
+                        || area.Area?.Template?.Samples?.Count > 0;
 
                     if (!canBeResized)
                     {
