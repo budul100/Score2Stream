@@ -17,7 +17,7 @@ using Xunit;
 namespace Score2Stream.Tests.MenuModuleTests
 {
     [Collection("HeadlessUI")]
-    public class InputServiceTests
+    public class InputTests
         : TestBase
     {
         #region Public Methods

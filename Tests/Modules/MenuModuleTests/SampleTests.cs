@@ -13,7 +13,7 @@ using Xunit;
 namespace Score2Stream.Tests.MenuModuleTests
 {
     [Collection("HeadlessUI")]
-    public class SampleServiceTests
+    public class SampleTests
         : TestBase, IDisposable
     {
         #region Private Fields
@@ -24,7 +24,7 @@ namespace Score2Stream.Tests.MenuModuleTests
 
         #region Public Constructors
 
-        public SampleServiceTests()
+        public SampleTests()
         {
             mat = new Mat(new Size(10, 10), MatType.CV_16SC1);
         }
