@@ -33,6 +33,7 @@ namespace Score2Stream.InputService
         private readonly ISettingsService<Session> settingsService;
         private readonly ITemplateService templateService;
         private readonly Func<IVideoService> videoServiceGetter;
+
         private ImmutableList<Input> inputs = [];
         private bool isInitializing;
 

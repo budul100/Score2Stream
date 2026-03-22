@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,41 +20,21 @@ using Score2Stream.Commons.Models.Settings;
 
 namespace Score2Stream.TemplateService
 {
-    public class Service
+    public class Service(ISettingsService<Session> settingsService, IDialogService dialogService,
+        Func<ISampleService> sampleServiceGetter, IEventAggregator eventAggregator)
         : ITemplateService
     {
         #region Private Fields
 
-        private readonly IContainerProvider containerProvider;
-        private readonly DetectionChangedEvent detectionChangedEvent;
-        private readonly IDialogService dialogService;
-        private readonly SamplesChangedEvent samplesChangedEvent;
-        private readonly ISettingsService<Session> settingsService;
-        private readonly TemplatesChangedEvent templatesChangedEvent;
-        private readonly TemplateSelectedEvent templateSelectedEvent;
+        private readonly DetectionChangedEvent detectionChangedEvent = eventAggregator.GetEvent<DetectionChangedEvent>();
+        private readonly SamplesChangedEvent samplesChangedEvent = eventAggregator.GetEvent<SamplesChangedEvent>();
+        private readonly TemplatesChangedEvent templatesChangedEvent = eventAggregator.GetEvent<TemplatesChangedEvent>();
+        private readonly TemplateSelectedEvent templateSelectedEvent = eventAggregator.GetEvent<TemplateSelectedEvent>();
 
         private bool isInitializing;
         private ImmutableList<Template> templates = [];
 
         #endregion Private Fields
-
-        #region Public Constructors
-
-        public Service(ISettingsService<Session> settingsService, IDialogService dialogService,
-            IContainerProvider containerProvider, IEventAggregator eventAggregator)
-        {
-            this.settingsService = settingsService;
-            this.dialogService = dialogService;
-            this.containerProvider = containerProvider;
-
-            templatesChangedEvent = eventAggregator.GetEvent<TemplatesChangedEvent>();
-            templateSelectedEvent = eventAggregator.GetEvent<TemplateSelectedEvent>();
-
-            detectionChangedEvent = eventAggregator.GetEvent<DetectionChangedEvent>();
-            samplesChangedEvent = eventAggregator.GetEvent<SamplesChangedEvent>();
-        }
-
-        #endregion Public Constructors
 
         #region Public Properties
 
@@ -168,8 +149,7 @@ namespace Score2Stream.TemplateService
 
             if (template.SampleService == default)
             {
-                template.SampleService = containerProvider
-                    .Resolve<ISampleService>();
+                template.SampleService = sampleServiceGetter();
 
                 template.SampleService.Initialize(
                     template: template);

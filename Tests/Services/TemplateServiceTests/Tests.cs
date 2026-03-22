@@ -23,16 +23,18 @@ namespace Score2Stream.Tests.TemplateServiceTests
     {
         #region Private Fields
 
-        private readonly Mock<IContainerProvider> containerProviderMock;
         private readonly DetectionChangedEvent detectionChangedEvent = new();
         private readonly Mock<IDialogService> dialogServiceMock;
         private readonly Mock<IEventAggregator> eventAggregatorMock;
         private readonly SamplesChangedEvent samplesChangedEvent = new();
+        private readonly Mock<ISampleService> sampleServiceMock;
         private readonly Session session;
         private readonly Mock<ISettingsService<Session>> settingsServiceMock;
         private readonly TemplatesChangedEvent templatesChangedEvent = new();
         private readonly TemplateSelectedEvent templateSelectedEvent = new();
         private readonly Service templateService;
+
+        private Func<ISampleService> sampleServiceGetter;
 
         #endregion Private Fields
 
@@ -40,10 +42,12 @@ namespace Score2Stream.Tests.TemplateServiceTests
 
         public ServiceTests()
         {
-            containerProviderMock = new Mock<IContainerProvider>();
             dialogServiceMock = new Mock<IDialogService>();
             eventAggregatorMock = new Mock<IEventAggregator>();
             settingsServiceMock = new Mock<ISettingsService<Session>>();
+            sampleServiceMock = new Mock<ISampleService>();
+
+            sampleServiceGetter = () => sampleServiceMock.Object;
 
             session = new Session { Templates = [] };
             settingsServiceMock.Setup(s => s.Contents).Returns(session);
@@ -57,7 +61,7 @@ namespace Score2Stream.Tests.TemplateServiceTests
             templateService = new Service(
                 settingsService: settingsServiceMock.Object,
                 dialogService: dialogServiceMock.Object,
-                containerProvider: containerProviderMock.Object,
+                sampleServiceGetter: () => sampleServiceGetter(),
                 eventAggregator: eventAggregatorMock.Object);
         }
 
@@ -69,7 +73,6 @@ namespace Score2Stream.Tests.TemplateServiceTests
         public void Create_AddsTemplateAndSelectsIt()
         {
             // Arrange
-            SetupSampleServiceMock();
             var eventPublished = false;
             templateSelectedEvent.Subscribe(_ => eventPublished = true);
 
@@ -87,9 +90,6 @@ namespace Score2Stream.Tests.TemplateServiceTests
         [Fact]
         public void Create_AssignsUniqueName()
         {
-            // Arrange
-            SetupSampleServiceMock();
-
             // Act
             templateService.Create();
             templateService.Create();
@@ -104,7 +104,7 @@ namespace Score2Stream.Tests.TemplateServiceTests
         public void Create_MaxCountExceeded_DoesNotAddTemplate()
         {
             // Arrange
-            SetupSampleServiceMock();
+
             for (var i = 0; i < Constants.MaxCountTemplates; i++)
                 templateService.Create();
 
@@ -119,7 +119,7 @@ namespace Score2Stream.Tests.TemplateServiceTests
         public void Create_MaxCountExceeded_ShowsErrorDialog()
         {
             // Arrange
-            SetupSampleServiceMock();
+
             for (var i = 0; i < Constants.MaxCountTemplates; i++)
                 templateService.Create();
 
@@ -158,7 +158,6 @@ namespace Score2Stream.Tests.TemplateServiceTests
             // Arrange
             var template = new Template { Name = "T1" };
             session.Templates.Add(template);
-            SetupSampleServiceMock();
 
             // Act
             templateService.Initialize();
@@ -173,7 +172,6 @@ namespace Score2Stream.Tests.TemplateServiceTests
         public void Initialize_WithMoreTemplatesThanMaxCount_StopsAtMaxCount()
         {
             // Arrange – push one more template than allowed into settings
-            SetupSampleServiceMock();
             for (var i = 0; i <= Constants.MaxCountTemplates; i++)
                 session.Templates.Add(new Template { Name = $"T{i}" });
 
@@ -188,7 +186,6 @@ namespace Score2Stream.Tests.TemplateServiceTests
         public async Task RemoveAsync_ActiveTemplateWithSuccessor_SelectsNextTemplate()
         {
             // Arrange
-            SetupSampleServiceMock();
             templateService.Create();
             templateService.Create();
 
@@ -208,7 +205,6 @@ namespace Score2Stream.Tests.TemplateServiceTests
         public async Task RemoveAsync_DefaultParameter_UsesActiveTemplate()
         {
             // Arrange
-            SetupSampleServiceMock();
             templateService.Create();
             var active = templateService.Active;
             SetupDialogResult(ButtonResult.Yes);
@@ -224,7 +220,6 @@ namespace Score2Stream.Tests.TemplateServiceTests
         public async Task RemoveAsync_LastTemplate_ActiveBecomesNull()
         {
             // Arrange
-            SetupSampleServiceMock();
             templateService.Create();
             var template = templateService.Active;
             SetupDialogResult(ButtonResult.Yes);
@@ -255,7 +250,6 @@ namespace Score2Stream.Tests.TemplateServiceTests
         public async Task RemoveAsync_UserSaysNo_DoesNotRemoveTemplate()
         {
             // Arrange
-            SetupSampleServiceMock();
             templateService.Create();
             var template = templateService.Active;
             SetupDialogResult(ButtonResult.No);
@@ -271,7 +265,6 @@ namespace Score2Stream.Tests.TemplateServiceTests
         public async Task RemoveAsync_UserSaysNo_DoesNotSave()
         {
             // Arrange
-            SetupSampleServiceMock();
             templateService.Create();
             var template = templateService.Active;
             SetupDialogResult(ButtonResult.No);
@@ -290,7 +283,6 @@ namespace Score2Stream.Tests.TemplateServiceTests
         public async Task RemoveAsync_UserSaysYes_ClearsSampleServiceAndSaves()
         {
             // Arrange
-            SetupSampleServiceMock();
             templateService.Create();
             var template = templateService.Active;
             SetupDialogResult(ButtonResult.Yes);
@@ -308,11 +300,10 @@ namespace Score2Stream.Tests.TemplateServiceTests
         public void SampleService_WithActiveTemplate_ReturnsSampleServiceOfActiveTemplate()
         {
             // Arrange
-            var mock = SetupSampleServiceMock();
             templateService.Create();
 
             // Assert
-            Assert.Equal(mock.Object, templateService.SampleService);
+            Assert.Equal(sampleServiceMock.Object, templateService.SampleService);
         }
 
         [Fact]
@@ -326,7 +317,6 @@ namespace Score2Stream.Tests.TemplateServiceTests
         public void Select_DifferentTemplate_PublishesEvent()
         {
             // Arrange
-            SetupSampleServiceMock();
             templateService.Create();
             templateService.Create();
 
@@ -349,7 +339,6 @@ namespace Score2Stream.Tests.TemplateServiceTests
         public void Select_SameTemplate_DoesNotPublishEvent()
         {
             // Arrange
-            SetupSampleServiceMock();
             templateService.Create();
 
             var eventCount = 0;
@@ -371,11 +360,9 @@ namespace Score2Stream.Tests.TemplateServiceTests
             sampleServiceMock2.SetupGet(s => s.IsDetection).Returns(true);
 
             var callCount = 0;
-            containerProviderMock
-                .Setup(c => c.Resolve(typeof(ISampleService)))
-                .Returns(() => callCount++ == 0
-                    ? (ISampleService)sampleServiceMock1.Object
-                    : (ISampleService)sampleServiceMock2.Object);
+            sampleServiceGetter = () => callCount++ == 0
+                ? sampleServiceMock1.Object
+                : sampleServiceMock2.Object;
 
             templateService.Create(); // -> sampleServiceMock1
             templateService.Create(); // -> sampleServiceMock2,
@@ -414,18 +401,6 @@ namespace Score2Stream.Tests.TemplateServiceTests
                     It.IsAny<bool>(),
                     It.IsAny<WindowStartupLocation>()))
                 .ReturnsAsync(result);
-        }
-
-        /// <summary>
-        /// Registers a mock ISampleService with the container so Create() / Initialize() can resolve it.
-        /// </summary>
-        private Mock<ISampleService> SetupSampleServiceMock()
-        {
-            var mock = new Mock<ISampleService>();
-            containerProviderMock
-                .Setup(c => c.Resolve(typeof(ISampleService)))
-                .Returns(mock.Object);
-            return mock;
         }
 
         #endregion Private Methods
