@@ -87,7 +87,7 @@ namespace Score2Stream.Tests.InputServiceTests
                 dialogService: dialogServiceMock.Object,
                 templateService: templateServiceMock.Object,
                 deviceEnumerator: deviceEnumeratorMock.Object,
-                videoServiceGetter: () => videoServiceMock.Object,
+                videoServiceFactory: () => videoServiceMock.Object,
                 eventAggregator: eventAggregatorMock.Object,
                 logger: loggerMock.Object);
         }

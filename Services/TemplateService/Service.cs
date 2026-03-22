@@ -21,7 +21,7 @@ using Score2Stream.Commons.Models.Settings;
 namespace Score2Stream.TemplateService
 {
     public class Service(ISettingsService<Session> settingsService, IDialogService dialogService,
-        Func<ISampleService> sampleServiceGetter, IEventAggregator eventAggregator)
+        Func<ISampleService> sampleServiceFactory, IEventAggregator eventAggregator)
         : ITemplateService
     {
         #region Private Fields
@@ -149,7 +149,7 @@ namespace Score2Stream.TemplateService
 
             if (template.SampleService == default)
             {
-                template.SampleService = sampleServiceGetter();
+                template.SampleService = sampleServiceFactory();
 
                 template.SampleService.Initialize(
                     template: template);

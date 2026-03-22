@@ -61,7 +61,7 @@ namespace Score2Stream.Tests.TemplateServiceTests
             templateService = new Service(
                 settingsService: settingsServiceMock.Object,
                 dialogService: dialogServiceMock.Object,
-                sampleServiceGetter: () => sampleServiceGetter(),
+                sampleServiceFactory: () => sampleServiceGetter(),
                 eventAggregator: eventAggregatorMock.Object);
         }
 

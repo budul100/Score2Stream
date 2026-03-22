@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Prism.Events;
 using Prism.Ioc;
@@ -6,7 +7,6 @@ using Prism.Regions;
 using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Interfaces;
-using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Prism;
 
 namespace Score2Stream.AreaModule.ViewModels
@@ -16,7 +16,7 @@ namespace Score2Stream.AreaModule.ViewModels
     {
         #region Private Fields
 
-        private readonly IContainerProvider containerProvider;
+        private readonly Func<AreaViewModel> areaViewModelFactory;
         private readonly IInputService inputService;
         private readonly ITemplateService templateService;
 
@@ -25,12 +25,13 @@ namespace Score2Stream.AreaModule.ViewModels
         #region Public Constructors
 
         public AreasViewModel(IInputService inputService, ITemplateService templateService,
-            IContainerProvider containerProvider, IRegionManager regionManager, IEventAggregator eventAggregator)
+            Func<AreaViewModel> areaViewModelGetter, IRegionManager regionManager,
+            IEventAggregator eventAggregator)
             : base(regionManager)
         {
             this.inputService = inputService;
             this.templateService = templateService;
-            this.containerProvider = containerProvider;
+            this.areaViewModelFactory = areaViewModelGetter;
 
             eventAggregator.GetEvent<InputStartedEvent>().Subscribe(
                 action: _ => UpdateAreas(),
@@ -92,7 +93,7 @@ namespace Score2Stream.AreaModule.ViewModels
 
                 foreach (var toBeAdded in toBeAddeds)
                 {
-                    var current = containerProvider.Resolve<AreaViewModel>();
+                    var current = areaViewModelFactory();
 
                     current.Initialize(
                         area: toBeAdded,

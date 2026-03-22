@@ -43,14 +43,14 @@ namespace Score2Stream.InputService
 
         public Service(ISettingsService<Session> settingsService, IDialogService dialogService,
             ITemplateService templateService, IDeviceEnumerator deviceEnumerator,
-            IEventAggregator eventAggregator, Func<IVideoService> videoServiceGetter,
+            Func<IVideoService> videoServiceFactory, IEventAggregator eventAggregator,
             ILogger<Service> logger = default)
         {
             this.settingsService = settingsService;
             this.dialogService = dialogService;
             this.templateService = templateService;
             this.deviceEnumerator = deviceEnumerator;
-            this.videoServiceGetter = videoServiceGetter;
+            this.videoServiceGetter = videoServiceFactory;
             this.logger = logger;
 
             inputSelectedEvent = eventAggregator.GetEvent<InputSelectedEvent>();
