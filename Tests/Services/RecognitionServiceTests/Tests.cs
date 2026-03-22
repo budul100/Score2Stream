@@ -63,8 +63,7 @@ namespace Score2Stream.Tests.RecognitionServiceTests
         public void RecognizeNumbers()
         {
             var recognitionService = new RecognitionService.Service(
-                settingsServiceMock.Object,
-                eventAggregatorMock.Object);
+                settingsServiceMock.Object);
 
             Assert.Equal("0", Recognize(recognitionService, "SevenSegment-0.png"));
             Assert.Equal("3", Recognize(recognitionService, "SevenSegment-3.png"));

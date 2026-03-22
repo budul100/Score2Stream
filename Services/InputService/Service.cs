@@ -414,6 +414,8 @@ namespace Score2Stream.InputService
         {
             if (input != default)
             {
+                input.IsActive = false;
+
                 if (input == Active)
                 {
                     var relevants = Inputs
@@ -426,8 +428,6 @@ namespace Score2Stream.InputService
 
                     Select(next);
                 }
-
-                input.IsActive = false;
 
                 SaveInputs();
             }
