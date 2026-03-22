@@ -3,6 +3,7 @@
 ## Version 1.13.0
 
 * Background can be moved ([#26](https://github.com/budul100/Score2Stream/issues/26))
+* Grid overlay added to video view for better element placement
 * Fouls can now also be detected and published
 * Refactor template management and view
 * Modularize Ribbon menu into separate tab components

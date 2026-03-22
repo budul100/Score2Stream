@@ -6,6 +6,7 @@
     xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
     xmlns:bv="using:Score2Stream.VideoModule.Behaviors"
     xmlns:co="using:Score2Stream.VideoModule.Converters"
+    xmlns:ctr="using:Score2Stream.VideoModule.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:paz="using:Avalonia.Controls.PanAndZoom"
@@ -86,6 +87,8 @@
                         </i:Interaction.Behaviors>
                     </Image>
 
+
+
                     <ItemsControl ItemsSource="{Binding Areas}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -124,6 +127,9 @@
                 </Panel>
             </paz:ZoomBorder>
         </ScrollViewer>
+
+        <ctr:GridOverlay
+            IsHitTestVisible="False" />
 
         <!-- Loading overlay -->
         <Border
