@@ -73,6 +73,19 @@ namespace Score2Stream.MenuModule.ViewModels
             this.InputCenterCommand = new DelegateCommand(
                 executeMethod: () => eventAggregator.GetEvent<InputCenteringEvent>().Publish(),
                 canExecuteMethod: () => inputService.IsActive);
+
+            this.InputMoveLeftCommand = new DelegateCommand(
+                executeMethod: () => ChangeOffsetX(true),
+                canExecuteMethod: CanMoveLeft);
+            this.InputMoveRightCommand = new DelegateCommand(
+                executeMethod: () => ChangeOffsetX(false),
+                canExecuteMethod: CanMoveRight);
+            this.InputMoveUpCommand = new DelegateCommand(
+                executeMethod: () => ChangeOffsetY(true),
+                canExecuteMethod: CanMoveUp);
+            this.InputMoveDownCommand = new DelegateCommand(
+                executeMethod: () => ChangeOffsetY(false),
+                canExecuteMethod: CanMoveDown);
             this.InputRotateLeftCommand = new DelegateCommand(
                 executeMethod: () => ChangeInputRotate(true),
                 canExecuteMethod: CanRotateLeft);
@@ -246,6 +259,14 @@ namespace Score2Stream.MenuModule.ViewModels
         }
 
         public DelegateCommand InputCenterCommand { get; }
+
+        public DelegateCommand InputMoveDownCommand { get; }
+
+        public DelegateCommand InputMoveLeftCommand { get; }
+
+        public DelegateCommand InputMoveRightCommand { get; }
+
+        public DelegateCommand InputMoveUpCommand { get; }
 
         public DelegateCommand InputRefreshCommand { get; }
 
@@ -543,6 +564,38 @@ namespace Score2Stream.MenuModule.ViewModels
             }
         }
 
+        private bool CanMoveDown()
+        {
+            var result = inputService.IsActive
+                && inputService.OffsetY >= Constants.OffsetYMin;
+
+            return result;
+        }
+
+        private bool CanMoveLeft()
+        {
+            var result = inputService.IsActive
+                && inputService.OffsetX >= Constants.OffsetXMin;
+
+            return result;
+        }
+
+        private bool CanMoveRight()
+        {
+            var result = inputService.IsActive
+                && inputService.OffsetX <= Constants.OffsetXMax;
+
+            return result;
+        }
+
+        private bool CanMoveUp()
+        {
+            var result = inputService.IsActive
+                && inputService.OffsetY <= Constants.OffsetYMax;
+
+            return result;
+        }
+
         private bool CanRotateLeft()
         {
             var result = inputService.IsActive
@@ -573,6 +626,42 @@ namespace Score2Stream.MenuModule.ViewModels
                 if (CanRotateRight())
                 {
                     inputService.Rotation += Constants.RotateStep;
+                }
+            }
+        }
+
+        private void ChangeOffsetX(bool toLeft)
+        {
+            if (toLeft)
+            {
+                if (CanMoveLeft())
+                {
+                    inputService.OffsetX -= Constants.OffsetStep;
+                }
+            }
+            else
+            {
+                if (CanMoveRight())
+                {
+                    inputService.OffsetX += Constants.OffsetStep;
+                }
+            }
+        }
+
+        private void ChangeOffsetY(bool toUp)
+        {
+            if (toUp)
+            {
+                if (CanMoveUp())
+                {
+                    inputService.OffsetY -= Constants.OffsetStep;
+                }
+            }
+            else
+            {
+                if (CanMoveDown())
+                {
+                    inputService.OffsetY += Constants.OffsetStep;
                 }
             }
         }
@@ -653,6 +742,11 @@ namespace Score2Stream.MenuModule.ViewModels
             RaisePropertyChanged(nameof(WaitingDuration));
 
             InputCenterCommand.RaiseCanExecuteChanged();
+
+            InputMoveLeftCommand.RaiseCanExecuteChanged();
+            InputMoveRightCommand.RaiseCanExecuteChanged();
+            InputMoveUpCommand.RaiseCanExecuteChanged();
+            InputMoveDownCommand.RaiseCanExecuteChanged();
             InputRotateLeftCommand.RaiseCanExecuteChanged();
             InputRotateRightCommand.RaiseCanExecuteChanged();
 

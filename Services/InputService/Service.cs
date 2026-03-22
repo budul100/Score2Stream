@@ -76,6 +76,80 @@ namespace Score2Stream.InputService
 
         public bool IsActive => VideoService?.IsActive ?? false;
 
+        public int OffsetX
+        {
+            get
+            {
+                var result = 0;
+
+                if (Active != default)
+                {
+                    result = Active.IsDevice
+                        ? settingsService.Contents.Inputs?
+                            .SingleOrDefault(i => i.DeviceName == Active.DeviceName)?.OffsetX ?? 0
+                        : settingsService.Contents.Inputs?
+                            .SingleOrDefault(i => i.FileName == Active.FileName)?.OffsetX ?? 0;
+                }
+
+                return result;
+            }
+            set
+            {
+                if (Active != default)
+                {
+                    var current = Active.IsDevice
+                        ? settingsService.Contents.Inputs?
+                            .SingleOrDefault(i => i.DeviceName == Active.DeviceName)
+                        : settingsService.Contents.Inputs?
+                            .SingleOrDefault(i => i.FileName == Active.FileName);
+
+                    if (current != default)
+                    {
+                        current.OffsetX = value;
+                    }
+
+                    settingsService.Save();
+                }
+            }
+        }
+
+        public int OffsetY
+        {
+            get
+            {
+                var result = 0;
+
+                if (Active != default)
+                {
+                    result = Active.IsDevice
+                        ? settingsService.Contents.Inputs?
+                            .SingleOrDefault(i => i.DeviceName == Active.DeviceName)?.OffsetY ?? 0
+                        : settingsService.Contents.Inputs?
+                            .SingleOrDefault(i => i.FileName == Active.FileName)?.OffsetY ?? 0;
+                }
+
+                return result;
+            }
+            set
+            {
+                if (Active != default)
+                {
+                    var current = Active.IsDevice
+                        ? settingsService.Contents.Inputs?
+                            .SingleOrDefault(i => i.DeviceName == Active.DeviceName)
+                        : settingsService.Contents.Inputs?
+                            .SingleOrDefault(i => i.FileName == Active.FileName);
+
+                    if (current != default)
+                    {
+                        current.OffsetY = value;
+                    }
+
+                    settingsService.Save();
+                }
+            }
+        }
+
         public float Rotation
         {
             get

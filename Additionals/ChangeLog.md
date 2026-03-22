@@ -2,6 +2,7 @@
 
 ## Version 1.12.1
 
+* Background can be moved ([#26](https://github.com/budul100/Score2Stream/issues/26))
 * Fouls can now also be detected and published
 * Refactor template management and view
 * Modularize Ribbon menu into separate tab components

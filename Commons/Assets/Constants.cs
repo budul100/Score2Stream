@@ -29,6 +29,12 @@
         public const int NormalizedHeight = 96;
         public const int NormalizedWidth = 64;
 
+        public const int OffsetStep = 1;
+        public const int OffsetXMax = 100;
+        public const int OffsetXMin = -100;
+        public const int OffsetYMax = 100;
+        public const int OffsetYMin = -100;
+
         public const int PortMax = 65535;
         public const int PortMin = 1;
 

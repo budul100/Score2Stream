@@ -22,8 +22,10 @@
 
     <rib:RibbonTab.Resources>
         <sys:Double x:Key="FontSize">10</sys:Double>
-        <sys:Double x:Key="IconWidth">30</sys:Double>
-        <sys:Double x:Key="IconHeight">30</sys:Double>
+        <sys:Double x:Key="LargeWidth">30</sys:Double>
+        <sys:Double x:Key="LargeHeight">30</sys:Double>
+        <sys:Double x:Key="SmallWidth">10</sys:Double>
+        <sys:Double x:Key="SmallHeight">10</sys:Double>
     </rib:RibbonTab.Resources>
 
     <rib:RibbonTab.Styles>
@@ -50,8 +52,8 @@
                 <rib:RibbonDropDownButton.LargeIcon>
                     <ControlTemplate>
                         <mat:MaterialIcon
-                            Width="{StaticResource IconWidth}"
-                            Height="{StaticResource IconHeight}"
+                            Width="{StaticResource LargeWidth}"
+                            Height="{StaticResource LargeHeight}"
                             Kind="VideoOutline" />
                     </ControlTemplate>
                 </rib:RibbonDropDownButton.LargeIcon>
@@ -67,40 +69,112 @@
                 <rib:RibbonButton.LargeIcon>
                     <ControlTemplate>
                         <mat:MaterialIcon
-                            Width="{StaticResource IconWidth}"
-                            Height="{StaticResource IconHeight}"
+                            Width="{StaticResource LargeWidth}"
+                            Height="{StaticResource LargeHeight}"
                             Kind="ImageFilterCenterFocus" />
                     </ControlTemplate>
                 </rib:RibbonButton.LargeIcon>
             </rib:RibbonButton>
-            <rib:RibbonButton
-                Command="{Binding InputRotateLeftCommand}"
-                Content="Rotate to left"
-                FontSize="{StaticResource FontSize}"
-                MinSize="Large">
-                <rib:RibbonButton.LargeIcon>
-                    <ControlTemplate>
-                        <mat:MaterialIcon
-                            Width="{StaticResource IconWidth}"
-                            Height="{StaticResource IconHeight}"
-                            Kind="RotateLeft" />
-                    </ControlTemplate>
-                </rib:RibbonButton.LargeIcon>
-            </rib:RibbonButton>
-            <rib:RibbonButton
-                Command="{Binding InputRotateRightCommand}"
-                Content="Rotate to right"
-                FontSize="{StaticResource FontSize}"
-                MinSize="Large">
-                <rib:RibbonButton.LargeIcon>
-                    <ControlTemplate>
-                        <mat:MaterialIcon
-                            Width="{StaticResource IconWidth}"
-                            Height="{StaticResource IconHeight}"
-                            Kind="RotateRight" />
-                    </ControlTemplate>
-                </rib:RibbonButton.LargeIcon>
-            </rib:RibbonButton>
+
+            <StackPanel Orientation="Vertical">
+                <rib:RibbonButton
+                    Command="{Binding InputMoveLeftCommand}"
+                    Content="Move left"
+                    FontSize="{StaticResource FontSize}"
+                    MinSize="Small"
+                    MaxSize="Medium">
+                    <rib:RibbonButton.Icon>
+                        <ControlTemplate>
+                            <mat:MaterialIcon
+                                Width="{StaticResource SmallWidth}"
+                                Height="{StaticResource SmallHeight}"
+                                Kind="ArrowLeft" />
+                        </ControlTemplate>
+                    </rib:RibbonButton.Icon>
+                </rib:RibbonButton>
+                <rib:RibbonButton
+                    Command="{Binding InputMoveRightCommand}"
+                    Content="Move right"
+                    FontSize="{StaticResource FontSize}"
+                    MinSize="Small"
+                    MaxSize="Medium">
+                    <rib:RibbonButton.Icon>
+                        <ControlTemplate>
+                            <mat:MaterialIcon
+                                Width="{StaticResource SmallWidth}"
+                                Height="{StaticResource SmallHeight}"
+                                Kind="ArrowRight" />
+                        </ControlTemplate>
+                    </rib:RibbonButton.Icon>
+                </rib:RibbonButton>
+            </StackPanel>
+
+            <StackPanel Orientation="Vertical">
+                <rib:RibbonButton
+                    Command="{Binding InputMoveUpCommand}"
+                    Content="Move up"
+                    FontSize="{StaticResource FontSize}"
+                    MinSize="Small"
+                    MaxSize="Medium">
+                    <rib:RibbonButton.Icon>
+                        <ControlTemplate>
+                            <mat:MaterialIcon
+                                Width="{StaticResource SmallWidth}"
+                                Height="{StaticResource SmallHeight}"
+                                Kind="ArrowUp" />
+                        </ControlTemplate>
+                    </rib:RibbonButton.Icon>
+                </rib:RibbonButton>
+                <rib:RibbonButton
+                    Command="{Binding InputMoveDownCommand}"
+                    Content="Move Down"
+                    FontSize="{StaticResource FontSize}"
+                    MinSize="Small"
+                    MaxSize="Medium">
+                    <rib:RibbonButton.Icon>
+                        <ControlTemplate>
+                            <mat:MaterialIcon
+                                Width="{StaticResource SmallWidth}"
+                                Height="{StaticResource SmallHeight}"
+                                Kind="ArrowDown" />
+                        </ControlTemplate>
+                    </rib:RibbonButton.Icon>
+                </rib:RibbonButton>
+            </StackPanel>
+
+            <StackPanel Orientation="Vertical">
+                <rib:RibbonButton
+                    Command="{Binding InputRotateLeftCommand}"
+                    Content="Rotate left"
+                    FontSize="{StaticResource FontSize}"
+                    MinSize="Small"
+                    MaxSize="Medium">
+                    <rib:RibbonButton.Icon>
+                        <ControlTemplate>
+                            <mat:MaterialIcon
+                                Width="{StaticResource SmallWidth}"
+                                Height="{StaticResource SmallHeight}"
+                                Kind="RotateLeft" />
+                        </ControlTemplate>
+                    </rib:RibbonButton.Icon>
+                </rib:RibbonButton>
+                <rib:RibbonButton
+                    Command="{Binding InputRotateRightCommand}"
+                    Content="Rotate right"
+                    FontSize="{StaticResource FontSize}"
+                    MinSize="Small"
+                    MaxSize="Medium">
+                    <rib:RibbonButton.Icon>
+                        <ControlTemplate>
+                            <mat:MaterialIcon
+                                Width="{StaticResource SmallWidth}"
+                                Height="{StaticResource SmallHeight}"
+                                Kind="RotateRight" />
+                        </ControlTemplate>
+                    </rib:RibbonButton.Icon>
+                </rib:RibbonButton>
+            </StackPanel>
+
         </rib:RibbonGroupBox>
 
         <rib:RibbonGroupBox Header="Video options">
@@ -151,8 +225,8 @@
                 <rib:RibbonDropDownButton.LargeIcon>
                     <ControlTemplate>
                         <mat:MaterialIcon
-                            Width="{StaticResource IconWidth}"
-                            Height="{StaticResource IconHeight}"
+                            Width="{StaticResource LargeWidth}"
+                            Height="{StaticResource LargeHeight}"
                             Kind="VectorSquarePlus" />
                     </ControlTemplate>
                 </rib:RibbonDropDownButton.LargeIcon>
@@ -164,8 +238,8 @@
                     <rib:RibbonDropDownItem.Icon>
                         <ControlTemplate>
                             <mat:MaterialIcon
-                                Width="{StaticResource IconWidth}"
-                                Height="{StaticResource IconHeight}"
+                                Width="{StaticResource LargeWidth}"
+                                Height="{StaticResource LargeHeight}"
                                 Kind="Numeric1BoxMultipleOutline" />
                         </ControlTemplate>
                     </rib:RibbonDropDownItem.Icon>
@@ -177,8 +251,8 @@
                     <rib:RibbonDropDownItem.Icon>
                         <ControlTemplate>
                             <mat:MaterialIcon
-                                Width="{StaticResource IconWidth}"
-                                Height="{StaticResource IconHeight}"
+                                Width="{StaticResource LargeWidth}"
+                                Height="{StaticResource LargeHeight}"
                                 Kind="Numeric2BoxMultipleOutline" />
                         </ControlTemplate>
                     </rib:RibbonDropDownItem.Icon>
@@ -190,8 +264,8 @@
                     <rib:RibbonDropDownItem.Icon>
                         <ControlTemplate>
                             <mat:MaterialIcon
-                                Width="{StaticResource IconWidth}"
-                                Height="{StaticResource IconHeight}"
+                                Width="{StaticResource LargeWidth}"
+                                Height="{StaticResource LargeHeight}"
                                 Kind="Numeric3BoxMultipleOutline" />
                         </ControlTemplate>
                     </rib:RibbonDropDownItem.Icon>
@@ -205,8 +279,8 @@
                 <rib:RibbonButton.LargeIcon>
                     <ControlTemplate>
                         <mat:MaterialIcon
-                            Width="{StaticResource IconWidth}"
-                            Height="{StaticResource IconHeight}"
+                            Width="{StaticResource LargeWidth}"
+                            Height="{StaticResource LargeHeight}"
                             Kind="VectorSquareMinus" />
                     </ControlTemplate>
                 </rib:RibbonButton.LargeIcon>
@@ -219,8 +293,8 @@
                 <rib:RibbonButton.LargeIcon>
                     <ControlTemplate>
                         <mat:MaterialIcon
-                            Width="{StaticResource IconWidth}"
-                            Height="{StaticResource IconHeight}"
+                            Width="{StaticResource LargeWidth}"
+                            Height="{StaticResource LargeHeight}"
                             Kind="VectorSquareRemove" />
                     </ControlTemplate>
                 </rib:RibbonButton.LargeIcon>
@@ -233,8 +307,8 @@
                 <rib:RibbonButton.LargeIcon>
                     <ControlTemplate>
                         <mat:MaterialIcon
-                            Width="{StaticResource IconWidth}"
-                            Height="{StaticResource IconHeight}"
+                            Width="{StaticResource LargeWidth}"
+                            Height="{StaticResource LargeHeight}"
                             Kind="Undo" />
                     </ControlTemplate>
                 </rib:RibbonButton.LargeIcon>
@@ -247,8 +321,8 @@
                 <rib:RibbonButton.LargeIcon>
                     <ControlTemplate>
                         <mat:MaterialIcon
-                            Width="{StaticResource IconWidth}"
-                            Height="{StaticResource IconHeight}"
+                            Width="{StaticResource LargeWidth}"
+                            Height="{StaticResource LargeHeight}"
                             Kind="Sort" />
                     </ControlTemplate>
                 </rib:RibbonButton.LargeIcon>

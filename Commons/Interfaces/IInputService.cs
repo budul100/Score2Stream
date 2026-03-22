@@ -16,6 +16,10 @@ namespace Score2Stream.Commons.Interfaces
 
         bool IsActive { get; }
 
+        int OffsetX { get; set; }
+
+        int OffsetY { get; set; }
+
         float Rotation { get; set; }
 
         IVideoService VideoService { get; }

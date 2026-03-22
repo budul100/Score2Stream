@@ -174,6 +174,31 @@ namespace Score2Stream.Commons.Extensions
             return result;
         }
 
+        public static Mat AsTranslated(this Mat source, int offsetX, int offsetY)
+        {
+            if (offsetX == 0 && offsetY == 0)
+                return source;
+
+            // Build 2x3 affine translation matrix
+            var translationMatrix = Mat.FromArray(new float[,]
+            {
+                { 1, 0, offsetX },
+                { 0, 1, offsetY }
+            });
+
+            var result = new Mat();
+
+            Cv2.WarpAffine(
+                src: source,
+                dst: result,
+                m: translationMatrix,
+                dsize: source.Size());
+
+            source.Dispose();
+
+            return result;
+        }
+
         public static Bitmap GetBitmap(this Mat image, Mat rotated)
         {
             Cv2.CvtColor(

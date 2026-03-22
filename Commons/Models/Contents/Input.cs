@@ -30,6 +30,10 @@ namespace Score2Stream.Commons.Models.Contents
         [JsonIgnore]
         public string Name { get; set; }
 
+        public int OffsetX { get; set; }
+
+        public int OffsetY { get; set; }
+
         public float Rotation { get; set; }
 
         [JsonIgnore]

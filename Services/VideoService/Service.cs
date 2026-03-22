@@ -231,7 +231,10 @@ namespace Score2Stream.VideoService
                 if (!currentFrame.Empty())
                 {
                     var rotated = currentFrame.Clone()
-                        .AsRotated(input.Rotation);
+                        .AsRotated(input.Rotation)
+                        .AsTranslated(
+                            offsetX: input.OffsetX,
+                            offsetY: input.OffsetY);
 
                     frameLock.EnterWriteLock();
 
