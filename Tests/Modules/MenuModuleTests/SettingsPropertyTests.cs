@@ -3,13 +3,14 @@ using Moq;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Settings;
+using Score2Stream.Tests.MenuModuleTests.Base;
 using Xunit;
 
 namespace Score2Stream.Tests.MenuModuleTests
 {
     [Collection("HeadlessUI")]
-    public class SettingsPropertyTests 
-        : TestBase
+    public class SettingsPropertyTests(HeadlessSessionFixture fixture)
+        : TestBase(fixture)
     {
         #region Public Methods
 

@@ -2,12 +2,14 @@
 using Moq;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
+using Score2Stream.Tests.MenuModuleTests.Base;
 using Xunit;
 
 namespace Score2Stream.Tests.MenuModuleTests
 {
     [Collection("HeadlessUI")]
-    public class TemplateTests : TestBase
+    public class TemplateTests(HeadlessSessionFixture fixture)
+        : TestBase(fixture)
     {
         #region Public Methods
 

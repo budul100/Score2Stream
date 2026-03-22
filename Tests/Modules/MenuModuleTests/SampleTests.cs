@@ -8,28 +8,22 @@ using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
 using Score2Stream.MenuModule.ViewModels;
+using Score2Stream.Tests.MenuModuleTests.Base;
 using Xunit;
 
 namespace Score2Stream.Tests.MenuModuleTests
 {
     [Collection("HeadlessUI")]
-    public class SampleTests
-        : TestBase, IDisposable
+    public class SampleTests(HeadlessSessionFixture fixture)
+        : TestBase(fixture), IDisposable
     {
         #region Private Fields
 
-        private readonly Mat mat;
+        private readonly Mat mat = new(
+            size: new Size(10, 10),
+            type: MatType.CV_16SC1);
 
         #endregion Private Fields
-
-        #region Public Constructors
-
-        public SampleTests()
-        {
-            mat = new Mat(new Size(10, 10), MatType.CV_16SC1);
-        }
-
-        #endregion Public Constructors
 
         #region Public Methods
 

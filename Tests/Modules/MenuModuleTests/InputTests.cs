@@ -12,13 +12,14 @@ using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
 using Score2Stream.MenuModule.ViewModels;
+using Score2Stream.Tests.MenuModuleTests.Base;
 using Xunit;
 
 namespace Score2Stream.Tests.MenuModuleTests
 {
     [Collection("HeadlessUI")]
-    public class InputTests
-        : TestBase
+    public class InputTests(HeadlessSessionFixture fixture)
+        : TestBase(fixture)
     {
         #region Public Methods
 
@@ -137,6 +138,246 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var (viewModel, _) = CreateViewModel(inputServiceMock);
 
                 Assert.True(viewModel.InputCenterCommand.CanExecute());
+            });
+        }
+
+        [Fact]
+        public async Task InputMoveDownCommand_CanExecute_ReturnsFalseWhenOffsetYBelowMin()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var inputServiceMock = new Mock<IInputService>();
+                inputServiceMock.Setup(m => m.IsActive).Returns(true);
+                inputServiceMock.Setup(m => m.OffsetY).Returns(Constants.OffsetYMin - 1);
+                var (viewModel, _) = CreateViewModel(inputServiceMock);
+
+                Assert.False(viewModel.InputMoveDownCommand.CanExecute());
+            });
+        }
+
+        [Fact]
+        public async Task InputMoveDownCommand_CanExecute_ReturnsTrueWhenActiveAndOffsetYAtMin()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var inputServiceMock = new Mock<IInputService>();
+                inputServiceMock.Setup(m => m.IsActive).Returns(true);
+                inputServiceMock.Setup(m => m.OffsetY).Returns(Constants.OffsetYMin);
+                var (viewModel, _) = CreateViewModel(inputServiceMock);
+
+                Assert.True(viewModel.InputMoveDownCommand.CanExecute());
+            });
+        }
+
+        [Fact]
+        public async Task InputMoveDownCommand_Execute_IncrementsOffsetYByStep()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var currentOffsetY = Constants.OffsetYMin;
+                var inputServiceMock = new Mock<IInputService>();
+                inputServiceMock.Setup(m => m.IsActive).Returns(true);
+                inputServiceMock.Setup(m => m.OffsetY).Returns(() => currentOffsetY);
+                inputServiceMock
+                    .SetupSet(m => m.OffsetY = It.IsAny<int>())
+                    .Callback<int>(v => currentOffsetY = v);
+                var (viewModel, _) = CreateViewModel(inputServiceMock);
+
+                viewModel.InputMoveDownCommand.Execute();
+
+                Assert.Equal(Constants.OffsetYMin + Constants.OffsetStep, currentOffsetY);
+            });
+        }
+
+        [Fact]
+        public async Task InputMoveLeftCommand_CanExecute_ReturnsFalseWhenNotActive()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var inputServiceMock = new Mock<IInputService>();
+                inputServiceMock.Setup(m => m.IsActive).Returns(false);
+                inputServiceMock.Setup(m => m.OffsetX).Returns(Constants.OffsetXMin);
+                var (viewModel, _) = CreateViewModel(inputServiceMock);
+
+                Assert.False(viewModel.InputMoveLeftCommand.CanExecute());
+            });
+        }
+
+        [Fact]
+        public async Task InputMoveLeftCommand_CanExecute_ReturnsFalseWhenOffsetXBelowMin()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var inputServiceMock = new Mock<IInputService>();
+                inputServiceMock.Setup(m => m.IsActive).Returns(true);
+                inputServiceMock.Setup(m => m.OffsetX).Returns(Constants.OffsetXMin - 1);
+                var (viewModel, _) = CreateViewModel(inputServiceMock);
+
+                Assert.False(viewModel.InputMoveLeftCommand.CanExecute());
+            });
+        }
+
+        [Fact]
+        public async Task InputMoveLeftCommand_CanExecute_ReturnsTrueWhenActiveAndOffsetXAtMin()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var inputServiceMock = new Mock<IInputService>();
+                inputServiceMock.Setup(m => m.IsActive).Returns(true);
+                inputServiceMock.Setup(m => m.OffsetX).Returns(Constants.OffsetXMin);
+                var (viewModel, _) = CreateViewModel(inputServiceMock);
+
+                Assert.True(viewModel.InputMoveLeftCommand.CanExecute());
+            });
+        }
+
+        [Fact]
+        public async Task InputMoveLeftCommand_Execute_DecrementsOffsetXByStep()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var currentOffsetX = Constants.OffsetXMin;
+                var inputServiceMock = new Mock<IInputService>();
+                inputServiceMock.Setup(m => m.IsActive).Returns(true);
+                inputServiceMock.Setup(m => m.OffsetX).Returns(() => currentOffsetX);
+                inputServiceMock
+                    .SetupSet(m => m.OffsetX = It.IsAny<int>())
+                    .Callback<int>(v => currentOffsetX = v);
+                var (viewModel, _) = CreateViewModel(inputServiceMock);
+
+                viewModel.InputMoveLeftCommand.Execute();
+
+                Assert.Equal(Constants.OffsetXMin - Constants.OffsetStep, currentOffsetX);
+            });
+        }
+
+        [Fact]
+        public async Task InputMoveRightCommand_CanExecute_ReturnsFalseWhenOffsetXExceedsMax()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var inputServiceMock = new Mock<IInputService>();
+                inputServiceMock.Setup(m => m.IsActive).Returns(true);
+                inputServiceMock.Setup(m => m.OffsetX).Returns(Constants.OffsetXMax + 1);
+                var (viewModel, _) = CreateViewModel(inputServiceMock);
+
+                Assert.False(viewModel.InputMoveRightCommand.CanExecute());
+            });
+        }
+
+        [Fact]
+        public async Task InputMoveRightCommand_CanExecute_ReturnsTrueWhenActiveAndOffsetXAtMax()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var inputServiceMock = new Mock<IInputService>();
+                inputServiceMock.Setup(m => m.IsActive).Returns(true);
+                inputServiceMock.Setup(m => m.OffsetX).Returns(Constants.OffsetXMax);
+                var (viewModel, _) = CreateViewModel(inputServiceMock);
+
+                Assert.True(viewModel.InputMoveRightCommand.CanExecute());
+            });
+        }
+
+        [Fact]
+        public async Task InputMoveRightCommand_Execute_DoesNotMoveWhenCannotMoveRight()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var currentOffsetX = Constants.OffsetXMax + Constants.OffsetStep;
+                var inputServiceMock = new Mock<IInputService>();
+                inputServiceMock.Setup(m => m.IsActive).Returns(true);
+                inputServiceMock.Setup(m => m.OffsetX).Returns(() => currentOffsetX);
+                inputServiceMock
+                    .SetupSet(m => m.OffsetX = It.IsAny<int>())
+                    .Callback<int>(v => currentOffsetX = v);
+                var (viewModel, _) = CreateViewModel(inputServiceMock);
+
+                viewModel.InputMoveRightCommand.Execute();
+
+                Assert.Equal(Constants.OffsetXMax + Constants.OffsetStep, currentOffsetX);
+            });
+        }
+
+        [Fact]
+        public async Task InputMoveRightCommand_Execute_IncrementsOffsetXByStep()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var currentOffsetX = 0;
+                var inputServiceMock = new Mock<IInputService>();
+                inputServiceMock.Setup(m => m.IsActive).Returns(true);
+                inputServiceMock.Setup(m => m.OffsetX).Returns(() => currentOffsetX);
+                inputServiceMock
+                    .SetupSet(m => m.OffsetX = It.IsAny<int>())
+                    .Callback<int>(v => currentOffsetX = v);
+                var (viewModel, _) = CreateViewModel(inputServiceMock);
+
+                viewModel.InputMoveRightCommand.Execute();
+
+                Assert.Equal(Constants.OffsetStep, currentOffsetX);
+            });
+        }
+
+        [Fact]
+        public async Task InputMoveUpCommand_CanExecute_ReturnsFalseWhenNotActive()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var inputServiceMock = new Mock<IInputService>();
+                inputServiceMock.Setup(m => m.IsActive).Returns(false);
+                inputServiceMock.Setup(m => m.OffsetY).Returns(Constants.OffsetYMax);
+                var (viewModel, _) = CreateViewModel(inputServiceMock);
+
+                Assert.False(viewModel.InputMoveUpCommand.CanExecute());
+            });
+        }
+
+        [Fact]
+        public async Task InputMoveUpCommand_CanExecute_ReturnsFalseWhenOffsetYExceedsMax()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var inputServiceMock = new Mock<IInputService>();
+                inputServiceMock.Setup(m => m.IsActive).Returns(true);
+                inputServiceMock.Setup(m => m.OffsetY).Returns(Constants.OffsetYMax + 1);
+                var (viewModel, _) = CreateViewModel(inputServiceMock);
+
+                Assert.False(viewModel.InputMoveUpCommand.CanExecute());
+            });
+        }
+
+        [Fact]
+        public async Task InputMoveUpCommand_CanExecute_ReturnsTrueWhenActiveAndOffsetYAtMax()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var inputServiceMock = new Mock<IInputService>();
+                inputServiceMock.Setup(m => m.IsActive).Returns(true);
+                inputServiceMock.Setup(m => m.OffsetY).Returns(Constants.OffsetYMax);
+                var (viewModel, _) = CreateViewModel(inputServiceMock);
+
+                Assert.True(viewModel.InputMoveUpCommand.CanExecute());
+            });
+        }
+
+        [Fact]
+        public async Task InputMoveUpCommand_Execute_DecrementsOffsetYByStep()
+        {
+            await RunInSessionAsync(() =>
+            {
+                var currentOffsetY = Constants.OffsetYMax;
+                var inputServiceMock = new Mock<IInputService>();
+                inputServiceMock.Setup(m => m.IsActive).Returns(true);
+                inputServiceMock.Setup(m => m.OffsetY).Returns(() => currentOffsetY);
+                inputServiceMock
+                    .SetupSet(m => m.OffsetY = It.IsAny<int>())
+                    .Callback<int>(v => currentOffsetY = v);
+                var (viewModel, _) = CreateViewModel(inputServiceMock);
+
+                viewModel.InputMoveUpCommand.Execute();
+
+                Assert.Equal(Constants.OffsetYMax - Constants.OffsetStep, currentOffsetY);
             });
         }
 

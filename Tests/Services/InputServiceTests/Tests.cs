@@ -256,6 +256,98 @@ namespace Score2Stream.Tests.InputServiceTests
         }
 
         [Fact]
+        public void OffsetX_NoActiveInput_ReturnsZeroAndDoesNotSave()
+        {
+            // Active is null by default
+            var result = inputService.OffsetX;
+            inputService.OffsetX = 20;
+
+            Assert.Equal(0, result);
+            settingsServiceMock.Verify(s => s.Save(It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task OffsetX_SetOnActiveInput_SavesToSettings()
+        {
+            // Arrange
+            var input = new Input
+            {
+                DeviceName = "Cam 1",
+                IsDevice = true,
+                Name = "Cam 1",
+            };
+            session.Inputs = [input];
+            deviceEnumeratorMock.Setup(d => d.GetVideoDevices()).Returns(new Dictionary<int, string>
+            {
+                { 1, "Cam 1" }
+            });
+            var runCalled = new TaskCompletionSource<bool>();
+            videoServiceMock.Setup(v => v.IsStarted).Returns(false);
+            videoServiceMock.Setup(v => v.IsActive).Returns(false);
+            videoServiceMock
+                .Setup(v => v.RunAsync(It.IsAny<Input>()))
+                .Callback(() => runCalled.TrySetResult(true))
+                .Returns(Task.CompletedTask);
+
+            inputService.SelectDevice("Cam 1");
+            await runCalled.Task.WaitAsync(TimeSpan.FromSeconds(2));
+
+            // Act
+            inputService.OffsetX = 15;
+            var result = inputService.OffsetX;
+
+            // Assert
+            Assert.Equal(15, result);
+            settingsServiceMock.Verify(s => s.Save(It.IsAny<string>()), Times.AtLeastOnce);
+        }
+
+        [Fact]
+        public void OffsetY_NoActiveInput_ReturnsZeroAndDoesNotSave()
+        {
+            // Active is null by default
+            var result = inputService.OffsetY;
+            inputService.OffsetY = 20;
+
+            Assert.Equal(0, result);
+            settingsServiceMock.Verify(s => s.Save(It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task OffsetY_SetOnActiveInput_SavesToSettings()
+        {
+            // Arrange
+            var input = new Input
+            {
+                DeviceName = "Cam 1",
+                IsDevice = true,
+                Name = "Cam 1",
+            };
+            session.Inputs = [input];
+            deviceEnumeratorMock.Setup(d => d.GetVideoDevices()).Returns(new Dictionary<int, string>
+            {
+                { 1, "Cam 1" }
+            });
+            var runCalled = new TaskCompletionSource<bool>();
+            videoServiceMock.Setup(v => v.IsStarted).Returns(false);
+            videoServiceMock.Setup(v => v.IsActive).Returns(false);
+            videoServiceMock
+                .Setup(v => v.RunAsync(It.IsAny<Input>()))
+                .Callback(() => runCalled.TrySetResult(true))
+                .Returns(Task.CompletedTask);
+
+            inputService.SelectDevice("Cam 1");
+            await runCalled.Task.WaitAsync(TimeSpan.FromSeconds(2));
+
+            // Act
+            inputService.OffsetY = -10;
+            var result = inputService.OffsetY;
+
+            // Assert
+            Assert.Equal(-10, result);
+            settingsServiceMock.Verify(s => s.Save(It.IsAny<string>()), Times.AtLeastOnce);
+        }
+
+        [Fact]
         public async Task RemoveAsync_ActiveRemoved_SelectsNextAvailableInput()
         {
             // Arrange — two inputs, first is Active

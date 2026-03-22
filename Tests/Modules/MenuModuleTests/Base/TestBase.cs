@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Avalonia.Headless;
 using EventAggregatorMocker;
 using Moq;
 using Prism.Events;
@@ -20,10 +19,25 @@ using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
 using Score2Stream.MenuModule.ViewModels;
 
-namespace Score2Stream.Tests.MenuModuleTests
+namespace Score2Stream.Tests.MenuModuleTests.Base
 {
     public abstract class TestBase
     {
+        #region Private Fields
+
+        private readonly HeadlessSessionFixture fixture;
+
+        #endregion Private Fields
+
+        #region Protected Constructors
+
+        protected TestBase(HeadlessSessionFixture fixture)
+        {
+            this.fixture = fixture;
+        }
+
+        #endregion Protected Constructors
+
         #region Protected Methods
 
         protected static Mock<IEventAggregator> CreateEventAggregatorMock()
@@ -118,16 +132,14 @@ namespace Score2Stream.Tests.MenuModuleTests
                     scoreboardServiceMock);
         }
 
-        protected static async Task RunInSessionAsync(Func<Task> action)
+        protected async Task RunInSessionAsync(Func<Task> action)
         {
-            using var session = HeadlessUnitTestSession.StartNew(typeof(TestApp.App));
-            await session.Dispatch(async () => await action(), CancellationToken.None);
+            await fixture.Session.Dispatch(async () => await action(), CancellationToken.None);
         }
 
-        protected static async Task RunInSessionAsync(Action action)
+        protected async Task RunInSessionAsync(Action action)
         {
-            using var session = HeadlessUnitTestSession.StartNew(typeof(TestApp.App));
-            await session.Dispatch(action, CancellationToken.None);
+            await fixture.Session.Dispatch(action, CancellationToken.None);
         }
 
         #endregion Protected Methods
