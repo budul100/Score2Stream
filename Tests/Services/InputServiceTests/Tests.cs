@@ -19,9 +19,9 @@ using Score2Stream.Commons.Models.Settings;
 using Score2Stream.InputService;
 using Xunit;
 
-namespace Score2Stream.Tests.InputService
+namespace Score2Stream.Tests.InputServiceTests
 {
-    public class Tests 
+    public class Tests
         : IDisposable
     {
         #region Private Fields
@@ -544,9 +544,6 @@ namespace Score2Stream.Tests.InputService
             Assert.Equal(0, eventCount);
         }
 
-        // ============================================================
-        // Missing tests to add to ServiceTests class
-        // ============================================================
         [Fact]
         public async Task SelectDevice_AlreadyRunning_DoesNotStartVideoAgain()
         {
@@ -612,10 +609,10 @@ namespace Score2Stream.Tests.InputService
             // Concrete approach: directly manipulate via multiple SelectDevice calls
             // with separate mocked video services, one per device.
 
-            const int max = Score2Stream.Commons.Assets.Constants.MaxCountInputs;
+            const int max = Commons.Assets.Constants.MaxCountInputs;
 
             var devices = new Dictionary<int, string>();
-            for (int i = 1; i <= max; i++)
+            for (var i = 1; i <= max; i++)
                 devices[i] = $"Cam{i}";
             devices[max + 1] = "CamOverflow";
 
@@ -642,7 +639,7 @@ namespace Score2Stream.Tests.InputService
                 });
 
             // Fill up to max
-            for (int i = 1; i <= max; i++)
+            for (var i = 1; i <= max; i++)
                 inputService.SelectDevice($"Cam{i}");
 
             // Act — one more device should trigger MaxCountExceededException → dialog
@@ -712,10 +709,10 @@ namespace Score2Stream.Tests.InputService
         public async Task SelectFile_MaxCountExceeded_ShowsErrorDialog()
         {
             // Arrange
-            const int max = Score2Stream.Commons.Assets.Constants.MaxCountInputs;
+            const int max = Commons.Assets.Constants.MaxCountInputs;
 
             var devices = new Dictionary<int, string>();
-            for (int i = 1; i <= max; i++)
+            for (var i = 1; i <= max; i++)
                 devices[i] = $"Cam{i}";
 
             deviceEnumeratorMock.Setup(d => d.GetVideoDevices()).Returns(devices);
@@ -736,7 +733,7 @@ namespace Score2Stream.Tests.InputService
                     return vm.Object;
                 });
 
-            for (int i = 1; i <= max; i++)
+            for (var i = 1; i <= max; i++)
                 inputService.SelectDevice($"Cam{i}");
 
             var overflowFile = Path.GetTempFileName();

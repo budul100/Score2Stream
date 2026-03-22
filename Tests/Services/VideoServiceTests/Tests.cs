@@ -8,12 +8,13 @@ using OpenCvSharp;
 using Prism.Events;
 using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Input;
+using Score2Stream.Commons.Events.Sample;
+using Score2Stream.Commons.Events.Segment;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
 using Score2Stream.VideoService;
 using Xunit;
-using Score2Stream.Commons.Events.Segment;
 
 namespace Score2Stream.Tests.VideoServiceTests
 {
@@ -31,13 +32,14 @@ namespace Score2Stream.Tests.VideoServiceTests
         private readonly Mock<InputUpdatedEvent> inputUpdatedEventMock;
         private readonly Mock<ILogger<Service>> loggerMock;
         private readonly Mock<IRecognitionService> recognitionServiceMock;
+        private readonly Mock<SampleUpdatedEvent> sampleUpdatedEventMock;
         private readonly Mock<SegmentDrawnEvent> segmentDrawnEventMock;
         private readonly Mock<SegmentUpdatedEvent> segmentUpdatedEventMock;
         private readonly Mock<ISettingsService<Session>> settingsServiceMock;
-        private readonly Mock<ITemplateService> templateServiceMock; // Fix: was missing
+        private readonly Mock<ITemplateService> templateServiceMock;
         private readonly Mock<IVideoCapture> videoCaptureMock;
         private readonly Service videoService;
-
+        
         private bool isDisposed;
 
         #endregion Private Fields
@@ -52,7 +54,7 @@ namespace Score2Stream.Tests.VideoServiceTests
             loggerMock = new Mock<ILogger<Service>>();
             recognitionServiceMock = new Mock<IRecognitionService>();
             settingsServiceMock = new Mock<ISettingsService<Session>>();
-            templateServiceMock = new Mock<ITemplateService>(); // Fix: added
+            templateServiceMock = new Mock<ITemplateService>();
             videoCaptureMock = new Mock<IVideoCapture>();
 
             inputEndedEventMock = new Mock<InputEndedEvent>();
@@ -60,6 +62,7 @@ namespace Score2Stream.Tests.VideoServiceTests
             inputUpdatedEventMock = new Mock<InputUpdatedEvent>();
             segmentDrawnEventMock = new Mock<SegmentDrawnEvent>();
             segmentUpdatedEventMock = new Mock<SegmentUpdatedEvent>();
+            sampleUpdatedEventMock = new Mock<SampleUpdatedEvent>();   // Fix: added
             areaModifiedEventMock = new Mock<AreaModifiedEvent>();
 
             eventAggregatorMock.Setup(e => e.GetEvent<InputStartedEvent>()).Returns(inputStartedEventMock.Object);
@@ -67,6 +70,7 @@ namespace Score2Stream.Tests.VideoServiceTests
             eventAggregatorMock.Setup(e => e.GetEvent<InputUpdatedEvent>()).Returns(inputUpdatedEventMock.Object);
             eventAggregatorMock.Setup(e => e.GetEvent<SegmentDrawnEvent>()).Returns(segmentDrawnEventMock.Object);
             eventAggregatorMock.Setup(e => e.GetEvent<SegmentUpdatedEvent>()).Returns(segmentUpdatedEventMock.Object);
+            eventAggregatorMock.Setup(e => e.GetEvent<SampleUpdatedEvent>()).Returns(sampleUpdatedEventMock.Object); // Fix: added
             eventAggregatorMock.Setup(e => e.GetEvent<AreaModifiedEvent>()).Returns(areaModifiedEventMock.Object);
 
             var session = new Session
@@ -100,8 +104,6 @@ namespace Score2Stream.Tests.VideoServiceTests
                 .Setup(d => d.InvokeAsync(It.IsAny<Func<object>>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Func<object> f, CancellationToken _) => f());
 
-            // Fix: constructor parameter order now matches Service's signature;
-            //      templateService added
             videoService = new Service(
                 settingsService: settingsServiceMock.Object,
                 areaService: areaServiceMock.Object,
@@ -134,6 +136,20 @@ namespace Score2Stream.Tests.VideoServiceTests
             Assert.Equal(areaServiceMock.Object, videoService.AreaService);
         }
 
+        [Fact]
+        public void Constructor_SetsRecognitionServiceProperty()
+        {
+            Assert.NotNull(videoService.RecognitionService);
+            Assert.Equal(recognitionServiceMock.Object, videoService.RecognitionService);
+        }
+
+        [Fact]
+        public void Constructor_SetsTemplateServiceProperty()
+        {
+            Assert.NotNull(videoService.TemplateService);
+            Assert.Equal(templateServiceMock.Object, videoService.TemplateService);
+        }
+
         public void Dispose()
         {
             Dispose(disposing: true);
@@ -145,7 +161,6 @@ namespace Score2Stream.Tests.VideoServiceTests
         {
             await videoService.StopAsync();
             var exception = Record.Exception(() => ((IDisposable)videoService).Dispose());
-
             Assert.Null(exception);
         }
 
@@ -154,7 +169,6 @@ namespace Score2Stream.Tests.VideoServiceTests
         {
             ((IDisposable)videoService).Dispose();
             var exception = Record.Exception(() => ((IDisposable)videoService).Dispose());
-
             Assert.Null(exception);
         }
 
@@ -176,6 +190,10 @@ namespace Score2Stream.Tests.VideoServiceTests
                 Name = "TestDevice",
             };
 
+            // Fix: Open must return true, otherwise RunAsync throws immediately
+            // and the deadlock scenario is never actually reached.
+            videoCaptureMock.Setup(v => v.Open(999)).Returns(true);
+
             videoCaptureMock.Setup(v => v.Read(It.IsAny<Mat>())).Returns(() =>
             {
                 Task.Delay(500).Wait();
@@ -192,6 +210,22 @@ namespace Score2Stream.Tests.VideoServiceTests
                 Task.Delay(TimeSpan.FromSeconds(5)));
 
             Assert.Equal(disposeTask, completed);
+            await runTask; // should complete cleanly after dispose
+        }
+
+        [Fact]
+        public async Task DisposeAsync_WhenCalledMultipleTimes_DoesNotThrow()
+        {
+            await videoService.DisposeAsync();
+            var exception = await Record.ExceptionAsync(() => videoService.DisposeAsync().AsTask());
+            Assert.Null(exception);
+        }
+
+        [Fact]
+        public async Task DisposeAsync_WhenNeverStarted_DoesNotThrow()
+        {
+            var exception = await Record.ExceptionAsync(() => videoService.DisposeAsync().AsTask());
+            Assert.Null(exception);
         }
 
         [Fact]
@@ -206,7 +240,6 @@ namespace Score2Stream.Tests.VideoServiceTests
 
             await videoService.RunAsync(input);
 
-            // Fix: assert the actual expected value, not just non-null
             Assert.Equal("dummy", videoService.Name);
         }
 
@@ -221,14 +254,65 @@ namespace Score2Stream.Tests.VideoServiceTests
                 Name = "TestDevice",
             };
 
+            videoCaptureMock.Setup(v => v.Open(999)).Returns(true);
+
+            // Controlled block: we unblock Read by cancelling this CTS,
+            // which lets hasContent = false → capture loop exits → RunAsync returns.
+            var readBlocker = new CancellationTokenSource();
+
+            videoCaptureMock.Setup(v => v.Read(It.IsAny<Mat>())).Returns(() =>
+            {
+                readBlocker.Token.WaitHandle.WaitOne();
+                return false; // hasContent = false → loop exits cleanly
+            });
+
             var firstRun = videoService.RunAsync(input);
-            await Task.Delay(100);
-            var secondRun = videoService.RunAsync(input);
+            await Task.Delay(100); // wait until service is inside CaptureAsync
 
-            await videoService.StopAsync();
-            await Task.WhenAll(firstRun, secondRun);
+            var secondRun = videoService.RunAsync(input); // should be ignored
 
+            // Unblock Read so both tasks can complete
+            readBlocker.Cancel();
+
+            var completed = await Task.WhenAny(
+                Task.WhenAll(firstRun, secondRun),
+                Task.Delay(TimeSpan.FromSeconds(5)));
+
+            Assert.IsNotType<Task<bool>>(completed); // ensure it wasn't the timeout
+
+            // InputStartedEvent should only have fired once
             inputStartedEventMock.Verify(e => e.Publish(It.IsAny<Input>()), Times.AtMostOnce);
+
+            readBlocker.Dispose();
+        }
+
+        [Fact]
+        public async Task RunAsync_WithDeviceInput_WhenOpenFails_LogsError()
+        {
+            var input = new Input
+            {
+                DeviceId = 999,
+                DeviceName = "TestDevice",
+                IsDevice = true,
+                Name = "TestDevice",
+            };
+
+            // Open returns false → ApplicationException → caught → logged
+            videoCaptureMock.Setup(v => v.Open(999)).Returns(false);
+
+            await videoService.RunAsync(input);
+
+            loggerMock.Verify(
+                x => x.Log(
+                    It.Is<Microsoft.Extensions.Logging.LogLevel>(l => l == Microsoft.Extensions.Logging.LogLevel.Error),
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => true),
+                    It.IsAny<Exception>(),
+                    It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)),
+                Times.AtLeastOnce);
+
+            Assert.False(videoService.IsActive);
+            Assert.False(videoService.IsStarted);
         }
 
         [Fact]
@@ -241,9 +325,7 @@ namespace Score2Stream.Tests.VideoServiceTests
                 Name = "nonexistent_file_xyz",
             };
 
-            // Note: no video.Open mock needed — service throws FileNotFoundException
-            //       before Open is ever called when the file does not exist.
-
+            // File does not exist → FileNotFoundException → caught → logged
             await videoService.RunAsync(input);
 
             loggerMock.Verify(
@@ -260,7 +342,6 @@ namespace Score2Stream.Tests.VideoServiceTests
         public async Task RunAsync_WithValidInput_ProcessesFramesAndPublishesEvents()
         {
             var tempFileName = System.IO.Path.GetTempFileName();
-
             try
             {
                 var input = new Input
@@ -289,9 +370,10 @@ namespace Score2Stream.Tests.VideoServiceTests
 
                 inputStartedEventMock.Verify(e => e.Publish(input), Times.Once);
                 videoCaptureMock.Verify(v => v.Read(It.IsAny<Mat>()), Times.AtLeastOnce);
+                inputEndedEventMock.Verify(e => e.Publish(input), Times.Once);
+
                 Assert.False(videoService.IsActive);
                 Assert.False(videoService.IsStarted);
-                inputEndedEventMock.Verify(e => e.Publish(input), Times.Once);
             }
             finally
             {
@@ -305,7 +387,6 @@ namespace Score2Stream.Tests.VideoServiceTests
         {
             await videoService.StopAsync();
             var exception = await Record.ExceptionAsync(() => videoService.StopAsync());
-
             Assert.Null(exception);
         }
 
@@ -313,8 +394,48 @@ namespace Score2Stream.Tests.VideoServiceTests
         public async Task StopAsync_WhenNeverStarted_DoesNotThrow()
         {
             var exception = await Record.ExceptionAsync(() => videoService.StopAsync());
-
             Assert.Null(exception);
+        }
+
+        [Fact]
+        public async Task StopAsync_WhileRunning_SetsIsActiveAndIsStartedToFalse()
+        {
+            var input = new Input
+            {
+                DeviceId = 999,
+                DeviceName = "TestDevice",
+                IsDevice = true,
+                Name = "TestDevice",
+            };
+
+            videoCaptureMock.Setup(v => v.Open(999)).Returns(true);
+
+            var readBlocker = new CancellationTokenSource();
+
+            videoCaptureMock.Setup(v => v.Read(It.IsAny<Mat>())).Returns(() =>
+            {
+                readBlocker.Token.WaitHandle.WaitOne();
+                return false; // lets the capture loop exit naturally after unblock
+            });
+
+            // RunAsync blocks internally on serviceTask → don't await yet
+            var runTask = videoService.RunAsync(input);
+            await Task.Delay(100); // give service time to enter CaptureAsync and block in Read
+
+            // Unblock Read FIRST, then StopAsync can complete because serviceTask will finish
+            readBlocker.Cancel();
+
+            await videoService.StopAsync();
+
+            var completed = await Task.WhenAny(runTask, Task.Delay(TimeSpan.FromSeconds(5)));
+            Assert.Equal(runTask, completed);
+
+            await runTask;
+
+            Assert.False(videoService.IsActive);
+            Assert.False(videoService.IsStarted);
+
+            readBlocker.Dispose();
         }
 
         #endregion Public Methods
@@ -327,10 +448,8 @@ namespace Score2Stream.Tests.VideoServiceTests
             {
                 if (disposing)
                 {
-                    // Fix: actually dispose the service under test
                     ((IDisposable)videoService).Dispose();
                 }
-
                 isDisposed = true;
             }
         }
