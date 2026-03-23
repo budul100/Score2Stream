@@ -19,44 +19,44 @@
 	</PropertyGroup>
 	
 	<ItemGroup>
-		<AvaloniaResource Include="Assets\**"/>
+		<AvaloniaResource Include="Assets\**" />
 	</ItemGroup>
 	
 	<ItemGroup>
-		<TrimmerRootAssembly Include="Avalonia.Themes.Fluent"/>
+		<TrimmerRootAssembly Include="Avalonia.Themes.Fluent" />
 	</ItemGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="Avalonia" Version="11.3.12"/>
-		<PackageReference Include="Avalonia.Desktop" Version="11.3.12"/>
-		<PackageReference Include="Avalonia.LinuxFramebuffer" Version="11.3.12"/>
-		<PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.12"/>
-		<PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.1"/>
-		<PackageReference Include="Prism.Avalonia" Version="8.1.97.11073"/>
-		<PackageReference Include="Prism.DryIoc.Avalonia" Version="8.1.97.11073"/>
+		<PackageReference Include="Avalonia" Version="11.3.12" />
+		<PackageReference Include="Avalonia.Desktop" Version="11.3.12" />
+		<PackageReference Include="Avalonia.LinuxFramebuffer" Version="11.3.12" />
+		<PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.12" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.1" />
+		<PackageReference Include="Prism.Avalonia" Version="8.1.97.11073" />
+		<PackageReference Include="Prism.DryIoc.Avalonia" Version="8.1.97.11073" />
 		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.12"/>
+		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.12" />
 	</ItemGroup>
 	
 	<ItemGroup>
-		<ProjectReference Include="..\Commons\Commons.csproj"/>
-		<ProjectReference Include="..\Modules\AreaModule\AreaModule.csproj"/>
-		<ProjectReference Include="..\Modules\MenuModule\MenuModule.csproj"/>
-		<ProjectReference Include="..\Modules\ScoreboardModule\ScoreboardModule.csproj"/>
-		<ProjectReference Include="..\Modules\TemplateModule\TemplateModule.csproj"/>
-		<ProjectReference Include="..\Modules\VideoModule\VideoModule.csproj"/>
-		<ProjectReference Include="..\Services\AreaService\AreaService.csproj"/>
-		<ProjectReference Include="..\Services\DialogService\DialogService.csproj"/>
-		<ProjectReference Include="..\Services\DispatcherService\DispatcherService.csproj"/>
-		<ProjectReference Include="..\Services\InputService\InputService.csproj"/>
-		<ProjectReference Include="..\Services\NavigationService\NavigationService.csproj"/>
-		<ProjectReference Include="..\Services\RecognitionService\RecognitionService.csproj"/>
-		<ProjectReference Include="..\Services\SampleService\SampleService.csproj"/>
-		<ProjectReference Include="..\Services\ScoreboardService\ScoreboardService.csproj"/>
-		<ProjectReference Include="..\Services\SettingsService\SettingsService.csproj"/>
-		<ProjectReference Include="..\Services\TemplateService\TemplateService.csproj"/>
-		<ProjectReference Include="..\Services\VideoService\VideoService.csproj"/>
-		<ProjectReference Include="..\Services\WebService\WebService.csproj"/>
+		<ProjectReference Include="..\Commons\Commons.csproj" />
+		<ProjectReference Include="..\Modules\AreaModule\AreaModule.csproj" />
+		<ProjectReference Include="..\Modules\MenuModule\MenuModule.csproj" />
+		<ProjectReference Include="..\Modules\ScoreboardModule\ScoreboardModule.csproj" />
+		<ProjectReference Include="..\Modules\TemplateModule\TemplateModule.csproj" />
+		<ProjectReference Include="..\Modules\VideoModule\VideoModule.csproj" />
+		<ProjectReference Include="..\Services\AreaService\AreaService.csproj" />
+		<ProjectReference Include="..\Services\DialogService\DialogService.csproj" />
+		<ProjectReference Include="..\Services\DispatcherService\DispatcherService.csproj" />
+		<ProjectReference Include="..\Services\InputService\InputService.csproj" />
+		<ProjectReference Include="..\Services\NavigationService\NavigationService.csproj" />
+		<ProjectReference Include="..\Services\RecognitionService\RecognitionService.csproj" />
+		<ProjectReference Include="..\Services\SampleService\SampleService.csproj" />
+		<ProjectReference Include="..\Services\ScoreboardService\ScoreboardService.csproj" />
+		<ProjectReference Include="..\Services\SettingsService\SettingsService.csproj" />
+		<ProjectReference Include="..\Services\TemplateService\TemplateService.csproj" />
+		<ProjectReference Include="..\Services\VideoService\VideoService.csproj" />
+		<ProjectReference Include="..\Services\WebService\WebService.csproj" />
 	</ItemGroup>
 	
 	<ItemGroup>
