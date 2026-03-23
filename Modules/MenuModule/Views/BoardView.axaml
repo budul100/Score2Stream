@@ -42,21 +42,6 @@
         <rib:RibbonGroupBox Header="Scoreboard control">
 
             <rib:RibbonButton
-                Command="{Binding ScoreboardOpenCommand}"
-                Content="Open board"
-                FontSize="{StaticResource FontSize}"
-                MinSize="Large">
-                <rib:RibbonButton.LargeIcon>
-                    <ControlTemplate>
-                        <mat:MaterialIcon
-                            Width="{StaticResource IconWidth}"
-                            Height="{StaticResource IconHeight}"
-                            Kind="EyeOutline" />
-                    </ControlTemplate>
-                </rib:RibbonButton.LargeIcon>
-            </rib:RibbonButton>
-
-            <rib:RibbonButton
                 Classes.IsUpToDate="{Binding IsUpToDate}"
                 Classes.IsNotUpToDate="{Binding !IsUpToDate}"
                 Command="{Binding ScoreboardUpdateCommand}"
@@ -93,6 +78,21 @@
                         </Style.Setters>
                     </Style>
                 </rib:RibbonButton.Styles>
+            </rib:RibbonButton>
+
+            <rib:RibbonButton
+                Command="{Binding ScoreboardOpenCommand}"
+                Content="Open board"
+                FontSize="{StaticResource FontSize}"
+                MinSize="Large">
+                <rib:RibbonButton.LargeIcon>
+                    <ControlTemplate>
+                        <mat:MaterialIcon
+                            Width="{StaticResource IconWidth}"
+                            Height="{StaticResource IconHeight}"
+                            Kind="EyeOutline" />
+                    </ControlTemplate>
+                </rib:RibbonButton.LargeIcon>
             </rib:RibbonButton>
 
         </rib:RibbonGroupBox>
