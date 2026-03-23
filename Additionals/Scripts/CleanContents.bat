@@ -52,6 +52,21 @@ for /f "tokens=*" %%G in ('dir /b /ad /s obj 2^>nul') do (
     )
 )
 
+:: Delete TestResult in the root directory
+echo [INFO] Deleting TestResult folder in root directory...
+if exist "TestResult\" (
+    echo Deleting: TestResult
+    rmdir /s /q "TestResult" 2>nul
+    if !errorlevel! equ 0 (
+        set /a deleted_count+=1
+    ) else (
+        echo [ERROR] Could not delete: TestResult
+        set /a error_count+=1
+    )
+) else (
+    echo [INFO] TestResult not found, skipping.
+)
+
 :: Delete wwwroot in the root directory
 echo [INFO] Deleting wwwroot folder in root directory...
 if exist "wwwroot\" (
