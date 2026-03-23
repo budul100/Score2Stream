@@ -5,7 +5,6 @@ using Avalonia.Controls;
 using Moq;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
-using Prism.Ioc;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Events.Menu;
 using Score2Stream.Commons.Events.Sample;
