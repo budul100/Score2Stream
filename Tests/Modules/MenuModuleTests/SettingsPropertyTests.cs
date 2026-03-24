@@ -24,7 +24,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var settingsServiceMock = new Mock<ISettingsService<Session>>();
                 settingsServiceMock.Setup(m => m.Contents).Returns(session);
 
-                var (viewModel, _, _, _, _, _, _) =
+                var (viewModel, _, _, _, _, _, _, _) =
                     CreateViewModel(settingsServiceMock: settingsServiceMock);
 
                 viewModel.AllowMultipleInstances = false; // same value
@@ -43,7 +43,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var settingsServiceMock = new Mock<ISettingsService<Session>>();
                 settingsServiceMock.Setup(m => m.Contents).Returns(session);
 
-                var (viewModel, _, _, _, _, _, _) =
+                var (viewModel, _, _, _, _, _, _, _) =
                     CreateViewModel(settingsServiceMock: settingsServiceMock);
 
                 viewModel.AllowMultipleInstances = true;
@@ -65,7 +65,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var inputServiceMock = new Mock<IInputService>();
                 inputServiceMock.Setup(m => m.IsActive).Returns(false);
 
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(
                     inputServiceMock: inputServiceMock,
                     templateServiceMock: templateServiceMock);
 
@@ -86,7 +86,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var settingsServiceMock = new Mock<ISettingsService<Session>>();
                 settingsServiceMock.Setup(m => m.Contents).Returns(session);
 
-                var (viewModel, _, _, _, _, _, _) =
+                var (viewModel, _, _, _, _, _, _, _) =
                     CreateViewModel(settingsServiceMock: settingsServiceMock);
 
                 viewModel.IsVerifiedsFiltered = true;
@@ -104,7 +104,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var settingsServiceMock = new Mock<ISettingsService<Session>>();
                 settingsServiceMock.Setup(m => m.Contents).Returns(session);
 
-                var (viewModel, _, _, _, _, _, _) =
+                var (viewModel, _, _, _, _, _, _, _) =
                     CreateViewModel(settingsServiceMock: settingsServiceMock);
                 var originalValue = session.Server.PortServer;
 
@@ -123,7 +123,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var settingsServiceMock = new Mock<ISettingsService<Session>>();
                 settingsServiceMock.Setup(m => m.Contents).Returns(session);
 
-                var (viewModel, _, _, _, _, _, _) =
+                var (viewModel, _, _, _, _, _, _, _) =
                     CreateViewModel(settingsServiceMock: settingsServiceMock);
                 var originalValue = session.Server.PortServer;
 
@@ -143,7 +143,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var settingsServiceMock = new Mock<ISettingsService<Session>>();
                 settingsServiceMock.Setup(m => m.Contents).Returns(session);
 
-                var (viewModel, _, _, _, _, _, _) =
+                var (viewModel, _, _, _, _, _, _, _) =
                     CreateViewModel(settingsServiceMock: settingsServiceMock);
                 var validPort = Constants.PortMin + 1;
 
@@ -163,7 +163,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var settingsServiceMock = new Mock<ISettingsService<Session>>();
                 settingsServiceMock.Setup(m => m.Contents).Returns(session);
 
-                var (viewModel, _, _, _, _, _, _) =
+                var (viewModel, _, _, _, _, _, _, _) =
                     CreateViewModel(settingsServiceMock: settingsServiceMock);
                 var originalValue = session.Detection.ThresholdDetecting;
 
@@ -183,7 +183,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var settingsServiceMock = new Mock<ISettingsService<Session>>();
                 settingsServiceMock.Setup(m => m.Contents).Returns(session);
 
-                var (viewModel, _, _, _, _, _, _) =
+                var (viewModel, _, _, _, _, _, _, _) =
                     CreateViewModel(settingsServiceMock: settingsServiceMock);
                 var originalValue = session.Detection.ThresholdDetecting;
 
@@ -202,7 +202,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var settingsServiceMock = new Mock<ISettingsService<Session>>();
                 settingsServiceMock.Setup(m => m.Contents).Returns(session);
 
-                var (viewModel, _, _, _, _, _, _) =
+                var (viewModel, _, _, _, _, _, _, _) =
                     CreateViewModel(settingsServiceMock: settingsServiceMock);
 
                 viewModel.ThresholdDetecting = Constants.ThresholdMax / 2;
@@ -221,7 +221,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var settingsServiceMock = new Mock<ISettingsService<Session>>();
                 settingsServiceMock.Setup(m => m.Contents).Returns(session);
 
-                var (viewModel, _, _, _, _, _, _) =
+                var (viewModel, _, _, _, _, _, _, _) =
                     CreateViewModel(settingsServiceMock: settingsServiceMock);
 
                 viewModel.ThresholdMatching = Constants.ThresholdMax / 2;

@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Moq;
 using OpenCvSharp;
 using Prism.Regions;
@@ -201,6 +202,7 @@ namespace Score2Stream.Tests.MenuModuleTests
         private static (MenuViewModel ViewModel, ISampleService SampleService) CreateViewModelWithNullSegment()
         {
             var templateMock = new Mock<Template>();
+            var loggerMock = new Mock<ILogger<MenuViewModel>>();
             var eventAggregatorMock = CreateEventAggregatorMock();
             var session = new Session();
 
@@ -229,7 +231,8 @@ namespace Score2Stream.Tests.MenuModuleTests
                 templateService: templateServiceMock.Object,
                 regionManager: new Mock<IRegionManager>().Object,
                 dialogService: new Mock<IDialogService>().Object,
-                eventAggregator: eventAggregatorMock.Object);
+                eventAggregator: eventAggregatorMock.Object,
+                logger: loggerMock.Object);
 
             return (viewModel, sampleService);
         }
@@ -237,6 +240,7 @@ namespace Score2Stream.Tests.MenuModuleTests
         private (MenuViewModel ViewModel, ISampleService SampleService) CreateViewModelWithService()
         {
             var templateMock = new Mock<Template>();
+            var loggerMock = new Mock<ILogger<MenuViewModel>>();
 
             var area = new Area { Template = templateMock.Object };
             var segment = new Segment { Area = area, Image = mat };
@@ -273,7 +277,8 @@ namespace Score2Stream.Tests.MenuModuleTests
                 templateService: templateServiceMock.Object,
                 regionManager: new Mock<IRegionManager>().Object,
                 dialogService: dialogServiceMock.Object,
-                eventAggregator: eventAggregatorMock.Object);
+                eventAggregator: eventAggregatorMock.Object,
+                logger: loggerMock.Object);
 
             return (viewModel, sampleService);
         }

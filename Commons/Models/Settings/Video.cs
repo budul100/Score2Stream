@@ -12,7 +12,7 @@ namespace Score2Stream.Commons.Models.Settings
 
         public bool NoCropping { get; set; }
 
-        public int ProcessingDelay { get; set; } = Defaults.VideoDelayProcessing;
+        public int DelayProcessing { get; set; } = Defaults.VideoDelayProcessing;
 
         #endregion Public Properties
     }

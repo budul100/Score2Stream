@@ -24,7 +24,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var inputServiceMock = new Mock<IInputService>();
                 inputServiceMock.Setup(m => m.AreaService).Returns(areaServiceMock.Object);
 
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(inputServiceMock: inputServiceMock);
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(inputServiceMock: inputServiceMock);
 
                 Assert.False(viewModel.AreaOrderAllCommand.CanExecute());
             });
@@ -41,7 +41,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var inputServiceMock = new Mock<IInputService>();
                 inputServiceMock.Setup(m => m.AreaService).Returns(areaServiceMock.Object);
 
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(inputServiceMock: inputServiceMock);
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(inputServiceMock: inputServiceMock);
 
                 viewModel.AreaOrderAllCommand.Execute();
 
@@ -60,7 +60,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var inputServiceMock = new Mock<IInputService>();
                 inputServiceMock.Setup(m => m.AreaService).Returns(areaServiceMock.Object);
 
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(inputServiceMock: inputServiceMock);
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(inputServiceMock: inputServiceMock);
 
                 Assert.False(viewModel.AreaRemoveAllCommand.CanExecute());
             });
@@ -77,7 +77,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var inputServiceMock = new Mock<IInputService>();
                 inputServiceMock.Setup(m => m.AreaService).Returns(areaServiceMock.Object);
 
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(inputServiceMock: inputServiceMock);
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(inputServiceMock: inputServiceMock);
 
                 Assert.True(viewModel.AreaRemoveAllCommand.CanExecute());
             });
@@ -94,7 +94,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var inputServiceMock = new Mock<IInputService>();
                 inputServiceMock.Setup(m => m.AreaService).Returns(areaServiceMock.Object);
 
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(inputServiceMock: inputServiceMock);
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(inputServiceMock: inputServiceMock);
 
                 viewModel.AreaRemoveAllCommand.Execute();
 
@@ -113,7 +113,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var inputServiceMock = new Mock<IInputService>();
                 inputServiceMock.Setup(m => m.AreaService).Returns(areaServiceMock.Object);
 
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(inputServiceMock: inputServiceMock);
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(inputServiceMock: inputServiceMock);
 
                 Assert.False(viewModel.AreaRemoveCommand.CanExecute());
             });
@@ -130,7 +130,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var inputServiceMock = new Mock<IInputService>();
                 inputServiceMock.Setup(m => m.AreaService).Returns(areaServiceMock.Object);
 
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(inputServiceMock: inputServiceMock);
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(inputServiceMock: inputServiceMock);
 
                 Assert.True(viewModel.AreaRemoveCommand.CanExecute());
             });
@@ -147,7 +147,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var inputServiceMock = new Mock<IInputService>();
                 inputServiceMock.Setup(m => m.AreaService).Returns(areaServiceMock.Object);
 
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(inputServiceMock: inputServiceMock);
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(inputServiceMock: inputServiceMock);
 
                 viewModel.AreaRemoveCommand.Execute();
 
@@ -166,7 +166,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var inputServiceMock = new Mock<IInputService>();
                 inputServiceMock.Setup(m => m.AreaService).Returns(areaServiceMock.Object);
 
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(inputServiceMock: inputServiceMock);
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(inputServiceMock: inputServiceMock);
 
                 Assert.False(viewModel.AreaUndoCommand.CanExecute());
             });
@@ -183,7 +183,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var inputServiceMock = new Mock<IInputService>();
                 inputServiceMock.Setup(m => m.AreaService).Returns(areaServiceMock.Object);
 
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(inputServiceMock: inputServiceMock);
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(inputServiceMock: inputServiceMock);
 
                 Assert.True(viewModel.AreaUndoCommand.CanExecute());
             });
@@ -200,7 +200,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var inputServiceMock = new Mock<IInputService>();
                 inputServiceMock.Setup(m => m.AreaService).Returns(areaServiceMock.Object);
 
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(inputServiceMock: inputServiceMock);
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(inputServiceMock: inputServiceMock);
 
                 viewModel.AreaUndoCommand.Execute();
 

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using Moq;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
@@ -20,7 +21,7 @@ namespace Score2Stream.Tests.MenuModuleTests
             {
                 var templateServiceMock = new Mock<ITemplateService>();
                 templateServiceMock.Setup(m => m.Active).Returns((Template)null);
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(templateServiceMock: templateServiceMock);
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(templateServiceMock: templateServiceMock);
 
                 Assert.False(viewModel.IsActiveSample);
             });
@@ -33,7 +34,7 @@ namespace Score2Stream.Tests.MenuModuleTests
             {
                 var templateServiceMock = new Mock<ITemplateService>();
                 templateServiceMock.Setup(m => m.Active).Returns(new Template());
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(templateServiceMock: templateServiceMock);
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(templateServiceMock: templateServiceMock);
 
                 Assert.True(viewModel.IsActiveSample);
             });
@@ -52,7 +53,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 areaServiceMock.Setup(a => a.ActiveSegment).Returns((Segment)null);
                 inputServiceMock.Setup(m => m.AreaService).Returns(areaServiceMock.Object);
 
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(
                     inputServiceMock: inputServiceMock,
                     templateServiceMock: templateServiceMock);
 
@@ -73,7 +74,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 areaServiceMock.Setup(a => a.ActiveSegment).Returns(new Segment());
                 inputServiceMock.Setup(m => m.AreaService).Returns(areaServiceMock.Object);
 
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(
                     inputServiceMock: inputServiceMock,
                     templateServiceMock: templateServiceMock);
 
@@ -82,13 +83,14 @@ namespace Score2Stream.Tests.MenuModuleTests
         }
 
         [Fact]
-        public async Task TemplateAddCommand_CanExecute_ReturnsTrue_Always()
+        public async Task TemplateAddCommand_CanExecute_ReturnsTrue_WhenBelowMaxCount()
         {
             await RunInSessionAsync(() =>
             {
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel();
+                var templateServiceMock = new Mock<ITemplateService>();
+                templateServiceMock.Setup(m => m.Templates).Returns(new ObservableCollection<Template>());
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(templateServiceMock: templateServiceMock);
 
-                // No canExecute guard on this command — must always be executable
                 Assert.True(viewModel.TemplateAddCommand.CanExecute());
             });
         }
@@ -99,7 +101,8 @@ namespace Score2Stream.Tests.MenuModuleTests
             await RunInSessionAsync(() =>
             {
                 var templateServiceMock = new Mock<ITemplateService>();
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(templateServiceMock: templateServiceMock);
+                templateServiceMock.Setup(m => m.Templates).Returns(new ObservableCollection<Template>());
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(templateServiceMock: templateServiceMock);
 
                 viewModel.TemplateAddCommand.Execute();
 
@@ -113,7 +116,8 @@ namespace Score2Stream.Tests.MenuModuleTests
             await RunInSessionAsync(() =>
             {
                 var templateServiceMock = new Mock<ITemplateService>();
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(templateServiceMock: templateServiceMock);
+                templateServiceMock.Setup(m => m.Templates).Returns(new ObservableCollection<Template>());
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(templateServiceMock: templateServiceMock);
 
                 viewModel.TemplateAddCommand.Execute();
                 viewModel.TemplateAddCommand.Execute();
@@ -128,7 +132,9 @@ namespace Score2Stream.Tests.MenuModuleTests
         {
             await RunInSessionAsync(() =>
             {
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel();
+                var templateServiceMock = new Mock<ITemplateService>();
+                templateServiceMock.Setup(m => m.Templates).Returns(new ObservableCollection<Template>());
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(templateServiceMock: templateServiceMock);
 
                 var exception = Record.Exception(() => viewModel.TemplateAddCommand.Execute());
 

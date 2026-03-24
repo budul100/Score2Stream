@@ -31,7 +31,7 @@ namespace Score2Stream.Tests.RecognitionServiceTests
             {
                 Video = new Video
                 {
-                    ProcessingDelay = 0,
+                    DelayProcessing = 0,
                     ImagesQueueSize = 5,
                     NoCropping = false,
                     FilePathVideo = string.Empty

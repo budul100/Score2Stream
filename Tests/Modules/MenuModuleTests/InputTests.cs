@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using Moq;
@@ -778,10 +779,12 @@ namespace Score2Stream.Tests.MenuModuleTests
         private static (MenuViewModel ViewModel, Mock<IInputService> InputServiceMock) CreateViewModel(
             Mock<IInputService> inputServiceMock = null,
             Mock<IDialogService> dialogServiceMock = null,
-            Mock<IEventAggregator> eventAggregatorMock = null)
+            Mock<IEventAggregator> eventAggregatorMock = null,
+            Mock<ILogger<MenuViewModel>> loggerMock = null)
         {
             inputServiceMock ??= new Mock<IInputService>();
             dialogServiceMock ??= new Mock<IDialogService>();
+            loggerMock ??= new Mock<ILogger<MenuViewModel>>();
             eventAggregatorMock ??= CreateEventAggregatorMock();
 
             var session = new Session();
@@ -796,7 +799,8 @@ namespace Score2Stream.Tests.MenuModuleTests
                 templateService: new Mock<ITemplateService>().Object,
                 regionManager: new Mock<IRegionManager>().Object,
                 dialogService: dialogServiceMock.Object,
-                eventAggregator: eventAggregatorMock.Object);
+                eventAggregator: eventAggregatorMock.Object,
+                logger: loggerMock.Object);
 
             return (viewModel, inputServiceMock);
         }

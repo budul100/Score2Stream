@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using EventAggregatorMocker;
 using Moq;
 using Prism.Events;
@@ -17,26 +18,18 @@ using Score2Stream.Commons.Events.Template;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Models.Settings;
+using Score2Stream.InputService;
 using Score2Stream.MenuModule.ViewModels;
 
 namespace Score2Stream.Tests.MenuModuleTests.Base
 {
-    public abstract class TestBase
+    public abstract class TestBase(HeadlessSessionFixture fixture)
     {
-        #region Private Fields
+        #region Protected Fields
 
-        private readonly HeadlessSessionFixture fixture;
+        protected readonly Mock<ILogger<Service>> loggerMock = new();
 
-        #endregion Private Fields
-
-        #region Protected Constructors
-
-        protected TestBase(HeadlessSessionFixture fixture)
-        {
-            this.fixture = fixture;
-        }
-
-        #endregion Protected Constructors
+        #endregion Protected Fields
 
         #region Protected Methods
 
@@ -97,19 +90,21 @@ namespace Score2Stream.Tests.MenuModuleTests.Base
         protected static (MenuViewModel ViewModel, Mock<IInputService> InputServiceMock,
             Mock<ITemplateService> TemplateServiceMock, Mock<ISettingsService<Session>> SettingsServiceMock,
             Mock<IDialogService> DialogServiceMock, Mock<IWebService> WebServiceMock,
-            Mock<IScoreboardService> ScoreboardServiceMock)
+            Mock<IScoreboardService> ScoreboardServiceMock, Mock<ILogger<MenuViewModel>> loggerMock)
             CreateViewModel(Mock<IInputService> inputServiceMock = null,
             Mock<ITemplateService> templateServiceMock = null,
             Mock<ISettingsService<Session>> settingsServiceMock = null, Mock<IDialogService> dialogServiceMock = null,
             Mock<IEventAggregator> eventAggregatorMock = null, Mock<IWebService> webServiceMock = null,
-            Mock<IScoreboardService> scoreboardServiceMock = null)
+            Mock<IScoreboardService> scoreboardServiceMock = null, Mock<ILogger<MenuViewModel>> loggerMock = null)
         {
             inputServiceMock ??= new Mock<IInputService>();
             templateServiceMock ??= new Mock<ITemplateService>();
             dialogServiceMock ??= new Mock<IDialogService>();
-            eventAggregatorMock ??= CreateEventAggregatorMock();
             webServiceMock ??= new Mock<IWebService>();
             scoreboardServiceMock ??= new Mock<IScoreboardService>();
+            loggerMock ??= new Mock<ILogger<MenuViewModel>>();
+
+            eventAggregatorMock ??= CreateEventAggregatorMock();
 
             if (settingsServiceMock == null)
             {
@@ -125,11 +120,12 @@ namespace Score2Stream.Tests.MenuModuleTests.Base
                 templateService: templateServiceMock.Object,
                 regionManager: new Mock<IRegionManager>().Object,
                 dialogService: dialogServiceMock.Object,
-                eventAggregator: eventAggregatorMock.Object);
+                eventAggregator: eventAggregatorMock.Object,
+                logger: loggerMock.Object);
 
             return (viewModel, inputServiceMock, templateServiceMock,
                     settingsServiceMock, dialogServiceMock, webServiceMock,
-                    scoreboardServiceMock);
+                    scoreboardServiceMock, loggerMock);
         }
 
         protected async Task RunInSessionAsync(Func<Task> action)

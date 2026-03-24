@@ -315,7 +315,7 @@ namespace Score2Stream.VideoService
                     capturingStart: capturingStart);
 
                 if (!deviceId.HasValue
-                    && settingsService.Contents.Video.ProcessingDelay > 0
+                    && settingsService.Contents.Video.DelayProcessing > 0
                     && ProcessingTime?.TotalMilliseconds > 0)
                 {
                     video.Set(
@@ -691,7 +691,7 @@ namespace Score2Stream.VideoService
             await dispatcherService.InvokeAsync(
                 action: inputUpdatedEvent.Publish);
 
-            var delay = settingsService.Contents.Video.ProcessingDelay + Constants.UpdateDelay;
+            var delay = settingsService.Contents.Video.DelayProcessing + Constants.UpdateDelay;
 
             await Task.Delay(delay);
 

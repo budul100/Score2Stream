@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Avalonia.Platform.Storage;
 using MsBox.Avalonia.Enums;
-using OpenCvSharp;
 using Prism.Events;
-using Prism.Ioc;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Input;
@@ -32,7 +32,7 @@ namespace Score2Stream.InputService
         private readonly ILogger<Service> logger;
         private readonly ISettingsService<Session> settingsService;
         private readonly ITemplateService templateService;
-        private readonly Func<IVideoService> videoServiceGetter;
+        private readonly Func<IVideoService> videoServiceFactory;
 
         private ImmutableList<Input> inputs = [];
         private bool isInitializing;
@@ -41,16 +41,15 @@ namespace Score2Stream.InputService
 
         #region Public Constructors
 
-        public Service(ISettingsService<Session> settingsService, IDialogService dialogService,
-            ITemplateService templateService, IDeviceEnumerator deviceEnumerator,
-            Func<IVideoService> videoServiceFactory, IEventAggregator eventAggregator,
+        public Service(ISettingsService<Session> settingsService, IDialogService dialogService, ITemplateService templateService,
+            IDeviceEnumerator deviceEnumerator, Func<IVideoService> videoServiceFactory, IEventAggregator eventAggregator,
             ILogger<Service> logger = default)
         {
             this.settingsService = settingsService;
             this.dialogService = dialogService;
             this.templateService = templateService;
             this.deviceEnumerator = deviceEnumerator;
-            this.videoServiceGetter = videoServiceFactory;
+            this.videoServiceFactory = videoServiceFactory;
             this.logger = logger;
 
             inputSelectedEvent = eventAggregator.GetEvent<InputSelectedEvent>();
@@ -315,6 +314,8 @@ namespace Score2Stream.InputService
 
         public void SelectFile(string fileName)
         {
+            if (string.IsNullOrWhiteSpace(fileName)) return;
+
             try
             {
                 var input = CreateFromFile(fileName);
@@ -469,7 +470,7 @@ namespace Score2Stream.InputService
             {
                 if (input.VideoService == default)
                 {
-                    input.VideoService = videoServiceGetter();
+                    input.VideoService = videoServiceFactory();
 
                     input.AreaService.Initialize(input);
                 }

@@ -15,10 +15,9 @@
     xmlns:sys="using:System"
     d:DesignHeight="120"
     d:DesignWidth="1600"
-    prism:ViewModelLocator.AutoWireViewModel="True"
+    mc:Ignorable="d"
     Name="BoardTab"
-    Header="Board"
-    mc:Ignorable="d">
+    Header="{Binding TabBoard}">
 
     <rib:RibbonTab.Resources>
         <sys:Double x:Key="FontSize">10</sys:Double>

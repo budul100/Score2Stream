@@ -15,10 +15,9 @@
     xmlns:sys="using:System"
     d:DesignHeight="120"
     d:DesignWidth="1600"
-    prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d"
     Name="InputTab"
-    Header="Input">
+    Header="{Binding TabInputs}">
 
     <rib:RibbonTab.Resources>
         <sys:Double x:Key="FontSize">10</sys:Double>
@@ -194,7 +193,7 @@
                     Increment="10"
                     Maximum="{Binding DelayMax}"
                     Minimum="0"
-                    Value="{Binding ProcessingDelay, Mode=TwoWay}" />
+                    Value="{Binding DelayProcessing, Mode=TwoWay}" />
             </StackPanel>
             <StackPanel
                 Margin="0,0,4,4"

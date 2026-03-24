@@ -20,7 +20,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var scoreboardServiceMock = new Mock<IScoreboardService>();
                 scoreboardServiceMock.Setup(m => m.IsUpToDate).Returns(true);
 
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(scoreboardServiceMock: scoreboardServiceMock);
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(scoreboardServiceMock: scoreboardServiceMock);
 
                 Assert.True(viewModel.IsUpToDate);
             });
@@ -34,7 +34,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var webServiceMock = new Mock<IWebService>();
                 webServiceMock.Setup(m => m.IsActive).Returns(false);
 
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(webServiceMock: webServiceMock);
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(webServiceMock: webServiceMock);
 
                 Assert.False(viewModel.ScoreboardOpenCommand.CanExecute());
             });
@@ -48,7 +48,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var webServiceMock = new Mock<IWebService>();
                 webServiceMock.Setup(m => m.IsActive).Returns(true);
 
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(webServiceMock: webServiceMock);
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(webServiceMock: webServiceMock);
 
                 Assert.True(viewModel.ScoreboardOpenCommand.CanExecute());
             });
@@ -62,7 +62,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var webServiceMock = new Mock<IWebService>();
                 webServiceMock.Setup(m => m.IsActive).Returns(true);
 
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(webServiceMock: webServiceMock);
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(webServiceMock: webServiceMock);
 
                 viewModel.ScoreboardOpenCommand.Execute();
 
@@ -78,7 +78,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var scoreboardServiceMock = new Mock<IScoreboardService>();
                 scoreboardServiceMock.Setup(m => m.IsUpToDate).Returns(true);
 
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(scoreboardServiceMock: scoreboardServiceMock);
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(scoreboardServiceMock: scoreboardServiceMock);
 
                 Assert.False(viewModel.ScoreboardUpdateCommand.CanExecute());
             });
@@ -92,7 +92,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var scoreboardServiceMock = new Mock<IScoreboardService>();
                 scoreboardServiceMock.Setup(m => m.IsUpToDate).Returns(false);
 
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(scoreboardServiceMock: scoreboardServiceMock);
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(scoreboardServiceMock: scoreboardServiceMock);
 
                 Assert.True(viewModel.ScoreboardUpdateCommand.CanExecute());
             });
@@ -106,7 +106,7 @@ namespace Score2Stream.Tests.MenuModuleTests
                 var scoreboardServiceMock = new Mock<IScoreboardService>();
                 scoreboardServiceMock.Setup(m => m.IsUpToDate).Returns(false);
 
-                var (viewModel, _, _, _, _, _, _) = CreateViewModel(scoreboardServiceMock: scoreboardServiceMock);
+                var (viewModel, _, _, _, _, _, _, _) = CreateViewModel(scoreboardServiceMock: scoreboardServiceMock);
 
                 viewModel.ScoreboardUpdateCommand.Execute();
 
