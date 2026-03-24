@@ -1,5 +1,9 @@
 # Change log
 
+## Version 1.14.0
+
+* Minor menu adjustments
+
 ## Version 1.13.0
 
 * Background can be moved ([#26](https://github.com/budul100/Score2Stream/issues/26))

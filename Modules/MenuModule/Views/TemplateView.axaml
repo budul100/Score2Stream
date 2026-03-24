@@ -18,7 +18,7 @@
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d"
     Name="TemplatesTab"
-    Header="Samples">
+    Header="Templates">
 
     <rib:RibbonTab.Resources>
         <sys:Double x:Key="FontSize">10</sys:Double>
@@ -239,47 +239,6 @@
 
         </rib:RibbonGroupBox>
 
-        <rib:RibbonGroupBox Header="Recognition options" IsEnabled="{Binding IsActive}">
-
-            <StackPanel
-                Margin="0,0,4,4"
-                IsEnabled="{Binding IsActive}"
-                Orientation="Horizontal">
-                <TextBlock
-                    Width="100"
-                    Margin="0,0,4,0"
-                    VerticalAlignment="Center"
-                    FontSize="{StaticResource FontSize}"
-                    Text="Wait to match [ms]" />
-                <NumericUpDown
-                    Width="130"
-                    MaxHeight="5"
-                    Increment="10"
-                    Maximum="{Binding DelayMax}"
-                    Minimum="0"
-                    Value="{Binding WaitingDuration, Mode=TwoWay}" />
-            </StackPanel>
-
-            <StackPanel
-                Margin="0,0,4,4"
-                IsEnabled="{Binding IsActive}"
-                Orientation="Horizontal">
-                <TextBlock
-                    Width="100"
-                    Margin="0,0,4,0"
-                    VerticalAlignment="Center"
-                    FontSize="{StaticResource FontSize}"
-                    Text="Confidence at [%]" />
-                <NumericUpDown
-                    Width="130"
-                    MaxHeight="5"
-                    Increment="5"
-                    Maximum="{Binding ThresholdMax}"
-                    Minimum="0"
-                    Value="{Binding ThresholdMatching, Mode=TwoWay}" />
-            </StackPanel>
-
-        </rib:RibbonGroupBox>
     </rib:RibbonTab.Groups>
 
 </rib:RibbonTab>

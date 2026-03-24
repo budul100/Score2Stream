@@ -329,7 +329,46 @@
             </rib:RibbonButton>
         </rib:RibbonGroupBox>
 
-        <rib:RibbonGroupBox Header="Segment options">
+        <rib:RibbonGroupBox Header="Recognition options" IsEnabled="{Binding IsActive}">
+
+            <StackPanel
+                Margin="0,0,4,4"
+                IsEnabled="{Binding IsActive}"
+                Orientation="Horizontal">
+                <TextBlock
+                    Width="100"
+                    Margin="0,0,4,0"
+                    VerticalAlignment="Center"
+                    FontSize="{StaticResource FontSize}"
+                    Text="Wait to match [ms]" />
+                <NumericUpDown
+                    Width="130"
+                    MaxHeight="5"
+                    Increment="10"
+                    Maximum="{Binding DelayMax}"
+                    Minimum="0"
+                    Value="{Binding WaitingDuration, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel
+                Margin="0,0,4,4"
+                IsEnabled="{Binding IsActive}"
+                Orientation="Horizontal">
+                <TextBlock
+                    Width="100"
+                    Margin="0,0,4,0"
+                    VerticalAlignment="Center"
+                    FontSize="{StaticResource FontSize}"
+                    Text="Confidence at [%]" />
+                <NumericUpDown
+                    Width="130"
+                    MaxHeight="5"
+                    Increment="5"
+                    Maximum="{Binding ThresholdMax}"
+                    Minimum="0"
+                    Value="{Binding ThresholdMatching, Mode=TwoWay}" />
+            </StackPanel>
+
             <CheckBox
                 Margin="0,0,4,4"
                 VerticalAlignment="Center"
@@ -337,7 +376,9 @@
                 FontSize="{StaticResource FontSize}"
                 IsChecked="{Binding NoCropping, Mode=TwoWay}"
                 IsEnabled="{Binding IsActive}" />
+
         </rib:RibbonGroupBox>
+
     </rib:RibbonTab.Groups>
 
 </rib:RibbonTab>
