@@ -37,7 +37,7 @@
         </TabControl.Styles>
 
         <TabControl.ItemTemplate>
-            <DataTemplate DataType="{x:Type vm:TabViewModel}">
+            <DataTemplate DataType="{x:Type vm:InputViewModel}">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <TextBlock
                         Text="{Binding Name}"
@@ -56,8 +56,8 @@
         </TabControl.ItemTemplate>
 
         <TabControl.ContentTemplate>
-            <DataTemplate DataType="{x:Type vm:TabViewModel}">
-                <v:InputView DataContext="{Binding Content}" />
+            <DataTemplate DataType="{x:Type vm:InputViewModel}">
+                <v:InputView/>
             </DataTemplate>
         </TabControl.ContentTemplate>
 

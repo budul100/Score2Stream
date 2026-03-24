@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using OpenCvSharp;
 using Score2Stream.Commons.Assets;
-using Score2Stream.Commons.Enums;
-using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Models.Contents;
 
 namespace Score2Stream.VideoService.Extensions

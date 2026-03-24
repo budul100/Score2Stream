@@ -257,29 +257,19 @@ namespace Score2Stream.InputService
             isInitializing = false;
         }
 
-        public async Task RemoveAsync(Input input = default)
+        public async Task RemoveAsync(Input input)
         {
-            input ??= Active;
+            if (input == default) return;
 
-            if (input != default)
+            if (input.VideoService != default)
             {
-                var result = await dialogService.GetMessageBoxResultAsync(
-                    contentMessage: $"Shall {input.Name} be removed?",
-                    contentTitle: "Remove input");
+                await input.VideoService.StopAsync();
+                await input.VideoService.DisposeAsync();
 
-                if (result == ButtonResult.Yes)
-                {
-                    if (input.VideoService != default)
-                    {
-                        await input.VideoService.StopAsync();
-                        await input.VideoService.DisposeAsync();
-
-                        input.VideoService = default;
-                    }
-
-                    RemoveInput(input);
-                }
+                input.VideoService = default;
             }
+
+            RemoveInput(input);
         }
 
         public void Select(Input input)
@@ -488,25 +478,24 @@ namespace Score2Stream.InputService
 
         private void RemoveInput(Input input)
         {
-            if (input != default)
+            if (input == default) return;
+
+            input.IsActive = false;
+
+            if (input == Active)
             {
-                input.IsActive = false;
+                var relevants = Inputs
+                    .Where(i => i != input
+                        && i.IsActive).ToArray();
 
-                if (input == Active)
-                {
-                    var relevants = Inputs
-                        .Where(i => i != input
-                            && i.IsActive).ToArray();
+                var next = relevants.Length > 1
+                    ? relevants.GetNext(input)
+                    : default;
 
-                    var next = relevants.Length > 1
-                        ? relevants.GetNext(input)
-                        : default;
-
-                    Select(next);
-                }
-
-                SaveInputs();
+                Select(next);
             }
+
+            SaveInputs();
         }
 
         private void SaveInputs()

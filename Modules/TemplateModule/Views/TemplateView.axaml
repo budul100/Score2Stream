@@ -10,7 +10,6 @@
     xmlns:vm="using:Score2Stream.TemplateModule.ViewModels"
     d:DesignHeight="200"
     d:DesignWidth="500"
-    prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d"
     Background="{StaticResource TemplateBackground}">
 

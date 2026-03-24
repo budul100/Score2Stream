@@ -32,7 +32,7 @@ namespace Score2Stream.Commons.Interfaces
 
         void Initialize();
 
-        Task RemoveAsync(Input input = default);
+        Task RemoveAsync(Input input);
 
         void Select(Input input);
 

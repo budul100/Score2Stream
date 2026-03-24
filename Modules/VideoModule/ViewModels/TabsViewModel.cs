@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Avalonia.Xaml.Interactions.Custom;
-using Prism.Commands;
 using Prism.Events;
-using Prism.Ioc;
 using Prism.Regions;
 using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Interfaces;
@@ -21,7 +18,7 @@ namespace Score2Stream.VideoModule.ViewModels
         private readonly Func<InputViewModel> inputViewModelFactory;
 
         private bool isRefreshing;
-        private TabViewModel selectedTab;
+        private InputViewModel tab;
 
         #endregion Private Fields
 
@@ -33,6 +30,8 @@ namespace Score2Stream.VideoModule.ViewModels
         {
             this.inputService = inputService;
             this.inputViewModelFactory = inputViewModelFactory;
+
+            // The selected event is needed to show the loading status of the tab.
 
             eventAggregator.GetEvent<InputSelectedEvent>().Subscribe(
                 action: _ => RefreshTabs(),
@@ -53,14 +52,14 @@ namespace Score2Stream.VideoModule.ViewModels
 
         #region Public Properties
 
-        public TabViewModel Tab
+        public InputViewModel Tab
         {
-            get => selectedTab;
+            get => tab;
             set
             {
                 if (isRefreshing) return;
 
-                SetProperty(ref selectedTab, value);
+                SetProperty(ref tab, value);
 
                 if (value != default
                     && inputService.Active != value.Input)
@@ -70,7 +69,7 @@ namespace Score2Stream.VideoModule.ViewModels
             }
         }
 
-        public ObservableCollection<TabViewModel> Tabs { get; } = [];
+        public ObservableCollection<InputViewModel> Tabs { get; } = [];
 
         #endregion Public Properties
 
@@ -95,25 +94,19 @@ namespace Score2Stream.VideoModule.ViewModels
                 .Where(i => i.VideoService != default
                     && i.IsStarted).ToArray();
 
-            var selected = default(TabViewModel);
+            var selected = default(InputViewModel);
 
             foreach (var relevant in relevants)
             {
                 var viewModel = inputViewModelFactory.Invoke();
-                var closeCommand = new DelegateCommand(async () =>
-                    await inputService.RemoveAsync(relevant));
 
-                var tab = new TabViewModel(
-                    Input: relevant,
-                    Name: relevant.Name,
-                    Content: viewModel,
-                    CloseCommand: closeCommand);
+                viewModel.Initialize(relevant);
 
-                Tabs.Add(tab);
+                Tabs.Add(viewModel);
 
                 if (relevant == inputService.Active)
                 {
-                    selected = tab;
+                    selected = viewModel;
                 }
             }
 

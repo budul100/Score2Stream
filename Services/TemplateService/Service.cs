@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using MsBox.Avalonia.Enums;
 using OpenCvSharp;
 using Prism.Events;
-using Prism.Ioc;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Events.Menu;
 using Score2Stream.Commons.Events.Sample;
@@ -94,28 +92,20 @@ namespace Score2Stream.TemplateService
             isInitializing = false;
         }
 
-        public async Task RemoveAsync(Template template = default)
+        public void Remove(Template template)
         {
-            template ??= Active;
+            if (template == default) return;
 
-            if (template != default)
+            if (template == Active)
             {
-                var canBeRemoved = !((Active?.Samples?.Count > 0) || !string.IsNullOrWhiteSpace(Active.Empty));
+                var active = Templates.Count > 1
+                    ? Templates.GetNext(template)
+                    : default;
 
-                if (!canBeRemoved)
-                {
-                    var messageBoxResult = await dialogService.GetMessageBoxResultAsync(
-                        contentMessage: $"Shall {template.Name} be removed?",
-                        contentTitle: "Remove template");
-
-                    canBeRemoved = messageBoxResult == ButtonResult.Yes;
-                }
-
-                if (canBeRemoved)
-                {
-                    RemoveTemplate(template);
-                }
+                Select(active);
             }
+
+            RemoveTemplate(template);
         }
 
         public void Select(Template template)
@@ -216,15 +206,6 @@ namespace Score2Stream.TemplateService
         private void RemoveTemplate(Template template)
         {
             if (template == default) return;
-
-            if (template == Active)
-            {
-                var next = Templates.Count > 1
-                    ? Templates.GetNext(template)
-                    : default;
-
-                Select(next);
-            }
 
             if (template.SampleService != default)
             {

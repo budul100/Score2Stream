@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Prism.Commands;
 using Prism.Events;
-using Prism.Ioc;
 using Prism.Regions;
 using Score2Stream.Commons.Events.Template;
 using Score2Stream.Commons.Interfaces;
@@ -20,7 +18,7 @@ namespace Score2Stream.TemplateModule.ViewModels
         private readonly Func<TemplateViewModel> templateViewModelFactory;
 
         private bool isRefreshing;
-        private TabViewModel selectedTab;
+        private TemplateViewModel tab;
 
         #endregion Private Fields
 
@@ -33,12 +31,14 @@ namespace Score2Stream.TemplateModule.ViewModels
             this.templateService = templateService;
             this.templateViewModelFactory = templateViewModelFactory;
 
-            eventAggregator.GetEvent<TemplatesChangedEvent>().Subscribe(
-                action: RefreshTabs,
-                keepSubscriberReferenceAlive: true);
+            // The selected event is needed to show the loading status of the tab.
 
             eventAggregator.GetEvent<TemplateSelectedEvent>().Subscribe(
                 action: _ => RefreshTabs(),
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<TemplatesChangedEvent>().Subscribe(
+                action: RefreshTabs,
                 keepSubscriberReferenceAlive: true);
 
             RefreshTabs();
@@ -48,14 +48,14 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         #region Public Properties
 
-        public TabViewModel Tab
+        public TemplateViewModel Tab
         {
-            get => selectedTab;
+            get => tab;
             set
             {
                 if (isRefreshing) return;
 
-                SetProperty(ref selectedTab, value);
+                SetProperty(ref tab, value);
 
                 if (value != default
                     && templateService.Active != value.Template)
@@ -65,7 +65,7 @@ namespace Score2Stream.TemplateModule.ViewModels
             }
         }
 
-        public ObservableCollection<TabViewModel> Tabs { get; } = [];
+        public ObservableCollection<TemplateViewModel> Tabs { get; } = [];
 
         #endregion Public Properties
 
@@ -89,25 +89,19 @@ namespace Score2Stream.TemplateModule.ViewModels
             var relevants = templateService.Templates
                 .Where(i => i.SampleService != default).ToArray();
 
-            var selected = default(TabViewModel);
+            var selected = default(TemplateViewModel);
 
             foreach (var relevant in relevants)
             {
                 var viewModel = templateViewModelFactory.Invoke();
-                var closeCommand = new DelegateCommand(async () =>
-                    await templateService.RemoveAsync(relevant));
 
-                var tab = new TabViewModel(
-                    Template: relevant,
-                    Name: relevant.Name,
-                    Content: viewModel,
-                    CloseCommand: closeCommand);
+                viewModel.Initialize(relevant);
 
-                Tabs.Add(tab);
+                Tabs.Add(viewModel);
 
                 if (relevant == templateService.Active)
                 {
-                    selected = tab;
+                    selected = viewModel;
                 }
             }
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
@@ -18,8 +19,8 @@ namespace Score2Stream.VideoModule.ViewModels
     {
         #region Private Fields
 
-        private readonly IContainerProvider containerProvider;
         private readonly INavigationService navigationService;
+        private readonly Func<SegmentViewModel> segmentViewModelFactory;
 
         private IAreaService areaService;
         private double? height;
@@ -35,10 +36,10 @@ namespace Score2Stream.VideoModule.ViewModels
 
         #region Public Constructors
 
-        public AreaViewModel(IContainerProvider containerProvider, INavigationService navigationService,
+        public AreaViewModel(Func<SegmentViewModel> segmentViewModelFactory, INavigationService navigationService,
             IEventAggregator eventAggregator)
         {
-            this.containerProvider = containerProvider;
+            this.segmentViewModelFactory = segmentViewModelFactory;
             this.navigationService = navigationService;
 
             OnPressedCommand = new DelegateCommand(
@@ -241,14 +242,13 @@ namespace Score2Stream.VideoModule.ViewModels
 
             RaisePropertyChanged(nameof(Description));
 
-            UpdateSize(
+            InitializeSegments(areaService);
+
+            InitializeSize(
                 actualLeft: actualLeft,
                 actualTop: actualTop,
                 actualWidth: actualWidth,
                 actualHeight: actualHeight);
-
-            UpdateSegments(
-                areaService: areaService);
 
             UpdateStatus();
         }
@@ -257,35 +257,27 @@ namespace Score2Stream.VideoModule.ViewModels
 
         #region Private Methods
 
-        private void OnPressed()
-        {
-            if (navigationService.EditView == ViewType.Inputs)
-            {
-                areaService.Select(Area);
-            }
-        }
-
-        private void UpdateSegments(IAreaService areaService)
+        private void InitializeSegments(IAreaService areaService)
         {
             Segments.Clear();
 
             foreach (var segment in Area.Segments)
             {
-                var current = containerProvider.Resolve<SegmentViewModel>();
+                var viewModel = segmentViewModelFactory.Invoke();
 
-                current.Initialize(
+                viewModel.Initialize(
                     segment: segment,
                     zoom: zoom,
                     areaService: areaService);
 
-                Segments.Add(current);
+                Segments.Add(viewModel);
             }
 
             RaisePropertyChanged(nameof(Size));
             RaisePropertyChanged(nameof(Segments));
         }
 
-        private void UpdateSize(double? actualLeft, double? actualTop, double? actualWidth,
+        private void InitializeSize(double? actualLeft, double? actualTop, double? actualWidth,
             double? actualHeight)
         {
             if (actualWidth.HasValue
@@ -296,6 +288,14 @@ namespace Score2Stream.VideoModule.ViewModels
 
                 Left = actualLeft + (Area.X1 * actualWidth);
                 Top = actualTop + (Area.Y1 * actualHeight);
+            }
+        }
+
+        private void OnPressed()
+        {
+            if (navigationService.EditView == ViewType.Inputs)
+            {
+                areaService.Select(Area);
             }
         }
 

@@ -4,9 +4,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
-using Prism.Events;
 using Score2Stream.Commons.Assets;
-using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Base;
@@ -148,8 +146,6 @@ namespace Score2Stream.RecognitionService
                         Type = type,
                         Value = sample.Value,
                     };
-
-                    sample.Match = result;
 
                     yield return result;
                 }

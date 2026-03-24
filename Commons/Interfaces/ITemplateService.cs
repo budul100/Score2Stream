@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
 using Score2Stream.Commons.Models.Contents;
 
 namespace Score2Stream.Commons.Interfaces
@@ -22,7 +21,7 @@ namespace Score2Stream.Commons.Interfaces
 
         void Initialize();
 
-        Task RemoveAsync(Template template = default);
+        void Remove(Template template);
 
         void Select(Template template);
 

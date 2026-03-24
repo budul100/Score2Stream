@@ -29,28 +29,20 @@
         Margin="2"
         BorderBrush="LightGray"
         BorderThickness="2"
-        CornerRadius="3">
+        CornerRadius="3"
+        Classes.IsSelected="{Binding IsSelected}">
+
+        <Border.Styles>
+            <Style Selector="Border#AreaBorder.IsSelected">
+                <Setter Property="Background" Value="LightBlue" />
+            </Style>
+
+            <Style Selector="Border#AreaBorder">
+                <Setter Property="Background" Value="Gainsboro" />
+            </Style>
+        </Border.Styles>
 
         <i:Interaction.Behaviors>
-            <ia:DataTriggerBehavior
-                Binding="{Binding IsActive}"
-                ComparisonCondition="Equal"
-                Value="True">
-                <ia:ChangePropertyAction
-                    PropertyName="Background"
-                    TargetObject="{Binding #AreaBorder}"
-                    Value="LightBlue" />
-            </ia:DataTriggerBehavior>
-            <ia:DataTriggerBehavior
-                Binding="{Binding IsActive}"
-                ComparisonCondition="NotEqual"
-                Value="True">
-                <ia:ChangePropertyAction
-                    PropertyName="Background"
-                    TargetObject="{Binding #AreaBorder}"
-                    Value="Gainsboro" />
-            </ia:DataTriggerBehavior>
-
             <ia:EventTriggerBehavior EventName="PointerPressed" SourceObject="{Binding #AreaBorder}">
                 <ia:InvokeCommandAction Command="{Binding OnSelectionCommand}" />
             </ia:EventTriggerBehavior>
@@ -70,6 +62,7 @@
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     Text="Type" />
+
                 <ComboBox
                     Width="{StaticResource ValueWidth}"
                     HorizontalAlignment="Left"
@@ -77,12 +70,21 @@
                     IsEnabled="{Binding ItemsSource, RelativeSource={RelativeSource Self}, Converter={StaticResource HasItemsConverter}}"
                     ItemsSource="{Binding Types}"
                     SelectedItem="{Binding Type}">
+
+                    <ComboBox.Resources>
+                        <SolidColorBrush x:Key="ComboBoxBackground" Color="White" />
+                        <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="White" />
+                        <SolidColorBrush x:Key="ComboBoxBackgroundPressed" Color="White" />
+                        <SolidColorBrush x:Key="ComboBoxBackgroundDisabled" Color="WhiteSmoke" />
+                    </ComboBox.Resources>
+
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Converter={StaticResource DescriptionToStringConverter}}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
+
             </StackPanel>
 
             <StackPanel
@@ -94,6 +96,7 @@
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     Text="Template" />
+
                 <ComboBox
                     Name="TemplatesComboBox"
                     Width="{StaticResource ValueWidth}"
@@ -102,11 +105,20 @@
                     IsEnabled="{Binding ItemsSource, RelativeSource={RelativeSource Self}, Converter={StaticResource HasItemsConverter}}"
                     ItemsSource="{Binding Templates}"
                     SelectedItem="{Binding Template, Mode=TwoWay}">
+
+                    <ComboBox.Resources>
+                        <SolidColorBrush x:Key="ComboBoxBackground" Color="White" />
+                        <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="White" />
+                        <SolidColorBrush x:Key="ComboBoxBackgroundPressed" Color="White" />
+                        <SolidColorBrush x:Key="ComboBoxBackgroundDisabled" Color="WhiteSmoke" />
+                    </ComboBox.Resources>
+
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Converter={StaticResource TemplateToStringConverter}}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
+
                 </ComboBox>
             </StackPanel>
 
@@ -119,6 +131,7 @@
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     Text="Contrast" />
+
                 <NumericUpDown
                     Width="{StaticResource ValueWidth}"
                     MaxHeight="5"
@@ -127,7 +140,17 @@
                     Increment="5"
                     Maximum="100"
                     Minimum="0"
-                    Value="{Binding ThresholdMonochrome, Mode=TwoWay}" />
+                    Value="{Binding ThresholdMonochrome, Mode=TwoWay}" >
+
+                    <NumericUpDown.Resources>
+                        <SolidColorBrush x:Key="NumericUpDownBackground" Color="White" />
+                        <SolidColorBrush x:Key="TextControlBackground" Color="White" />
+                        <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="White" />
+                        <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="White" />
+                        <SolidColorBrush x:Key="TextControlBackgroundDisabled" Color="WhiteSmoke" />
+                    </NumericUpDown.Resources>
+                </NumericUpDown>
+
             </StackPanel>
 
             <StackPanel
@@ -139,6 +162,7 @@
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     Text="Noise removal" />
+
                 <NumericUpDown
                     Width="{StaticResource ValueWidth}"
                     MaxHeight="5"
@@ -147,7 +171,17 @@
                     Increment="1"
                     Maximum="10"
                     Minimum="0"
-                    Value="{Binding NoiseRemoval, Mode=TwoWay}" />
+                    Value="{Binding NoiseRemoval, Mode=TwoWay}">
+
+                    <NumericUpDown.Resources>
+                        <SolidColorBrush x:Key="NumericUpDownBackground" Color="White" />
+                        <SolidColorBrush x:Key="TextControlBackground" Color="White" />
+                        <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="White" />
+                        <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="White" />
+                        <SolidColorBrush x:Key="TextControlBackgroundDisabled" Color="WhiteSmoke" />
+                    </NumericUpDown.Resources>
+                </NumericUpDown>
+
             </StackPanel>
 
             <ItemsControl

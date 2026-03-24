@@ -382,7 +382,7 @@ namespace Score2Stream.Tests.InputServiceTests
             await Task.Delay(100);
             firstInput = inputService.Active;
 
-            // Nach dem ersten Run: IsStarted zurücksetzen, damit der zweite Input auch gestartet wird
+            // After the first run: reset IsStarted so the second input can also be started
             videoServiceMock.Setup(v => v.IsStarted).Returns(false);
 
             inputService.SelectDevice("Cam2");
@@ -449,52 +449,7 @@ namespace Score2Stream.Tests.InputServiceTests
         }
 
         [Fact]
-        public async Task RemoveAsync_NoActiveInput_DoesNothing()
-        {
-            // Active is null by default, no input passed → early return
-            await inputService.RemoveAsync();
-
-            dialogServiceMock.Verify(d => d.GetMessageBoxResultAsync(
-                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ButtonEnum>(),
-                It.IsAny<ClickEnum>(), It.IsAny<ClickEnum>(), It.IsAny<Icon>(),
-                It.IsAny<bool>(), It.IsAny<WindowStartupLocation>()), Times.Never);
-
-            settingsServiceMock.Verify(s => s.Save(It.IsAny<string>()), Times.Never);
-        }
-
-        [Fact]
-        public async Task RemoveAsync_UserSaysNo_DoesNotStopOrSave()
-        {
-            // Arrange
-            var areaServiceMock = new Mock<IAreaService>();
-            var videoServiceMock = new Mock<IVideoService>();
-            videoServiceMock.Setup(v => v.AreaService).Returns(areaServiceMock.Object);
-
-            var input = new Input
-            {
-                DeviceName = "TestCam",
-                IsDevice = true,
-                Name = "TestCam",
-                VideoService = videoServiceMock.Object,
-            };
-
-            dialogServiceMock
-                .Setup(d => d.GetMessageBoxResultAsync(
-                    It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ButtonEnum>(),
-                    It.IsAny<ClickEnum>(), It.IsAny<ClickEnum>(), It.IsAny<Icon>(),
-                    It.IsAny<bool>(), It.IsAny<WindowStartupLocation>()))
-                .ReturnsAsync(ButtonResult.No);
-
-            // Act
-            await inputService.RemoveAsync(input);
-
-            // Assert
-            videoServiceMock.Verify(v => v.StopAsync(), Times.Never);
-            settingsServiceMock.Verify(s => s.Save(It.IsAny<string>()), Times.Never);
-        }
-
-        [Fact]
-        public async Task RemoveAsync_UserSaysYes_StopsDisposesAndSaves()
+        public async Task RemoveAsync_StopsDisposesAndSaves()
         {
             // Arrange
             var videoServiceMock = CreateVideoServiceMock();
@@ -506,13 +461,6 @@ namespace Score2Stream.Tests.InputServiceTests
                 VideoService = videoServiceMock.Object,
             };
             session.Inputs = [input];
-
-            dialogServiceMock
-                .Setup(d => d.GetMessageBoxResultAsync(
-                    It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ButtonEnum>(),
-                    It.IsAny<ClickEnum>(), It.IsAny<ClickEnum>(), It.IsAny<Icon>(),
-                    It.IsAny<bool>(), It.IsAny<WindowStartupLocation>()))
-                .ReturnsAsync(ButtonResult.Yes);
 
             // Act
             await inputService.RemoveAsync(input);

@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Prism.Events;
+using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Events.Graphics;
 using Score2Stream.Commons.Events.Scoreboard;
 using Score2Stream.Commons.Interfaces;
@@ -31,7 +32,7 @@ namespace Score2Stream.WebService
 
         #region Public Constructors
 
-        public Service(ISettingsService<Session> settingsService, 
+        public Service(ISettingsService<Session> settingsService,
             IDispatcherService dispatcherService, IEventAggregator eventAggregator)
         {
             this.settingsService = settingsService;
@@ -139,17 +140,31 @@ namespace Score2Stream.WebService
 
             eventAggregator.GetEvent<ServerStoppedEvent>().Publish();
 
+            var timeout = TimeSpan.FromSeconds(Constants.ShutdownTimeoutSecs);
+
             if (webServerTask != default)
             {
-                // To let the exceptions exit
-                await webServerTask;
+                try
+                {
+                    await webServerTask.WaitAsync(timeout);
+                }
+                catch { }
             }
 
             if (webSocketTask != default)
             {
-                // To let the exceptions exit
-                await webSocketTask;
+                try
+                {
+                    await webSocketTask.WaitAsync(timeout);
+                }
+                catch { }
             }
+
+            cancellationTokenSource?.Dispose();
+            cancellationTokenSource = default;
+
+            webServer = default;
+            webSocket = default;
         }
 
         #endregion Public Methods

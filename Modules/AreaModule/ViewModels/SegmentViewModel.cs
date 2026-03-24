@@ -39,7 +39,9 @@ namespace Score2Stream.AreaModule.ViewModels
 
         public Bitmap Bitmap => segment.Bitmap;
 
-        public string Description => segment.GetDescription();
+        public string Description => segment.GetDescription(
+            showEmptyValue: true,
+            includeType: false);
 
         #endregion Public Properties
 

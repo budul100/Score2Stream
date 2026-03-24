@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -45,6 +46,7 @@ namespace Score2Stream.VideoService
         private int heightMax;
         private Input input;
         private volatile bool isDisposed;
+        private Segment lastActive;
         private Task serviceTask;
         private int widthLast;
         private int widthMax;
@@ -198,9 +200,11 @@ namespace Score2Stream.VideoService
 
             if (serviceTask != null)
             {
+                var timeout = TimeSpan.FromSeconds(Constants.ShutdownTimeoutSecs);
+
                 try
                 {
-                    await serviceTask;
+                    await serviceTask.WaitAsync(timeout);
                 }
                 catch { }
             }
@@ -284,7 +288,7 @@ namespace Score2Stream.VideoService
                         location1: ref widthMax,
                         value: segments.Max(a => a.Rect.Value.Width));
 
-                    await Task.WhenAll(segments.Select(segment => UpdateBitmapAsync(
+                    await Task.WhenAll(segments.Select(segment => UpdateSegmentAsync(
                         segment: segment,
                         cancellationToken: cancellationToken)));
                 }
@@ -487,10 +491,8 @@ namespace Score2Stream.VideoService
             }
         }
 
-        private async Task UpdateBitmapAsync(Segment segment, CancellationToken cancellationToken)
+        private async Task UpdateImageAsync(Segment segment, CancellationToken cancellationToken)
         {
-            if (isDisposed) return;
-
             segment.Image = default;
 
             var current = GetImage(segment);
@@ -529,15 +531,43 @@ namespace Score2Stream.VideoService
             await dispatcherService.InvokeAsync(
                 action: () => segmentDrawnEvent.Publish(segment),
                 cancellationToken: cancellationToken);
+        }
 
-            RecognitionService.Bind(segment);
+        private async Task UpdateMatchAsync(Segment segment, IEnumerable<Match> matches,
+            CancellationToken cancellationToken)
+        {
+            var match = matches?
+                .Where(m => m?.Type != MatchType.None)
+                .OrderByDescending(m => m?.Similarity)?.FirstOrDefault();
 
-            await UpdateSegmentAsync(
-                segment: segment,
-                cancellationToken: cancellationToken);
+            match ??= RecognitionService.Detect(segment);
 
-            await UpdateSamplesAsync(
-                segment: segment,
+            var waitingDurationMS = Math.Abs(settingsService.Contents.Detection.DurationDetectionWait);
+            var waitingDuration = TimeSpan.FromMilliseconds(waitingDurationMS);
+
+            if (match != default)
+            {
+                match.Type = MatchType.Match;
+
+                segment.SetValue(
+                    value: match.Value,
+                    hasValue: true,
+                    similarity: match.Similarity,
+                    waitingDuration: waitingDuration);
+            }
+            else
+            {
+                var value = segment.Area?.Template?.Empty;
+
+                segment.SetValue(
+                    value: value,
+                    hasValue: false,
+                    similarity: 0.0,
+                    waitingDuration: waitingDuration);
+            }
+
+            await dispatcherService.InvokeAsync(
+                action: () => segmentUpdatedEvent.Publish(segment),
                 cancellationToken: cancellationToken);
         }
 
@@ -586,7 +616,8 @@ namespace Score2Stream.VideoService
             }
         }
 
-        private async Task UpdateSamplesAsync(Segment segment, CancellationToken cancellationToken)
+        private async Task UpdateSamplesAsync(Segment segment, IEnumerable<Sample> samples,
+            IEnumerable<Match> matches, CancellationToken cancellationToken)
         {
             var templateSamples = TemplateService.Active?.Samples?.ToArray();
 
@@ -594,42 +625,54 @@ namespace Score2Stream.VideoService
             {
                 if (AreaService?.ActiveSegment == segment)
                 {
-                    var segmentSamples = segment?.Area?.Template?.Samples?.ToArray();
-
-                    if (segmentSamples?.Length > 0
-                        && templateSamples?.SequenceEqual(segmentSamples) == true)
+                    if (samples?.Count() > 0
+                        && templateSamples?.SequenceEqual(samples) == true)
                     {
-                        foreach (var segmentSample in segmentSamples)
+                        var segmentSamples = samples.ToArray();
+                        var segmentMatches = matches?.ToArray();
+
+                        for (var index = 0; index < segmentSamples.Length; index++)
                         {
+                            segmentSamples[index].Match = segmentMatches?.Length > 0
+                                ? segmentMatches[index]
+                                : default;
+
                             await dispatcherService.InvokeAsync(
-                                action: () => sampleUpdatedEvent.Publish(segmentSample),
+                                action: () => sampleUpdatedEvent.Publish(segmentSamples[index]),
                                 cancellationToken: cancellationToken);
                         }
                     }
                     else
                     {
-                        var matches = RecognitionService.GetMatches(
+                        var templateMatches = RecognitionService.GetMatches(
                             segment: segment,
                             samples: templateSamples).ToArray();
 
-                        var match = matches?
+                        var templateMatch = templateMatches?
                             .Where(m => m?.Type != MatchType.None)
                             .OrderByDescending(m => m?.Similarity)?.FirstOrDefault();
 
-                        if (match != default)
+                        if (templateMatch != default)
                         {
-                            match.Type = MatchType.Match;
+                            templateMatch.Type = MatchType.Match;
                         }
 
-                        foreach (var templateSample in templateSamples)
+                        for (var index = 0; index < templateSamples.Length; index++)
                         {
+                            templateSamples[index].Match = templateMatches?.Length > 0
+                                ? templateMatches[index]
+                                : default;
+
                             await dispatcherService.InvokeAsync(
-                                action: () => sampleUpdatedEvent.Publish(templateSample),
+                                action: () => sampleUpdatedEvent.Publish(templateSamples[index]),
                                 cancellationToken: cancellationToken);
                         }
                     }
+
+                    lastActive = segment;
                 }
-                else if (AreaService?.ActiveSegment == default)
+                else if (AreaService?.ActiveSegment == default
+                    && lastActive == segment)
                 {
                     foreach (var templateSample in templateSamples)
                     {
@@ -639,50 +682,37 @@ namespace Score2Stream.VideoService
                             action: () => sampleUpdatedEvent.Publish(templateSample),
                             cancellationToken: cancellationToken);
                     }
+
+                    lastActive = default;
                 }
             }
         }
 
         private async Task UpdateSegmentAsync(Segment segment, CancellationToken cancellationToken)
         {
+            if (isDisposed) return;
+
+            await UpdateImageAsync(
+                segment: segment,
+                cancellationToken: cancellationToken);
+
+            RecognitionService.Bind(segment);
+
             var samples = segment?.Area?.Template?.Samples?.ToArray();
 
             var matches = RecognitionService.GetMatches(
                 segment: segment,
                 samples: samples).ToArray();
 
-            var match = matches?
-                .Where(m => m?.Type != MatchType.None)
-                .OrderByDescending(m => m?.Similarity)?.FirstOrDefault();
+            await UpdateMatchAsync(
+                segment: segment,
+                matches: matches,
+                cancellationToken: cancellationToken);
 
-            match ??= RecognitionService.Detect(segment);
-
-            var waitingDurationMS = Math.Abs(settingsService.Contents.Detection.DurationDetectionWait);
-            var waitingDuration = TimeSpan.FromMilliseconds(waitingDurationMS);
-
-            if (match != default)
-            {
-                match.Type = MatchType.Match;
-
-                segment.SetValue(
-                    value: match.Value,
-                    hasValue: true,
-                    similarity: match.Similarity,
-                    waitingDuration: waitingDuration);
-            }
-            else
-            {
-                var value = segment.Area?.Template?.Empty;
-
-                segment.SetValue(
-                    value: value,
-                    hasValue: false,
-                    similarity: 0.0,
-                    waitingDuration: waitingDuration);
-            }
-
-            await dispatcherService.InvokeAsync(
-                action: () => segmentUpdatedEvent.Publish(segment),
+            await UpdateSamplesAsync(
+                segment: segment,
+                samples: samples,
+                matches: matches,
                 cancellationToken: cancellationToken);
         }
 

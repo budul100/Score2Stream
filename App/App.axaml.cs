@@ -175,6 +175,7 @@ namespace Score2Stream.App
             try
             {
                 desktop.MainWindow = mainWindow;
+                desktop.ShutdownRequested += OnShutdownRequested;
 
                 var assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
                 var iconUri = $"avares://{assemblyName}/Assets/{assemblyName}.png";
@@ -197,6 +198,46 @@ namespace Score2Stream.App
                 desktop.MainWindow = default;
 
                 splashWindow?.Close();
+            }
+        }
+
+        private async void OnShutdownRequested(object sender, ShutdownRequestedEventArgs e)
+        {
+            e.Cancel = true;
+
+            try
+            {
+                await Task.Run(async () =>
+                {
+                    var webService = Container.Resolve<IWebService>();
+                    await webService.StopAsync();
+
+                    var inputService = Container.Resolve<IInputService>();
+                    if (inputService.Inputs?.Count > 0)
+                    {
+                        foreach (var input in inputService.Inputs.ToArray())
+                        {
+                            await inputService.RemoveAsync(input);
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(
+                    exception: ex,
+                    message: "Shutdown cleanup failed.");
+            }
+            finally
+            {
+                if (desktop != default)
+                {
+                    desktop.Shutdown();
+                }
+                else
+                {
+                    Environment.Exit(Constants.ExitCodeStandard);
+                }
             }
         }
 

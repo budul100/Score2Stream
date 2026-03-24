@@ -299,11 +299,13 @@ namespace Score2Stream.App.ViewModels
 
                 if (result == ButtonResult.Yes)
                 {
-                    eventArgs.Cancel = false;
-
                     userWantsToQuit = true;
                     desktop.Shutdown();
                 }
+            }
+            else if (userWantsToQuit)
+            {
+                eventArgs.Cancel = false;
             }
         }
 

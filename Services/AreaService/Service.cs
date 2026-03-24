@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
-using Avalonia.Markup.Xaml.Templates;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Score2Stream.AreaService.Extensions;

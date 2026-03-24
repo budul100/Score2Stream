@@ -182,7 +182,7 @@ namespace Score2Stream.Tests.TemplateServiceTests
         }
 
         [Fact]
-        public async Task RemoveAsync_ActiveTemplateWithSuccessor_SelectsNextTemplate()
+        public void Remove_ActiveTemplateWithSuccessor_SelectsNextTemplate()
         {
             // Arrange
             templateService.Create();
@@ -194,107 +194,42 @@ namespace Score2Stream.Tests.TemplateServiceTests
             SetupDialogResult(ButtonResult.Yes);
 
             // Act
-            await templateService.RemoveAsync(first);
+            templateService.Remove(first);
 
             // Assert
             Assert.Equal(second, templateService.Active);
         }
 
         [Fact]
-        public async Task RemoveAsync_DefaultParameter_UsesActiveTemplate()
-        {
-            // Arrange
-            templateService.Create();
-            var active = templateService.Active;
-            SetupDialogResult(ButtonResult.Yes);
-
-            // Act – call without explicit template argument
-            await templateService.RemoveAsync();
-
-            // Assert
-            Assert.DoesNotContain(active, templateService.Templates);
-        }
-
-        [Fact]
-        public async Task RemoveAsync_LastTemplate_ActiveBecomesNull()
+        public void Remove_ClearsSampleServiceAndSaves()
         {
             // Arrange
             templateService.Create();
             var template = templateService.Active;
-            SetupDialogResult(ButtonResult.Yes);
 
             // Act
-            await templateService.RemoveAsync(template);
-
-            // Assert
-            Assert.Null(templateService.Active);
-            Assert.Empty(templateService.Templates);
-        }
-
-        [Fact]
-        public async Task RemoveAsync_NullActiveTemplate_DoesNothing()
-        {
-            // Arrange – no template created, Active is null
-            SetupDialogResult(ButtonResult.Yes);
-
-            // Act – must not throw
-            await templateService.RemoveAsync();
-
-            // Assert
-            Assert.Empty(templateService.Templates);
-            settingsServiceMock.Verify(s => s.Save(It.IsAny<string>()), Times.Never);
-        }
-
-        [Fact]
-        public async Task RemoveAsync_UserSaysNo_DoesNotRemoveTemplate()
-        {
-            // Arrange
-            templateService.Create();
-            var template = templateService.Active;
-            template.Empty = "Test"; // Ensure template is not empty, so we can check if it remains unchanged
-            SetupDialogResult(ButtonResult.No);
-
-            // Act
-            await templateService.RemoveAsync(template);
-
-            // Assert – template still in list, nothing saved after initial Create
-            Assert.Contains(template, templateService.Templates);
-        }
-
-        [Fact]
-        public async Task RemoveAsync_UserSaysNo_DoesNotSave()
-        {
-            // Arrange
-            templateService.Create();
-            var template = templateService.Active;
-            template.Empty = "Test"; // Ensure template is not empty, so we can check if it remains unchanged
-            SetupDialogResult(ButtonResult.No);
-
-            // Reset invocation count after Create()
-            settingsServiceMock.Invocations.Clear();
-
-            // Act
-            await templateService.RemoveAsync(template);
-
-            // Assert
-            settingsServiceMock.Verify(s => s.Save(It.IsAny<string>()), Times.Never);
-        }
-
-        [Fact]
-        public async Task RemoveAsync_UserSaysYes_ClearsSampleServiceAndSaves()
-        {
-            // Arrange
-            templateService.Create();
-            var template = templateService.Active;
-            SetupDialogResult(ButtonResult.Yes);
-
-            // Act
-            await templateService.RemoveAsync(template);
+            templateService.Remove(template);
 
             // Assert – SampleService.Clear() must be called, template removed, settings saved
             // The mock returned by SetupSampleServiceMock was assigned to the template
             Assert.DoesNotContain(template, templateService.Templates);
             settingsServiceMock.Verify(s => s.Save(It.IsAny<string>()), Times.AtLeastOnce);
+        }
+
+        [Fact]
+        public void Remove_LastTemplate_ActiveBecomesNull()
+        {
+            // Arrange
+            templateService.Create();
+            var template = templateService.Active;
+            SetupDialogResult(ButtonResult.Yes);
+
+            // Act
+            templateService.Remove(template);
+
+            // Assert
+            Assert.Null(templateService.Active);
+            Assert.Empty(templateService.Templates);
         }
 
         [Fact]

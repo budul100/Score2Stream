@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Avalonia.Media;
 using Prism.Events;
@@ -16,22 +17,22 @@ namespace Score2Stream.ScoreboardModule.ViewModels
     {
         #region Private Fields
 
-        private readonly IContainerProvider containerProvider;
         private readonly ScoreboardModifiedEvent scoreboardModifiedEvent;
         private readonly IScoreboardService scoreboardService;
         private readonly ISettingsService<Session> settingsService;
+        private readonly Func<TickerViewModel> tickerViewModelFactory;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public ContentViewModel(ISettingsService<Session> settingsService, IScoreboardService scoreboardService,
-            IContainerProvider containerProvider, IRegionManager regionManager, IEventAggregator eventAggregator)
+        public ContentViewModel(IScoreboardService scoreboardService, ISettingsService<Session> settingsService,
+            Func<TickerViewModel> tickerViewModelFactory, IEventAggregator eventAggregator, IRegionManager regionManager)
             : base(regionManager: regionManager)
         {
-            this.settingsService = settingsService;
             this.scoreboardService = scoreboardService;
-            this.containerProvider = containerProvider;
+            this.settingsService = settingsService;
+            this.tickerViewModelFactory = tickerViewModelFactory;
 
             scoreboardModifiedEvent = eventAggregator.GetEvent<ScoreboardModifiedEvent>();
 
@@ -359,11 +360,11 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
             for (var index = 0; index < length; index++)
             {
-                var current = containerProvider.Resolve<TickerViewModel>();
+                var viewModel = tickerViewModelFactory.Invoke();
 
-                current.Initialize(index);
+                viewModel.Initialize(index);
 
-                Tickers.Add(current);
+                Tickers.Add(viewModel);
             }
         }
 

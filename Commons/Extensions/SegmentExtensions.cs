@@ -1,4 +1,5 @@
-﻿using Score2Stream.Commons.Enums;
+﻿using System.Text;
+using Score2Stream.Commons.Enums;
 using Score2Stream.Commons.Models.Contents;
 
 namespace Score2Stream.Commons.Extensions
@@ -7,38 +8,50 @@ namespace Score2Stream.Commons.Extensions
     {
         #region Public Methods
 
-        public static string GetDescription(this Segment segment, bool includeType = false)
+        public static string GetDescription(this Segment segment, bool showEmptyValue, bool includeType)
         {
-            var result = default(string);
+            var result = new StringBuilder();
 
             if (segment != default)
             {
-                string value;
+                if (includeType)
+                {
+                    if (segment.Type != SegmentType.None)
+                    {
+                        result.Append($"{segment.Type.GetDescription()} => ");
+                    }
+                    else
+                    {
+                        result.Append($"{segment.Area.Name} => ");
+                    }
+                }
 
                 if (segment.HasValue)
                 {
-                    value = !string.IsNullOrWhiteSpace(segment.Value)
-                        ? $"{segment.Value} ({segment.Similarity}%)"
-                        : $"-/- ({segment.Similarity}%)";
+                    result.Append(segment.Value);
+                }
+                else if (showEmptyValue
+                    && segment.Area.Template?.Empty != default)
+                {
+                    result.Append(segment.Area.Template?.Empty);
                 }
                 else
                 {
-                    value = "-/-";
+                    result.Append("-/-");
                 }
 
-                if (includeType)
+                if (segment.HasValue)
                 {
-                    result = segment.Type != SegmentType.None
-                        ? $"{segment.Type.GetDescription()} => {value}"
-                        : $"{segment.Area.Name} => {value}";
-                }
-                else
-                {
-                    result = value;
+                    if (result.Length > 0)
+                    {
+                        result.Append(' ');
+                    }
+
+                    result.Append($"({segment.Similarity}%)");
                 }
             }
 
-            return result;
+            return result.ToString();
         }
 
         #endregion Public Methods

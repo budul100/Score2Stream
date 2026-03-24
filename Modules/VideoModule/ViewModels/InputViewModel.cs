@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia.Controls.PanAndZoom;
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
@@ -48,8 +49,8 @@ namespace Score2Stream.VideoModule.ViewModels
 
         #region Public Constructors
 
-        public InputViewModel(IInputService inputService, INavigationService navigationService,
-            IDialogService dialogService, Func<AreaViewModel> areaViewModelFactory,
+        public InputViewModel(IInputService inputService, Func<AreaViewModel> areaViewModelFactory,
+            IDialogService dialogService, INavigationService navigationService,
             IEventAggregator eventAggregator)
         {
             this.inputService = inputService;
@@ -126,6 +127,8 @@ namespace Score2Stream.VideoModule.ViewModels
             }
         }
 
+        public DelegateCommand CloseCommand { get; private set; }
+
         public double FullHeight
         {
             get { return heightFull; }
@@ -145,6 +148,8 @@ namespace Score2Stream.VideoModule.ViewModels
                 SetDimensions();
             }
         }
+
+        public Input Input { get; private set; }
 
         public bool IsLoading
         {
@@ -203,9 +208,24 @@ namespace Score2Stream.VideoModule.ViewModels
             }
         }
 
+        public string Name => Input?.Name;
+
         public DelegateCommand<ZoomChangedEventArgs> ZoomChangedCommand { get; }
 
         #endregion Public Properties
+
+        #region Public Methods
+
+        public void Initialize(Input input)
+        {
+            Input = input;
+
+            CloseCommand = new DelegateCommand(async () => await RemoveAsync());
+
+            RaisePropertyChanged(nameof(Name));
+        }
+
+        #endregion Public Methods
 
         #region Private Methods
 
@@ -407,6 +427,20 @@ namespace Score2Stream.VideoModule.ViewModels
                 RefreshAreas();
 
                 IsLoading = false;
+            }
+        }
+
+        private async Task RemoveAsync()
+        {
+            if (Input == default) return;
+
+            var result = await dialogService.GetMessageBoxResultAsync(
+                contentMessage: $"Shall {Name} be removed?",
+                contentTitle: "Remove input");
+
+            if (result == ButtonResult.Yes)
+            {
+                await inputService.RemoveAsync(Input);
             }
         }
 

@@ -92,7 +92,7 @@ namespace Score2Stream.AreaModule.ViewModels
         }
 
         public DelegateCommand OnSelectionCommand { get; }
-       
+
         public ObservableCollection<SegmentViewModel> Segments { get; } = [];
 
         public Template Template

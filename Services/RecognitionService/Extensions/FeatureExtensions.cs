@@ -9,12 +9,24 @@ namespace Score2Stream.RecognitionService.Extensions
 
         public static float CosineSimilarity(this float[] a, float[] b)
         {
-            var dot = a.Zip(b, (x, y) => x * y).Sum();
-            var normA = MathF.Sqrt(a.Select(x => x * x).Sum());
-            var normB = MathF.Sqrt(b.Select(x => x * x).Sum());
+            if (a == null || b == null || a.Length != b.Length)
+                return default;
 
-            var result = (normA * normB) != 0
-                ? dot / (normA * normB)
+            var dot = 0f;
+            var normA = 0f;
+            var normB = 0f;
+
+            for (var index = 0; index < a.Length; index++)
+            {
+                dot += a[index] * b[index];
+                normA += a[index] * a[index];
+                normB += b[index] * b[index];
+            }
+
+            var denom = MathF.Sqrt(normA) * MathF.Sqrt(normB);
+
+            var result = denom != 0
+                ? dot / denom
                 : default;
 
             return result;

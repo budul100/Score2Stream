@@ -1,9 +1,12 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
+using MsBox.Avalonia.Enums;
+using Prism.Commands;
 using Prism.Events;
-using Prism.Ioc;
-using Prism.Regions;
+using Prism.Mvvm;
 using Score2Stream.Commons.Events.Menu;
 using Score2Stream.Commons.Events.Sample;
 using Score2Stream.Commons.Events.Segment;
@@ -11,17 +14,17 @@ using Score2Stream.Commons.Events.Template;
 using Score2Stream.Commons.Extensions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Models.Contents;
-using Score2Stream.Commons.Prism;
 
 namespace Score2Stream.TemplateModule.ViewModels
 {
     public class TemplateViewModel
-        : RegionViewModelBase
+        : BindableBase
     {
         #region Private Fields
 
-        private readonly IContainerProvider containerProvider;
+        private readonly IDialogService dialogService;
         private readonly IInputService inputService;
+        private readonly Func<SampleViewModel> sampleViewModelFactory;
         private readonly ITemplateService templateService;
 
         private bool isDetection;
@@ -30,14 +33,14 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         #region Public Constructors
 
-        public TemplateViewModel(IInputService inputService, ITemplateService templateService,
-            IContainerProvider containerProvider, IRegionManager regionManager,
+        public TemplateViewModel(ITemplateService templateService, IInputService inputService,
+            Func<SampleViewModel> sampleViewModelFactory, IDialogService dialogService,
             IEventAggregator eventAggregator)
-            : base(regionManager)
         {
             this.inputService = inputService;
             this.templateService = templateService;
-            this.containerProvider = containerProvider;
+            this.sampleViewModelFactory = sampleViewModelFactory;
+            this.dialogService = dialogService;
 
             eventAggregator.GetEvent<DetectionChangedEvent>().Subscribe(
                 action: () => IsDetection = templateService.SampleService.IsDetection,
@@ -70,11 +73,6 @@ namespace Score2Stream.TemplateModule.ViewModels
                 threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => s == inputService.AreaService?.ActiveSegment);
-
-            Template = templateService?.Active;
-
-            RefreshSamples();
-            OnSegmentSelected();
         }
 
         #endregion Public Constructors
@@ -83,7 +81,11 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         public Bitmap Bitmap => inputService.AreaService?.ActiveSegment?.Bitmap;
 
-        public string Description => inputService.AreaService?.ActiveSegment?.GetDescription(true);
+        public DelegateCommand CloseCommand { get; private set; }
+
+        public string Description => inputService.AreaService?.ActiveSegment?.GetDescription(
+            showEmptyValue: false,
+            includeType: true);
 
         public string Empty
         {
@@ -103,11 +105,29 @@ namespace Score2Stream.TemplateModule.ViewModels
             set => SetProperty(ref isDetection, value);
         }
 
+        public string Name => Template?.Name;
+
         public ObservableCollection<SampleViewModel> Samples { get; private set; } = [];
 
         public Template Template { get; private set; }
 
         #endregion Public Properties
+
+        #region Public Methods
+
+        public void Initialize(Template template)
+        {
+            Template = template;
+
+            CloseCommand = new DelegateCommand(async () => await RemoveAsync());
+
+            RaisePropertyChanged(nameof(Name));
+
+            RefreshSamples();
+            OnSegmentSelected();
+        }
+
+        #endregion Public Methods
 
         #region Private Methods
 
@@ -144,14 +164,35 @@ namespace Score2Stream.TemplateModule.ViewModels
 
                 foreach (var toBeAdded in toBeAddeds)
                 {
-                    var current = containerProvider.Resolve<SampleViewModel>();
+                    var sample = sampleViewModelFactory.Invoke();
 
-                    current.Initialize(
+                    sample.Initialize(
                         sample: toBeAdded,
                         templateService: templateService);
 
-                    Samples.Add(current);
+                    Samples.Add(sample);
                 }
+            }
+        }
+
+        private async Task RemoveAsync()
+        {
+            if (Template == default) return;
+
+            var canBeRemoved = !((Samples?.Count > 0) || !string.IsNullOrWhiteSpace(Empty));
+
+            if (!canBeRemoved)
+            {
+                var messageBoxResult = await dialogService.GetMessageBoxResultAsync(
+                    contentMessage: $"Shall {Name} be removed?",
+                    contentTitle: "Remove template");
+
+                canBeRemoved = messageBoxResult == ButtonResult.Yes;
+            }
+
+            if (canBeRemoved)
+            {
+                templateService.Remove(Template);
             }
         }
 
