@@ -74,6 +74,18 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         public string ClockShot { get; private set; }
 
+        public bool ClockWithTenthSec
+        {
+            get => scoreboardService.ClockWithTenthSec;
+            set
+            {
+                if (scoreboardService.ClockWithTenthSec == value) return;
+
+                scoreboardService.ClockWithTenthSec = value;
+                RaisePropertyChanged(nameof(ClockWithTenthSec));
+            }
+        }
+
         public Color ColorGuest
         {
             get => scoreboardService.ColorGuest;
@@ -275,15 +287,15 @@ namespace Score2Stream.ScoreboardModule.ViewModels
             }
         }
 
-        public bool ShowTenthOfSecs
+        public bool ShotWithTenthSec
         {
-            get => scoreboardService.ShowTenthOfSecs;
+            get => scoreboardService.ShotWithTenthSec;
             set
             {
-                if (scoreboardService.ShowTenthOfSecs == value) return;
+                if (scoreboardService.ShotWithTenthSec == value) return;
 
-                scoreboardService.ShowTenthOfSecs = value;
-                RaisePropertyChanged(nameof(ShowTenthOfSecs));
+                scoreboardService.ShotWithTenthSec = value;
+                RaisePropertyChanged(nameof(ShotWithTenthSec));
             }
         }
 

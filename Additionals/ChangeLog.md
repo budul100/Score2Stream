@@ -1,5 +1,9 @@
 # Change log
 
+## Version 1.14.1
+
+* Add separate tenth-second options for game and shot clock
+
 ## Version 1.14.0
 
 * Minor menu adjustments

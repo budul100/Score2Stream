@@ -25,13 +25,15 @@ namespace Score2Stream.Commons.Models.Settings
 
         #region Public Properties
 
+        public bool ClockWithTenthSec { get; set; }
+
         public string ColorGuest { get; set; } = Colors.Yellow.ToString();
 
         public string ColorHome { get; set; } = Colors.Blue.ToString();
 
         public string Periods { get; set; }
 
-        public bool ShowTenthOfSecs { get; set; }
+        public bool ShotWithTenthSec { get; set; }
 
         public string TeamGuest { get; set; }
 

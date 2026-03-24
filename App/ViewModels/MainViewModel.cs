@@ -204,6 +204,62 @@ namespace Score2Stream.App.ViewModels
 
             result.Append(assemblyTitle);
 
+            if (!scoreboardService.ScoreNotDetected)
+            {
+                if (!string.IsNullOrWhiteSpace(scoreboardService.ScoreHome))
+                {
+                    if (result.Length > 0)
+                    {
+                        result.Append(Constants.SplitterTitle);
+                    }
+
+                    result.Append("Home: ").Append(scoreboardService.ScoreHome);
+                }
+
+                if (!string.IsNullOrWhiteSpace(scoreboardService.ScoreGuest))
+                {
+                    if (result.Length > 0)
+                    {
+                        result.Append(Constants.SplitterTitle);
+                    }
+
+                    result.Append("Guest: ").Append(scoreboardService.ScoreGuest);
+                }
+            }
+
+            if (!scoreboardService.PeriodNotDetected
+                && !string.IsNullOrWhiteSpace(scoreboardService.Period))
+            {
+                if (result.Length > 0)
+                {
+                    result.Append(Constants.SplitterTitle);
+                }
+
+                result.Append("Period: ").Append(scoreboardService.Period);
+            }
+
+            if (!scoreboardService.ClockNotDetected
+                && !string.IsNullOrWhiteSpace(scoreboardService.ClockGame))
+            {
+                if (result.Length > 0)
+                {
+                    result.Append(Constants.SplitterTitle);
+                }
+
+                result.Append("Clock: ").Append(scoreboardService.ClockGame);
+            }
+
+            if (!scoreboardService.ShotNotDetected
+                && !string.IsNullOrWhiteSpace(scoreboardService.ClockShot))
+            {
+                if (result.Length > 0)
+                {
+                    result.Append(Constants.SplitterTitle);
+                }
+
+                result.Append("Shot: ").Append(scoreboardService.ClockShot);
+            }
+
             var processingTime = GetProcessingTimes();
 
             if (!string.IsNullOrWhiteSpace(processingTime))
@@ -214,56 +270,6 @@ namespace Score2Stream.App.ViewModels
                 }
 
                 result.Append(processingTime);
-            }
-
-            if (!string.IsNullOrWhiteSpace(scoreboardService.ClockGame))
-            {
-                if (result.Length > 0)
-                {
-                    result.Append(Constants.SplitterTitle);
-                }
-
-                result.Append("Game: ").Append(scoreboardService.ClockGame);
-            }
-
-            if (!string.IsNullOrWhiteSpace(scoreboardService.ClockShot))
-            {
-                if (result.Length > 0)
-                {
-                    result.Append(Constants.SplitterTitle);
-                }
-
-                result.Append("Shot: ").Append(scoreboardService.ClockShot);
-            }
-
-            if (!string.IsNullOrWhiteSpace(scoreboardService.Period))
-            {
-                if (result.Length > 0)
-                {
-                    result.Append(Constants.SplitterTitle);
-                }
-
-                result.Append("Period: ").Append(scoreboardService.Period);
-            }
-
-            if (!string.IsNullOrWhiteSpace(scoreboardService.ScoreHome))
-            {
-                if (result.Length > 0)
-                {
-                    result.Append(Constants.SplitterTitle);
-                }
-
-                result.Append("Home: ").Append(scoreboardService.ScoreHome);
-            }
-
-            if (!string.IsNullOrWhiteSpace(scoreboardService.ScoreGuest))
-            {
-                if (result.Length > 0)
-                {
-                    result.Append(Constants.SplitterTitle);
-                }
-
-                result.Append("Guest: ").Append(scoreboardService.ScoreGuest);
             }
 
             return result.ToString();

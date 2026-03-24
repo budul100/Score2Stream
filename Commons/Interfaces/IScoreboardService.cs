@@ -18,6 +18,8 @@ namespace Score2Stream.Commons.Interfaces
 
         bool ClockShotIsUpToDate { get; }
 
+        bool ClockWithTenthSec { get; set; }
+
         Color ColorGuest { get; set; }
 
         bool ColorGuestUpToDate { get; }
@@ -66,7 +68,7 @@ namespace Score2Stream.Commons.Interfaces
 
         bool ShotNotDetected { get; set; }
 
-        bool ShowTenthOfSecs { get; set; }
+        bool ShotWithTenthSec { get; set; }
 
         string TeamGuest { get; set; }
 

@@ -60,7 +60,7 @@
                 <Rectangle Grid.Row="8" Grid.Column="2" Grid.ColumnSpan="2" Fill="{Binding PeriodsUpToDate,    Converter={StaticResource BoolToHighlight}, ConverterParameter={StaticResource UpdateBackground}}" />
                 <Rectangle Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="4" Fill="{Binding IsGameOverUpToDate, Converter={StaticResource BoolToHighlight}, ConverterParameter={StaticResource UpdateBackground}}" />
 
-                <!-- ══════════════════════════════════════════════ Row 0: Colors ══ -->
+                <!-- ════════ Row 0: Colors ════════ -->
 
                 <TextBlock
                     Grid.Row="0" Grid.Column="0"
@@ -84,7 +84,7 @@
                     HorizontalAlignment="Left" VerticalAlignment="Center"
                     Color="{Binding ColorGuest, Mode=TwoWay}" />
 
-                <!-- ══════════════════════════════════════════ Row 1: Team names ══ -->
+                <!-- ════════ Row 1: Team names ════════ -->
 
                 <TextBlock
                     Grid.Row="1" Grid.Column="0"
@@ -110,7 +110,7 @@
                     MaxLength="{Binding MaxLengthTeam}"
                     Text="{Binding TeamGuest}" />
 
-                <!-- ════════════════════════════════════════════════ Row 2: Score ══ -->
+                <!-- ════════ Row 2: Score ════════ -->
 
                 <TextBlock
                     Grid.Row="2" Grid.Column="0"
@@ -142,10 +142,10 @@
                     x:Name="ScoreNotDetected"
                     Grid.Row="2" Grid.Column="4"
                     Margin="5" VerticalAlignment="Center"
-                    Content="Deactivate detection"
+                    Content="No detection"
                     IsChecked="{Binding ScoreNotDetected}" />
 
-                <!-- ════════════════════════════════════════════════ Row 3: Fouls ══ -->
+                <!-- ════════ Row 3: Fouls ════════ -->
 
                 <TextBlock
                     Grid.Row="3" Grid.Column="0"
@@ -177,10 +177,10 @@
                     x:Name="FoulsNotDetected"
                     Grid.Row="3" Grid.Column="4"
                     Margin="5" VerticalAlignment="Center"
-                    Content="Deactivate detection"
+                    Content="No detection"
                     IsChecked="{Binding FoulsNotDetected}" />
 
-                <!-- ══════════════════════════════════════════ Row 5: Game header ══ -->
+                <!-- ════════ Row 5: Game header ════════ -->
 
                 <TextBlock
                     Grid.Row="5" Grid.Column="0"
@@ -188,7 +188,7 @@
                     HorizontalAlignment="Left" VerticalAlignment="Center"
                     FontWeight="Bold" Text="Game" />
 
-                <!-- ═══════════════════════════════════════════ Row 6: Game clock ══ -->
+                <!-- ════════ Row 6: Game clock ════════ -->
 
                 <TextBlock
                     Grid.Row="6" Grid.Column="0"
@@ -203,21 +203,21 @@
                     Text="{Binding ClockGame, Mode=OneWay}" />
 
                 <CheckBox
-                    x:Name="ShowTenthOfSecsCheckbox"
+                    x:Name="ClockWithTenthSecCheckbox"
                     Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="2"
                     Margin="5" VerticalAlignment="Center"
                     Content="Show tenth of seconds"
-                    IsChecked="{Binding ShowTenthOfSecs}"
+                    IsChecked="{Binding ClockWithTenthSec}"
                     IsEnabled="{Binding !#ClockNotDetected.IsChecked}" />
 
                 <CheckBox
                     x:Name="ClockNotDetected"
                     Grid.Row="6" Grid.Column="4"
                     Margin="5" VerticalAlignment="Center"
-                    Content="Deactivate detection"
+                    Content="No detection"
                     IsChecked="{Binding ClockNotDetected}" />
 
-                <!-- ═══════════════════════════════════════════ Row 7: Shot clock ══ -->
+                <!-- ════════ Row 7: Shot clock ════════ -->
 
                 <TextBlock
                     Grid.Row="7" Grid.Column="0"
@@ -232,13 +232,21 @@
                     Text="{Binding ClockShot, Mode=OneWay}" />
 
                 <CheckBox
+                    x:Name="ShotWithTenthSecCheckbox"
+                    Grid.Row="7" Grid.Column="2" Grid.ColumnSpan="2"
+                    Margin="5" VerticalAlignment="Center"
+                    Content="Show tenth of seconds"
+                    IsChecked="{Binding ShotWithTenthSec}"
+                    IsEnabled="{Binding !#ShotNotDetected.IsChecked}" />
+
+                <CheckBox
                     x:Name="ShotNotDetected"
                     Grid.Row="7" Grid.Column="4"
                     Margin="5" VerticalAlignment="Center"
-                    Content="Deactivate detection"
+                    Content="No detection"
                     IsChecked="{Binding ShotNotDetected}" />
 
-                <!-- ══════════════════════════════════════ Row 8: Period / Periods ══ -->
+                <!-- ════════ Row 8: Period / Periods ════════ -->
 
                 <TextBlock
                     Grid.Row="8" Grid.Column="0"
@@ -269,10 +277,10 @@
                     x:Name="PeriodNotDetected"
                     Grid.Row="8" Grid.Column="4"
                     Margin="5" VerticalAlignment="Center"
-                    Content="Deactivate detection"
+                    Content="No detection"
                     IsChecked="{Binding PeriodNotDetected}" />
 
-                <!-- ══════════════════════════════════════════════ Row 9: Game over ══ -->
+                <!-- ════════ Row 9: Game over ════════ -->
 
                 <CheckBox
                     Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="4"
@@ -280,7 +288,7 @@
                     Content="Game is over"
                     IsChecked="{Binding IsGameOver}" />
 
-                <!-- ══════════════════════════════════════ Row 11: Tickers header ══ -->
+                <!-- ════════ Row 11: Tickers header ════════ -->
 
                 <TextBlock
                     Grid.Row="11" Grid.Column="0"
@@ -288,7 +296,7 @@
                     HorizontalAlignment="Left" VerticalAlignment="Center"
                     FontWeight="Bold" Text="Tickers" />
 
-                <!-- ═══════════════════════════════════════ Row 12: Ticker frequency ══ -->
+                <!-- ════════ Row 12: Ticker frequency ════════ -->
 
                 <TextBlock
                     Grid.Row="12" Grid.Column="0"

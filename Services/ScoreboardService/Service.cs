@@ -45,6 +45,7 @@ namespace Score2Stream.ScoreboardService
         private string scoreHome;
         private string secondsLast;
         private DateTime secondsUpdate;
+        private string shotLast;
         private string teamGuest;
         private string teamHome;
         private string ticker;
@@ -100,6 +101,19 @@ namespace Score2Stream.ScoreboardService
         public string ClockShot { get; private set; }
 
         public bool ClockShotIsUpToDate => ClockShot == clockShot;
+
+        public bool ClockWithTenthSec
+        {
+            get { return settingsService.Contents?.Scoreboard.ClockWithTenthSec ?? false; }
+            set
+            {
+                if (settingsService.Contents.Scoreboard.ClockWithTenthSec != value)
+                {
+                    settingsService.Contents.Scoreboard.ClockWithTenthSec = value;
+                    settingsService.Save();
+                }
+            }
+        }
 
         public Color ColorGuest
         {
@@ -221,14 +235,14 @@ namespace Score2Stream.ScoreboardService
 
         public bool ShotNotDetected { get; set; }
 
-        public bool ShowTenthOfSecs
+        public bool ShotWithTenthSec
         {
-            get { return settingsService.Contents?.Scoreboard.ShowTenthOfSecs ?? false; }
+            get { return settingsService.Contents?.Scoreboard.ShotWithTenthSec ?? false; }
             set
             {
-                if (settingsService.Contents.Scoreboard.ShowTenthOfSecs != value)
+                if (settingsService.Contents.Scoreboard.ShotWithTenthSec != value)
                 {
-                    settingsService.Contents.Scoreboard.ShowTenthOfSecs = value;
+                    settingsService.Contents.Scoreboard.ShotWithTenthSec = value;
                     settingsService.Save();
                 }
             }
@@ -511,7 +525,7 @@ namespace Score2Stream.ScoreboardService
 
             var currentTime = DateTime.Now;
 
-            if (ShowTenthOfSecs
+            if (ClockWithTenthSec
                 || seconds.Length > 1
                 || currentTime >= secondsUpdate.AddSeconds(1))
             {
@@ -534,15 +548,35 @@ namespace Score2Stream.ScoreboardService
         {
             var result = new StringBuilder();
 
+            var shot = new StringBuilder();
+
             if (segments[SegmentType.ClockShot1] != default)
             {
-                result.Append(segments[SegmentType.ClockShot1].Value);
+                shot.Append(segments[SegmentType.ClockShot1].Value);
             }
 
             if (segments[SegmentType.ClockShot2] != default)
             {
-                result.Append(segments[SegmentType.ClockShot2].Value);
+                shot.Append(segments[SegmentType.ClockShot2].Value);
             }
+
+            var currentTime = DateTime.Now;
+
+            if (ClockWithTenthSec
+                || shot.Length > 1
+                || currentTime >= secondsUpdate.AddSeconds(1))
+            {
+                result.Append(shot);
+            }
+
+            if (string.IsNullOrWhiteSpace(shotLast)
+                || shot.Length == 0
+                || shotLast != shot.ToString())
+            {
+                secondsUpdate = currentTime;
+            }
+
+            shotLast = shot.ToString();
 
             return result.ToString();
         }
