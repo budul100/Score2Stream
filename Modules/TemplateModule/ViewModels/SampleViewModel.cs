@@ -97,7 +97,7 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         public Sample Sample { get; private set; }
 
-        public string Similarity => Sample?.Match != default
+        public string Similarity => Sample?.Match?.Similarity > 0
             ? $"Similarity: {(int)(Sample.Match.Similarity * Constants.ThresholdDivider)}%"
             : default;
 

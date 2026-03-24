@@ -530,65 +530,15 @@ namespace Score2Stream.VideoService
                 action: () => segmentDrawnEvent.Publish(segment),
                 cancellationToken: cancellationToken);
 
-            await UpdateMatchesAsync(
-                segment: segment,
-                cancellationToken: cancellationToken);
-        }
-
-        private async Task UpdateMatchesAsync(Segment segment, CancellationToken cancellationToken)
-        {
-            var waitingDurationMS = Math.Abs(settingsService.Contents.Detection.DurationDetectionWait);
-            var waitingDuration = TimeSpan.FromMilliseconds(waitingDurationMS);
-
             RecognitionService.Bind(segment);
 
-            var samples = segment?.Area?.Template?.Samples?.ToArray();
-
-            var compares = RecognitionService.Compare(
+            await UpdateSegmentAsync(
                 segment: segment,
-                samples: samples).ToArray();
-
-            var match = compares?
-                .Where(s => s.Match?.Type != MatchType.None)
-                .OrderByDescending(s => s.Match?.Similarity)?.FirstOrDefault().Match;
-
-            match ??= RecognitionService.Detect(segment);
-
-            if (match != default)
-            {
-                match.Type = MatchType.Match;
-
-                segment.SetValue(
-                    value: match.Value,
-                    hasValue: true,
-                    similarity: match.Similarity,
-                    waitingDuration: waitingDuration);
-            }
-            else
-            {
-                var value = segment.Area?.Template?.Empty;
-
-                segment.SetValue(
-                    value: value,
-                    hasValue: false,
-                    similarity: 0.0,
-                    waitingDuration: waitingDuration);
-            }
-
-            await dispatcherService.InvokeAsync(
-                action: () => segmentUpdatedEvent.Publish(segment),
                 cancellationToken: cancellationToken);
 
-            if (segment == AreaService?.ActiveSegment
-                && compares?.Length > 0)
-            {
-                foreach (var compare in compares)
-                {
-                    compare.Sample.Match = compare.Match;
-
-                    sampleUpdatedEvent.Publish(compare.Sample);
-                }
-            }
+            await UpdateSamplesAsync(
+                segment: segment,
+                cancellationToken: cancellationToken);
         }
 
         private void UpdateRectangles(Area area)
@@ -634,6 +584,106 @@ namespace Score2Stream.VideoService
             {
                 frameLock.ExitReadLock();
             }
+        }
+
+        private async Task UpdateSamplesAsync(Segment segment, CancellationToken cancellationToken)
+        {
+            var templateSamples = TemplateService.Active?.Samples?.ToArray();
+
+            if (templateSamples?.Length > 0)
+            {
+                if (AreaService?.ActiveSegment == segment)
+                {
+                    var segmentSamples = segment?.Area?.Template?.Samples?.ToArray();
+
+                    if (segmentSamples?.Length > 0
+                        && templateSamples?.SequenceEqual(segmentSamples) == true)
+                    {
+                        foreach (var segmentSample in segmentSamples)
+                        {
+                            await dispatcherService.InvokeAsync(
+                                action: () => sampleUpdatedEvent.Publish(segmentSample),
+                                cancellationToken: cancellationToken);
+                        }
+                    }
+                    else
+                    {
+                        var matches = RecognitionService.GetMatches(
+                            segment: segment,
+                            samples: templateSamples).ToArray();
+
+                        var match = matches?
+                            .Where(m => m?.Type != MatchType.None)
+                            .OrderByDescending(m => m?.Similarity)?.FirstOrDefault();
+
+                        if (match != default)
+                        {
+                            match.Type = MatchType.Match;
+                        }
+
+                        foreach (var templateSample in templateSamples)
+                        {
+                            await dispatcherService.InvokeAsync(
+                                action: () => sampleUpdatedEvent.Publish(templateSample),
+                                cancellationToken: cancellationToken);
+                        }
+                    }
+                }
+                else if (AreaService?.ActiveSegment == default)
+                {
+                    foreach (var templateSample in templateSamples)
+                    {
+                        templateSample.Match = default;
+
+                        await dispatcherService.InvokeAsync(
+                            action: () => sampleUpdatedEvent.Publish(templateSample),
+                            cancellationToken: cancellationToken);
+                    }
+                }
+            }
+        }
+
+        private async Task UpdateSegmentAsync(Segment segment, CancellationToken cancellationToken)
+        {
+            var samples = segment?.Area?.Template?.Samples?.ToArray();
+
+            var matches = RecognitionService.GetMatches(
+                segment: segment,
+                samples: samples).ToArray();
+
+            var match = matches?
+                .Where(m => m?.Type != MatchType.None)
+                .OrderByDescending(m => m?.Similarity)?.FirstOrDefault();
+
+            match ??= RecognitionService.Detect(segment);
+
+            var waitingDurationMS = Math.Abs(settingsService.Contents.Detection.DurationDetectionWait);
+            var waitingDuration = TimeSpan.FromMilliseconds(waitingDurationMS);
+
+            if (match != default)
+            {
+                match.Type = MatchType.Match;
+
+                segment.SetValue(
+                    value: match.Value,
+                    hasValue: true,
+                    similarity: match.Similarity,
+                    waitingDuration: waitingDuration);
+            }
+            else
+            {
+                var value = segment.Area?.Template?.Empty;
+
+                segment.SetValue(
+                    value: value,
+                    hasValue: false,
+                    similarity: 0.0,
+                    waitingDuration: waitingDuration);
+            }
+
+            await dispatcherService.InvokeAsync(
+                action: () => segmentUpdatedEvent.Publish(segment),
+                cancellationToken: cancellationToken);
         }
 
         private async Task UpdateVideoAsync(DateTime? capturingStart = default)

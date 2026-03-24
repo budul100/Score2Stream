@@ -95,34 +95,6 @@ namespace Score2Stream.RecognitionService
             }
         }
 
-        public IEnumerable<(Match Match, Sample Sample)> Compare(Segment segment, IEnumerable<Sample> samples)
-        {
-            if (samples?.Count() > 0
-                && segment?.IsEmpty == false)
-            {
-                var thresholdMatching = Math.Abs(settingsService.Contents.Detection.ThresholdMatching)
-                    / Constants.ThresholdDivider;
-
-                foreach (var sample in samples)
-                {
-                    var similarity = sample.Features.CosineSimilarity(segment.Features);
-
-                    var type = similarity >= thresholdMatching
-                        ? Commons.Enums.MatchType.Similar
-                        : Commons.Enums.MatchType.None;
-
-                    var match = new Match
-                    {
-                        Value = sample.Value,
-                        Similarity = similarity,
-                        Type = type,
-                    };
-
-                    yield return (match, sample);
-                }
-            }
-        }
-
         public Match Detect(Imageable imageable)
         {
             var result = default(Match);
@@ -138,9 +110,9 @@ namespace Score2Stream.RecognitionService
                 {
                     result = new Match
                     {
-                        Value = value,
                         Similarity = confidence,
                         Type = Commons.Enums.MatchType.Similar,
+                        Value = value,
                     };
                 }
             }
@@ -152,6 +124,36 @@ namespace Score2Stream.RecognitionService
         {
             Dispose(isDisposing: true);
             GC.SuppressFinalize(this);
+        }
+
+        public IEnumerable<Match> GetMatches(Segment segment, IEnumerable<Sample> samples)
+        {
+            if (samples?.Count() > 0
+                && segment?.IsEmpty == false)
+            {
+                var thresholdMatching = Math.Abs(settingsService.Contents.Detection.ThresholdMatching)
+                    / Constants.ThresholdDivider;
+
+                foreach (var sample in samples)
+                {
+                    var similarity = sample.Features.CosineSimilarity(segment.Features);
+
+                    var type = similarity >= thresholdMatching
+                        ? Commons.Enums.MatchType.Similar
+                        : Commons.Enums.MatchType.None;
+
+                    var result = new Match
+                    {
+                        Similarity = similarity,
+                        Type = type,
+                        Value = sample.Value,
+                    };
+
+                    sample.Match = result;
+
+                    yield return result;
+                }
+            }
         }
 
         public bool HasSimilars(Segment segment, IEnumerable<Sample> samples)

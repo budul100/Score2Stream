@@ -12,9 +12,9 @@ namespace Score2Stream.Commons.Interfaces
 
         void Bind(Imageable imageable);
 
-        IEnumerable<(Match Match, Sample Sample)> Compare(Segment segment, IEnumerable<Sample> samples);
-
         Match Detect(Imageable imageable);
+
+        IEnumerable<Match> GetMatches(Segment segment, IEnumerable<Sample> samples);
 
         bool HasSimilars(Segment segment, IEnumerable<Sample> samples);
 

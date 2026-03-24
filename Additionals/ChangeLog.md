@@ -3,6 +3,7 @@
 ## Version 1.14.1
 
 * Add separate tenth-second options for game and shot clock
+* Refactor recognition matching and sample update logic
 
 ## Version 1.14.0
 
