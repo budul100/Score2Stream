@@ -207,7 +207,7 @@ namespace Score2Stream.TemplateService
                 catch (MaxCountExceededException)
                 { }
 
-                template.SampleService.Order();
+                template.SampleService.Order(true);
 
                 samplesChangedEvent.Publish();
             }

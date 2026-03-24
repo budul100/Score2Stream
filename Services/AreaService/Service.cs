@@ -90,6 +90,8 @@ namespace Score2Stream.AreaService
                         maxCount: Constants.MaxCountAreas);
                 }
 
+                area.Index = index++;
+
                 area.Segments = area
                     .GetSegments().ToArray();
 
@@ -208,6 +210,8 @@ namespace Score2Stream.AreaService
                 area.Index = index++;
             }
 
+            SaveAreas();
+
             areasOrderedEvent.Publish();
         }
 
@@ -274,34 +278,32 @@ namespace Score2Stream.AreaService
 
         public void Select(Area area)
         {
-            if (Active != area)
+            Active = Active != area
+                ? area
+                : default;
+
+            areaSelectedEvent.Publish(Active);
+
+            if (ActiveSegment != default
+                && ActiveSegment.Area != Active)
             {
-                Active = area;
-
-                areaSelectedEvent.Publish(Active);
-
-                if (ActiveSegment != default
-                    && ActiveSegment.Area != Active)
-                {
-                    Select();
-                }
+                Select();
             }
         }
 
         public void Select(Segment segment = default)
         {
-            if (ActiveSegment != segment)
+            ActiveSegment = ActiveSegment != segment
+                ? segment
+                : default;
+
+            segmentSelectedEvent.Publish(ActiveSegment);
+
+            if (Active != ActiveSegment?.Area)
             {
-                ActiveSegment = segment;
+                Active = ActiveSegment?.Area;
 
-                segmentSelectedEvent.Publish(ActiveSegment);
-
-                if (Active != ActiveSegment?.Area)
-                {
-                    Active = ActiveSegment?.Area;
-
-                    areaSelectedEvent.Publish(Active);
-                }
+                areaSelectedEvent.Publish(Active);
             }
         }
 

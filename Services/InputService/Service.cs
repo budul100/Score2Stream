@@ -441,7 +441,8 @@ namespace Score2Stream.InputService
             {
                 try
                 {
-                    var areas = input.Areas.ToArray();
+                    var areas = input.Areas
+                        .OrderBy(a => a.Index).ToArray();
 
                     foreach (var area in areas)
                     {
@@ -454,7 +455,7 @@ namespace Score2Stream.InputService
                 catch (MaxCountExceededException)
                 { }
 
-                input.AreaService.Order();
+                input.AreaService.Order(true);
 
                 areasChangedEvent.Publish();
             }

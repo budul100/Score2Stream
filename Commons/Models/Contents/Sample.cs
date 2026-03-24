@@ -12,7 +12,6 @@ namespace Score2Stream.Commons.Models.Contents
 
         public double Height { get; set; }
 
-        [JsonIgnore]
         public int Index { get; set; }
 
         [JsonIgnore]
