@@ -11,7 +11,6 @@ using Prism.Events;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Input;
-using Score2Stream.Commons.Exceptions;
 using Score2Stream.Commons.Interfaces;
 using Score2Stream.Commons.Prism;
 

@@ -284,14 +284,17 @@ namespace Score2Stream.VideoService
                         location1: ref widthMax,
                         value: segments.Max(a => a.Rect.Value.Width));
 
-                    var actions = UpdateSegments(segments).ToArray();
+                    var imageUpdates = UpdateImages(segments).ToArray();
 
-                    if (actions.Length > 0)
-                    {
-                        await dispatcherService.InvokeAsync(
-                            actions: actions,
-                            cancellationToken: cancellationToken);
-                    }
+                    await dispatcherService.InvokeAsync(
+                        actions: imageUpdates,
+                        cancellationToken: cancellationToken);
+
+                    var sampleUpdates = UdpateSamples(segments).ToArray();
+
+                    await dispatcherService.InvokeAsync(
+                        actions: sampleUpdates,
+                        cancellationToken: cancellationToken);
                 }
 
                 var position = 0.0;
@@ -352,27 +355,37 @@ namespace Score2Stream.VideoService
                 frameLock.ExitReadLock();
             }
 
-            if (segment.Area.NoiseRemoval > 0)
-            {
-                var noiselessImage = segmentImage.WithoutNoise(
-                    erodeIterations: segment.Area.NoiseRemoval,
-                    dilateIterations: segment.Area.NoiseRemoval);
-
-                segmentImage.Dispose();
-
-                segmentImage = noiselessImage;
-            }
-
-            var thresholdMonochrome = segment.Area.ThresholdMonochrome
-                / Constants.ThresholdDivider;
-            var monochromeImage = segmentImage.AsMonochrome(thresholdMonochrome);
+            var grayImage = segmentImage.Channels() > 1
+                ? segmentImage.CvtColor(ColorConversionCodes.BGR2GRAY)
+                : segmentImage;
 
             if (!ReferenceEquals(
-                objA: monochromeImage,
+                objA: grayImage,
                 objB: segmentImage))
             {
                 segmentImage.Dispose();
             }
+
+            if (segment.Area.NoiseRemoval > 0)
+            {
+                var noiselessImage = grayImage.WithoutNoise(
+                    erodeIterations: segment.Area.NoiseRemoval,
+                    dilateIterations: segment.Area.NoiseRemoval);
+
+                grayImage.Dispose();
+
+                grayImage = noiselessImage;
+            }
+
+            var thresh = 255 *
+                (segment.Area.ThresholdMonochrome / Constants.ThresholdDivider);
+
+            var monochromeImage = grayImage.Threshold(
+                thresh: thresh,
+                maxval: 255,
+                type: ThresholdTypes.Binary);
+
+            grayImage.Dispose();
 
             if (!settingsService.Contents.Video.NoCropping)
             {
@@ -380,7 +393,7 @@ namespace Score2Stream.VideoService
 
                 if (contourRectangle.HasValue)
                 {
-                    var croppedImage = monochromeImage.AsCropped(contourRectangle.Value);
+                    var croppedImage = monochromeImage.Clone(contourRectangle.Value);
 
                     monochromeImage.Dispose();
 
@@ -569,6 +582,39 @@ namespace Score2Stream.VideoService
             }
         }
 
+        private IEnumerable<Action> UdpateSamples(IEnumerable<Segment> segments)
+        {
+            if (!isDisposed)
+            {
+                foreach (var segment in segments)
+                {
+                    RecognitionService.Bind(segment);
+
+                    var samples = segment?.Area?.Template?.Samples?.ToArray();
+
+                    var matches = RecognitionService.GetMatches(
+                        segment: segment,
+                        samples: samples).ToArray();
+
+                    UpdateMatch(
+                        segment: segment,
+                        matches: matches);
+
+                    yield return () => segmentUpdatedEvent.Publish(segment);
+
+                    var actions = UdpateSamples(
+                        segment: segment,
+                        samples: samples,
+                        matches: matches).ToArray();
+
+                    foreach (var action in actions)
+                    {
+                        yield return action;
+                    }
+                }
+            }
+        }
+
         private void UpdateImage(Segment segment)
         {
             segment.Image = default;
@@ -593,14 +639,26 @@ namespace Score2Stream.VideoService
 
             if (segment.Image.HasValue() == true)
             {
-                var bitmapStream = segment.Image.ToMemoryStream();
-                var segmentBitmap = new Bitmap(bitmapStream);
+                using var bitmapStream = segment.Image.ToMemoryStream();
 
-                segment.Bitmap = segmentBitmap;
+                segment.Bitmap = new Bitmap(bitmapStream);
             }
             else
             {
                 segment.Bitmap = default;
+            }
+        }
+
+        private IEnumerable<Action> UpdateImages(IEnumerable<Segment> segments)
+        {
+            if (!isDisposed)
+            {
+                foreach (var segment in segments)
+                {
+                    UpdateImage(segment);
+
+                    yield return () => segmentDrawnEvent.Publish(segment);
+                }
             }
         }
 
@@ -680,43 +738,6 @@ namespace Score2Stream.VideoService
             finally
             {
                 frameLock.ExitReadLock();
-            }
-        }
-
-        private IEnumerable<Action> UpdateSegments(IEnumerable<Segment> segments)
-        {
-            if (!isDisposed)
-            {
-                foreach (var segment in segments)
-                {
-                    UpdateImage(segment);
-
-                    yield return () => segmentDrawnEvent.Publish(segment);
-
-                    RecognitionService.Bind(segment);
-
-                    var samples = segment?.Area?.Template?.Samples?.ToArray();
-
-                    var matches = RecognitionService.GetMatches(
-                        segment: segment,
-                        samples: samples).ToArray();
-
-                    UpdateMatch(
-                        segment: segment,
-                        matches: matches);
-
-                    yield return () => segmentUpdatedEvent.Publish(segment);
-
-                    var actions = UdpateSamples(
-                        segment: segment,
-                        samples: samples,
-                        matches: matches).ToArray();
-
-                    foreach (var action in actions)
-                    {
-                        yield return action;
-                    }
-                }
             }
         }
 

@@ -14,7 +14,7 @@
 
         public const char GameClockSplitterDefault = ':';
 
-        public const int ImageQueueSizeMax = 20;
+        public const int ImageQueueSizeMax = 6;
         public const int ImageQueueSizeMin = 1;
 
         public const string LockFileName = ".lock";
@@ -69,7 +69,7 @@
 
         public const int TickersSize = 6;
 
-        public const int UpdateChunkSize = 5;
+        public const int UpdateChunkSize = 4;
         public const int UpdateDelay = 1;
 
         public const double ZoomMax = 5;

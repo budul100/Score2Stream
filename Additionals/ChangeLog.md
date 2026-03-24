@@ -2,7 +2,8 @@
 
 ## Version 1.14.2
 
-* Tab handling refactored
+* Refactor tab handling
+* Refactor segment processing and optimize image handling
 
 ## Version 1.14.1
 

@@ -57,7 +57,8 @@ namespace Score2Stream.DispatcherService
         {
             ArgumentNullException.ThrowIfNull(actions);
 
-            if (cancellationToken.IsCancellationRequested) return;
+            if (!(actions?.Count() > 0)
+                || cancellationToken.IsCancellationRequested) return;
 
             try
             {
