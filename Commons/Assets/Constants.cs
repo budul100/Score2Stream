@@ -4,8 +4,6 @@
     {
         #region Public Fields
 
-        public const int ClipPositionFactor = 50;
-
         public const int DelayMax = 1000;
         public const int DelayMin = 10;
 
@@ -37,6 +35,8 @@
 
         public const int PortMax = 65535;
         public const int PortMin = 1;
+
+        public const int PositionOrderFactor = 50;
 
         public const int RecognitionDurationMax = 1000 * 60;
 

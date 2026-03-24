@@ -10,11 +10,11 @@ namespace Score2Stream.Commons.Interfaces
 
         Area Active { get; }
 
+        Segment ActiveSegment { get; }
+
         IReadOnlyList<Area> Areas { get; }
 
         bool CanUndo { get; }
-
-        Segment ActiveSegment { get; }
 
         #endregion Public Properties
 
@@ -41,7 +41,7 @@ namespace Score2Stream.Commons.Interfaces
 
         void Select(Area area);
 
-        void Select(Segment clip = default);
+        void Select(Segment segment = default);
 
         void Undo();
 

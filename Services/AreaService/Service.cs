@@ -137,8 +137,8 @@ namespace Score2Stream.AreaService
         public async Task ClearAsync()
         {
             var messageBoxResult = await dialogService.GetMessageBoxResultAsync(
-                contentMessage: "Shall all clips be removed?",
-                contentTitle: "Remove all clips");
+                contentMessage: "Shall all segments be removed?",
+                contentTitle: "Remove all segments");
 
             if (messageBoxResult == ButtonResult.Yes)
             {
@@ -189,14 +189,14 @@ namespace Score2Stream.AreaService
             if (orderDescending)
             {
                 areas = Areas
-                    .OrderByDescending(c => (int)(c.Y1 * Constants.ClipPositionFactor))
-                    .ThenByDescending(c => (int)(c.X1 * Constants.ClipPositionFactor)).ToList();
+                    .OrderByDescending(c => (int)(c.Y1 * Constants.PositionOrderFactor))
+                    .ThenByDescending(c => (int)(c.X1 * Constants.PositionOrderFactor)).ToList();
             }
             else
             {
                 areas = Areas
-                    .OrderBy(c => (int)(c.Y1 * Constants.ClipPositionFactor))
-                    .ThenBy(c => (int)(c.X1 * Constants.ClipPositionFactor)).ToList();
+                    .OrderBy(c => (int)(c.Y1 * Constants.PositionOrderFactor))
+                    .ThenBy(c => (int)(c.X1 * Constants.PositionOrderFactor)).ToList();
             }
 
             orderDescending = !orderDescending;

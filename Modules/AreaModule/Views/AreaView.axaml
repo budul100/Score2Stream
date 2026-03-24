@@ -155,7 +155,7 @@
                 Grid.RowSpan="3"
                 Grid.Column="4"
                 Margin="2"
-                ItemsSource="{Binding Clips}">
+                ItemsSource="{Binding Segments}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Horizontal" />

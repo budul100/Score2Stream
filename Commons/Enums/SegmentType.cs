@@ -4,7 +4,7 @@ namespace Score2Stream.Commons.Enums
 {
     public enum SegmentType
     {
-        [Description("[Clip]")]
+        [Description("[Segment]")]
         None,
 
         [Description("Period")]

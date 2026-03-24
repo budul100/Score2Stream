@@ -59,7 +59,7 @@ Additional settings:
 
 The Board tab controls the graphic output. Recognized values are transmitted to the HTML graphic page via a built-in web server and a WebSocket connection as a JSON stream.
 
-On the right-hand side, values can be entered manually or used to override automatically detected values by enabling *Ignore clip*. Changes are not transmitted to the graphic immediately — the *Update board* button must be clicked to apply them. The button activates automatically as soon as any value on the right-hand panel is modified.
+On the right-hand side, values can be entered manually or used to override automatically detected values by enabling *Deactivate detection*. Changes are not transmitted to the graphic immediately — the *Update board* button must be clicked to apply them. The button activates automatically as soon as any value on the right-hand panel is modified.
 
 Available actions and settings:
 

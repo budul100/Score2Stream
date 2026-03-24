@@ -219,9 +219,9 @@ namespace Score2Stream.VideoModule.ViewModels
                 {
                     SetProperty(ref zoom, value);
 
-                    foreach (var clip in Segments)
+                    foreach (var segment in Segments)
                     {
-                        clip.Zoom = zoom;
+                        segment.Zoom = zoom;
                     }
                 }
             }

@@ -60,15 +60,15 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         public string ClockGame { get; private set; }
 
-        public bool ClockNotFromClip
+        public bool ClockNotDetected
         {
-            get => scoreboardService.ClockNotFromClip;
+            get => scoreboardService.ClockNotDetected;
             set
             {
-                if (scoreboardService.ClockNotFromClip == value) return;
+                if (scoreboardService.ClockNotDetected == value) return;
 
-                scoreboardService.ClockNotFromClip = value;
-                RaisePropertyChanged(nameof(ClockNotFromClip));
+                scoreboardService.ClockNotDetected = value;
+                RaisePropertyChanged(nameof(ClockNotDetected));
             }
         }
 
@@ -142,15 +142,15 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         public bool FoulsHomeUpToDate => scoreboardService.FoulsHomeUpToDate;
 
-        public bool FoulsNotFromClip
+        public bool FoulsNotDetected
         {
-            get => scoreboardService.FoulsNotFromClip;
+            get => scoreboardService.FoulsNotDetected;
             set
             {
-                if (scoreboardService.FoulsNotFromClip == value) return;
+                if (scoreboardService.FoulsNotDetected == value) return;
 
-                scoreboardService.FoulsNotFromClip = value;
-                RaisePropertyChanged(nameof(FoulsNotFromClip));
+                scoreboardService.FoulsNotDetected = value;
+                RaisePropertyChanged(nameof(FoulsNotDetected));
             }
         }
 
@@ -186,15 +186,15 @@ namespace Score2Stream.ScoreboardModule.ViewModels
             }
         }
 
-        public bool PeriodNotFromClip
+        public bool PeriodNotDetected
         {
-            get => scoreboardService.PeriodNotFromClip;
+            get => scoreboardService.PeriodNotDetected;
             set
             {
-                if (scoreboardService.PeriodNotFromClip == value) return;
+                if (scoreboardService.PeriodNotDetected == value) return;
 
-                scoreboardService.PeriodNotFromClip = value;
-                RaisePropertyChanged(nameof(PeriodNotFromClip));
+                scoreboardService.PeriodNotDetected = value;
+                RaisePropertyChanged(nameof(PeriodNotDetected));
             }
         }
 
@@ -251,27 +251,27 @@ namespace Score2Stream.ScoreboardModule.ViewModels
 
         public bool ScoreHomeUpToDate => scoreboardService.ScoreHomeUpToDate;
 
-        public bool ScoreNotFromClip
+        public bool ScoreNotDetected
         {
-            get => scoreboardService.ScoreNotFromClip;
+            get => scoreboardService.ScoreNotDetected;
             set
             {
-                if (scoreboardService.ScoreNotFromClip == value) return;
+                if (scoreboardService.ScoreNotDetected == value) return;
 
-                scoreboardService.ScoreNotFromClip = value;
-                RaisePropertyChanged(nameof(ScoreNotFromClip));
+                scoreboardService.ScoreNotDetected = value;
+                RaisePropertyChanged(nameof(ScoreNotDetected));
             }
         }
 
-        public bool ShotNotFromClip
+        public bool ShotNotDetected
         {
-            get => scoreboardService.ShotNotFromClip;
+            get => scoreboardService.ShotNotDetected;
             set
             {
-                if (scoreboardService.ShotNotFromClip == value) return;
+                if (scoreboardService.ShotNotDetected == value) return;
 
-                scoreboardService.ShotNotFromClip = value;
-                RaisePropertyChanged(nameof(ShotNotFromClip));
+                scoreboardService.ShotNotDetected = value;
+                RaisePropertyChanged(nameof(ShotNotDetected));
             }
         }
 

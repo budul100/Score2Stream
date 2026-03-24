@@ -65,8 +65,6 @@ namespace Score2Stream.AreaModule.ViewModels
 
         public Area Area { get; private set; }
 
-        public ObservableCollection<SegmentViewModel> Clips { get; } = [];
-
         public bool IsActive
         {
             get { return isActive; }
@@ -94,6 +92,8 @@ namespace Score2Stream.AreaModule.ViewModels
         }
 
         public DelegateCommand OnSelectionCommand { get; }
+       
+        public ObservableCollection<SegmentViewModel> Segments { get; } = [];
 
         public Template Template
         {
@@ -179,7 +179,7 @@ namespace Score2Stream.AreaModule.ViewModels
             RaisePropertyChanged(nameof(Types));
 
             UpdateValues();
-            UpdateClips();
+            UpdateSegments();
 
             isInitializing = false;
 
@@ -206,15 +206,15 @@ namespace Score2Stream.AreaModule.ViewModels
             RaisePropertyChanged(nameof(Templates));
         }
 
-        private void UpdateClips()
+        private void UpdateSegments()
         {
-            foreach (var clip in Area.Segments)
+            foreach (var segment in Area.Segments)
             {
                 var current = segmentViewModelFactory.Invoke();
 
-                current.Initialize(clip);
+                current.Initialize(segment);
 
-                Clips.Add(current);
+                Segments.Add(current);
             }
         }
 

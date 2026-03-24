@@ -12,7 +12,7 @@ namespace Score2Stream.Commons.Interfaces
 
         bool ClockGameIsUpToDate { get; }
 
-        bool ClockNotFromClip { get; set; }
+        bool ClockNotDetected { get; set; }
 
         string ClockShot { get; }
 
@@ -34,7 +34,7 @@ namespace Score2Stream.Commons.Interfaces
 
         bool FoulsHomeUpToDate { get; }
 
-        bool FoulsNotFromClip { get; set; }
+        bool FoulsNotDetected { get; set; }
 
         bool IsGameOver { get; set; }
 
@@ -46,7 +46,7 @@ namespace Score2Stream.Commons.Interfaces
 
         string Period { get; set; }
 
-        bool PeriodNotFromClip { get; set; }
+        bool PeriodNotDetected { get; set; }
 
         string Periods { get; set; }
 
@@ -62,9 +62,9 @@ namespace Score2Stream.Commons.Interfaces
 
         bool ScoreHomeUpToDate { get; }
 
-        bool ScoreNotFromClip { get; set; }
+        bool ScoreNotDetected { get; set; }
 
-        bool ShotNotFromClip { get; set; }
+        bool ShotNotDetected { get; set; }
 
         bool ShowTenthOfSecs { get; set; }
 

@@ -24,7 +24,7 @@ namespace Score2Stream.Commons.Interfaces
 
         Task ClearAsync();
 
-        void Create(Segment clip);
+        void Create(Segment segment);
 
         void Initialize(Template template);
 

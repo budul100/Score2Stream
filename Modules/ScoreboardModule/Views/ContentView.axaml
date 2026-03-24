@@ -121,7 +121,7 @@
                     Grid.Row="2" Grid.Column="1"
                     Margin="5"
                     HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                    IsEnabled="{Binding #ScoreNotFromClip.IsChecked}"
+                    IsEnabled="{Binding #ScoreNotDetected.IsChecked}"
                     MaxLength="{Binding MaxLengthScore}"
                     Text="{Binding ScoreHome}" />
 
@@ -134,16 +134,16 @@
                     Grid.Row="2" Grid.Column="3"
                     Margin="5"
                     HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                    IsEnabled="{Binding #ScoreNotFromClip.IsChecked}"
+                    IsEnabled="{Binding #ScoreNotDetected.IsChecked}"
                     MaxLength="{Binding MaxLengthScore}"
                     Text="{Binding ScoreGuest}" />
 
                 <CheckBox
-                    x:Name="ScoreNotFromClip"
+                    x:Name="ScoreNotDetected"
                     Grid.Row="2" Grid.Column="4"
                     Margin="5" VerticalAlignment="Center"
-                    Content="Ignore clip"
-                    IsChecked="{Binding ScoreNotFromClip}" />
+                    Content="Deactivate detection"
+                    IsChecked="{Binding ScoreNotDetected}" />
 
                 <!-- ════════════════════════════════════════════════ Row 3: Fouls ══ -->
 
@@ -156,7 +156,7 @@
                     Grid.Row="3" Grid.Column="1"
                     Margin="5"
                     HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                    IsEnabled="{Binding #FoulsNotFromClip.IsChecked}"
+                    IsEnabled="{Binding #FoulsNotDetected.IsChecked}"
                     MaxLength="{Binding MaxLengthFouls}"
                     Text="{Binding FoulsHome}" />
 
@@ -169,16 +169,16 @@
                     Grid.Row="3" Grid.Column="3"
                     Margin="5"
                     HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                    IsEnabled="{Binding #FoulsNotFromClip.IsChecked}"
+                    IsEnabled="{Binding #FoulsNotDetected.IsChecked}"
                     MaxLength="{Binding MaxLengthFouls}"
                     Text="{Binding FoulsGuest}" />
 
                 <CheckBox
-                    x:Name="FoulsNotFromClip"
+                    x:Name="FoulsNotDetected"
                     Grid.Row="3" Grid.Column="4"
                     Margin="5" VerticalAlignment="Center"
-                    Content="Ignore clip"
-                    IsChecked="{Binding FoulsNotFromClip}" />
+                    Content="Deactivate detection"
+                    IsChecked="{Binding FoulsNotDetected}" />
 
                 <!-- ══════════════════════════════════════════ Row 5: Game header ══ -->
 
@@ -208,14 +208,14 @@
                     Margin="5" VerticalAlignment="Center"
                     Content="Show tenth of seconds"
                     IsChecked="{Binding ShowTenthOfSecs}"
-                    IsEnabled="{Binding !#ClockNotFromClip.IsChecked}" />
+                    IsEnabled="{Binding !#ClockNotDetected.IsChecked}" />
 
                 <CheckBox
-                    x:Name="ClockNotFromClip"
+                    x:Name="ClockNotDetected"
                     Grid.Row="6" Grid.Column="4"
                     Margin="5" VerticalAlignment="Center"
-                    Content="Ignore clip"
-                    IsChecked="{Binding ClockNotFromClip}" />
+                    Content="Deactivate detection"
+                    IsChecked="{Binding ClockNotDetected}" />
 
                 <!-- ═══════════════════════════════════════════ Row 7: Shot clock ══ -->
 
@@ -232,11 +232,11 @@
                     Text="{Binding ClockShot, Mode=OneWay}" />
 
                 <CheckBox
-                    x:Name="ShotNotFromClip"
+                    x:Name="ShotNotDetected"
                     Grid.Row="7" Grid.Column="4"
                     Margin="5" VerticalAlignment="Center"
-                    Content="Ignore clip"
-                    IsChecked="{Binding ShotNotFromClip}" />
+                    Content="Deactivate detection"
+                    IsChecked="{Binding ShotNotDetected}" />
 
                 <!-- ══════════════════════════════════════ Row 8: Period / Periods ══ -->
 
@@ -249,7 +249,7 @@
                     Grid.Row="8" Grid.Column="1"
                     Margin="5"
                     HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                    IsEnabled="{Binding #PeriodNotFromClip.IsChecked}"
+                    IsEnabled="{Binding #PeriodNotDetected.IsChecked}"
                     MaxLength="{Binding MaxLengthPeriod}"
                     Text="{Binding Period}" />
 
@@ -266,11 +266,11 @@
                     Text="{Binding Periods}" />
 
                 <CheckBox
-                    x:Name="PeriodNotFromClip"
+                    x:Name="PeriodNotDetected"
                     Grid.Row="8" Grid.Column="4"
                     Margin="5" VerticalAlignment="Center"
-                    Content="Ignore clip"
-                    IsChecked="{Binding PeriodNotFromClip}" />
+                    Content="Deactivate detection"
+                    IsChecked="{Binding PeriodNotDetected}" />
 
                 <!-- ══════════════════════════════════════════════ Row 9: Game over ══ -->
 

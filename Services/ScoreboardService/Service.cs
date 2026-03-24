@@ -95,7 +95,7 @@ namespace Score2Stream.ScoreboardService
 
         public bool ClockGameIsUpToDate => ClockGame == clockGame;
 
-        public bool ClockNotFromClip { get; set; }
+        public bool ClockNotDetected { get; set; }
 
         public string ClockShot { get; private set; }
 
@@ -167,7 +167,7 @@ namespace Score2Stream.ScoreboardService
 
         public bool FoulsHomeUpToDate => FoulsHome == foulsHome;
 
-        public bool FoulsNotFromClip { get; set; }
+        public bool FoulsNotDetected { get; set; }
 
         public bool IsGameOver { get; set; }
 
@@ -190,7 +190,7 @@ namespace Score2Stream.ScoreboardService
 
         public string Period { get; set; }
 
-        public bool PeriodNotFromClip { get; set; }
+        public bool PeriodNotDetected { get; set; }
 
         public string Periods
         {
@@ -217,9 +217,9 @@ namespace Score2Stream.ScoreboardService
 
         public bool ScoreHomeUpToDate => ScoreHome == scoreHome;
 
-        public bool ScoreNotFromClip { get; set; }
+        public bool ScoreNotDetected { get; set; }
 
-        public bool ShotNotFromClip { get; set; }
+        public bool ShotNotDetected { get; set; }
 
         public bool ShowTenthOfSecs
         {
@@ -293,10 +293,10 @@ namespace Score2Stream.ScoreboardService
 
                 if (type != AreaType.None)
                 {
-                    var clipTypes = type
+                    var segmentTypes = type
                         .GetSegmentTypes().ToArray();
 
-                    if (area.Size != clipTypes.Length)
+                    if (area.Size != segmentTypes.Length)
                     {
                         throw new ArgumentException(
                             message: $"The area type {type} does not fit the area size {area.Size}.",
@@ -312,7 +312,7 @@ namespace Score2Stream.ScoreboardService
                     var releasedAreas = segments
                         .Where(c => c.Value != default
                             && c.Value?.Area != area
-                            && clipTypes.Contains(c.Key))
+                            && segmentTypes.Contains(c.Key))
                         .Select(c => c.Value.Area)
                         .Distinct().ToArray();
 
@@ -323,14 +323,14 @@ namespace Score2Stream.ScoreboardService
 
                     for (var index = 0; index < area.Size; index++)
                     {
-                        var clip = area.Segments.ElementAt(index);
+                        var segment = area.Segments.ElementAt(index);
 
-                        segments[clipTypes[index]] = clip;
+                        segments[segmentTypes[index]] = segment;
 
-                        if (clip.Type != clipTypes[index])
+                        if (segment.Type != segmentTypes[index])
                         {
-                            clip.Type = clipTypes[index];
-                            segmentModifiedEvent.Publish(clip);
+                            segment.Type = segmentTypes[index];
+                            segmentModifiedEvent.Publish(segment);
                         }
                     }
                 }
@@ -394,13 +394,13 @@ namespace Score2Stream.ScoreboardService
             this.colorHome = ColorHome;
             this.colorGuest = ColorGuest;
 
-            if (PeriodNotFromClip
+            if (PeriodNotDetected
                 || segments[SegmentType.Period] == default)
             {
                 period = Period;
             }
 
-            if (ScoreNotFromClip
+            if (ScoreNotDetected
                 || segments[SegmentType.ScoreHome1] == default
                 || segments[SegmentType.ScoreHome2] == default
                 || segments[SegmentType.ScoreHome3] == default
@@ -412,7 +412,7 @@ namespace Score2Stream.ScoreboardService
                 scoreGuest = ScoreGuest;
             }
 
-            if (FoulsNotFromClip
+            if (FoulsNotDetected
                 || segments[SegmentType.FoulsHome] == default
                 || segments[SegmentType.FoulsGuest] == default)
             {
@@ -627,23 +627,23 @@ namespace Score2Stream.ScoreboardService
         private void UpdateBoard()
         {
             ClockGame = GetClockGame();
-            clockGame = !ClockNotFromClip && !isGameOver
+            clockGame = !ClockNotDetected && !isGameOver
                 ? ClockGame
                 : default;
 
             ClockShot = GetClockShot();
-            clockShot = !ShotNotFromClip && !isGameOver
+            clockShot = !ShotNotDetected && !isGameOver
                 ? ClockShot
                 : default;
 
-            if (!PeriodNotFromClip
+            if (!PeriodNotDetected
                 && !isGameOver)
             {
                 Period = GetPeriod();
                 period = Period;
             }
 
-            if (!ScoreNotFromClip
+            if (!ScoreNotDetected
                 && !isGameOver)
             {
                 ScoreHome = GetScoreHome();
@@ -653,7 +653,7 @@ namespace Score2Stream.ScoreboardService
                 scoreGuest = ScoreGuest;
             }
 
-            if (!FoulsNotFromClip
+            if (!FoulsNotDetected
                 && !isGameOver)
             {
                 FoulsHome = GetFoulsHome();

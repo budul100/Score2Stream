@@ -270,22 +270,22 @@ namespace Score2Stream.VideoService
                         cancellationToken: cancellationToken);
                 }
 
-                var clips = AreaService?.Areas?
+                var segments = AreaService?.Areas?
                     .SelectMany(a => a.Segments)
                     .Where(c => c.Rect.HasValue).ToArray();
 
-                if (clips?.Length > 0)
+                if (segments?.Length > 0)
                 {
                     Interlocked.Exchange(
                         location1: ref heightMax,
-                        value: clips.Max(a => a.Rect.Value.Height));
+                        value: segments.Max(a => a.Rect.Value.Height));
 
                     Interlocked.Exchange(
                         location1: ref widthMax,
-                        value: clips.Max(a => a.Rect.Value.Width));
+                        value: segments.Max(a => a.Rect.Value.Width));
 
-                    await Task.WhenAll(clips.Select(clip => UpdateBitmapAsync(
-                        segment: clip,
+                    await Task.WhenAll(segments.Select(segment => UpdateBitmapAsync(
+                        segment: segment,
                         cancellationToken: cancellationToken)));
                 }
 
@@ -327,11 +327,11 @@ namespace Score2Stream.VideoService
                 && !cancellationToken.IsCancellationRequested);
         }
 
-        private Mat GetImage(Segment clip)
+        private Mat GetImage(Segment segment)
         {
             if (isDisposed) return default;
 
-            var clipImage = default(Mat);
+            var segmentImage = default(Mat);
 
             frameLock.EnterReadLock();
 
@@ -340,25 +340,25 @@ namespace Score2Stream.VideoService
                 if (frame == null || frame.Empty())
                     return default;
 
-                clipImage = frame.Clone(clip.Rect.Value);
+                segmentImage = frame.Clone(segment.Rect.Value);
             }
             finally
             {
                 frameLock.ExitReadLock();
             }
 
-            var noiselessImage = clip.Area.NoiseRemoval == 0
-                ? clipImage
-                : clipImage.WithoutNoise(
-                    erodeIterations: clip.Area.NoiseRemoval,
-                    dilateIterations: clip.Area.NoiseRemoval);
+            var noiselessImage = segment.Area.NoiseRemoval == 0
+                ? segmentImage
+                : segmentImage.WithoutNoise(
+                    erodeIterations: segment.Area.NoiseRemoval,
+                    dilateIterations: segment.Area.NoiseRemoval);
 
-            if (!ReferenceEquals(noiselessImage, clipImage))
+            if (!ReferenceEquals(noiselessImage, segmentImage))
             {
-                clipImage.Dispose();
+                segmentImage.Dispose();
             }
 
-            var thresholdMonochrome = clip.Area.ThresholdMonochrome / Constants.ThresholdDivider;
+            var thresholdMonochrome = segment.Area.ThresholdMonochrome / Constants.ThresholdDivider;
             var monochromeImage = noiselessImage.AsMonochrome(thresholdMonochrome);
 
             noiselessImage.Dispose();
@@ -618,15 +618,15 @@ namespace Score2Stream.VideoService
 
                 foreach (var segement in area.Segments)
                 {
-                    var clipX1 = areaX1 + (width * index);
-                    var clipX2 = segement != area.Segments.Last()
+                    var segmentX1 = areaX1 + (width * index);
+                    var segmentX2 = segement != area.Segments.Last()
                         ? areaX1 + (width * ++index)
                         : areaX2;
 
                     segement.Rect = size.GetRectangle(
-                        firstX: clipX1,
+                        firstX: segmentX1,
                         firstY: areaY1,
-                        secondX: clipX2,
+                        secondX: segmentX2,
                         secondY: areaY2);
                 }
             }
