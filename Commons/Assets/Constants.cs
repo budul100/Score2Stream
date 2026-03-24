@@ -69,6 +69,7 @@
 
         public const int TickersSize = 6;
 
+        public const int UpdateChunkSize = 5;
         public const int UpdateDelay = 1;
 
         public const double ZoomMax = 5;

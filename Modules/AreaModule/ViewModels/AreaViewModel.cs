@@ -45,11 +45,13 @@ namespace Score2Stream.AreaModule.ViewModels
             areaModifiedEvent = eventAggregator.GetEvent<AreaModifiedEvent>();
 
             eventAggregator.GetEvent<AreaSelectedEvent>().Subscribe(
-                action: _ => UpdateStatus(),
+                action: a => IsSelected = a == Area,
                 keepSubscriberReferenceAlive: true);
             eventAggregator.GetEvent<AreaModifiedEvent>().Subscribe(
                 action: _ => UpdateValues(),
-                keepSubscriberReferenceAlive: true);
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: a => a == Area);
 
             eventAggregator.GetEvent<TemplateSelectedEvent>().Subscribe(
                 action: _ => SelectTemplate(),
@@ -65,7 +67,7 @@ namespace Score2Stream.AreaModule.ViewModels
 
         public Area Area { get; private set; }
 
-        public bool IsActive
+        public bool IsSelected
         {
             get { return isActive; }
             set { SetProperty(ref isActive, value); }
@@ -182,8 +184,6 @@ namespace Score2Stream.AreaModule.ViewModels
             UpdateSegments();
 
             isInitializing = false;
-
-            UpdateStatus();
         }
 
         #endregion Public Methods
@@ -216,11 +216,6 @@ namespace Score2Stream.AreaModule.ViewModels
 
                 Segments.Add(current);
             }
-        }
-
-        private void UpdateStatus()
-        {
-            IsActive = areaService.Active == Area;
         }
 
         private void UpdateTemplates()

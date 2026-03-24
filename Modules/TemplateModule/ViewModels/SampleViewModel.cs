@@ -49,15 +49,14 @@ namespace Score2Stream.TemplateModule.ViewModels
 
             sampleModifiedEvent = eventAggregator.GetEvent<SampleModifiedEvent>();
 
+            eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
+                action: s => IsSelected = s == Sample,
+                keepSubscriberReferenceAlive: true);
             eventAggregator.GetEvent<SampleUpdatedEvent>().Subscribe(
                 action: _ => UpdateMatch(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => s == Sample);
-
-            eventAggregator.GetEvent<SampleSelectedEvent>().Subscribe(
-                action: s => IsSelected = s == Sample,
-                keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<FilterChangedEvent>().Subscribe(
                 action: () => RaisePropertyChanged(nameof(IsVisible)),
