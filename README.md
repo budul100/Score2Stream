@@ -1,112 +1,98 @@
 # Score2Stream
 
-Score2Stream is a freeware to read and capture scoreboards of sports events and show its content as tv graphics in video live streams. The idea was inspired by [Scoreboard-webcam-OCR](https://xy-kao.com/projects/scoreboard-ocr-with-python-webcam/) by Xiaoyang Kao.
+Score2Stream is a free, open-source tool that reads scoreboards of sports events and other digital displays using a video camera, recognizes the displayed values through image processing, and outputs the result as a TV graphic for live streams. The graphic is served via a built-in web server as an HTML page and can be integrated directly into tools like OBS or other streaming software.
 
-## Screenshots
+The idea was inspired by the project [Scoreboard-webcam-OCR](https://xy-kao.com/projects/scoreboard-ocr-with-python-webcam/) by Xiaoyang Kao.
 
-Scoreboard view:
-![Scoreboard view](./Additionals/Images/Screenshot_ScoreboardView.png)
+**No training required:** Score2Stream ships with pre-built sample data for a wide range of common digital sports displays. Once a segment is placed on the scoreboard, the digits are typically recognized immediately — out of the box, no manual training needed. Custom samples can be added if required, but are usually unnecessary for standard displays.
 
-Clips view:
-![Clips view](./Additionals/Images/Screenshot_ClipsView.png)
+The tool consists of three tabs: **Input**, **Templates**, and **Board**.
 
-Samples view:
-![Samples view](./Additionals/Images/Screenshot_SamplesView.png)
+---
 
-Graphics output:
-![Samples view](./Additionals/Images/Screenshot_Graphics.png)
+## Input
 
-## Usage
+![Input Tab](Additionals/Images/01_Input.png)
 
-**Some sample data for testing can be found in the [additionals](./Additionals/Samples).**
+The Input tab is where the video source is configured. Clicking the *Inputs* button lists all currently available cameras or video files. The list refreshes on each click. Once a source is selected, it is displayed in the video view on the left.
 
-The configuration of Score2Stream consists of the following steps:
+The image can be repositioned (left/right, up/down) and rotated using the controls in the *Video handling* section. These adjustments are preserved after segments are defined.
 
-1. Selecting webcam as the input source (this can be a video file for testing purposes too).
-2. Defining the clips which contain the digits of the scoreboard.
-3. Selecting one or multiple clips as a sample template for values.
-4. Identifying samples with values to be used.
-5. Setting all scoreboard values.
-6. Using the graphic as output for the stream.
+**Segments** are rectangular regions drawn directly onto the video image, each covering one display area of the scoreboard — for example, a single digit of the game clock or the score. Each segment is assigned a meaning via the *Type* dropdown, such as *Game mins*, *Game secs*, *Shot clock*, *Score home*, *Score guest*, *Period*, and others.
 
-### Selecting the input
+Additional processing options:
 
-The input can be selected by clicking *Video -> Source*. If a new webcam is added to the computer, the system must be started again to identify the new source.
+| Option | Description |
+|---|---|
+| **Image queue size** | Number of consecutive frames merged into a single output image before processing. Useful for LED displays whose refresh rate exceeds the camera frame rate, causing individual frames to appear incomplete. |
+| **Processing delay [ms]** | Delay between processing steps in milliseconds. Primarily useful when testing with imported video files that would otherwise play back too fast. |
+| **Confidence at [%]** | Minimum recognition confidence in percent. If the match falls below this threshold, the *Empty value* defined in the Templates tab is output instead. |
+| **Wait to match [ms]** | Time in milliseconds a changed value must persist before it is accepted. Prevents flickering caused by briefly unstable input. |
 
-It is also possible to add a video file to test the application's handling. The file can be added by clicking *Video -> Source -> Select file...*.
+---
 
-All inputs can be stopped by clicking *Video -> Stop sources*
+## Templates
 
-### Defining a clip
+![Templates Tab](Additionals/Images/02_Samples.png)
 
-If the source is visible on the video view (left part of the application), a clip can be selected by clicking *Video -> Add new clip*.
+The Templates tab is used to define reference images (samples) for recognition. A template is assigned to one or more segments and contains the sample images against which the live camera frames are compared.
 
-A new clip definition is shown on the editing view (right part of the application). You can define the clip region by selecting the area with the mouse in the video view. You can always change the clip's location by reselecting it with the mouse.
+Samples can be added in two ways:
 
-When the clip is selected, you can immediately see the resulting monochrome (black/white) outlook in the editing view. If the image is hard to identify, then you should adjust the contrast of the clip by changing the value of *Contrast*.
+- **Manually:** Select a segment, wait for the desired value to appear, and click *Add as sample* to capture it as a reference image. Then enter the correct value in the text field.
+- **Automatically (Detect samples):** The tool automatically captures new samples whenever the similarity to all existing samples falls below the threshold set in *New sample at [%]*. For example, at 90%, a new sample is created as soon as the current image differs by more than 10% from all known samples.
 
-Furthermore, you should define its purpose by changing the value of *Type*. You can select one of the following types:
+Additional settings:
 
-| Type 					| Description 															|
-|-----------------------|-----------------------------------------------------------------------|
-| *Period*				| Digit of the current period                                           |
-| *Clock min X\_*		| Left digit of the game clock minutes shown in the graphic             |
-| *Clock min \_X*		| Right digit of the game clock minutes shown in the graphic			|
-| *Clock sec X\_*		| Left digit of the game clock seconds shown in the graphic				|
-| *Clock sec \_X*		| Right digit of the game clock seconds shown in the graphic			|
-| *Clock splitter*		| Splitter character between minutes and seconds (it is *:* by default)	|
-| *Shot X\_*			| Left digit of the shot clock seconds shown in the graphic             |
-| *Shot \_X*			| Left digit of the shot clock seconds shown in the graphic             |
-| *Score home X\_\_*	| First digit of the home team score shown in the graphic               |
-| *Score home \_X\_*	| Second digit of the home team score shown in the graphic              |
-| *Score home \_\_X*	| Third digit of the home team score shown in the graphic               |
-| *Score guest X\_\_*	| First digit of the guest team score shown in the graphic              |
-| *Score guest \_X\_*	| Second digit of the guest team score shown in the graphic             |
-| *Score guest \_\_X*	| Third digit of the guest team score shown in the graphic              |
-| *Fouls home*			| Single digit of the home team fouls shown in the graphic              |
-| *Fouls guest*			| Single digit of the home team fouls shown in the graphic              |
+| Option | Description |
+|---|---|
+| **Max nr undetects** | Maximum number of unrecognized frames before a new sample is created automatically. |
+| **Empty value** | Value output when recognition confidence falls below the *Confidence* threshold. Can be left blank or set to a placeholder such as `-`. |
 
-**Please note that you must NOT select all values. E.g., it is possible to use the game clock digits only but not use the other content.**
+> **Note:** Deactivate the detection mode once enough samples have been collected.
 
-### Using as a template
+---
 
-If a clip is selected, it can be used as a sample template by clicking *Video -> Use as template*.
+## Board
 
-**Please note that you don't need to define a template for each clip. You can reuse an existing template for another clip by changing the value of *Template*.**
+![Board Tab](Additionals/Images/03_Board.png)
 
-When a clip is used as a template, the template tab is opened, and the clip content is shown on the editing view (the right part of the application). Now the sample values can be defined by either:
-* Adding each new sample step-by-step when it it appears on the clip by clicking *Templates -> Add as sample*, or
-* Using the detection functionality by clicking *Templates -> Detect samples*.
+The Board tab controls the graphic output. Recognized values are transmitted to the HTML graphic page via a built-in web server and a WebSocket connection as a JSON stream.
 
-The latter function automatically adds new samples when all existing samples' similarity value is below the detection threshold (see *Samples -> Detection threshold*). If the part is activated, the sample view on the right side has a yellow background. **Don't forget to deactivate the detection if you have once collected enough values ;-)**
+On the right-hand side, values can be entered manually or used to override automatically detected values by enabling *Ignore clip*. Changes are not transmitted to the graphic immediately — the *Update board* button must be clicked to apply them. The button activates automatically as soon as any value on the right-hand panel is modified.
 
-### Defining the sample values
+Available actions and settings:
 
-You can immediately define a new sample's value by putting it into the text box. You can easily switch between the values by using the *TAB* button. Unnecessary samples can be deleted by clicking *Samples -> Remove selected* or using the keyboard combination *CTRL + DEL*.
+| Option / Action | Description |
+|---|---|
+| **Update board** | Applies changed values to the graphic output. |
+| **Open board** | Opens the current scoreboard graphic in the local browser. |
+| **Restart server** | Restarts the built-in web server. |
+| **Open root folder** | Opens the server folder where custom HTML graphic pages can be placed. |
+| **Port Server / Port Socket** | Ports used for the HTTP server and the WebSocket connection. |
+| **Delay Socket [ms]** | Update interval of the WebSocket data transmission in milliseconds. |
 
-### Setting up the scoreboard
+---
 
-Now you are ready to use the scoreboard. Therefore, open the *Board* tab. All previously defined clips should now be visible in the respective boxes (e.g., the game clock, if you set this). Directly you can input all missing values (e.g., the home team and guest team names, number of periods, etc.).
+## Output
 
-**Please note that when you change a value, it is not shown immediately on the graphic. The adjusted values are marked with an orange background. To set the changed values in the graphic, you must click *Board -> Update board.*.**
+![Graphic Output](Additionals/Images/11_Output.png)
 
-The text boxes at the bottom are ticker entries in the graphic. The changing period of the ticker (in seconds) can be set above the boxes.
+In addition to the included sample scoreboard, custom HTML graphics can be created and placed in the root folder. The graphic page receives all values — score, game clock, shot clock, team names, period, fouls, and more — via WebSocket as a JSON stream and can render them in any desired layout.
 
-### Using the output
+The output is designed to be used as a browser source in OBS or similar streaming tools, with full support for transparency (chroma key or CSS-based).
 
-The resulting graphic can be started. To open the output, click *Board -> Open server*. It opens a website containing the graphic, which can be integrated into a web stream. With version 1.3 you must not be connected to the internet anymore to receive the website.
+---
 
-The website address and the used ports are currently hard-coded and cannot be changed.
+## Optional Settings Summary
 
-## Optional settings
-
-The following optional settings can be set:
-
-| Setting							| Description	|
-|-----------------------------------|---------------|
-| *Video -> Processing delay*		| The delay between capturing two images in milliseconds. By adjusting this value, you can minimize the computational load of the app. |
-| *Video -> Image queue size*		| The number of the last X images merged into the resulting output image. Sometimes the input is flickering. By merging the images, the resulting output minimizes the impact of this effect. |
-| *Video -> Deactivate cropping*	| If this value is activated, then the clips are used as defined by the selection. By default the content of the clips is centered and only main objects are detected. |
-| *Samples -> Detection threshold*	| The value of similarity under which a new sample is created in the detection mode (see above). |
-| *Samples -> Matching threshold*	| The similarity value must be reached that a sample is considered as value. Otherwise, the value is used, which is defined in *Empty value* |
-| *Samples -> Wait for update*		| The number of milliseconds waited until a changed value is considered. Sometimes the input is flickering. Using this value, you can ensure that changes must exist for a minimum time until they are considered. |
+| Setting | Description |
+|---|---|
+| *Image queue size* | Frames merged per output image (reduces LED flicker artifacts). |
+| *Processing delay [ms]* | Delay between capture cycles (useful for video file testing). |
+| *Confidence at [%]* | Minimum match confidence; below this, the empty value is shown. |
+| *Wait to match [ms]* | Minimum duration a value must be stable before being accepted. |
+| *New sample at [%]* | Similarity threshold below which a new sample is auto-created in detection mode. |
+| *Max nr undetects* | Cap on unrecognized frames before auto-sample creation triggers. |
+| *Empty value* | Fallback value shown when no confident match is found. |
+| *Delay Socket [ms]* | WebSocket update interval for the graphic output. |
