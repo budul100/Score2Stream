@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -337,7 +336,7 @@ namespace Score2Stream.VideoService
         {
             if (isDisposed) return default;
 
-            var segmentImage = default(Mat);
+            Mat segmentImage;
 
             frameLock.EnterReadLock();
 
@@ -353,49 +352,59 @@ namespace Score2Stream.VideoService
                 frameLock.ExitReadLock();
             }
 
-            var noiselessImage = segment.Area.NoiseRemoval == 0
-                ? segmentImage
-                : segmentImage.WithoutNoise(
+            if (segment.Area.NoiseRemoval > 0)
+            {
+                var noiselessImage = segmentImage.WithoutNoise(
                     erodeIterations: segment.Area.NoiseRemoval,
                     dilateIterations: segment.Area.NoiseRemoval);
 
-            if (!ReferenceEquals(noiselessImage, segmentImage))
+                segmentImage.Dispose();
+
+                segmentImage = noiselessImage;
+            }
+
+            var thresholdMonochrome = segment.Area.ThresholdMonochrome
+                / Constants.ThresholdDivider;
+            var monochromeImage = segmentImage.AsMonochrome(thresholdMonochrome);
+
+            if (!ReferenceEquals(
+                objA: monochromeImage,
+                objB: segmentImage))
             {
                 segmentImage.Dispose();
             }
 
-            var thresholdMonochrome = segment.Area.ThresholdMonochrome / Constants.ThresholdDivider;
-            var monochromeImage = noiselessImage.AsMonochrome(thresholdMonochrome);
-
-            noiselessImage.Dispose();
-
-            var contourRectangle = !settingsService.Contents.Video.NoCropping
-                ? monochromeImage.GetContour()
-                : default;
-
-            var contourImage = contourRectangle.HasValue
-                ? monochromeImage.AsCropped(contourRectangle.Value)
-                : monochromeImage;
-
-            if (!ReferenceEquals(
-                objA: contourImage,
-                objB: monochromeImage))
+            if (!settingsService.Contents.Video.NoCropping)
             {
-                monochromeImage.Dispose();
+                var contourRectangle = monochromeImage.GetContour();
+
+                if (contourRectangle.HasValue)
+                {
+                    var croppedImage = monochromeImage.AsCropped(contourRectangle.Value);
+
+                    monochromeImage.Dispose();
+
+                    monochromeImage = croppedImage;
+                }
             }
 
-            if (!contourImage.HasValue() || widthMax <= 0 || heightMax <= 0)
+            if (!monochromeImage.HasValue() || widthMax <= 0 || heightMax <= 0)
             {
-                contourImage.Dispose();
+                monochromeImage.Dispose();
 
                 return default;
             }
 
-            var centeredImage = contourImage.AsCentered(
+            var centeredImage = monochromeImage.AsCentered(
                 fullWidth: widthMax,
                 fullHeight: heightMax);
 
-            contourImage.Dispose();
+            if (!ReferenceEquals(
+                objA: centeredImage,
+                objB: monochromeImage))
+            {
+                monochromeImage.Dispose();
+            }
 
             return centeredImage;
         }
