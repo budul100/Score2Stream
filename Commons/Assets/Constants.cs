@@ -7,6 +7,8 @@
         public const int DelayMax = 1000;
         public const int DelayMin = 10;
 
+        public const double DragThreshold = 3.0;
+
         public const int DurationKeepLast = 500;
         public const int DurationUpdateTitle = 500;
 

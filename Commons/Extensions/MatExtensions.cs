@@ -124,6 +124,13 @@ namespace Score2Stream.Commons.Extensions
                     thresh: thresh,
                     maxval: 255,
                     type: ThresholdTypes.Binary);
+
+                if (!ReferenceEquals(
+                    objA: monochromeImage,
+                    objB: image))
+                {
+                    monochromeImage.Dispose();
+                }
             }
 
             return result;
@@ -160,7 +167,7 @@ namespace Score2Stream.Commons.Extensions
 
                 var cornersResult = rotated.Points();
 
-                var transformed = Cv2.GetAffineTransform(
+                using var transformed = Cv2.GetAffineTransform(
                     src: cornersImage,
                     dst: cornersResult);
 
@@ -265,7 +272,7 @@ namespace Score2Stream.Commons.Extensions
 
             if (!image.IsEmpty())
             {
-                var gray = new Mat();
+                using var gray = new Mat();
 
                 if (image.Channels() > 1)
                 {
@@ -276,10 +283,10 @@ namespace Score2Stream.Commons.Extensions
                 }
                 else
                 {
-                    gray = image.Clone();
+                    image.CopyTo(gray);
                 }
 
-                var resized = new Mat();
+                using var resized = new Mat();
 
                 var size = new Size(
                     Width: width,

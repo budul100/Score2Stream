@@ -90,7 +90,7 @@
         </ItemsControl>
 
         <i:Interaction.Behaviors>
-            <bv:PointerPressedBehavior Command="{Binding OnPressedCommand}" />
+            <bv:PointerPressedBehavior Command="{Binding OnPressedCommand}" MarkHandled="False" />
         </i:Interaction.Behaviors>
 
     </Panel>

@@ -214,8 +214,7 @@ namespace Score2Stream.VideoService
 
         #region Private Methods
 
-        private async Task CaptureAsync(int? deviceId, IVideoCapture video,
-            CancellationToken cancellationToken)
+        private async Task CaptureAsync(int? deviceId, IVideoCapture video, CancellationToken cancellationToken)
         {
             var hasContent = false;
 
@@ -266,7 +265,6 @@ namespace Score2Stream.VideoService
                     widthLast = size.Width;
 
                     using var converted = new Mat();
-
                     Bitmap = converted.GetBitmap(rotated);
                 }
 
@@ -627,7 +625,7 @@ namespace Score2Stream.VideoService
 
                 if (segment.Images.Count >= settingsService.Contents.Video.ImagesQueueSize)
                 {
-                    if (segment.Images.Count > settingsService.Contents.Video.ImagesQueueSize)
+                    while (segment.Images.Count > settingsService.Contents.Video.ImagesQueueSize)
                     {
                         var oldImages = segment.Images.Dequeue();
                         oldImages?.Dispose();
@@ -639,9 +637,9 @@ namespace Score2Stream.VideoService
 
             if (segment.Image.HasValue() == true)
             {
-                using var bitmapStream = segment.Image.ToMemoryStream();
-
-                segment.Bitmap = new Bitmap(bitmapStream);
+                using var stream = segment.Image.ToMemoryStream();
+                
+                segment.Bitmap = new Bitmap(stream);
             }
             else
             {

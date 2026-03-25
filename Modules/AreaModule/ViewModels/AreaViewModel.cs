@@ -34,8 +34,8 @@ namespace Score2Stream.AreaModule.ViewModels
 
         #region Public Constructors
 
-        public AreaViewModel(IScoreboardService scoreboardService,
-            Func<SegmentViewModel> segmentViewModelFactory, IEventAggregator eventAggregator)
+        public AreaViewModel(IScoreboardService scoreboardService, Func<SegmentViewModel> segmentViewModelFactory,
+            IEventAggregator eventAggregator)
         {
             this.scoreboardService = scoreboardService;
             this.segmentViewModelFactory = segmentViewModelFactory;

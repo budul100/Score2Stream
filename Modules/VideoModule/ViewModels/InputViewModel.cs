@@ -35,7 +35,11 @@ namespace Score2Stream.VideoModule.ViewModels
         private double heightFull;
         private double? heightMax;
         private double? heightMin;
+        private bool isDragging;
         private bool isLoading;
+        private bool isMouseDown;
+        private double mouseDownX;
+        private double mouseDownY;
         private double mouseX;
         private double mouseY;
         private bool movedToBottom;
@@ -239,8 +243,8 @@ namespace Score2Stream.VideoModule.ViewModels
         private double? GetActualHeight()
         {
             var result = heightMin.HasValue
-            ? heightMax.Value - heightMin.Value
-            : default(double?);
+                ? heightMax.Value - heightMin.Value
+                : default(double?);
 
             return result;
         }
@@ -248,88 +252,107 @@ namespace Score2Stream.VideoModule.ViewModels
         private double? GetActualWidth()
         {
             var result = widthMin.HasValue
-            ? widthMax.Value - widthMin.Value
-            : default(double?);
+                ? widthMax.Value - widthMin.Value
+                : default(double?);
 
             return result;
         }
 
         private bool IsMouseEditing(bool isActivating = false)
         {
-            var result = area != default
-            && Bitmap != default
-            && (area.IsEditing || isActivating)
-            && navigationService.EditView == ViewType.Inputs;
+            var result = navigationService.EditView == ViewType.Inputs
+                && Bitmap != default
+                && area != default
+                && (area.IsEditing || isActivating);
 
             return result;
         }
 
         private void OnMousePressed(PointerPressedEventArgs eventArgs)
         {
-            var pointerUpdateKind = eventArgs.GetCurrentPoint(default).Properties.PointerUpdateKind;
+            var pointerUpdateKind = eventArgs.GetCurrentPoint(default)
+                .Properties.PointerUpdateKind;
 
             if (pointerUpdateKind == PointerUpdateKind.LeftButtonPressed
-                && IsMouseEditing(true))
+                && Bitmap != default
+                && area != default)
             {
-                area.IsEditing = true;
-                area.Left = default;
-                area.Top = default;
-                area.Height = default;
-                area.Width = default;
-
-                MouseX = mouseX;
-                MouseY = mouseY;
+                isMouseDown = true;
+                isDragging = false;
+                mouseDownX = mouseX;
+                mouseDownY = mouseY;
             }
         }
 
         private async void OnMouseReleasedAsync(PointerReleasedEventArgs eventArgs)
         {
-            var pointerUpdateKind = eventArgs.GetCurrentPoint(default).Properties.PointerUpdateKind;
+            var pointerUpdateKind = eventArgs.GetCurrentPoint(default)
+                .Properties.PointerUpdateKind;
 
-            if (pointerUpdateKind == PointerUpdateKind.LeftButtonReleased
-                && IsMouseEditing())
+            if (pointerUpdateKind == PointerUpdateKind.LeftButtonReleased)
             {
-                var isResized = false;
-
-                if (area.IsVisible)
+                if (isDragging
+                    && IsMouseEditing())
                 {
-                    var canBeResized = !area.Area.HasDimensions
-                        || area.Area?.Template?.Samples?.Count > 0;
+                    var isResized = false;
 
-                    if (!canBeResized)
+                    if (area.IsVisible)
                     {
-                        var messageBoxResult = await dialogService.GetMessageBoxResultAsync(
-                            contentMessage: "Shall the dimensions of the area be changed?",
-                            contentTitle: "Change dimension");
+                        var canBeResized = !area.Area.HasDimensions;
 
-                        canBeResized = messageBoxResult == ButtonResult.Yes;
+                        if (!canBeResized)
+                        {
+                            var messageBoxResult = await dialogService.GetMessageBoxResultAsync(
+                                contentMessage: "Shall the dimensions of the area be changed?",
+                                contentTitle: "Change dimension");
+
+                            canBeResized = messageBoxResult == ButtonResult.Yes;
+                        }
+
+                        if (canBeResized)
+                        {
+                            var actualWidth = GetActualWidth();
+                            var actualHeight = GetActualHeight();
+
+                            inputService.AreaService.Resize(
+                                left: area.Left,
+                                widthMin: widthMin,
+                                widthFull: area.Width,
+                                widthActual: actualWidth,
+                                top: area.Top,
+                                heightMin: heightMin,
+                                heightFull: area.Height,
+                                heightActual: actualHeight);
+
+                            area.IsEditing = false;
+
+                            isResized = true;
+                        }
                     }
 
-                    if (canBeResized)
+                    if (!isResized)
                     {
-                        var actualWidth = GetActualWidth();
-                        var actualHeight = GetActualHeight();
+                        SetDimensions();
+                    }
+                }
+                else if (isMouseDown
+                    && !isDragging)
+                {
+                    var clickedInsideArea = Areas.Any(a => a.HasValue
+                        && mouseDownX >= (a.Left ?? 0)
+                        && mouseDownX <= (a.Right ?? 0)
+                        && mouseDownY >= (a.Top ?? 0)
+                        && mouseDownY <= (a.Bottom ?? 0));
 
-                        inputService.AreaService.Resize(
-                            left: area.Left,
-                            widthMin: widthMin,
-                            widthFull: area.Width,
-                            widthActual: actualWidth,
-                            top: area.Top,
-                            heightMin: heightMin,
-                            heightFull: area.Height,
-                            heightActual: actualHeight);
-
-                        area.IsEditing = false;
-
-                        isResized = true;
+                    if (!clickedInsideArea)
+                    {
+                        inputService.AreaService.Select(
+                            area: default);
                     }
                 }
 
-                if (!isResized)
-                {
-                    SetDimensions();
-                }
+                isMouseDown = false;
+                isDragging = false;
             }
         }
 
@@ -345,40 +368,63 @@ namespace Score2Stream.VideoModule.ViewModels
 
         private void RefreshArea()
         {
-            if (IsMouseEditing())
+            if (!isMouseDown || !IsMouseEditing(isActivating: !isDragging))
             {
-                if (!area.HasValue)
-                {
-                    area.Left = mouseX;
-                    area.Top = mouseY;
-                }
-                else
-                {
-                    if (mouseX > (area.Right ?? 0) || (mouseX >= (area.Left ?? 0) && movedToRight))
-                    {
-                        area.Width = mouseX - area.Left.Value;
-                        movedToRight = true;
-                    }
-                    else if (mouseX < (area.Left ?? 0)
-                    || (mouseX <= (area.Right ?? 0) && !movedToRight))
-                    {
-                        area.Width = (area.Width ?? 0) + area.Left.Value - mouseX;
-                        area.Left = mouseX;
-                        movedToRight = false;
-                    }
+                return;
+            }
 
-                    if (mouseY > (area.Bottom ?? 0) || (mouseY >= (area.Top ?? 0) && movedToBottom))
-                    {
-                        area.Height = mouseY - area.Top.Value;
-                        movedToBottom = true;
-                    }
-                    else if (mouseY < (area.Top ?? 0)
-                    || (mouseY <= (area.Bottom ?? 0) && !movedToBottom))
-                    {
-                        area.Height = (area.Height ?? 0) + area.Top.Value - mouseY;
-                        area.Top = mouseY;
-                        movedToBottom = false;
-                    }
+            if (!isDragging)
+            {
+                var dx = Math.Abs(mouseX - mouseDownX);
+                var dy = Math.Abs(mouseY - mouseDownY);
+
+                if (dx < Constants.DragThreshold
+                    && dy < Constants.DragThreshold)
+                {
+                    return;
+                }
+
+                isDragging = true;
+                area.IsEditing = true;
+                area.Left = mouseDownX;
+                area.Top = mouseDownY;
+                area.Height = default;
+                area.Width = default;
+            }
+
+            if (!area.HasValue)
+            {
+                area.Left = mouseX;
+                area.Top = mouseY;
+            }
+            else
+            {
+                if (mouseX > (area.Right ?? 0) || (mouseX >= (area.Left ?? 0)
+                    && movedToRight))
+                {
+                    area.Width = mouseX - area.Left.Value;
+                    movedToRight = true;
+                }
+                else if (mouseX < (area.Left ?? 0) || (mouseX <= (area.Right ?? 0)
+                    && !movedToRight))
+                {
+                    area.Width = (area.Width ?? 0) + area.Left.Value - mouseX;
+                    area.Left = mouseX;
+                    movedToRight = false;
+                }
+
+                if (mouseY > (area.Bottom ?? 0) || (mouseY >= (area.Top ?? 0)
+                    && movedToBottom))
+                {
+                    area.Height = mouseY - area.Top.Value;
+                    movedToBottom = true;
+                }
+                else if (mouseY < (area.Top ?? 0) || (mouseY <= (area.Bottom ?? 0)
+                    && !movedToBottom))
+                {
+                    area.Height = (area.Height ?? 0) + area.Top.Value - mouseY;
+                    area.Top = mouseY;
+                    movedToBottom = false;
                 }
             }
         }
