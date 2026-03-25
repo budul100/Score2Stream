@@ -24,22 +24,37 @@ namespace Score2Stream.Tests.VideoServiceTests
         #region Private Fields
 
         private readonly Mock<AreaModifiedEvent> areaModifiedEventMock;
+
         private readonly Mock<IAreaService> areaServiceMock;
+
         private readonly Mock<IDispatcherService> dispatcherServiceMock;
+
         private readonly Mock<IEventAggregator> eventAggregatorMock;
+
         private readonly Mock<InputEndedEvent> inputEndedEventMock;
+
         private readonly Mock<InputStartedEvent> inputStartedEventMock;
+
         private readonly Mock<InputUpdatedEvent> inputUpdatedEventMock;
+
         private readonly Mock<ILogger<Service>> loggerMock;
+
         private readonly Mock<IRecognitionService> recognitionServiceMock;
+
         private readonly Mock<SampleUpdatedEvent> sampleUpdatedEventMock;
+
         private readonly Mock<SegmentDrawnEvent> segmentDrawnEventMock;
+
         private readonly Mock<SegmentUpdatedEvent> segmentUpdatedEventMock;
+
         private readonly Mock<ISettingsService<Session>> settingsServiceMock;
+
         private readonly Mock<ITemplateService> templateServiceMock;
+
         private readonly Mock<IVideoCapture> videoCaptureMock;
+
         private readonly Service videoService;
-        
+
         private bool isDisposed;
 
         #endregion Private Fields
@@ -229,6 +244,44 @@ namespace Score2Stream.Tests.VideoServiceTests
         }
 
         [Fact]
+        public async Task RunAsync_ConcurrentFrameAccess_DoesNotThrow()
+        {
+            // Verifies that frameLock correctly serializes read/write access
+            // under concurrent pressure. Any ReaderWriterLockSlim misuse
+            // (e.g. double-enter) would throw LockRecursionException here.
+            var input = new Input { FileName = "dummy.mp4", IsDevice = false, Name = "dummy" };
+            videoCaptureMock.Setup(v => v.Open(input.FileName)).Returns(true);
+
+            var frameCount = 0;
+            videoCaptureMock.Setup(v => v.Read(It.IsAny<Mat>())).Returns((Mat mat) =>
+            {
+                if (frameCount++ < 10)
+                {
+                    new Mat(10, 10, MatType.CV_8UC3, Scalar.Black).CopyTo(mat);
+                    return true;
+                }
+                return false;
+            });
+
+            // Hammer concurrent reads while RunAsync is writing frames
+            var concurrentReads = Task.Run(async () =>
+            {
+                for (var i = 0; i < 50; i++)
+                {
+                    _ = videoService.Bitmap;
+                    await Task.Delay(1);
+                }
+            });
+
+            var exception = await Record.ExceptionAsync(async () =>
+            {
+                await Task.WhenAll(videoService.RunAsync(input), concurrentReads);
+            });
+
+            Assert.Null(exception);
+        }
+
+        [Fact]
         public async Task RunAsync_SetsNameProperty()
         {
             var input = new Input
@@ -395,6 +448,29 @@ namespace Score2Stream.Tests.VideoServiceTests
         {
             var exception = await Record.ExceptionAsync(() => videoService.StopAsync());
             Assert.Null(exception);
+        }
+
+        [Fact]
+        public async Task StopAsync_WhileRunning_BitmapIsNull()
+        {
+            var input = new Input { FileName = "dummy.mp4", IsDevice = false, Name = "dummy" };
+            videoCaptureMock.Setup(v => v.Open(input.FileName)).Returns(true);
+
+            var frameCount = 0;
+            videoCaptureMock.Setup(v => v.Read(It.IsAny<Mat>())).Returns((Mat mat) =>
+            {
+                if (frameCount++ == 0)
+                {
+                    new Mat(10, 10, MatType.CV_8UC3, Scalar.Black).CopyTo(mat);
+                    return true;
+                }
+                return false;
+            });
+
+            await videoService.RunAsync(input);
+
+            // Bitmap must be cleared after capture ends — memory leak otherwise
+            Assert.Null(videoService.Bitmap);
         }
 
         [Fact]
