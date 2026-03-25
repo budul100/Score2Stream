@@ -187,7 +187,7 @@ namespace Score2Stream.Commons.Extensions
                 return source;
 
             // Build 2x3 affine translation matrix
-            var translationMatrix = Mat.FromArray(new float[,]
+            using var translationMatrix = Mat.FromArray(new float[,]
             {
                 { 1, 0, offsetX },
                 { 0, 1, offsetY }
@@ -216,6 +216,7 @@ namespace Score2Stream.Commons.Extensions
             var bitmapSize = new Avalonia.PixelSize(
                 width: image.Width,
                 height: image.Height);
+
             var bitmapDPI = new Avalonia.Vector(96, 96);
 
             var result = new Bitmap(

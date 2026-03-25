@@ -30,6 +30,7 @@ namespace Score2Stream.VideoService
         private readonly object ctsLock = new();
         private readonly IDispatcherService dispatcherService;
         private readonly ReaderWriterLockSlim frameLock = new();
+        private readonly InputDrawnEvent inputDrawnEvent;
         private readonly InputEndedEvent inputEndedEvent;
         private readonly InputStartedEvent inputStartedEvent;
         private readonly InputUpdatedEvent inputUpdatedEvent;
@@ -71,6 +72,7 @@ namespace Score2Stream.VideoService
 
             inputStartedEvent = eventAggregator.GetEvent<InputStartedEvent>();
             inputEndedEvent = eventAggregator.GetEvent<InputEndedEvent>();
+            inputDrawnEvent = eventAggregator.GetEvent<InputDrawnEvent>();
             inputUpdatedEvent = eventAggregator.GetEvent<InputUpdatedEvent>();
 
             segmentDrawnEvent = eventAggregator.GetEvent<SegmentDrawnEvent>();
@@ -221,15 +223,17 @@ namespace Score2Stream.VideoService
             var frameCount = 0.0;
             var frameIndex = 0.0;
 
+            var stopwatch = new Stopwatch();
+
             do
             {
                 if (isDisposed) break;
 
+                stopwatch.Restart();
+
                 using var currentFrame = new Mat();
 
                 hasContent = video.Read(currentFrame);
-
-                var capturingStart = DateTime.Now;
 
                 if (!currentFrame.Empty())
                 {
@@ -265,7 +269,11 @@ namespace Score2Stream.VideoService
                     widthLast = size.Width;
 
                     using var converted = new Mat();
-                    Bitmap = converted.GetBitmap(rotated);
+                    var bitmap = converted.GetBitmap(rotated);
+
+                    await dispatcherService.InvokeAsync(
+                        action: () => RefreshInput(bitmap),
+                        cancellationToken: cancellationToken);
                 }
 
                 var segments = AreaService?.Areas?
@@ -282,17 +290,13 @@ namespace Score2Stream.VideoService
                         location1: ref widthMax,
                         value: segments.Max(a => a.Rect.Value.Width));
 
-                    var imageUpdates = UpdateImages(segments).ToArray();
+                    var segmentRefreshs = RefreshSegments(segments).ToArray();
 
                     await dispatcherService.InvokeAsync(
-                        actions: imageUpdates,
+                        actions: segmentRefreshs,
                         cancellationToken: cancellationToken);
 
-                    var sampleUpdates = UdpateSamples(segments).ToArray();
-
-                    await dispatcherService.InvokeAsync(
-                        actions: sampleUpdates,
-                        cancellationToken: cancellationToken);
+                    UdpateSegments(segments);
                 }
 
                 var position = 0.0;
@@ -317,8 +321,17 @@ namespace Score2Stream.VideoService
                     position = video.Get(VideoCaptureProperties.PosMsec);
                 }
 
-                await UpdateVideoAsync(
-                    capturingStart: capturingStart);
+                inputUpdatedEvent.Publish();
+
+                var delay = settingsService.Contents.Video.DelayProcessing + Constants.UpdateDelay;
+
+                await Task.Delay(
+                    millisecondsDelay: delay,
+                    cancellationToken: cancellationToken);
+
+                stopwatch.Stop();
+
+                ProcessingTime = stopwatch.Elapsed;
 
                 if (!deviceId.HasValue
                     && settingsService.Contents.Video.DelayProcessing > 0
@@ -420,6 +433,69 @@ namespace Score2Stream.VideoService
             return centeredImage;
         }
 
+        private void RefreshInput(Bitmap bitmap)
+        {
+            var given = Bitmap;
+
+            Bitmap = bitmap;
+
+            inputDrawnEvent.Publish();
+
+            given?.Dispose();
+        }
+
+        private void RefreshSegment(Segment segment, Bitmap bitmap)
+        {
+            var given = segment.Bitmap;
+
+            segment.Bitmap = bitmap;
+
+            segmentDrawnEvent.Publish(segment);
+
+            given?.Dispose();
+        }
+
+        private IEnumerable<Action> RefreshSegments(IEnumerable<Segment> segments)
+        {
+            if (!isDisposed)
+            {
+                foreach (var segment in segments)
+                {
+                    segment.Image = default;
+
+                    var current = GetImage(segment);
+
+                    if (current.HasValue())
+                    {
+                        segment.Images.Enqueue(current);
+
+                        if (segment.Images.Count >= settingsService.Contents.Video.ImagesQueueSize)
+                        {
+                            while (segment.Images.Count > settingsService.Contents.Video.ImagesQueueSize)
+                            {
+                                var oldImages = segment.Images.Dequeue();
+                                oldImages?.Dispose();
+                            }
+
+                            segment.Image = segment.Images.AsBlended();
+                        }
+                    }
+
+                    var bitmap = default(Bitmap);
+
+                    if (segment.Image.HasValue() == true)
+                    {
+                        using var stream = segment.Image.ToMemoryStream();
+                        bitmap = new Bitmap(stream);
+                    }
+
+                    yield return () => RefreshSegment(
+                        segment: segment,
+                        bitmap: bitmap);
+                }
+            }
+        }
+
         private async Task RunAsync(int? deviceId, string fileName)
         {
             CancellationToken cancellationToken;
@@ -434,8 +510,6 @@ namespace Score2Stream.VideoService
 
             try
             {
-                await UpdateVideoAsync();
-
                 using var video = videoCaptureFactory.Invoke();
 
                 if (deviceId.HasValue)
@@ -501,8 +575,6 @@ namespace Score2Stream.VideoService
                         frameLock.ExitWriteLock();
                     }
 
-                    await UpdateVideoAsync();
-
                     await dispatcherService.InvokeAsync(() => inputEndedEvent.Publish(input));
                 }
                 else
@@ -513,7 +585,7 @@ namespace Score2Stream.VideoService
             }
         }
 
-        private IEnumerable<Action> UdpateSamples(Segment segment, Sample[] samples,
+        private void UdpateSamples(Segment segment, Sample[] samples,
             Match[] matches)
         {
             var templateSamples = TemplateService.Active?.Samples?.ToArray();
@@ -533,7 +605,7 @@ namespace Score2Stream.VideoService
                                 ? matches[index]
                                 : default;
 
-                            yield return () => sampleUpdatedEvent.Publish(sample);
+                            sampleUpdatedEvent.Publish(sample);
                         }
                     }
                     else
@@ -559,7 +631,7 @@ namespace Score2Stream.VideoService
                                 ? templateMatches[index]
                                 : default;
 
-                            yield return () => sampleUpdatedEvent.Publish(sample);
+                            sampleUpdatedEvent.Publish(sample);
                         }
                     }
 
@@ -572,7 +644,7 @@ namespace Score2Stream.VideoService
                     {
                         templateSample.Match = default;
 
-                        yield return () => sampleUpdatedEvent.Publish(templateSample);
+                        sampleUpdatedEvent.Publish(templateSample);
                     }
 
                     lastActive = default;
@@ -580,7 +652,7 @@ namespace Score2Stream.VideoService
             }
         }
 
-        private IEnumerable<Action> UdpateSamples(IEnumerable<Segment> segments)
+        private void UdpateSegments(IEnumerable<Segment> segments)
         {
             if (!isDisposed)
             {
@@ -598,64 +670,12 @@ namespace Score2Stream.VideoService
                         segment: segment,
                         matches: matches);
 
-                    yield return () => segmentUpdatedEvent.Publish(segment);
+                    segmentUpdatedEvent.Publish(segment);
 
-                    var actions = UdpateSamples(
+                    UdpateSamples(
                         segment: segment,
                         samples: samples,
-                        matches: matches).ToArray();
-
-                    foreach (var action in actions)
-                    {
-                        yield return action;
-                    }
-                }
-            }
-        }
-
-        private void UpdateImage(Segment segment)
-        {
-            segment.Image = default;
-
-            var current = GetImage(segment);
-
-            if (current.HasValue())
-            {
-                segment.Images.Enqueue(current);
-
-                if (segment.Images.Count >= settingsService.Contents.Video.ImagesQueueSize)
-                {
-                    while (segment.Images.Count > settingsService.Contents.Video.ImagesQueueSize)
-                    {
-                        var oldImages = segment.Images.Dequeue();
-                        oldImages?.Dispose();
-                    }
-
-                    segment.Image = segment.Images.AsBlended();
-                }
-            }
-
-            if (segment.Image.HasValue() == true)
-            {
-                using var stream = segment.Image.ToMemoryStream();
-                
-                segment.Bitmap = new Bitmap(stream);
-            }
-            else
-            {
-                segment.Bitmap = default;
-            }
-        }
-
-        private IEnumerable<Action> UpdateImages(IEnumerable<Segment> segments)
-        {
-            if (!isDisposed)
-            {
-                foreach (var segment in segments)
-                {
-                    UpdateImage(segment);
-
-                    yield return () => segmentDrawnEvent.Publish(segment);
+                        matches: matches);
                 }
             }
         }
@@ -719,14 +739,14 @@ namespace Score2Stream.VideoService
 
                 var index = 0;
 
-                foreach (var segement in area.Segments)
+                foreach (var segment in area.Segments)
                 {
                     var segmentX1 = areaX1 + (width * index);
-                    var segmentX2 = segement != area.Segments.Last()
+                    var segmentX2 = segment != area.Segments.Last()
                         ? areaX1 + (width * ++index)
                         : areaX2;
 
-                    segement.Rect = size.GetRectangle(
+                    segment.Rect = size.GetRectangle(
                         firstX: segmentX1,
                         firstY: areaY1,
                         secondX: segmentX2,
@@ -737,20 +757,6 @@ namespace Score2Stream.VideoService
             {
                 frameLock.ExitReadLock();
             }
-        }
-
-        private async Task UpdateVideoAsync(DateTime? capturingStart = default)
-        {
-            await dispatcherService.InvokeAsync(
-                action: inputUpdatedEvent.Publish);
-
-            var delay = settingsService.Contents.Video.DelayProcessing + Constants.UpdateDelay;
-
-            await Task.Delay(delay);
-
-            ProcessingTime = capturingStart.HasValue
-                ? DateTime.Now - capturingStart
-                : default;
         }
 
         #endregion Private Methods

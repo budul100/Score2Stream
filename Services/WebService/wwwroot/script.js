@@ -1,6 +1,4 @@
 $(document).ready(function () {
-    $.ajaxSetup({ cache: false });
-
     const ellog = document.getElementById('log');
 
     function log(m) {

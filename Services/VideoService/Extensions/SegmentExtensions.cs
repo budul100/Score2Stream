@@ -1,4 +1,5 @@
 ﻿using System;
+using Avalonia.Media.Imaging;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Models.Contents;
 

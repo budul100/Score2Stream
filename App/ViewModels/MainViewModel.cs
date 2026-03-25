@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -26,8 +27,8 @@ namespace Score2Stream.App.ViewModels
         private readonly IInputService inputService;
         private readonly IScoreboardService scoreboardService;
         private readonly ISettingsService<Session> settingsService;
+        private readonly Stopwatch stopwatchTitle = new();
 
-        private DateTime? lastUpdateTitle;
         private string title;
         private bool userWantsToQuit;
 
@@ -311,11 +312,11 @@ namespace Score2Stream.App.ViewModels
 
         private void UpdateTitle()
         {
-            if (!lastUpdateTitle.HasValue
-                || lastUpdateTitle.Value.AddMilliseconds(Constants.DurationUpdateTitle) < DateTime.Now)
+            if (!stopwatchTitle.IsRunning
+                || stopwatchTitle.ElapsedMilliseconds >= Constants.DurationUpdateTitle)
             {
                 Title = GetTitle();
-                lastUpdateTitle = DateTime.Now;
+                stopwatchTitle.Restart();
             }
         }
 

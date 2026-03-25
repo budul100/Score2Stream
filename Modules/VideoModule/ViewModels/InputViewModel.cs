@@ -66,7 +66,7 @@ namespace Score2Stream.VideoModule.ViewModels
             MouseReleasedCommand = new DelegateCommand<PointerReleasedEventArgs>(OnMouseReleasedAsync);
             ZoomChangedCommand = new DelegateCommand<ZoomChangedEventArgs>(OnZoomChanged);
 
-            eventAggregator.GetEvent<InputUpdatedEvent>().Subscribe(
+            eventAggregator.GetEvent<InputDrawnEvent>().Subscribe(
                 action: RefreshInput,
                 keepSubscriberReferenceAlive: true);
 
