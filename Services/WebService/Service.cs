@@ -36,7 +36,7 @@ namespace Score2Stream.WebService
         #region Public Constructors
 
         public Service(ISettingsService<Session> settingsService, IDispatcherService dispatcherService,
-            IEventAggregator eventAggregator, ILogger<Service> logger)
+            IEventAggregator eventAggregator, ILogger<Service> logger = default)
         {
             this.settingsService = settingsService;
             this.dispatcherService = dispatcherService;

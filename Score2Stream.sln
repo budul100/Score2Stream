@@ -76,6 +76,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoServiceTests", "Tests\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TemplateServiceTests", "Tests\Services\TemplateServiceTests\TemplateServiceTests.csproj", "{95ED54F3-C286-6859-DEFF-9E183F54DEB1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebServiceTests", "Tests\Services\WebServiceTests\WebServiceTests.csproj", "{8C91070D-DF83-4B4E-84AB-A807B3DD595B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -186,6 +188,10 @@ Global
 		{95ED54F3-C286-6859-DEFF-9E183F54DEB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{95ED54F3-C286-6859-DEFF-9E183F54DEB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{95ED54F3-C286-6859-DEFF-9E183F54DEB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C91070D-DF83-4B4E-84AB-A807B3DD595B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C91070D-DF83-4B4E-84AB-A807B3DD595B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C91070D-DF83-4B4E-84AB-A807B3DD595B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C91070D-DF83-4B4E-84AB-A807B3DD595B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -218,6 +224,7 @@ Global
 		{EF4B2051-485E-4634-854D-5756F4BDAA4A} = {2791EF42-0379-4A9C-8DFA-4C89F2CE4975}
 		{0771712A-16BC-42D7-BA2F-980EE451C1B0} = {2791EF42-0379-4A9C-8DFA-4C89F2CE4975}
 		{95ED54F3-C286-6859-DEFF-9E183F54DEB1} = {2791EF42-0379-4A9C-8DFA-4C89F2CE4975}
+		{8C91070D-DF83-4B4E-84AB-A807B3DD595B} = {2791EF42-0379-4A9C-8DFA-4C89F2CE4975}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {426EBDEF-973C-4F65-AA08-27BB71AC16B7}
