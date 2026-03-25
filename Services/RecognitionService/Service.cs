@@ -56,10 +56,14 @@ namespace Score2Stream.RecognitionService
                 path2: FolderData,
                 path3: FileFeatures);
 
-            if (File.Exists(featurePath))
+            if (!File.Exists(featurePath))
             {
-                sessionFeature = new InferenceSession(featurePath);
+                throw new FileNotFoundException(
+                    message: $"Feature data file '{featurePath}' not found.",
+                    fileName: featurePath);
             }
+
+            sessionFeature = new InferenceSession(featurePath);
         }
 
         #endregion Public Constructors
@@ -126,15 +130,19 @@ namespace Score2Stream.RecognitionService
 
         public IEnumerable<Match> GetMatches(Segment segment, IEnumerable<Sample> samples)
         {
-            if (samples?.Count() > 0
-                && segment?.IsEmpty == false)
+            var relevants = samples?
+                .Where(s => s?.Features != default).ToArray();
+
+            if (segment?.Features != default
+                && !segment.IsEmpty
+                && relevants?.Length > 0)
             {
                 var thresholdMatching = Math.Abs(settingsService.Contents.Detection.ThresholdMatching)
                     / Constants.ThresholdDivider;
 
-                foreach (var sample in samples)
+                foreach (var relevant in relevants)
                 {
-                    var similarity = sample.Features.CosineSimilarity(segment.Features);
+                    var similarity = relevant.Features.CosineSimilarity(segment.Features);
 
                     var type = similarity >= thresholdMatching
                         ? Commons.Enums.MatchType.Similar
@@ -144,7 +152,7 @@ namespace Score2Stream.RecognitionService
                     {
                         Similarity = similarity,
                         Type = type,
-                        Value = sample.Value,
+                        Value = relevant.Value,
                     };
 
                     yield return result;
@@ -156,13 +164,17 @@ namespace Score2Stream.RecognitionService
         {
             var result = false;
 
-            if (segment?.IsEmpty == false
-                && samples?.Count() > 0)
+            var relevants = samples?
+                .Where(s => s?.Features != default).ToArray();
+
+            if (segment?.Features != default
+                && !segment.IsEmpty
+                && relevants?.Length > 0)
             {
                 var thresholdDetecting = Math.Abs(settingsService.Contents.Detection.ThresholdDetecting)
                     / Constants.ThresholdDivider;
 
-                result = samples
+                result = relevants
                     .Select(s => s.Features.CosineSimilarity(segment.Features))
                     .Any(s => s >= thresholdDetecting);
             }
