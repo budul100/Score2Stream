@@ -109,9 +109,17 @@ namespace Score2Stream.VideoService
 
         #region Public Methods
 
+        void IDisposable.Dispose()
+        {
+            DisposeAsync().AsTask()
+                .GetAwaiter()
+                .GetResult();
+        }
+
         public async ValueTask DisposeAsync()
         {
             if (isDisposed) return;
+
             isDisposed = true;
 
             CancellationTokenSource cts;
@@ -124,9 +132,7 @@ namespace Score2Stream.VideoService
 
             if (cts != default && !cts.IsCancellationRequested)
             {
-                try { 
-                    cts.Cancel(); 
-                }
+                try { cts.Cancel(); }
                 catch (ObjectDisposedException) { }
             }
 
@@ -136,47 +142,7 @@ namespace Score2Stream.VideoService
                 {
                     await serviceTask
                         .WaitAsync(TimeSpan.FromSeconds(5))
-                        .ConfigureAwait(false); // ← entscheidend
-                }
-                catch { }
-            }
-
-            cts?.Dispose();
-            frameLock?.Dispose();
-
-            GC.SuppressFinalize(this);
-        }
-
-
-        public async ValueTask DisposeAsync()
-        {
-            if (isDisposed) return;
-
-            isDisposed = true;
-
-            CancellationTokenSource cts;
-
-            lock (ctsLock)
-            {
-                cts = cancellationTokenSource;
-                cancellationTokenSource = default;
-            }
-
-            if (cts != default
-                && !cts.IsCancellationRequested)
-            {
-                try
-                {
-                    cts.Cancel();
-                }
-                catch (ObjectDisposedException) { }
-            }
-
-            if (serviceTask != null)
-            {
-                try
-                {
-                    await serviceTask.WaitAsync(TimeSpan.FromSeconds(5));
+                        .ConfigureAwait(false);
                 }
                 catch { }
             }
