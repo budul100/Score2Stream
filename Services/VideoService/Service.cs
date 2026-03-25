@@ -109,10 +109,44 @@ namespace Score2Stream.VideoService
 
         #region Public Methods
 
-        void IDisposable.Dispose()
+        public async ValueTask DisposeAsync()
         {
-            DisposeAsync().AsTask().GetAwaiter().GetResult();
+            if (isDisposed) return;
+            isDisposed = true;
+
+            CancellationTokenSource cts;
+
+            lock (ctsLock)
+            {
+                cts = cancellationTokenSource;
+                cancellationTokenSource = default;
+            }
+
+            if (cts != default && !cts.IsCancellationRequested)
+            {
+                try { 
+                    cts.Cancel(); 
+                }
+                catch (ObjectDisposedException) { }
+            }
+
+            if (serviceTask != null)
+            {
+                try
+                {
+                    await serviceTask
+                        .WaitAsync(TimeSpan.FromSeconds(5))
+                        .ConfigureAwait(false); // ← entscheidend
+                }
+                catch { }
+            }
+
+            cts?.Dispose();
+            frameLock?.Dispose();
+
+            GC.SuppressFinalize(this);
         }
+
 
         public async ValueTask DisposeAsync()
         {

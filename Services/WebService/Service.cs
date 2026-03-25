@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Prism.Events;
 using Score2Stream.Commons.Assets;
 using Score2Stream.Commons.Events.Graphics;
@@ -20,6 +22,7 @@ namespace Score2Stream.WebService
 
         private readonly IDispatcherService dispatcherService;
         private readonly IEventAggregator eventAggregator;
+        private readonly ILogger logger;
         private readonly ISettingsService<Session> settingsService;
 
         private CancellationTokenSource cancellationTokenSource;
@@ -33,17 +36,20 @@ namespace Score2Stream.WebService
         #region Public Constructors
 
         public Service(ISettingsService<Session> settingsService, IDispatcherService dispatcherService,
-            IEventAggregator eventAggregator)
+            IEventAggregator eventAggregator, ILogger logger)
         {
             this.settingsService = settingsService;
             this.dispatcherService = dispatcherService;
             this.eventAggregator = eventAggregator;
+            this.logger = logger;
 
             eventAggregator.GetEvent<ScoreboardUpdatedEvent>().Subscribe(
                 action: OnScoreboardUpdate,
                 keepSubscriberReferenceAlive: true);
 
-            Task.Run(StartAsync);
+            _ = StartAsync().ContinueWith(
+                continuationAction: OnFailure,
+                continuationOptions: TaskContinuationOptions.OnlyOnFaulted);
         }
 
         #endregion Public Constructors
@@ -171,19 +177,38 @@ namespace Score2Stream.WebService
 
         #region Private Methods
 
-        private static string GetLocalIPAddress()
+        private string GetLocalIPAddress()
         {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-
-            foreach (var ip in host.AddressList)
+            try
             {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                var host = Dns.GetHostEntry(Dns.GetHostName());
+
+                var ip = host.AddressList
+                    .FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork);
+
+                if (ip != default)
                 {
                     return ip.ToString();
                 }
+
+                logger?.LogWarning(
+                    "No IPv4 network adapter found. Falling back to localhost.");
+            }
+            catch (Exception ex)
+            {
+                logger?.LogWarning(
+                    exception: ex,
+                    message: "Failed to resolve local IP address. Falling back to localhost.");
             }
 
-            throw new Exception("No network adapters with an IPv4 address in the system!");
+            return IPAddress.Loopback.ToString(); // "127.0.0.1"
+        }
+
+        private void OnFailure(Task task)
+        {
+            logger?.LogError(
+                exception: task.Exception,
+                message: "WebService failed to start.");
         }
 
         private void OnScoreboardUpdate(string message)
