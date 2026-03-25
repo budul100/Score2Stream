@@ -31,7 +31,7 @@
     </rib:RibbonTab.Styles>
 
     <i:Interaction.Behaviors>
-        <ia:EventTriggerBehavior EventName="PointerPressed" SourceObject="TemplatesTab">
+        <ia:EventTriggerBehavior EventName="Tapped" SourceObject="TemplatesTab">
             <ia:InvokeCommandAction Command="{Binding SelectTabCommand}" CommandParameter="{x:Static en:ViewType.Templates}" />
         </ia:EventTriggerBehavior>
     </i:Interaction.Behaviors>

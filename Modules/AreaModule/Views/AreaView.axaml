@@ -43,7 +43,7 @@
         </Border.Styles>
 
         <i:Interaction.Behaviors>
-            <ia:EventTriggerBehavior EventName="PointerPressed" SourceObject="{Binding #AreaBorder}">
+            <ia:EventTriggerBehavior EventName="Tapped" SourceObject="{Binding #AreaBorder}">
                 <ia:InvokeCommandAction Command="{Binding OnSelectionCommand}" />
             </ia:EventTriggerBehavior>
         </i:Interaction.Behaviors>
