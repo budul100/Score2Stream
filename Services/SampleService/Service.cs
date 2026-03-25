@@ -286,8 +286,8 @@ namespace Score2Stream.SampleService
                 result = new Sample
                 {
                     Bitmap = bitmap,
-                    Height = bitmap?.Size.Height ?? 0,
-                    Width = bitmap?.Size.Width ?? 0,
+                    Height = bitmap.Size.Height,
+                    Width = bitmap.Size.Width,
                     Image = segment.Image,
                 };
 

@@ -216,7 +216,8 @@ namespace Score2Stream.VideoService
 
         #region Private Methods
 
-        private async Task CaptureAsync(int? deviceId, IVideoCapture video, CancellationToken cancellationToken)
+        private async Task CaptureAsync(int? deviceId, IVideoCapture video,
+            CancellationToken cancellationToken)
         {
             var hasContent = false;
 
@@ -452,7 +453,8 @@ namespace Score2Stream.VideoService
 
             segmentDrawnEvent.Publish(segment);
 
-            given?.Dispose();
+            dispatcherService.Post(
+                action: () => given?.Dispose());
         }
 
         private IEnumerable<Action> RefreshSegments(IEnumerable<Segment> segments)

@@ -77,6 +77,15 @@ namespace Score2Stream.DispatcherService
             { }
         }
 
+        public void Post(Action action)
+        {
+            ArgumentNullException.ThrowIfNull(action);
+
+            Dispatcher.UIThread.Post(
+                action: action,
+                priority: DispatcherPriority.Background);
+        }
+
         #endregion Public Methods
 
         #region Private Methods

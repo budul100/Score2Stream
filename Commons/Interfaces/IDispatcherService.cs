@@ -15,6 +15,8 @@ namespace Score2Stream.Commons.Interfaces
 
         Task<T> InvokeAsync<T>(Func<T> function, CancellationToken cancellationToken = default);
 
+        void Post(Action action);
+
         #endregion Public Methods
     }
 }
