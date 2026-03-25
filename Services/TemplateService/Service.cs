@@ -189,7 +189,9 @@ namespace Score2Stream.TemplateService
                         sample.Image = Mat.FromImageData(
                             imageBytes: sample.Bytes,
                             mode: ImreadModes.Unchanged);
-                        sample.Bitmap = new Bitmap(sample.Image.ToMemoryStream());
+
+                        using var stream = sample.Image.ToMemoryStream();
+                        sample.Bitmap = new Bitmap(stream);
 
                         template.SampleService.Add(sample);
                     }

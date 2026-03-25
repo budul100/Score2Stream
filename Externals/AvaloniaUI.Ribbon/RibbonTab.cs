@@ -1,13 +1,13 @@
-﻿using Avalonia;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Linq;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using AvaloniaUI.Ribbon.Extensions;
 using AvaloniaUI.Ribbon.Interfaces;
-using System;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Linq;
 
 namespace AvaloniaUI.Ribbon
 {

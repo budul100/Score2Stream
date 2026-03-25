@@ -9,7 +9,9 @@ namespace AvaloniaUI.Ribbon.Extensions
         public static Ribbon GetParentRibbon(this Control control)
         {
             return Avalonia.VisualTree.VisualExtensions.FindAncestorOfType<Ribbon>(control, true);
+
             /*IControl parentRbn = control.Parent;
+
             while ((!(parentRbn is Ribbon)) && (parentRbn != null))
             {
                 parentRbn = parentRbn.Parent;

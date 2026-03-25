@@ -4,7 +4,7 @@ using OpenCvSharp;
 
 namespace Score2Stream.Commons.Models.Base
 {
-    public abstract class Imageable
+    public abstract class Matchable
     {
         #region Public Properties
 
@@ -13,6 +13,9 @@ namespace Score2Stream.Commons.Models.Base
 
         [JsonIgnore]
         public float[] Features { get; set; }
+
+        [JsonIgnore]
+        public int Hash { get; set; }
 
         [JsonIgnore]
         public Mat Image { get; set; }

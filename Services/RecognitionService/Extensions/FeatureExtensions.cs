@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Score2Stream.RecognitionService.Extensions
 {
@@ -30,6 +31,15 @@ namespace Score2Stream.RecognitionService.Extensions
                 : default;
 
             return result;
+        }
+
+        public static int GetHash(this float[] data)
+        {
+            var result = new HashCode();
+
+            result.AddBytes(MemoryMarshal.Cast<float, byte>(data));
+
+            return result.ToHashCode();
         }
 
         public static float[] Softmax(this float[] logits)

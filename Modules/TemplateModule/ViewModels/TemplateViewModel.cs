@@ -52,10 +52,12 @@ namespace Score2Stream.TemplateModule.ViewModels
 
             eventAggregator.GetEvent<SamplesChangedEvent>().Subscribe(
                 action: RefreshSamples,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<SamplesOrderedEvent>().Subscribe(
                 action: OrderSamples,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<SegmentSelectedEvent>().Subscribe(
@@ -139,9 +141,20 @@ namespace Score2Stream.TemplateModule.ViewModels
 
         private void OrderSamples()
         {
-            Samples = new ObservableCollection<SampleViewModel>(Samples.OrderBy(s => s.Sample.Index));
+            var ordered = Samples
+                .OrderBy(s => s.Sample.Index).ToArray();
 
-            RaisePropertyChanged(nameof(Samples));
+            for (var newIndex = 0; newIndex < ordered.Length; newIndex++)
+            {
+                var oldIndex = Samples.IndexOf(ordered[newIndex]);
+
+                if (oldIndex != newIndex)
+                {
+                    Samples.Move(
+                        oldIndex: oldIndex,
+                        newIndex: newIndex);
+                }
+            }
         }
 
         private void RefreshSamples()

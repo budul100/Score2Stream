@@ -4,7 +4,7 @@ using Score2Stream.Commons.Models.Base;
 namespace Score2Stream.Commons.Models.Contents
 {
     public class Sample
-        : Imageable
+        : Matchable
     {
         #region Public Properties
 

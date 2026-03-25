@@ -70,7 +70,7 @@ namespace Score2Stream.RecognitionService
 
         #region Public Methods
 
-        public void Bind(Imageable imageable)
+        public void Bind(Matchable imageable)
         {
             imageable.Normalized = imageable.Image.GetNormalized(
                 Constants.NormalizedHeight,
@@ -79,25 +79,33 @@ namespace Score2Stream.RecognitionService
             if (imageable.IsEmpty)
             {
                 imageable.Features = default;
+                imageable.Hash = 0;
             }
             else
             {
-                var tensor = new DenseTensor<float>(
-                    memory: imageable.Normalized,
-                    dimensions: [1, 1, Constants.NormalizedHeight, Constants.NormalizedWidth]);
+                var hash = imageable.Normalized.GetHash();
 
-                var input = NamedOnnxValue.CreateFromTensor(
-                    name: "image",
-                    value: tensor);
+                if (hash != imageable.Hash || imageable.Features == default)
+                {
+                    imageable.Hash = hash;
 
-                using var outputs = sessionFeature.Run([input]);
+                    var tensor = new DenseTensor<float>(
+                        memory: imageable.Normalized,
+                        dimensions: [1, 1, Constants.NormalizedHeight, Constants.NormalizedWidth]);
 
-                imageable.Features = outputs[0]
-                    .AsEnumerable<float>().ToArray();
+                    var input = NamedOnnxValue.CreateFromTensor(
+                        name: "image",
+                        value: tensor);
+
+                    using var outputs = sessionFeature.Run([input]);
+
+                    imageable.Features = outputs[0]
+                        .AsEnumerable<float>().ToArray();
+                }
             }
         }
 
-        public Match Detect(Imageable imageable)
+        public Match Detect(Matchable imageable)
         {
             var result = default(Match);
 

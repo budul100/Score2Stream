@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Score2Stream.Commons.Assets;
@@ -279,11 +280,14 @@ namespace Score2Stream.SampleService
 
             if (segment?.Image != default)
             {
+                using var stream = segment.Image.ToMemoryStream();
+                var bitmap = new Bitmap(stream);
+
                 result = new Sample
                 {
-                    Bitmap = segment.Bitmap,
-                    Height = segment.Bitmap?.Size.Height ?? 0,
-                    Width = segment.Bitmap?.Size.Width ?? 0,
+                    Bitmap = bitmap,
+                    Height = bitmap?.Size.Height ?? 0,
+                    Width = bitmap?.Size.Width ?? 0,
                     Image = segment.Image,
                 };
 

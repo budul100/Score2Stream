@@ -10,9 +10,9 @@ namespace Score2Stream.Commons.Interfaces
     {
         #region Public Methods
 
-        void Bind(Imageable imageable);
+        void Bind(Matchable imageable);
 
-        Match Detect(Imageable imageable);
+        Match Detect(Matchable imageable);
 
         IEnumerable<Match> GetMatches(Segment segment, IEnumerable<Sample> samples);
 

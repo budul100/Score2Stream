@@ -7,6 +7,7 @@ using Prism.Regions;
 using Score2Stream.Commons.Events.Area;
 using Score2Stream.Commons.Events.Input;
 using Score2Stream.Commons.Interfaces;
+using Score2Stream.Commons.Models.Contents;
 using Score2Stream.Commons.Prism;
 
 namespace Score2Stream.AreaModule.ViewModels
@@ -69,9 +70,20 @@ namespace Score2Stream.AreaModule.ViewModels
 
         private void OrderAreas()
         {
-            Areas = new ObservableCollection<AreaViewModel>(Areas.OrderBy(a => a.Area.Index));
+            var ordered = Areas
+                .OrderBy(a => a.Area.Index).ToArray();
 
-            RaisePropertyChanged(nameof(Areas));
+            for (var newIndex = 0; newIndex < ordered.Length; newIndex++)
+            {
+                var oldIndex = Areas.IndexOf(ordered[newIndex]);
+
+                if (oldIndex != newIndex)
+                {
+                    Areas.Move(
+                        oldIndex: oldIndex,
+                        newIndex: newIndex);
+                }
+            }
         }
 
         private void UpdateAreas()

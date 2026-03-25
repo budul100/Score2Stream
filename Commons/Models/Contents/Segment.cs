@@ -7,7 +7,7 @@ using Score2Stream.Commons.Models.Base;
 namespace Score2Stream.Commons.Models.Contents
 {
     public class Segment
-        : Imageable
+        : Matchable
     {
         #region Public Properties
 
